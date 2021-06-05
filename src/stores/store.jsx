@@ -612,8 +612,8 @@ class Store {
           symbol: ["USDT","USDC","DAI"],
           description: "Stablecoins",
           vaultSymbol: "daoCDV",
-          // erc20address: ["0x07de306ff27a2b630b1141956844eb1552b956b5", "0xb7a4f3e9097c08da09517b5ab877f7a917224ede", "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa"],
-          erc20address:'0x07de306ff27a2b630b1141956844eb1552b956b5',
+          erc20address: ["0x07de306ff27a2b630b1141956844eb1552b956b5", "0xb7a4f3e9097c08da09517b5ab877f7a917224ede", "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa"],
+          // erc20address:'0x07de306ff27a2b630b1141956844eb1552b956b5',
           vaultContractAddress: "0x542a42496c96b946324f7dce2b030d5643d9ef8a",
           vaultContractABI: config.vaultDAOCDVContractABI,
           balance: 0,
@@ -861,8 +861,8 @@ class Store {
           symbol: ["USDT","USDC","DAI"],
           description: "Stablecoins",
           vaultSymbol: "daoCDV",
-          // erc20address: ["0x07de306ff27a2b630b1141956844eb1552b956b5", "0xb7a4f3e9097c08da09517b5ab877f7a917224ede", "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa"],
-          erc20address:'0x07de306ff27a2b630b1141956844eb1552b956b5',
+          erc20address: ["0x07de306ff27a2b630b1141956844eb1552b956b5", "0xb7a4f3e9097c08da09517b5ab877f7a917224ede", "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa"],
+          //erc20address:'0x07de306ff27a2b630b1141956844eb1552b956b5',
           vaultContractAddress: "0x542a42496c96b946324f7dce2b030d5643d9ef8a",
           vaultContractABI: config.vaultDAOCDVContractABI,
           balance: 0,
@@ -1912,16 +1912,47 @@ class Store {
             return callback(ex)
           }
         } else {
-            let erc20Contract = new web3.eth.Contract(config.erc20ABI, asset.erc20address)
+            if (asset.strategyType === 'citadel') {
+              const usdPrices = await this._getUSDPrices();
+
+              const stableCoins = {
+                "tether" : { address: "0x07de306ff27a2b630b1141956844eb1552b956b5", abi: config.erc20UsdtABI },
+                "usd-coin" : { address: "0xb7a4f3e9097c08da09517b5ab877f7a917224ede", abi: config.erc20UsdcABI },
+                "dai": { address: "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa", abi: config.erc20DaiABI }
+              }
+
+              let total = 0;
+
+              try {
+                for(var key of Object.keys(stableCoins)) {
+                  const tokenContract = new web3.eth.Contract(stableCoins[key].abi, stableCoins[key].address);
+  
+                  const tokenDecimals = await tokenContract.methods.decimals().call();
+                  const accountBalance = await tokenContract.methods.balanceOf(account.address).call({ from: account.address });
+                  const tokenUsdPrices = usdPrices[key].usd;
+  
+                  if(accountBalance > 0) {
+                    const tokenBalInUsd = (accountBalance / 10 ** tokenDecimals) * tokenUsdPrices;
+                    total = tokenBalInUsd + total;
+                  } 
+                }
+              } catch (err) {
+                console.log("Error in _getERC20Balance()", err);
+              }
+
+              callback (null, parseFloat(total));
+
+            } else {
+              let erc20Contract = new web3.eth.Contract(config.erc20ABI, asset.erc20address)
           
-      
-            try {
-              var balance = await erc20Contract.methods.balanceOf(account.address).call({ from: account.address });
-              balance = parseFloat(balance) / 10 ** asset.decimals
-              callback(null, parseFloat(balance))
-            } catch (ex) {
-              console.log(ex)
-              return callback(ex)
+              try {
+                var balance = await erc20Contract.methods.balanceOf(account.address).call({ from: account.address });
+                balance = parseFloat(balance) / 10 ** asset.decimals
+                callback(null, parseFloat(balance))
+              } catch (ex) {
+                console.log(ex)
+                return callback(ex)
+              }
             }
           }
     // }
@@ -4108,6 +4139,7 @@ class Store {
     }
     const vaultStatistics = await this._getStatistics()
     const addressStatistics = await this._getAddressStatistics(account.address)
+
     // const addressTXHitory = await this._getAddressTxHistory(account.address)
 
     const usdPrices = await this._getUSDPrices()

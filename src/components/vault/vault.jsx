@@ -1039,14 +1039,14 @@ class Vault extends Component {
                       </Typography> */}
                       <Typography variant={'h5'} className={classes.assetLabel1}>
                         { /* TODO: Left Citadel Symbol as blank first, update later */}
-                        { (asset.balance ? (asset.balance).toFixed(2) : '0.00')+' '+ (asset.strategyType === 'citadel' ? '' : asset.symbol)  }
+                        { (asset.balance ? (asset.balance).toFixed(2) : '0.00')+' '+ (asset.strategyType === 'citadel' ? 'USD' : asset.symbol)  }
                       </Typography>
                       <Typography variant={ 'body1' } className={ classes.assetLabel2 }>Available to deposit</Typography>
                     </div>
                     <div className={classes.showMobile}>
                       <Typography variant={ 'h3' } noWrap className={classes.assetLabel1}>
                         { /* TODO: Left Citadel Symbol as blank first, update later */}
-                        { (asset.balance ? (asset.balance).toFixed(2) : '0.00')+' '+ (asset.strategyType === 'citadel' ? '' : asset.symbol) }
+                        { (asset.balance ? (asset.balance).toFixed(2) : '0.00')+' '+ (asset.strategyType === 'citadel' ? 'USD' : asset.symbol) }
                       </Typography>
                       <Typography variant={ 'h5' } className={ classes.assetLabel2 }>Available to deposit</Typography>
                     </div>
