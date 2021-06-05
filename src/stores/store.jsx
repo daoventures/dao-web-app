@@ -631,7 +631,7 @@ class Store {
           strategyAddress: '0x4996b12560b9a4a85dd437a3e8ff489335dcffa7',
           strategyContractABI: config.strategyDAOCDVContractABI,
           historicalPriceId: 'daoCDV_price',
-          logoFormat: 'png',
+          logoFormat: 'svg',
           risk: 'Expert',
           strategyType: 'citadel',
           cTokenAddress: '',
@@ -880,7 +880,7 @@ class Store {
           strategyAddress: '0x4996b12560b9a4a85dd437a3e8ff489335dcffa7',
           strategyContractABI: config.strategyDAOCDVContractABI,
           historicalPriceId: 'daoCDV_price',
-          logoFormat: 'png',
+          logoFormat: 'svg',
           risk: 'Expert',
           strategyType: 'citadel',
           cTokenAddress: '',
@@ -2850,7 +2850,7 @@ class Store {
 
       let vault = [];
 
-      if (asset.strategyType === 'compound') {
+      if (asset.strategyType === 'compound' || asset.strategyType === 'citadel') {
         vault = vaultStatistics.filter((stats) => {
           return stats.address.toLowerCase() === asset.vaultContractAddress.toLowerCase()
         })
@@ -2858,7 +2858,7 @@ class Store {
         vault = vaultStatistics.filter((stats) => {
           return stats.tokenAddress.toLowerCase() === asset.erc20address.toLowerCase()
         })
-      }
+      } 
       if (vault.length === 0) {
         return callback(null, {})
       }

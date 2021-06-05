@@ -982,7 +982,7 @@ class Vault extends Component {
                     <div className={classes.assetIcon}>
                       <img
                           alt=""
-                          src={ require('../../assets/img_new/'+asset.symbol+'-logo.'+asset.logoFormat) }
+                          src={ require('../../assets/img_new/'+ (asset.strategyType === 'citadel' ? asset.strategyType : asset.symbol ) +'-logo.'+asset.logoFormat) }
                           // height={ '50px' }
                           className={classes.assetIconImg}
                           style={asset.disabled?{filter:'grayscale(100%)'}:{}}
@@ -1147,7 +1147,7 @@ class Vault extends Component {
 
   _getAPY = (asset) => {
     const { basedOn } = this.state
-
+   
     // To calculate APY (Vault + Earn divide by 2 : Estimated)
     // Compound APY is using compoundApy
     if(asset && asset.stats) {
@@ -1168,6 +1168,8 @@ class Vault extends Component {
           default:
             return (asset.apy + parseFloat(asset.earnApr) * 100) / 2
         }
+      } else if (asset.strategyType === 'citadel') {
+        return asset.stats.citadelApy;
       }
     } else {
       return '0.00'
