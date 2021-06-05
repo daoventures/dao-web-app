@@ -3667,24 +3667,32 @@ class Store {
         );
       });
     } else if (asset.strategyType === "citadel") {
-      this._checkApproval(asset, account, amount, strategyAddress, (err) => {
-        if (err) {
-          return emitter.emit(ERROR, err);
-        }
-
-        this._callDepositAmountContract(
-          asset,
-          account,
-          amount,
-          (err, depositResult) => {
-            if (err) {
-              return emitter.emit(ERROR, err);
-            }
-
-            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, depositResult);
+      this._checkApproval(
+        asset,
+        account,
+        amount,
+        strategyAddress,
+        tokenIndex,
+        (err) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
           }
-        );
-      });
+          // TODO: Modify _callDepositAmountContract to handle citadel
+          this._callDepositAmountContract(
+            asset,
+            account,
+            amount,
+            tokenIndex,
+            (err, depositResult) => {
+              if (err) {
+                return emitter.emit(ERROR, err);
+              }
+
+              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, depositResult);
+            }
+          );
+        }
+      );
     }
   };
 
@@ -3792,6 +3800,73 @@ class Store {
     }
   };
 
+  // For Citadel
+  _callDepositAmountContractCitadel = async (
+    asset,
+    account,
+    amount,
+    tokenIndex = null,
+    callback
+  ) => {
+    // Handle vaults with multi tokens
+    try {
+      if (tokenIndex > 0 && tokenIndex < asset.erc20address.length) {
+        asset.erc20address = asset.erc20address[tokenIndex];
+      }
+    } catch (error) {
+      if (error.message) {
+        return callback(error.message);
+      }
+      callback(error);
+    }
+
+    const web3 = new Web3(store.getStore("web3context").library.provider);
+
+    let vaultContract = new web3.eth.Contract(
+      asset.vaultContractABI,
+      asset.vaultContractAddress
+    );
+
+    var amountToSend = web3.utils.toWei(amount, "ether");
+    if (asset.decimals !== 18) {
+      amountToSend = web3.utils.toBN(amount * 10 ** asset.decimals).toString();
+    }
+
+    console.log(amountToSend);
+    vaultContract.methods
+      .deposit(amountToSend, tokenIndex)
+      .send({
+        from: account.address,
+        gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+      })
+      .on("transactionHash", function (hash) {
+        console.log(hash);
+        callback(null, hash);
+      })
+      .on("confirmation", function (confirmationNumber, receipt) {
+        console.log(confirmationNumber, receipt);
+      })
+      .on("receipt", function (receipt) {
+        console.log(receipt);
+      })
+      .on("error", function (error) {
+        if (!error.toString().includes("-32601")) {
+          if (error.message) {
+            return callback(error.message);
+          }
+          callback(error);
+        }
+      })
+      .catch((error) => {
+        if (!error.toString().includes("-32601")) {
+          if (error.message) {
+            return callback(error.message);
+          }
+          callback(error);
+        }
+      });
+  };
+
   _callDepositAmountContract = async (asset, account, amount, callback) => {
     const web3 = new Web3(store.getStore("web3context").library.provider);
 
@@ -3840,6 +3915,7 @@ class Store {
       });
   };
 
+  // For Yearn
   _callDepositContract = async (
     asset,
     account,
