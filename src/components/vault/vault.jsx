@@ -487,6 +487,19 @@ const styles = theme => ({
     top: '0px',
     borderBottomLeftRadius: '15px'
   },
+  riskExpertLabel: {
+    background: '#C715A7',
+    // borderRadius: '5px',
+    color: '#ffffff',
+    padding: '5px 10px',
+    textAlign: 'center',
+    width: '7rem',
+    marginLeft: 'auto',
+    position: 'absolute',
+    right: '0px',
+    top: '0px',
+    borderBottomLeftRadius: '15px'
+  },
   assetName: {
     color: '#222222',
     fontSize: '1rem'
@@ -1098,7 +1111,7 @@ class Vault extends Component {
   renderRiskLabel = (asset) => {
     const { classes } = this.props;
     return (
-      <div className={asset.risk === 'Low' ? classes.riskLowLabel : asset.risk === 'Medium' ? classes.riskMediumLabel : '' }>
+      <div className={asset.risk === 'Low' ? classes.riskLowLabel : asset.risk === 'Medium' ? classes.riskMediumLabel : asset.risk === 'Expert' ? classes.riskExpertLabel : '' }>
         <Typography variant='caption'>{asset.risk}</Typography>
       </div>
     );
