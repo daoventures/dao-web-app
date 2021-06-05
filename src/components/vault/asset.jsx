@@ -976,6 +976,7 @@ class Asset extends Component {
     var earnAPY = [];
     var vaultAPY = [];
     var compoundAPY = [];
+    var citadelAPY = [];
     var labels = [];
 
     const { hideNav } = this.state;
@@ -1010,6 +1011,8 @@ class Asset extends Component {
             vaultAPY.push([date, parseFloat(groups[date][0].apyInceptionSample.toFixed(4))]);
           } else if (asset.strategyType === 'compound') {
             compoundAPY.push([date, parseFloat(groups[date][0].compoundApy.toFixed(4))])
+          } else if (asset.strategyType === 'citadel') {
+            citadelAPY.push([date, parseFloat(groups[date][0].citadelApy.toFixed(4))])
           }
           
           // second attempt
@@ -1022,6 +1025,8 @@ class Asset extends Component {
               vaultAPY.push([date, parseFloat(groups[date][halfCount].apyInceptionSample.toFixed(4))]);
             } else if (asset.strategyType === 'compound') {
               compoundAPY.push([date, parseFloat(groups[date][halfCount].compoundAPY.toFixed(4))]);
+            } else if (asset.strategyType === 'citadel') {
+              citadelAPY.push([date, parseFloat(groups[date][halfCount].citadelApy.toFixed(4))])
             }
           }        
         })
@@ -1083,6 +1088,39 @@ class Asset extends Component {
           {
             name: 'Compound',
             data: compoundAPY
+          },
+        ],
+        responsive: {
+          rules: [{
+            condition: {
+              maxWidth: 450,
+              chartOptions: {
+                chart: {
+                  width: 300
+                }
+              }
+            }
+          }]
+        },
+        credits: {
+          enabled: false
+        }
+      };
+    } else if (asset.strategyType === 'citadel') {
+      options = {
+        chart: {
+          width: hideNav ? 300 : 420
+        },
+        title: {
+          text: 'Historical Earn & Vault Performance'
+        },
+        xAxis: {
+          categories: labels
+        },
+        series: [
+          {
+            name: 'Citadel',
+            data: citadelAPY
           },
         ],
         responsive: {
@@ -1194,6 +1232,8 @@ class Asset extends Component {
           default:
             return (asset.apy + parseFloat(asset.earnApr) * 100) / 2
         }
+      } else if (asset.strategyType === 'citadel') {
+        return asset.stats.citadelApy;
       }
     } else {
       return '0.00'
