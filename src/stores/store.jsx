@@ -860,8 +860,12 @@ class Store {
           symbol: ["USDT", "USDC", "DAI"],
           description: "Stablecoins",
           vaultSymbol: "daoCDV",
-          // erc20address: ["0x07de306ff27a2b630b1141956844eb1552b956b5", "0xb7a4f3e9097c08da09517b5ab877f7a917224ede", "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa"],
-          erc20address: "0x07de306ff27a2b630b1141956844eb1552b956b5",
+          erc20address: [
+            "0x07de306ff27a2b630b1141956844eb1552b956b5",
+            "0xb7a4f3e9097c08da09517b5ab877f7a917224ede",
+            "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
+          ],
+          // erc20address: "0x07de306ff27a2b630b1141956844eb1552b956b5",
           vaultContractAddress: "0x542a42496c96b946324f7dce2b030d5643d9ef8a",
           vaultContractABI: config.vaultDAOCDVContractABI,
           balance: 0,
@@ -1573,9 +1577,28 @@ class Store {
     }
   };
 
-  _checkApproval = async (asset, account, amount, contract, callback) => {
+  _checkApproval = async (
+    asset,
+    account,
+    amount,
+    contract,
+    tokenIndex = null,
+    callback
+  ) => {
     if (asset.erc20address === "Ethereum") {
       return callback();
+    }
+
+    // Handle vaults with multi tokens
+    try {
+      if (tokenIndex > 0 && tokenIndex < asset.erc20address.length) {
+        asset.erc20address = asset.erc20address[tokenIndex];
+      }
+    } catch (error) {
+      if (error.message) {
+        return callback(error.message);
+      }
+      callback(error);
     }
 
     const web3 = new Web3(store.getStore("web3context").library.provider);
@@ -3581,6 +3604,7 @@ class Store {
 
   depositContract = async (payload) => {
     const account = store.getStore("account");
+
     //  Token Index USDT = 0, USDC = 1, DAI = 2
     const { asset, earnAmount, vaultAmount, amount, tokenIndex } =
       payload.content;
