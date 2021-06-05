@@ -1303,7 +1303,14 @@ class Asset extends Component {
         amount: amount.toString(),
         asset 
       } })
-    }
+    } else if (asset.strategyType === 'citadel') {
+      dispatcher.dispatch({ type: DEPOSIT_CONTRACT, content: { 
+        earnAmount: 0, 
+        vaultAmount: 0, 
+        amount: amount.toString(),
+        tokenIndex: 0,
+        asset 
+      } })
   }
 
   onDepositAll = () => {
