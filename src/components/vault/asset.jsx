@@ -402,6 +402,10 @@ const styles = theme => ({
     alignItems: 'center',
     justifyContent: 'space-between',
     color: theme.themeColors.textT
+  },
+  changeCurrencyContainer: {
+    padding: '36px 20px 20px 20px',
+    position: 'relative'
   }
 
 });
@@ -511,6 +515,9 @@ class Asset extends Component {
 
   render() {
     const { classes, asset } = this.props;
+    if(asset.strategyType === 'citadel') {
+      console.log("Citadel: ", asset);
+    }
     const {
       amount,
       amountError,
@@ -572,31 +579,46 @@ class Asset extends Component {
                 <Grid item sm={3} xs={6}>
                   <Typography variant={ 'h5' } className={ classes.grey }>Total Earnings:</Typography>
                   <div className={ classes.flexy }>
-                    <Typography variant={ 'h4' } noWrap>{ asset.addressStatistics ? (asset.addressStatistics.earnings/10**asset.decimals).toFixed(2) : '0.00' } {asset.symbol}</Typography>
+                    <Typography variant={ 'h4' } noWrap>
+                      { asset.addressStatistics ? (asset.addressStatistics.earnings/10**asset.decimals).toFixed(2) : '0.00' } 
+                      { asset.strategyType === 'citadel' ? 'USD' : asset.symbol }
+                    </Typography>
                   </div>
                 </Grid>
                 <Grid item sm={3} xs={6}>
                   <Typography variant={ 'h5' } className={ classes.grey }>Deposits:</Typography>
                   <div className={ classes.flexy }>
-                    <Typography variant={ 'h4' } noWrap>{ asset.addressStatistics ? (asset.addressStatistics.totalDeposits/10**asset.decimals).toFixed(2) : '0.00' } {asset.symbol}</Typography>
+                    <Typography variant={ 'h4' } noWrap>
+                      { asset.addressStatistics ? (asset.addressStatistics.totalDeposits/10**asset.decimals).toFixed(2) : '0.00' } 
+                      { asset.strategyType === 'citadel' ? 'USD' : asset.symbol }
+                    </Typography>
                   </div>
                 </Grid>
                 <Grid item sm={3} xs={6}>
                   <Typography variant={ 'h5' } className={ classes.grey }>Withdrawals:</Typography>
                   <div className={ classes.flexy }>
-                    <Typography variant={ 'h4' } noWrap>{ asset.addressStatistics ? (asset.addressStatistics.totalWithdrawals/10**asset.decimals).toFixed(2) : '0.00' } {asset.symbol}</Typography>
+                    <Typography variant={ 'h4' } noWrap>
+                      { asset.addressStatistics ? (asset.addressStatistics.totalWithdrawals/10**asset.decimals).toFixed(2) : '0.00' } 
+                      { asset.strategyType === 'citadel' ? 'USD' : asset.symbol }
+                    </Typography>
                   </div>
                 </Grid>
                 <Grid item sm={3} xs={6}>
                   <Typography variant={ 'h5' } className={ classes.grey }>Transferred In:</Typography>
                   <div className={ classes.flexy }>
-                    <Typography variant={ 'h4' } noWrap>{ asset.addressStatistics ? (asset.addressStatistics.totalTransferredIn/10**asset.decimals).toFixed(2) : '0.00' } {asset.symbol}</Typography>
+                    <Typography variant={ 'h4' } noWrap>
+                      { asset.addressStatistics ? (asset.addressStatistics.totalTransferredIn/10**asset.decimals).toFixed(2) : '0.00' } 
+                      { asset.strategyType === 'citadel' ? 'USD' : asset.symbol }
+                    </Typography>
                   </div>
                 </Grid>
                 <Grid item sm={3} xs={6}>
                   <Typography variant={ 'h5' } className={ classes.grey }>Transferred Out:</Typography>
                   <div className={ classes.flexy }>
-                    <Typography variant={ 'h4' } noWrap>{ asset.addressStatistics ? (asset.addressStatistics.totalTransferredOut/10**asset.decimals).toFixed(2) : '0.00' } {asset.symbol}</Typography>
+                    <Typography variant={ 'h4' } noWrap>
+                      { asset.addressStatistics ? (asset.addressStatistics.totalTransferredOut/10**asset.decimals).toFixed(2) : '0.00' } 
+                      { asset.strategyType === 'citadel' ? 'USD' : asset.symbol }
+                    </Typography>
                   </div>
                 </Grid>
               </Grid>
