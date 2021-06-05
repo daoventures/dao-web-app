@@ -608,9 +608,9 @@ class Store {
         },
         {
           id: "daoCDV",
-          name: "DAO Vault Citadel",
+          name: "USDT/USDC/DAI",
           symbol: ["USDT","USDC","DAI"],
-          description: "DAO Vault Citadel for 3 stablecoins",
+          description: "Stablecoins",
           vaultSymbol: "daoCDV",
           // erc20address: ["0x07de306ff27a2b630b1141956844eb1552b956b5", "0xb7a4f3e9097c08da09517b5ab877f7a917224ede", "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa"],
           erc20address:'0x07de306ff27a2b630b1141956844eb1552b956b5',
@@ -857,9 +857,9 @@ class Store {
         },
         {
           id: "daoCDV",
-          name: "DAO Vault Citadel",
+          name: "USDT/USDC/DAI",
           symbol: ["USDT","USDC","DAI"],
-          description: "DAO Vault Citadel for 3 stablecoins",
+          description: "Stablecoins",
           vaultSymbol: "daoCDV",
           // erc20address: ["0x07de306ff27a2b630b1141956844eb1552b956b5", "0xb7a4f3e9097c08da09517b5ab877f7a917224ede", "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa"],
           erc20address:'0x07de306ff27a2b630b1141956844eb1552b956b5',
