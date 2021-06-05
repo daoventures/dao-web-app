@@ -3553,10 +3553,29 @@ class Store {
           compoundExchangeRate: parseFloat(exchangeRate) / 10 ** asset.decimals,
           apy: parseFloat(exchangeRate)
         }
+
         return callback(null, returnObj)
+
+      } else if (asset.strategyType === 'citadel') {
+        const citadelContract = new web3.eth.Contract(asset.abi, asset.address);
+
+        const pool = await citadelContract.methods.getAllPoolInETH().call();
+        const totalSupply = await citadelContract.methods.totalSupply().call();
+
+        const pricePerFullShare = pool / totalSupply;
+
+        const returnObj = {
+          earnPricePerFullShare: 0,
+          vaultPricePerFullShare: 0,
+          compoundExchangeRate: 0,
+          citadelPricePerFullShare: pricePerFullShare
+        }
+
+        return callback(null, returnObj);
       }
+
     } catch (e) {
-      console.log(e)
+      console.log(e);
       callback(null, {
         earnPricePerFullShare: 0,
         vaultPricePerFullShare: 0,
@@ -3850,6 +3869,7 @@ class Store {
       const url = `${config.statsProvider}vaults/tvl/${tvl_id}`
       const resultString = await rp(url);
       const result = JSON.parse(resultString)
+  
       callback(null, result.body)
     } catch (e) {
       console.log(e)
@@ -4133,9 +4153,10 @@ class Store {
       })
     }, (err, assets) => {
       if (err) {
-        console.log(err)
+        console.log(err);
         return emitter.emit(ERROR, err)
       }
+
       store.setStore({ vaultAssets: assets })
       return emitter.emit(STRATEGY_BALANCES_FULL_RETURNED, assets)
     })

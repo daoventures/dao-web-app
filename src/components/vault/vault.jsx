@@ -699,9 +699,11 @@ class Vault extends Component {
       tabList: ['ALL', 'Basic', 'Advance', 'Expert', 'Degen'],
     }
 
-    if(account && account.address) {
-      dispatcher.dispatch({ type: GET_STRATEGY_BALANCES_FULL, content: { interval: '30d' } })
-    }
+    // TODO: undo comment for this afterwards
+    // if(account && account.address) {
+    //   dispatcher.dispatch({ type: GET_STRATEGY_BALANCES_FULL, content: { interval: '30d' } })
+    // }
+    dispatcher.dispatch({ type: GET_STRATEGY_BALANCES_FULL, content: { interval: '30d' } })
   }
 
   componentWillMount() {
@@ -922,7 +924,6 @@ class Vault extends Component {
     const { classes } = this.props
     const width = window.innerWidth
 
-
     return assets.filter((asset) => {
       if(currentTab=='ALL'){
         return true;
@@ -1036,11 +1037,17 @@ class Vault extends Component {
                           { (asset.balance ? (asset.balance).toFixed(2) : '0.00')+' '+asset.symbol }
                         </span>
                       </Typography> */}
-                      <Typography variant={'h5'} className={classes.assetLabel1}>{ (asset.balance ? (asset.balance).toFixed(2) : '0.00')+' '+asset.symbol }</Typography>
+                      <Typography variant={'h5'} className={classes.assetLabel1}>
+                        { /* TODO: Left Citadel Symbol as blank first, update later */}
+                        { (asset.balance ? (asset.balance).toFixed(2) : '0.00')+' '+ (asset.strategyType === 'citadel' ? '' : asset.symbol)  }
+                      </Typography>
                       <Typography variant={ 'body1' } className={ classes.assetLabel2 }>Available to deposit</Typography>
                     </div>
                     <div className={classes.showMobile}>
-                      <Typography variant={ 'h3' } noWrap className={classes.assetLabel1}>{ (asset.balance ? (asset.balance).toFixed(2) : '0.00')+' '+asset.symbol }</Typography>
+                      <Typography variant={ 'h3' } noWrap className={classes.assetLabel1}>
+                        { /* TODO: Left Citadel Symbol as blank first, update later */}
+                        { (asset.balance ? (asset.balance).toFixed(2) : '0.00')+' '+ (asset.strategyType === 'citadel' ? '' : asset.symbol) }
+                      </Typography>
                       <Typography variant={ 'h5' } className={ classes.assetLabel2 }>Available to deposit</Typography>
                     </div>
                   </Grid>
