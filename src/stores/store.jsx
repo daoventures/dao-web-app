@@ -2149,6 +2149,7 @@ class Store {
         }
 
         store.setStore({ assets: assets });
+        console.log(assets);
         return emitter.emit(BALANCES_RETURNED, assets);
       }
     );
@@ -4435,7 +4436,10 @@ class Store {
 
         return callback(null, returnObj);
       } else if (asset.strategyType === "citadel") {
-        const citadelContract = new web3.eth.Contract(asset.abi, asset.address);
+        const citadelContract = new web3.eth.Contract(
+          asset.vaultContractABI,
+          asset.vaultContractAddress
+        );
 
         const pool = await citadelContract.methods.getAllPoolInETH().call();
         const totalSupply = await citadelContract.methods.totalSupply().call();
