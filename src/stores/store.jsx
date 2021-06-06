@@ -787,7 +787,7 @@ class Store {
           logoFormat: "png",
           risk: "Low",
           strategyType: "compound",
-          cTokenAddress: "0xf650c3d88d12db855b8bf7d11be6c55a4e07dcc9",
+          cTokenAddress: "0x3f0A0EA2f86baE6362CF9799B523BA06647Da018",
           cAbi: config.cUSDTContract,
           group: "Basic",
           tvlKey: "cUSDT_tvl",
