@@ -860,15 +860,16 @@ class Store {
           symbol: ["USDT", "USDC", "DAI"],
           description: "Stablecoins",
           vaultSymbol: "daoCDV",
-          erc20address: [
+          erc20addresses: [
             "0x07de306ff27a2b630b1141956844eb1552b956b5",
             "0xb7a4f3e9097c08da09517b5ab877f7a917224ede",
             "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
           ],
-          // erc20address: "0x07de306ff27a2b630b1141956844eb1552b956b5",
+          erc20address: "0x07de306ff27a2b630b1141956844eb1552b956b5",
           vaultContractAddress: "0x542a42496c96b946324f7dce2b030d5643d9ef8a",
           vaultContractABI: config.vaultDAOCDVContractABI,
-          balance: 0,
+          balance: 0, // Stores balance of selectedERC20Address
+          balances: [0, 0, 0],
           vaultBalance: 0,
           decimals: 18,
           deposit: true,
@@ -2037,50 +2038,110 @@ class Store {
     async.map(
       assets,
       (asset, callback) => {
-        async.parallel(
-          [
-            (callbackInner) => {
-              this._getERC20Balance(web3, asset, account, callbackInner);
-            },
-            (callbackInner) => {
-              this._getInvestedBalance(web3, asset, account, callbackInner);
-            },
-            (callbackInner) => {
-              this._getPoolPrice(web3, asset, account, callbackInner);
-            },
-            (callbackInner) => {
-              this._getMaxAPR(web3, asset, account, callbackInner);
-            },
-            (callbackInner) => {
-              this._getPoolValue(web3, asset, account, callbackInner);
-            },
-            (callbackInner) => {
-              this._getAPY(web3, asset, account, callbackInner);
-            },
-            (callbackInner) => {
-              this._getCurrentLender(web3, asset, account, callbackInner);
-            },
-            (callbackInner) => {
-              this._getRecommendedLender(web3, asset, account, callbackInner);
-            },
-            (callbackInner) => {
-              this._getBalance(web3, asset, account, callbackInner);
-            },
-          ],
-          (err, data) => {
-            asset.balance = data[0];
-            asset.investedBalance = data[1];
-            asset.price = data[2];
-            asset.maxApr = data[3];
-            asset.poolValue = data[4];
-            asset.apy = data[5];
-            asset.current = data[6];
-            asset.recommended = data[7];
-            asset.tokenBalance = data[8];
+        if (asset.strategyType === "citadel") {
+          async.parallel(
+            [
+              (callbackInner) => {
+                this._getERC20BalancesCitadel(
+                  web3,
+                  asset,
+                  account,
+                  callbackInner
+                );
+              },
+              (callbackInner) => {
+                this._getInvestedBalance(web3, asset, account, callbackInner);
+              },
+            ],
+            (err, data) => {
+              asset.balance = data[0];
+              asset.investedBalance = data[1];
 
-            callback(null, asset);
-          }
-        );
+              callback(null, asset);
+            }
+          );
+          async.parallel(
+            [
+              (callbackInner) => {
+                this._getPoolPrice(web3, asset, account, callbackInner);
+              },
+              (callbackInner) => {
+                this._getMaxAPR(web3, asset, account, callbackInner);
+              },
+              (callbackInner) => {
+                this._getPoolValue(web3, asset, account, callbackInner);
+              },
+              (callbackInner) => {
+                this._getAPY(web3, asset, account, callbackInner);
+              },
+              (callbackInner) => {
+                this._getCurrentLender(web3, asset, account, callbackInner);
+              },
+              (callbackInner) => {
+                this._getRecommendedLender(web3, asset, account, callbackInner);
+              },
+              (callbackInner) => {
+                this._getBalance(web3, asset, account, callbackInner);
+              },
+            ],
+            (err, data) => {
+              asset.price = data[2];
+              asset.maxApr = data[3];
+              asset.poolValue = data[4];
+              asset.apy = data[5];
+              asset.current = data[6];
+              asset.recommended = data[7];
+              asset.tokenBalance = data[8];
+
+              callback(null, asset);
+            }
+          );
+        } else {
+          async.parallel(
+            [
+              (callbackInner) => {
+                this._getERC20Balance(web3, asset, account, callbackInner);
+              },
+              (callbackInner) => {
+                this._getInvestedBalance(web3, asset, account, callbackInner);
+              },
+              (callbackInner) => {
+                this._getPoolPrice(web3, asset, account, callbackInner);
+              },
+              (callbackInner) => {
+                this._getMaxAPR(web3, asset, account, callbackInner);
+              },
+              (callbackInner) => {
+                this._getPoolValue(web3, asset, account, callbackInner);
+              },
+              (callbackInner) => {
+                this._getAPY(web3, asset, account, callbackInner);
+              },
+              (callbackInner) => {
+                this._getCurrentLender(web3, asset, account, callbackInner);
+              },
+              (callbackInner) => {
+                this._getRecommendedLender(web3, asset, account, callbackInner);
+              },
+              (callbackInner) => {
+                this._getBalance(web3, asset, account, callbackInner);
+              },
+            ],
+            (err, data) => {
+              asset.balance = data[0];
+              asset.investedBalance = data[1];
+              asset.price = data[2];
+              asset.maxApr = data[3];
+              asset.poolValue = data[4];
+              asset.apy = data[5];
+              asset.current = data[6];
+              asset.recommended = data[7];
+              asset.tokenBalance = data[8];
+
+              callback(null, asset);
+            }
+          );
+        }
       },
       (err, assets) => {
         if (err) {
