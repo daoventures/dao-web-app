@@ -865,7 +865,7 @@ class Store {
             "0xb7a4f3e9097c08da09517b5ab877f7a917224ede",
             "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
           ],
-          erc20address: "0x07de306ff27a2b630b1141956844eb1552b956b5",
+          erc20address: "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
           vaultContractAddress: "0x542a42496c96b946324f7dce2b030d5643d9ef8a",
           vaultContractABI: config.vaultDAOCDVContractABI,
           balance: 0, // Stores balance of selectedERC20Address
@@ -1646,13 +1646,14 @@ class Store {
             from: account.address,
             gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
           });
+
         callback();
       } else {
         callback();
       }
     } catch (error) {
       if (error.message) {
-        return callback(error.message);
+        console.log(error.message);
       }
       callback(error);
     }
@@ -2027,6 +2028,7 @@ class Store {
   };
 
   getBalances = async () => {
+    console.log("GB");
     const account = store.getStore("account");
 
     const assets = store.getStore("assets");
@@ -2149,7 +2151,7 @@ class Store {
         }
 
         store.setStore({ assets: assets });
-        console.log(assets);
+        console.log("AAAAAAAAAAAAAAAAAAA", assets);
         return emitter.emit(BALANCES_RETURNED, assets);
       }
     );
@@ -4457,6 +4459,7 @@ class Store {
       }
     } catch (e) {
       console.log(e);
+      console.log(asset.strategyType, asset.id);
       callback(null, {
         earnPricePerFullShare: 0,
         vaultPricePerFullShare: 0,
