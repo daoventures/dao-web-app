@@ -480,6 +480,10 @@ const styles = theme => ({
   },
   dialogContent: {
     background: theme.themeColors.itemBack,
+  },
+  arrowDropdownIcon: {
+    height: '15px', 
+    fill: theme.themeColors.textP
   }
 });
 
@@ -851,7 +855,7 @@ class Asset extends Component {
                           <span className={classes.addressSpan}>
                             { this.state.citadelCurrency }
                           </span>
-                          <ArrowDropDownCircleIcon style={{ height: '15px', fill: '#7367F7' }}/>
+                          <ArrowDropDownCircleIcon className={classes.arrowDropdownIcon}/>
                         </div>
                       </div>
                    }
