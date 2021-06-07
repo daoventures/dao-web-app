@@ -3766,14 +3766,14 @@ class Store {
         asset,
         account,
         amount,
-        strategyAddress,
+        asset.vaultContractAddress,
         tokenIndex,
         (err) => {
           if (err) {
             return emitter.emit(ERROR, err);
           }
           // TODO: Modify _callDepositAmountContract to handle citadel
-          this._callDepositAmountContract(
+          this._callDepositAmountContractCitadel(
             asset,
             account,
             amount,
