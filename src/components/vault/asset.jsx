@@ -867,7 +867,7 @@ class Asset extends Component {
                           aria-labelledby="customized-dialog-title" 
                           open={displayCurrencyModal}>
                     <MuiDialogTitle disableTypography className={ classes.dialogTitle }>
-                      <Typography variant="h6">Select currency</Typography>
+                      <Typography variant="h6">Select a Currency</Typography>
                       <IconButton aria-label="close" className={classes.closeButton} onClick={() => this.handleModalDisplay(false)}>
                           <CloseIcon />
                       </IconButton>
