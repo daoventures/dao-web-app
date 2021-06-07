@@ -458,7 +458,7 @@ const styles = theme => ({
     color: theme.palette.grey[500],
   },
   modalListItem: {
-    border: '1px solid ' + colors.borderBlue,
+    border: '1px solid ' + theme.themeColors.border,
     marginTop: '10px',
     color: theme.themeColors.textT
   },
@@ -470,7 +470,7 @@ const styles = theme => ({
     }
   },
   dialogRoot: {
-    border: '1px solid ' + colors.borderBlue,
+    border: '1px solid ' + theme.themeColors.border,
   }, 
   dialogTitle: {
     background: '#15023A',
