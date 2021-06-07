@@ -4,8 +4,24 @@ import { withStyles } from '@material-ui/core/styles';
 import {
   Typography,
   TextField,
-  Button, Slider, Grid, Tooltip
+  Button, 
+  Slider, 
+  Grid, 
+  Tooltip,
+  Dialog, 
+  IconButton,
+  DialogContent, 
+  DialogActions, 
+  List, 
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Slide, 
+  ListItemAvatar,
+  Avatar
 } from '@material-ui/core';
+import MuiDialogTitle from '@material-ui/core/DialogTitle';
+import CloseIcon from '@material-ui/icons/Close';
 
 import {
   ERROR,
@@ -17,7 +33,8 @@ import {
   DEPOSIT_ALL_CONTRACT_RETURNED,
   WITHDRAW_BOTH_VAULT,
   WITHDRAW_BOTH_VAULT_RETURNED,
-  CURRENT_THEME_RETURNED
+  CURRENT_THEME_RETURNED,
+  CITADEL_CURRENCY_TYPE
 } from '../../constants'
 
 import { colors } from '../../theme'
@@ -406,8 +423,41 @@ const styles = theme => ({
   changeCurrencyContainer: {
     padding: '36px 20px 20px 20px',
     position: 'relative'
+  },
+  accountInfoBlock: {
+    position: 'relative'
+  },
+  accountInfo: {
+    marginTop: '10px',
+    width: '100%',
+    height: '30px',
+    color: theme.themeColors.textT,
+    background: theme.themeColors.blockBack,
+    borderColor: theme.themeColors.blockBorder,
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    fontSize: '14px',
+    display: 'flex',
+    alignItems: 'center',
+    padding: '0px 10px',
+    cursor: 'pointer'
+  },
+  closeButton: {
+    position: 'absolute',
+    right: theme.spacing(1),
+    top: theme.spacing(1),
+    color: theme.palette.grey[500],
+  },
+  modalListItem: {
+    borderColor: theme.themeColors.blockBorder
+  },
+  assetIconImg: {
+    height: '25px',
+    padding: '5px',
+    [theme.breakpoints.down('md')]: {
+      height: '25px'
+    }
   }
-
 });
 
 const marks = [
@@ -435,6 +485,10 @@ const HtmlTooltip = withStyles((theme) => ({
   },
 }))(Tooltip);
 
+function Transition(props) {
+  return <Slide direction="up" {...props} />;
+}
+
 class Asset extends Component {
 
   constructor() {
@@ -458,7 +512,9 @@ class Asset extends Component {
       hideNav: false,
       openEarnInfo: false,
       openVaultInfo: false,
-      interestTheme: {}, // 当前主题数据
+      interestTheme: {}, // 当前主题数据,
+      citadelCurrency: 'USDT',
+      citadelCoinBalance: 0.00
     }
   }
 
@@ -501,6 +557,44 @@ class Asset extends Component {
     });
   };
 
+  handleModalDisplay = (open) => {
+    this.setState({ displayCurrencyModal: open });
+  }
+
+  handleSelectedCurrency = (currencyType) => {
+    this.setState({
+      citadelCurrency: currencyType
+    })
+    this.handleCitadelCurrencyBalance();
+    dispatcher.dispatch({ type: CITADEL_CURRENCY_TYPE, content: { currency: currencyType } })
+    this.handleModalDisplay(false);
+  };
+
+  handleCitadelCurrencyBalance = () => {
+    const { asset } = this.props;
+
+    if(asset.strategyType === 'citadel') {
+      const stableCoinBal = asset.balance.stableCoins;
+
+      console.log("Balance", asset);
+
+      switch(this.state.citadelCurrency) {
+        case "USDT":
+          this.setState({stableCoinBalance: stableCoinBal['tether'].balance });
+          break;
+        case "USDC":
+          this.setState({stableCoinBalance: stableCoinBal['usd-coin'].balance});
+          break;
+        case "DAI":
+          this.setState({stableCoinBalance: stableCoinBal['dai'].balance});
+          break;
+        default:
+          this.setState({stableCoinBalance: 0.00});
+          break;
+      }
+    }
+  }
+
   depositReturned = () => {
     this.setState({ loading: false, amount: '' })
   };
@@ -534,7 +628,8 @@ class Asset extends Component {
       vaultPercent,
       amountPercent,
       openEarnInfo,
-      openVaultInfo
+      openVaultInfo,
+      displayCurrencyModal
     } = this.state
 
     return (
@@ -711,8 +806,63 @@ class Asset extends Component {
               <div className={ classes.tradeContainer }>
                 <div className={ classes.balances }>
                     {/* <Typography variant='h4' onClick={ () => { this.setAmount(100) } } className={ classes.value } noWrap>{ 'Your wallet: '+ (asset.balance ? (Math.floor(asset.balance*10000)/10000).toFixed(4) : '0.0000') } { asset.tokenSymbol ? asset.tokenSymbol : asset.symbol }</Typography> */}
-                    <Typography variant='body1' className={ classes.value } noWrap>Your wallet</Typography>
-                    <Typography variant='body2' onClick={ () => { this.setAmount(100) } } className={ classes.value } noWrap>{ (asset.balance ? (Math.floor(asset.balance*10000)/10000).toFixed(4) : '0.0000') } { asset.tokenSymbol ? asset.tokenSymbol : asset.symbol }</Typography>
+                    <Typography variant='body1' className={ classes.value } noWrap onClick={ () => { this.setAmount(100) } }>
+                      Your wallet : 
+                      { (asset.strategyType === 'citadel' ? this.state.stableCoinBalance : asset.balance ? (Math.floor(asset.balance*10000)/10000).toFixed(4) : '0.0000') } 
+                      { asset.tokenSymbol ? asset.tokenSymbol : asset.strategyType === 'citadel' ?  this.state.citadelCurrency : asset.symbol }
+                    </Typography>
+                    {/* <Typography variant='body2'  className={ classes.value } noWrap>
+                     
+                    </Typography> */}
+
+                   {/** Change Currency  */}
+                   {
+                     (asset.strategyType === 'citadel') && 
+                     <div className={classes.accountInfoBlock}>
+                        <div className={classes.accountInfo} onClick={() => { this.handleModalDisplay(true) }}>
+                          <img
+                            alt=""
+                            src={require('../../assets/'+ this.state.citadelCurrency +'-logo.png')}
+                            className={classes.assetIconImg}
+                            style={asset.disabled?{filter:'grayscale(100%)'}:{}}
+                          />
+                          <span className={classes.addressSpan}>
+                            { this.state.citadelCurrency }
+                          </span>
+                        </div>
+                      </div>
+                   }
+                  
+                  <Dialog  onClose={() => this.handleModalDisplay(false)} fullWidth={ true } maxWidth={ 'sm' } TransitionComponent={ Transition } aria-labelledby="customized-dialog-title" open={displayCurrencyModal}>
+                    <MuiDialogTitle disableTypography>
+                      <Typography variant="h6">Select currency</Typography>
+                      <IconButton aria-label="close" className={classes.closeButton} onClick={() => this.handleModalDisplay(false)}>
+                          <CloseIcon />
+                      </IconButton>
+                      </MuiDialogTitle>
+                      <DialogContent dividers>
+                        <List component="nav" aria-label="main mailbox folders">
+                          <ListItem button className={classes.modalListItem} onClick={() => this.handleSelectedCurrency('USDT')}>
+                            <ListItemAvatar>
+                              <Avatar alt="" src={require('../../assets/USDT-logo.png')} />
+                            </ListItemAvatar>
+                            <ListItemText primary="USDT" />
+                          </ListItem>
+                          <ListItem button onClick={() => this.handleSelectedCurrency('USDC')}>
+                            <ListItemAvatar>
+                              <Avatar alt="" src={require('../../assets/USDC-logo.png')} />
+                            </ListItemAvatar>
+                            <ListItemText primary="USDC" />
+                          </ListItem>
+                          <ListItem button onClick={() => this.handleSelectedCurrency('DAI')}>
+                            <ListItemAvatar>
+                              <Avatar alt="" src={require('../../assets/DAI-logo.png')} />
+                            </ListItemAvatar>
+                            <ListItemText primary="DAI" />
+                          </ListItem>
+                        </List>
+                     </DialogContent>
+                  </Dialog>
                 </div>
                 <div className={ classes.depositIputBox }>
                   <TextField

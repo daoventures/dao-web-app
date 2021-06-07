@@ -35,7 +35,8 @@ import {
   GET_STRATEGY_BALANCES_FULL,
   STRATEGY_BALANCES_FULL_RETURNED,
   CHANGE_NETWORK,
-  VAULT_BALANCES_FULL_RETURNED
+  VAULT_BALANCES_FULL_RETURNED,
+  CITADEL_CURRENCY_RETURNED
 } from '../../constants'
 
 import Store from "../../stores";
@@ -717,6 +718,7 @@ class Vault extends Component {
     emitter.on(CONNECTION_DISCONNECTED, this.connectionDisconnected);
     emitter.on(CHANGE_NETWORK, this.networkChanged);
     emitter.on(VAULT_BALANCES_FULL_RETURNED, this.networkChanged);
+    emitter.on(CITADEL_CURRENCY_RETURNED, this.handleSelectedCurrency);
   }
 
   componentWillUnmount() {
@@ -730,6 +732,7 @@ class Vault extends Component {
     emitter.removeListener(STRATEGY_BALANCES_FULL_RETURNED, this.balancesReturned);
     emitter.removeListener(CHANGE_NETWORK, this.networkChanged);
     emitter.removeListener(VAULT_BALANCES_FULL_RETURNED, this.networkChanged);
+    emitter.removeListener(CITADEL_CURRENCY_RETURNED, this.handleSelectedCurrency);
   };
 
   networkChanged = (obj) => {
@@ -794,6 +797,10 @@ class Vault extends Component {
       that.setState(snackbarObj)
     })
   };
+
+  handleSelectedCurrency = (callback) => {
+    console.log('Callback', callback);
+  }
 
   render() {
     const { classes } = this.props;
@@ -1039,14 +1046,14 @@ class Vault extends Component {
                       </Typography> */}
                       <Typography variant={'h5'} className={classes.assetLabel1}>
                         { /* TODO: Left Citadel Symbol as blank first, update later */}
-                        { (asset.balance ? (asset.balance).toFixed(2) : '0.00')+' '+ (asset.strategyType === 'citadel' ? 'USD' : asset.symbol)  }
+                        { (asset.strategyType === 'citadel' ? asset.balance.total ? asset.balance.total.toFixed(2) : '0.00' : asset.balance ? (asset.balance).toFixed(2) : '0.00')+' '+ (asset.strategyType === 'citadel' ? 'USD' : asset.symbol)  }
                       </Typography>
                       <Typography variant={ 'body1' } className={ classes.assetLabel2 }>Available to deposit</Typography>
                     </div>
                     <div className={classes.showMobile}>
                       <Typography variant={ 'h3' } noWrap className={classes.assetLabel1}>
                         { /* TODO: Left Citadel Symbol as blank first, update later */}
-                        { (asset.balance ? (asset.balance).toFixed(2) : '0.00')+' '+ (asset.strategyType === 'citadel' ? 'USD' : asset.symbol) }
+                        { (asset.strategyType === 'citadel' ? asset.balance.total ? asset.balance.total.toFixed(2) : '0.00' : asset.balance ? (asset.balance).toFixed(2) : '0.00')+' '+ (asset.strategyType === 'citadel' ? 'USD' : asset.symbol)  }
                       </Typography>
                       <Typography variant={ 'h5' } className={ classes.assetLabel2 }>Available to deposit</Typography>
                     </div>
@@ -1060,7 +1067,7 @@ class Vault extends Component {
               </div>
             </AccordionSummary>
             <AccordionDetails className={ classes.removePadding }>
-              <Asset asset={ asset } startLoading={ this.startLoading } basedOn={ basedOn } />
+              <Asset asset={ asset } startLoading={ this.startLoading } basedOn={ basedOn }/>
             </AccordionDetails>
           </Accordion>
         </div>

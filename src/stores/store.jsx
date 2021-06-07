@@ -53,6 +53,8 @@ import {
   TOGGLE_THEME, // 切换主题
   CURRENT_THEME_RETURNED, // 返回当前主题
   GET_VAULT_INFO,//获取接口信息
+  CITADEL_CURRENCY_TYPE,
+  CITADEL_CURRENCY_RETURNED
 } from '../constants';
 import Web3 from 'web3';
 
@@ -268,7 +270,8 @@ class Store {
       ],
       ethBalance: 0,
       sCrvBalance: 0,
-      openDrawer: false
+      openDrawer: false,
+      selectedCurrencyForCitadel: 'usdt'
     }
 
     dispatcher.register(
@@ -356,6 +359,8 @@ class Store {
           case GET_VAULT_INFO:
             this.getVaultInfo(payload);
             break;
+          case CITADEL_CURRENCY_TYPE: 
+            this.setCitadelCurrencyType(payload);
           default: {
           }
         }
@@ -378,6 +383,12 @@ class Store {
     store.setStore({ currentTheme: currentTheme })
     emitter.emit(CURRENT_THEME_RETURNED, currentTheme)
   };
+
+  setCitadelCurrencyType(obj) {
+    const selectedCurrency = obj.content.currency;
+    store.setStore({ selectedCurrencyForCitadel: selectedCurrency})
+    emitter.emit(CITADEL_CURRENCY_RETURNED, selectedCurrency)
+  }
 
   resetProfile = () => {
     const defaultvalues = this._getDefaultValues()
@@ -1916,9 +1927,9 @@ class Store {
               const usdPrices = await this._getUSDPrices();
 
               const stableCoins = {
-                "tether" : { address: "0x07de306ff27a2b630b1141956844eb1552b956b5", abi: config.erc20UsdtABI },
-                "usd-coin" : { address: "0xb7a4f3e9097c08da09517b5ab877f7a917224ede", abi: config.erc20UsdcABI },
-                "dai": { address: "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa", abi: config.erc20DaiABI }
+                "tether" : { address: "0x07de306ff27a2b630b1141956844eb1552b956b5", abi: config.erc20UsdtABI , balance: 0.00},
+                "usd-coin" : { address: "0xb7a4f3e9097c08da09517b5ab877f7a917224ede", abi: config.erc20UsdcABI, balance: 0.00},
+                "dai": { address: "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa", abi: config.erc20DaiABI, balance: 0.00 }
               }
 
               let total = 0;
@@ -1932,7 +1943,9 @@ class Store {
                   const tokenUsdPrices = usdPrices[key].usd;
   
                   if(accountBalance > 0) {
-                    const tokenBalInUsd = (accountBalance / 10 ** tokenDecimals) * tokenUsdPrices;
+                    const accountBalExactAmount  =  (accountBalance / 10 ** tokenDecimals);
+                    stableCoins[key].balance = parseFloat(accountBalExactAmount);
+                    const tokenBalInUsd = accountBalExactAmount * tokenUsdPrices;
                     total = tokenBalInUsd + total;
                   } 
                 }
@@ -1940,7 +1953,9 @@ class Store {
                 console.log("Error in _getERC20Balance()", err);
               }
 
-              callback (null, parseFloat(total));
+              total = parseFloat(total);
+
+              callback (null, { stableCoins, total });
 
             } else {
               let erc20Contract = new web3.eth.Contract(config.erc20ABI, asset.erc20address)
