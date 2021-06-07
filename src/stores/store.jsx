@@ -781,7 +781,7 @@ class Store {
           measurement: 1e18,
           price_id: "compound-usdt",
           strategyName: "Compound-Farmer: Compound USDT",
-          strategy: "Compount USDT",
+          strategy: "Compound USDT",
           strategyContractABI: config.compundStrategyCompundABI,
           historicalPriceId: "cUSDT_price",
           logoFormat: "png",
