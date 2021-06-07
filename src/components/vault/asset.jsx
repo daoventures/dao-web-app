@@ -529,6 +529,7 @@ class Asset extends Component {
       amountPercent,
       openEarnInfo,
       openVaultInfo,
+      tokenIndex, // for multi currency vault
     } = this.state;
 
     return (
@@ -829,6 +830,36 @@ class Asset extends Component {
                       ? (Math.floor(asset.balance * 10000) / 10000).toFixed(4)
                       : "0.0000"}{" "}
                     {asset.tokenSymbol ? asset.tokenSymbol : asset.symbol}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    onClick={() => {
+                      this.setCurrency(0);
+                    }}
+                    className={classes.value}
+                    noWrap
+                  >
+                    {asset.strategyType === "citadel" ? "USDT" : ""}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    onClick={() => {
+                      this.setCurrency(1);
+                    }}
+                    className={classes.value}
+                    noWrap
+                  >
+                    {asset.strategyType === "citadel" ? "USDC" : ""}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    onClick={() => {
+                      this.setCurrency(2);
+                    }}
+                    className={classes.value}
+                    noWrap
+                  >
+                    {asset.strategyType === "citadel" ? "DAI" : ""}
                   </Typography>
                 </div>
                 <div className={classes.depositIputBox}>
@@ -1834,6 +1865,20 @@ class Asset extends Component {
     amount = Math.floor(amount * 10000) / 10000;
 
     this.setState({ amount: amount.toFixed(4), percent });
+  };
+
+  setCurrency = (tokenIndex) => {
+    if (this.state.loading) {
+      return;
+    }
+
+    const { asset } = this.props;
+
+    asset.symbol = asset.symbols[tokenIndex];
+    asset.balance = asset.balances[tokenIndex];
+    asset.erc20address = asset.erc20addresses[tokenIndex];
+
+    this.setState({ tokenIndex: tokenIndex });
   };
 
   setRedeemAmount = (percent) => {
