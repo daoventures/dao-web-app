@@ -471,9 +471,10 @@ const styles = theme => ({
   },
   dialogRoot: {
     border: '1px solid ' + theme.themeColors.border,
+    background: theme.themeColors.itemBack,
   }, 
   dialogTitle: {
-    background: '#15023A',
+    background: theme.themeColors.menuSel,
     borderColor: theme.themeColors.blockBorder,
     color: theme.themeColors.menuSelText
   },
