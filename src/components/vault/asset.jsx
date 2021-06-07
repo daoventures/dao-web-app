@@ -1084,7 +1084,8 @@ class Asset extends Component {
                   <div className={ classes.withdrawContainer }>
                     <div className={ classes.tradeContainer }>
                       <div className={ classes.balances }>
-                        <Typography variant='body1' onClick={ () => { this.setRedeemAmount(100) } }  className={ classes.value } noWrap>{ (asset.strategyBalance ? (Math.floor(asset.strategyBalance*asset.compoundExchangeRate*10000)/10000).toFixed(4) : '0.0000') } { asset.symbol } ({ asset.strategyBalance ? (Math.floor(asset.strategyBalance*10000)/10000).toFixed(4) : '0.0000' } { asset.vaultSymbol }) </Typography>
+                        <Typography variant='body1' onClick={ () => { this.setRedeemAmount(100) } }  className={ classes.value } noWrap>
+                          { (asset.strategyBalance ? (Math.floor(asset.strategyBalance*asset.compoundExchangeRate*10000)/10000).toFixed(4) : '0.0000') } { asset.symbol } ({ asset.strategyBalance ? (Math.floor(asset.strategyBalance*10000)/10000).toFixed(4) : '0.0000' } { asset.vaultSymbol }) </Typography>
                       </div>
                       <TextField
                         style={{width: '100%'}}
@@ -1140,7 +1141,9 @@ class Asset extends Component {
                   <div className={ classes.withdrawContainer }>
                     <div className={ classes.tradeContainer }>
                       <div className={ classes.balances }>
-                        <Typography variant='body1' onClick={ () => { this.setRedeemAmount(100) } }  className={ classes.value } noWrap>{ (asset.strategyBalance ? (Math.floor(asset.strategyBalance*asset.compoundExchangeRate*10000)/10000).toFixed(4) : '0.0000') } { asset.symbol } </Typography>
+                        <Typography variant='body1' onClick={ () => { this.setRedeemAmount(100) } }  className={ classes.value } noWrap>
+                          { (asset.strategyBalance ? asset.strategyBalance.toFixed(4) : '0.0000') + 'USD'} 
+                        </Typography>
                       </div>
                       <TextField
                         style={{width: '100%'}}
