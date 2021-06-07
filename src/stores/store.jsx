@@ -1593,8 +1593,12 @@ class Store {
 
     // Handle vaults with multi tokens
     try {
-      if (tokenIndex > 0 && tokenIndex < asset.erc20address.length) {
-        asset.erc20address = asset.erc20address[tokenIndex];
+      if (
+        tokenIndex !== null &&
+        tokenIndex > 0 &&
+        tokenIndex < asset.erc20addresses.length
+      ) {
+        asset.erc20address = asset.erc20addresses[tokenIndex];
       }
     } catch (error) {
       if (error.message) {
