@@ -5149,6 +5149,14 @@ class Store {
             (callbackInner) => {
               this._getTvl(asset.tvlKey, callbackInner);
             },
+            (callbackInner) => {
+              this._getERC20BalancesCitadel(
+                web3,
+                asset,
+                account,
+                callbackInner
+              );
+            },
 
             // (callbackInner) => { this._getVaultHoldings(web3, asset, account, callbackInner) },
             // (callbackInner) => { this._getAddressTransactions(addressTXHitory, asset, callbackInner) },
@@ -5171,6 +5179,7 @@ class Store {
             asset.earnApr = data[6];
             asset.historicalAPY = data[7];
             asset.tvl = data[9][0].tvl;
+            asset.balances = data[10];
 
             // asset.addressTransactions = data[7]
             // asset.vaultHoldings = data[3]
