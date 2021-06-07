@@ -22,6 +22,7 @@ import {
 } from '@material-ui/core';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import CloseIcon from '@material-ui/icons/Close';
+import ArrowDropDownCircleIcon from '@material-ui/icons/ArrowDropDownCircle';
 
 import {
   ERROR,
@@ -442,6 +443,14 @@ const styles = theme => ({
     padding: '0px 10px',
     cursor: 'pointer'
   },
+  disableAccountInfoBlock: {
+    pointerEvents: 'none',
+    opacity: 0.7
+  },
+  enableAccountInfoBlock: {
+    pointerEvents: 'auto',
+    opacity: 1.0
+  },
   closeButton: {
     position: 'absolute',
     right: theme.spacing(1),
@@ -449,7 +458,9 @@ const styles = theme => ({
     color: theme.palette.grey[500],
   },
   modalListItem: {
-    borderColor: theme.themeColors.blockBorder
+    border: '1px solid ' + colors.borderBlue,
+    marginTop: '10px',
+    color: theme.themeColors.textT
   },
   assetIconImg: {
     height: '25px',
@@ -457,6 +468,17 @@ const styles = theme => ({
     [theme.breakpoints.down('md')]: {
       height: '25px'
     }
+  },
+  dialogRoot: {
+    border: '1px solid ' + colors.borderBlue,
+  }, 
+  dialogTitle: {
+    background: '#15023A',
+    borderColor: theme.themeColors.blockBorder,
+    color: theme.themeColors.menuSelText
+  },
+  dialogContent: {
+    background: theme.themeColors.itemBack,
   }
 });
 
@@ -565,20 +587,19 @@ class Asset extends Component {
     this.setState({
       citadelCurrency: currencyType
     })
-    this.handleCitadelCurrencyBalance();
+    this.handleCitadelCurrencyBalance(currencyType);
     dispatcher.dispatch({ type: CITADEL_CURRENCY_TYPE, content: { currency: currencyType } })
     this.handleModalDisplay(false);
   };
 
-  handleCitadelCurrencyBalance = () => {
+  handleCitadelCurrencyBalance = (currencyType) => {
     const { asset } = this.props;
+    const stableCoinBal = asset.balance.stableCoins;
 
-    if(asset.strategyType === 'citadel') {
-      const stableCoinBal = asset.balance.stableCoins;
 
-      console.log("Balance", asset);
-
-      switch(this.state.citadelCurrency) {
+    if(asset.strategyType === 'citadel' && stableCoinBal) {
+     
+      switch(currencyType) {
         case "USDT":
           this.setState({stableCoinBalance: stableCoinBal['tether'].balance });
           break;
@@ -592,6 +613,9 @@ class Asset extends Component {
           this.setState({stableCoinBalance: 0.00});
           break;
       }
+
+      this.state.amount = '';
+      this.state.percent = 0;
     }
   }
 
@@ -609,9 +633,6 @@ class Asset extends Component {
 
   render() {
     const { classes, asset } = this.props;
-    if(asset.strategyType === 'citadel') {
-      console.log("Citadel: ", asset);
-    }
     const {
       amount,
       amountError,
@@ -808,7 +829,7 @@ class Asset extends Component {
                     {/* <Typography variant='h4' onClick={ () => { this.setAmount(100) } } className={ classes.value } noWrap>{ 'Your wallet: '+ (asset.balance ? (Math.floor(asset.balance*10000)/10000).toFixed(4) : '0.0000') } { asset.tokenSymbol ? asset.tokenSymbol : asset.symbol }</Typography> */}
                     <Typography variant='body1' className={ classes.value } noWrap onClick={ () => { this.setAmount(100) } }>
                       Your wallet : 
-                      { (asset.strategyType === 'citadel' ? this.state.stableCoinBalance : asset.balance ? (Math.floor(asset.balance*10000)/10000).toFixed(4) : '0.0000') } 
+                      { (asset.strategyType === 'citadel' ? this.state.stableCoinBalance ? this.state.stableCoinBalance.toFixed(4) : "0.0000" : asset.balance ? (Math.floor(asset.balance*10000)/10000).toFixed(4) : '0.0000') } 
                       { asset.tokenSymbol ? asset.tokenSymbol : asset.strategyType === 'citadel' ?  this.state.citadelCurrency : asset.symbol }
                     </Typography>
                     {/* <Typography variant='body2'  className={ classes.value } noWrap>
@@ -829,32 +850,38 @@ class Asset extends Component {
                           <span className={classes.addressSpan}>
                             { this.state.citadelCurrency }
                           </span>
+                          <ArrowDropDownCircleIcon style={{ height: '15px', fill: '#7367F7' }}/>
                         </div>
                       </div>
                    }
                   
-                  <Dialog  onClose={() => this.handleModalDisplay(false)} fullWidth={ true } maxWidth={ 'sm' } TransitionComponent={ Transition } aria-labelledby="customized-dialog-title" open={displayCurrencyModal}>
-                    <MuiDialogTitle disableTypography>
+                  <Dialog onClose={() => this.handleModalDisplay(false)} 
+                          fullWidth={ true } 
+                          maxWidth={ 'sm' } 
+                          classes={{paper: classes.dialogRoot}}
+                          aria-labelledby="customized-dialog-title" 
+                          open={displayCurrencyModal}>
+                    <MuiDialogTitle disableTypography className={ classes.dialogTitle }>
                       <Typography variant="h6">Select currency</Typography>
                       <IconButton aria-label="close" className={classes.closeButton} onClick={() => this.handleModalDisplay(false)}>
                           <CloseIcon />
                       </IconButton>
                       </MuiDialogTitle>
-                      <DialogContent dividers>
-                        <List component="nav" aria-label="main mailbox folders">
-                          <ListItem button className={classes.modalListItem} onClick={() => this.handleSelectedCurrency('USDT')}>
+                      <DialogContent dividers className={classes.dialogContent}>
+                        <List component="nav" aria-label="main mailbox folders"  >
+                          <ListItem button onClick={() => this.handleSelectedCurrency('USDT')} className={classes.modalListItem}>
                             <ListItemAvatar>
                               <Avatar alt="" src={require('../../assets/USDT-logo.png')} />
                             </ListItemAvatar>
                             <ListItemText primary="USDT" />
                           </ListItem>
-                          <ListItem button onClick={() => this.handleSelectedCurrency('USDC')}>
+                          <ListItem button onClick={() => this.handleSelectedCurrency('USDC')} className={classes.modalListItem}>
                             <ListItemAvatar>
                               <Avatar alt="" src={require('../../assets/USDC-logo.png')} />
                             </ListItemAvatar>
                             <ListItemText primary="USDC" />
                           </ListItem>
-                          <ListItem button onClick={() => this.handleSelectedCurrency('DAI')}>
+                          <ListItem button onClick={() => this.handleSelectedCurrency('DAI')} className={classes.modalListItem}>
                             <ListItemAvatar>
                               <Avatar alt="" src={require('../../assets/DAI-logo.png')} />
                             </ListItemAvatar>
@@ -1058,6 +1085,62 @@ class Asset extends Component {
                     <div className={ classes.tradeContainer }>
                       <div className={ classes.balances }>
                         <Typography variant='body1' onClick={ () => { this.setRedeemAmount(100) } }  className={ classes.value } noWrap>{ (asset.strategyBalance ? (Math.floor(asset.strategyBalance*asset.compoundExchangeRate*10000)/10000).toFixed(4) : '0.0000') } { asset.symbol } ({ asset.strategyBalance ? (Math.floor(asset.strategyBalance*10000)/10000).toFixed(4) : '0.0000' } { asset.vaultSymbol }) </Typography>
+                      </div>
+                      <TextField
+                        style={{width: '100%'}}
+                        className={ classes.actionInput }
+                        id='redeemAmount'
+                        value={ redeemAmount }
+                        error={ redeemAmountError }
+                        onChange={ this.onChange }
+                        disabled={ loading }
+                        placeholder="0.00"
+                        variant="outlined"
+                        onKeyDown={ this.inputRedeemKeyDown }
+                      />
+                      <div className={ classes.scaleContainer }>
+                        <Button
+                          className={ amountPercent === 25 ? classes.scaleActive : classes.scale }
+                          variant='text'
+                          disabled={ loading }
+                          color="primary"
+                          onClick={ () => { this.setRedeemAmount(25) } }>
+                          <Typography variant={'h5'}>25%</Typography>
+                        </Button>
+                        <Button
+                          className={ amountPercent === 50 ? classes.scaleActive : classes.scale }
+                          variant='text'
+                          disabled={ loading }
+                          color="primary"
+                          onClick={ () => { this.setRedeemAmount(50) } }>
+                          <Typography variant={'h5'}>50%</Typography>
+                        </Button>
+                        <Button
+                          className={ amountPercent === 75 ? classes.scaleActive : classes.scale }
+                          variant='text'
+                          disabled={ loading }
+                          color="primary"
+                          onClick={ () => { this.setRedeemAmount(75) } }>
+                          <Typography variant={'h5'}>75%</Typography>
+                        </Button>
+                        <Button
+                          className={ amountPercent === 100 ? classes.scaleActive : classes.scale }
+                          variant='text'
+                          disabled={ loading }
+                          color="primary"
+                          onClick={ () => { this.setRedeemAmount(100) } }>
+                          <Typography variant={'h5'}>Max</Typography>
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                }
+                {
+                  (asset.strategyType === 'citadel') && 
+                  <div className={ classes.withdrawContainer }>
+                    <div className={ classes.tradeContainer }>
+                      <div className={ classes.balances }>
+                        <Typography variant='body1' onClick={ () => { this.setRedeemAmount(100) } }  className={ classes.value } noWrap>{ (asset.strategyBalance ? (Math.floor(asset.strategyBalance*asset.compoundExchangeRate*10000)/10000).toFixed(4) : '0.0000') } { asset.symbol } </Typography>
                       </div>
                       <TextField
                         style={{width: '100%'}}
@@ -1554,9 +1637,16 @@ class Asset extends Component {
 
     const { asset } = this.props
 
-    const balance = asset.balance
-    let amount = balance*percent/100
-    amount = Math.floor(amount*10000)/10000;
+    let amount = 0.00; 
+
+    if(asset.strategyType === 'citadel') {
+      amount = this.state.stableCoinBalance * percent /100;
+    } else {
+      const balance = asset.balance
+      amount = balance*percent/100
+      amount = Math.floor(amount*10000)/10000;
+    }
+    
 
     this.setState({ amount: amount.toFixed(4), percent })
   }

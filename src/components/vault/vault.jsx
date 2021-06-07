@@ -718,7 +718,6 @@ class Vault extends Component {
     emitter.on(CONNECTION_DISCONNECTED, this.connectionDisconnected);
     emitter.on(CHANGE_NETWORK, this.networkChanged);
     emitter.on(VAULT_BALANCES_FULL_RETURNED, this.networkChanged);
-    emitter.on(CITADEL_CURRENCY_RETURNED, this.handleSelectedCurrency);
   }
 
   componentWillUnmount() {
@@ -732,7 +731,6 @@ class Vault extends Component {
     emitter.removeListener(STRATEGY_BALANCES_FULL_RETURNED, this.balancesReturned);
     emitter.removeListener(CHANGE_NETWORK, this.networkChanged);
     emitter.removeListener(VAULT_BALANCES_FULL_RETURNED, this.networkChanged);
-    emitter.removeListener(CITADEL_CURRENCY_RETURNED, this.handleSelectedCurrency);
   };
 
   networkChanged = (obj) => {
@@ -797,10 +795,6 @@ class Vault extends Component {
       that.setState(snackbarObj)
     })
   };
-
-  handleSelectedCurrency = (callback) => {
-    console.log('Callback', callback);
-  }
 
   render() {
     const { classes } = this.props;

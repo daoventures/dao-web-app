@@ -3071,47 +3071,20 @@ class Store {
         balance
       })
     }else if(asset.strategyType === 'citadel'){
+      const vaultContract = new web3.eth.Contract(asset.vaultContractABI, asset.vaultContractAddress);
+      
+      const pool = await vaultContract.methods.getAllPoolInUSD().call();
+      const totalSupply = await vaultContract.methods.totalSupply().call();
+      const depositedShares = await vaultContract.methods.balanceOf(account.address).call({from: account.address });
+
+      let balance = (pool * depositedShares) / totalSupply;
+      balance = parseFloat(balance) / 10 ** 6; // Follow USD Decimal
 
       callback(null, {
         earnBalance: 0,
         vaultBalance: 0,
-        balance: 0
-      })
-      // let USDTvaultContract = new web3.eth.Contract(asset.USDTvaultContractABI, asset.USDTvaultContractAddress);
-      // let USDTstrategyAddress = await USDTvaultContract.methods.strategy().call({ from: account.address });
-      // let USDTstrategyContract = new web3.eth.Contract(asset.USDTstrategyContractABI, USDTstrategyAddress);
-      // //USDT
-      // let USDTearnBalance = await USDTstrategyContract.methods.getEarnDepositBalance(account.address).call({ from: account.address });
-      // earnBalance = parseFloat(earnBalance) / 10 ** asset.decimals
-      
-      // let USDTvaultBalance = await USDTstrategyContract.methods.getVaultDepositBalance(account.address).call({ from: account.address });
-      // vaultBalance = parseFloat(vaultBalance) / 10 ** asset.decimals
-      // console.log(USDTearnBalance,'USDTearnBalance###');
-      // console.log(USDTvaultBalance,'USDTvaultBalance###');
-
-
-      // console.log(strategyContract.methods,'strategyContract###3056');
-      // console.log(asset,'assets$$$$$$$$$$$');
-
-
-      
-      //USDC
-      // let USDCearnBalance = await strategyContract.methods.getEarnDepositBalance(account.address).call({ from: account.address });
-      // earnBalance = parseFloat(earnBalance) / 10 ** asset.decimals
-      
-      // let USDCvaultBalance = await strategyContract.methods.getVaultDepositBalance(account.address).call({ from: account.address });
-      // vaultBalance = parseFloat(vaultBalance) / 10 ** asset.decimals
-      // //DAI
-      // let DAIearnBalance = await strategyContract.methods.getEarnDepositBalance(account.address).call({ from: account.address });
-      // earnBalance = parseFloat(earnBalance) / 10 ** asset.decimals
-      
-      // let DAIvaultBalance = await strategyContract.methods.getVaultDepositBalance(account.address).call({ from: account.address });
-      // vaultBalance = parseFloat(vaultBalance) / 10 ** asset.decimals
-      // callback(null, {
-      //   earnBalance: parseFloat(earnBalance),
-      //   vaultBalance: parseFloat(vaultBalance),
-      //   balance: 0,
-      // })
+        balance
+      });
     }
   } 
 
