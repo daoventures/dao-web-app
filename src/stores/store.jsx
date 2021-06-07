@@ -2194,6 +2194,32 @@ class Store {
     // }
   };
 
+  _getERC20BalancesCitadel = async (web3, asset, account, callback) => {
+    if (asset.strategyType !== "citadel") {
+      return callback(null, null);
+    }
+
+    let balances = [];
+    for (let i = 0; i < asset.erc20addresses.length; i++) {
+      let erc20Contract = new web3.eth.Contract(
+        config.erc20ABI,
+        asset.erc20addresses[i]
+      );
+
+      try {
+        var balance = await erc20Contract.methods
+          .balanceOf(account.address)
+          .call({ from: account.address });
+        balance = parseFloat(balance) / 10 ** asset.decimals;
+        balances.push(parseFloat(balance));
+      } catch (ex) {
+        console.log(ex);
+        return callback(ex);
+      }
+    }
+    callback(null, balances);
+  };
+
   _getBalance = async (web3, asset, account, callback) => {
     if (asset.iEarnContract === null) {
       return callback(null, 0);
