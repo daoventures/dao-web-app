@@ -966,19 +966,20 @@ class Asset extends Component {
                       this.setAmount(100);
                     }}
                   >
-                    Your wallet :
-                    {asset.strategyType === "citadel"
-                      ? this.state.stableCoinBalance
-                        ? this.state.stableCoinBalance.toFixed(4)
-                        : "0.0000"
-                      : asset.balance
+                    Your wallet
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    onClick={() => {
+                      this.setAmount(100);
+                    }}
+                    className={classes.value}
+                    noWrap
+                  >
+                    {asset.balance
                       ? (Math.floor(asset.balance * 10000) / 10000).toFixed(4)
-                      : "0.0000"}
-                    {asset.tokenSymbol
-                      ? asset.tokenSymbol
-                      : asset.strategyType === "citadel"
-                      ? this.state.citadelCurrency
-                      : asset.symbol}
+                      : "0.0000"}{" "}
+                    {asset.tokenSymbol ? asset.tokenSymbol : asset.symbol}
                   </Typography>
                   {/* <Typography variant='body2'  className={ classes.value } noWrap>
                      
