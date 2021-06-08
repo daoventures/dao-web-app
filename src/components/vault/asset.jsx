@@ -4,11 +4,25 @@ import { withStyles } from "@material-ui/core/styles";
 import {
   Typography,
   TextField,
-  Button,
-  Slider,
-  Grid,
+  Button, 
+  Slider, 
+  Grid, 
   Tooltip,
-} from "@material-ui/core";
+  Dialog, 
+  IconButton,
+  DialogContent, 
+  DialogActions, 
+  List, 
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Slide, 
+  ListItemAvatar,
+  Avatar
+} from '@material-ui/core';
+import MuiDialogTitle from '@material-ui/core/DialogTitle';
+import CloseIcon from '@material-ui/icons/Close';
+import ArrowDropDownCircleIcon from '@material-ui/icons/ArrowDropDownCircle';
 
 import {
   ERROR,
@@ -21,7 +35,8 @@ import {
   WITHDRAW_BOTH_VAULT,
   WITHDRAW_BOTH_VAULT_RETURNED,
   CURRENT_THEME_RETURNED,
-} from "../../constants";
+  CITADEL_CURRENCY_TYPE
+} from '../../constants'
 
 import { colors } from "../../theme";
 import { getTheme } from "../../theme";
@@ -400,12 +415,76 @@ const styles = (theme) => ({
     },
   },
   balances: {
-    width: "100%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    color: theme.themeColors.textT,
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    color: theme.themeColors.textT
   },
+  changeCurrencyContainer: {
+    padding: '36px 20px 20px 20px',
+    position: 'relative'
+  },
+  accountInfoBlock: {
+    position: 'relative'
+  },
+  accountInfo: {
+    marginTop: '10px',
+    width: '100%',
+    height: '30px',
+    color: theme.themeColors.textT,
+    background: theme.themeColors.blockBack,
+    borderColor: theme.themeColors.blockBorder,
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    fontSize: '14px',
+    display: 'flex',
+    alignItems: 'center',
+    padding: '0px 10px',
+    cursor: 'pointer'
+  },
+  disableAccountInfoBlock: {
+    pointerEvents: 'none',
+    opacity: 0.7
+  },
+  enableAccountInfoBlock: {
+    pointerEvents: 'auto',
+    opacity: 1.0
+  },
+  closeButton: {
+    position: 'absolute',
+    right: theme.spacing(1),
+    top: theme.spacing(1),
+    color: theme.palette.grey[500],
+  },
+  modalListItem: {
+    border: '1px solid ' + theme.themeColors.border,
+    marginTop: '10px',
+    color: theme.themeColors.textT
+  },
+  assetIconImg: {
+    height: '25px',
+    padding: '5px',
+    [theme.breakpoints.down('md')]: {
+      height: '25px'
+    }
+  },
+  dialogRoot: {
+    border: '1px solid ' + theme.themeColors.border,
+    background: theme.themeColors.itemBack,
+  }, 
+  dialogTitle: {
+    background: theme.themeColors.menuSel,
+    borderColor: theme.themeColors.blockBorder,
+    color: theme.themeColors.menuSelText
+  },
+  dialogContent: {
+    background: theme.themeColors.itemBack,
+  },
+  arrowDropdownIcon: {
+    height: '15px', 
+    fill: theme.themeColors.textP
+  }
 });
 
 const marks = [
@@ -433,6 +512,10 @@ const HtmlTooltip = withStyles((theme) => ({
   },
 }))(Tooltip);
 
+function Transition(props) {
+  return <Slide direction="up" {...props} />;
+}
+
 class Asset extends Component {
   constructor() {
     super();
@@ -455,8 +538,10 @@ class Asset extends Component {
       hideNav: false,
       openEarnInfo: false,
       openVaultInfo: false,
-      interestTheme: {}, // 当前主题数据
-    };
+      interestTheme: {}, // 当前主题数据,
+      citadelCurrency: 'USDT',
+      citadelCoinBalance: 0.00
+    }
   }
 
   componentWillMount() {
@@ -498,6 +583,46 @@ class Asset extends Component {
     });
   };
 
+  handleModalDisplay = (open) => {
+    this.setState({ displayCurrencyModal: open });
+  }
+
+  handleSelectedCurrency = (currencyType) => {
+    this.setState({
+      citadelCurrency: currencyType
+    })
+    this.handleCitadelCurrencyBalance(currencyType);
+    dispatcher.dispatch({ type: CITADEL_CURRENCY_TYPE, content: { currency: currencyType } })
+    this.handleModalDisplay(false);
+  };
+
+  handleCitadelCurrencyBalance = (currencyType) => {
+    const { asset } = this.props;
+    const stableCoinBal = asset.balance.stableCoins;
+
+
+    if(asset.strategyType === 'citadel' && stableCoinBal) {
+     
+      switch(currencyType) {
+        case "USDT":
+          this.setState({stableCoinBalance: stableCoinBal['tether'].balance });
+          break;
+        case "USDC":
+          this.setState({stableCoinBalance: stableCoinBal['usd-coin'].balance});
+          break;
+        case "DAI":
+          this.setState({stableCoinBalance: stableCoinBal['dai'].balance});
+          break;
+        default:
+          this.setState({stableCoinBalance: 0.00});
+          break;
+      }
+
+      this.state.amount = '';
+      this.state.percent = 0;
+    }
+  }
+
   depositReturned = () => {
     this.setState({ loading: false, amount: "" });
   };
@@ -529,8 +654,8 @@ class Asset extends Component {
       amountPercent,
       openEarnInfo,
       openVaultInfo,
-      tokenIndex, // for multi currency vault
-    } = this.state;
+      displayCurrencyModal
+    } = this.state
 
     return (
       <div className={classes.vaultContainer}>
@@ -592,82 +717,47 @@ class Asset extends Component {
 
               <Grid container style={{ marginTop: "1rem" }}>
                 <Grid item sm={3} xs={6}>
-                  <Typography variant={"h5"} className={classes.grey}>
-                    Total Earnings:
-                  </Typography>
-                  <div className={classes.flexy}>
-                    <Typography variant={"h4"} noWrap>
-                      {asset.addressStatistics
-                        ? (
-                            asset.addressStatistics.earnings /
-                            10 ** asset.decimals
-                          ).toFixed(2)
-                        : "0.00"}{" "}
-                      {asset.symbol}
+                  <Typography variant={ 'h5' } className={ classes.grey }>Total Earnings:</Typography>
+                  <div className={ classes.flexy }>
+                    <Typography variant={ 'h4' } noWrap>
+                      { asset.addressStatistics ? (asset.addressStatistics.earnings/10**asset.decimals).toFixed(2) : '0.00' } 
+                      { asset.strategyType === 'citadel' ? 'USD' : asset.symbol }
                     </Typography>
                   </div>
                 </Grid>
                 <Grid item sm={3} xs={6}>
-                  <Typography variant={"h5"} className={classes.grey}>
-                    Deposits:
-                  </Typography>
-                  <div className={classes.flexy}>
-                    <Typography variant={"h4"} noWrap>
-                      {asset.addressStatistics
-                        ? (
-                            asset.addressStatistics.totalDeposits /
-                            10 ** asset.decimals
-                          ).toFixed(2)
-                        : "0.00"}{" "}
-                      {asset.symbol}
+                  <Typography variant={ 'h5' } className={ classes.grey }>Deposits:</Typography>
+                  <div className={ classes.flexy }>
+                    <Typography variant={ 'h4' } noWrap>
+                      { asset.addressStatistics ? (asset.addressStatistics.totalDeposits/10**asset.decimals).toFixed(2) : '0.00' } 
+                      { asset.strategyType === 'citadel' ? 'USD' : asset.symbol }
                     </Typography>
                   </div>
                 </Grid>
                 <Grid item sm={3} xs={6}>
-                  <Typography variant={"h5"} className={classes.grey}>
-                    Withdrawals:
-                  </Typography>
-                  <div className={classes.flexy}>
-                    <Typography variant={"h4"} noWrap>
-                      {asset.addressStatistics
-                        ? (
-                            asset.addressStatistics.totalWithdrawals /
-                            10 ** asset.decimals
-                          ).toFixed(2)
-                        : "0.00"}{" "}
-                      {asset.symbol}
+                  <Typography variant={ 'h5' } className={ classes.grey }>Withdrawals:</Typography>
+                  <div className={ classes.flexy }>
+                    <Typography variant={ 'h4' } noWrap>
+                      { asset.addressStatistics ? (asset.addressStatistics.totalWithdrawals/10**asset.decimals).toFixed(2) : '0.00' } 
+                      { asset.strategyType === 'citadel' ? 'USD' : asset.symbol }
                     </Typography>
                   </div>
                 </Grid>
                 <Grid item sm={3} xs={6}>
-                  <Typography variant={"h5"} className={classes.grey}>
-                    Transferred In:
-                  </Typography>
-                  <div className={classes.flexy}>
-                    <Typography variant={"h4"} noWrap>
-                      {asset.addressStatistics
-                        ? (
-                            asset.addressStatistics.totalTransferredIn /
-                            10 ** asset.decimals
-                          ).toFixed(2)
-                        : "0.00"}{" "}
-                      {asset.symbol}
+                  <Typography variant={ 'h5' } className={ classes.grey }>Transferred In:</Typography>
+                  <div className={ classes.flexy }>
+                    <Typography variant={ 'h4' } noWrap>
+                      { asset.addressStatistics ? (asset.addressStatistics.totalTransferredIn/10**asset.decimals).toFixed(2) : '0.00' } 
+                      { asset.strategyType === 'citadel' ? 'USD' : asset.symbol }
                     </Typography>
                   </div>
                 </Grid>
                 <Grid item sm={3} xs={6}>
-                  <Typography variant={"h5"} className={classes.grey}>
-                    Transferred Out:
-                  </Typography>
-                  <div className={classes.flexy}>
-                    <Typography variant={"h4"} noWrap>
-                      {asset.addressStatistics
-                        ? (
-                            asset.addressStatistics.totalTransferredOut /
-                            10 ** asset.decimals
-                          ).toFixed(2)
-                        : "0.00"}{" "}
-                      {asset.symbol}
+                  <Typography variant={ 'h5' } className={ classes.grey }>Transferred Out:</Typography>
+                  <div className={ classes.flexy }>
+                    <Typography variant={ 'h4' } noWrap>
+                      { asset.addressStatistics ? (asset.addressStatistics.totalTransferredOut/10**asset.decimals).toFixed(2) : '0.00' } 
+                      { asset.strategyType === 'citadel' ? 'USD' : asset.symbol }
                     </Typography>
                   </div>
                 </Grid>
@@ -812,55 +902,72 @@ class Asset extends Component {
 
             <div className={classes.actionsContainer}>
               {/* 充值部分 */}
-              <div className={classes.tradeContainer}>
-                <div className={classes.balances}>
-                  {/* <Typography variant='h4' onClick={ () => { this.setAmount(100) } } className={ classes.value } noWrap>{ 'Your wallet: '+ (asset.balance ? (Math.floor(asset.balance*10000)/10000).toFixed(4) : '0.0000') } { asset.tokenSymbol ? asset.tokenSymbol : asset.symbol }</Typography> */}
-                  <Typography variant="body1" className={classes.value} noWrap>
-                    Your wallet
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    onClick={() => {
-                      this.setAmount(100);
-                    }}
-                    className={classes.value}
-                    noWrap
-                  >
-                    {asset.balance
-                      ? (Math.floor(asset.balance * 10000) / 10000).toFixed(4)
-                      : "0.0000"}{" "}
-                    {asset.tokenSymbol ? asset.tokenSymbol : asset.symbol}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    onClick={() => {
-                      this.setCurrency(0);
-                    }}
-                    className={classes.value}
-                    noWrap
-                  >
-                    {asset.strategyType === "citadel" ? "USDT" : ""}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    onClick={() => {
-                      this.setCurrency(1);
-                    }}
-                    className={classes.value}
-                    noWrap
-                  >
-                    {asset.strategyType === "citadel" ? "USDC" : ""}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    onClick={() => {
-                      this.setCurrency(2);
-                    }}
-                    className={classes.value}
-                    noWrap
-                  >
-                    {asset.strategyType === "citadel" ? "DAI" : ""}
-                  </Typography>
+              <div className={ classes.tradeContainer }>
+                <div className={ classes.balances }>
+                    {/* <Typography variant='h4' onClick={ () => { this.setAmount(100) } } className={ classes.value } noWrap>{ 'Your wallet: '+ (asset.balance ? (Math.floor(asset.balance*10000)/10000).toFixed(4) : '0.0000') } { asset.tokenSymbol ? asset.tokenSymbol : asset.symbol }</Typography> */}
+                    <Typography variant='body1' className={ classes.value } noWrap onClick={ () => { this.setAmount(100) } }>
+                      Your wallet : 
+                      { (asset.strategyType === 'citadel' ? this.state.stableCoinBalance ? this.state.stableCoinBalance.toFixed(4) : "0.0000" : asset.balance ? (Math.floor(asset.balance*10000)/10000).toFixed(4) : '0.0000') } 
+                      { asset.tokenSymbol ? asset.tokenSymbol : asset.strategyType === 'citadel' ?  this.state.citadelCurrency : asset.symbol }
+                    </Typography>
+                    {/* <Typography variant='body2'  className={ classes.value } noWrap>
+                     
+                    </Typography> */}
+
+                   {/** Change Currency  */}
+                   {
+                     (asset.strategyType === 'citadel') && 
+                     <div className={classes.accountInfoBlock}>
+                        <div className={classes.accountInfo} onClick={() => { this.handleModalDisplay(true) }}>
+                          <img
+                            alt=""
+                            src={require('../../assets/'+ this.state.citadelCurrency +'-logo.png')}
+                            className={classes.assetIconImg}
+                            style={asset.disabled?{filter:'grayscale(100%)'}:{}}
+                          />
+                          <span className={classes.addressSpan}>
+                            { this.state.citadelCurrency }
+                          </span>
+                          <ArrowDropDownCircleIcon className={classes.arrowDropdownIcon}/>
+                        </div>
+                      </div>
+                   }
+                  
+                  <Dialog onClose={() => this.handleModalDisplay(false)} 
+                          fullWidth={ true } 
+                          maxWidth={ 'sm' } 
+                          classes={{paper: classes.dialogRoot}}
+                          aria-labelledby="customized-dialog-title" 
+                          open={displayCurrencyModal}>
+                    <MuiDialogTitle disableTypography className={ classes.dialogTitle }>
+                      <Typography variant="h6">Select a Currency</Typography>
+                      <IconButton aria-label="close" className={classes.closeButton} onClick={() => this.handleModalDisplay(false)}>
+                          <CloseIcon />
+                      </IconButton>
+                      </MuiDialogTitle>
+                      <DialogContent dividers className={classes.dialogContent}>
+                        <List component="nav" aria-label="main mailbox folders"  >
+                          <ListItem button onClick={() => this.handleSelectedCurrency('USDT')} className={classes.modalListItem}>
+                            <ListItemAvatar>
+                              <Avatar alt="" src={require('../../assets/USDT-logo.png')} />
+                            </ListItemAvatar>
+                            <ListItemText primary="USDT" />
+                          </ListItem>
+                          <ListItem button onClick={() => this.handleSelectedCurrency('USDC')} className={classes.modalListItem}>
+                            <ListItemAvatar>
+                              <Avatar alt="" src={require('../../assets/USDC-logo.png')} />
+                            </ListItemAvatar>
+                            <ListItemText primary="USDC" />
+                          </ListItem>
+                          <ListItem button onClick={() => this.handleSelectedCurrency('DAI')} className={classes.modalListItem}>
+                            <ListItemAvatar>
+                              <Avatar alt="" src={require('../../assets/DAI-logo.png')} />
+                            </ListItemAvatar>
+                            <ListItemText primary="DAI" />
+                          </ListItem>
+                        </List>
+                     </DialogContent>
+                  </Dialog>
                 </div>
                 <div className={classes.depositIputBox}>
                   <TextField
@@ -1197,37 +1304,71 @@ class Asset extends Component {
                         </Button>
                       </div>
                     </div>
+                }
+                {
+                  (asset.strategyType === 'compound') &&
+                  <div className={ classes.withdrawContainer }>
+                    <div className={ classes.tradeContainer }>
+                      <div className={ classes.balances }>
+                        <Typography variant='body1' onClick={ () => { this.setRedeemAmount(100) } }  className={ classes.value } noWrap>
+                          { (asset.strategyBalance ? (Math.floor(asset.strategyBalance*asset.compoundExchangeRate*10000)/10000).toFixed(4) : '0.0000') } { asset.symbol } ({ asset.strategyBalance ? (Math.floor(asset.strategyBalance*10000)/10000).toFixed(4) : '0.0000' } { asset.vaultSymbol }) </Typography>
+                      </div>
+                      <TextField
+                        style={{width: '100%'}}
+                        className={ classes.actionInput }
+                        id='redeemAmount'
+                        value={ redeemAmount }
+                        error={ redeemAmountError }
+                        onChange={ this.onChange }
+                        disabled={ loading }
+                        placeholder="0.00"
+                        variant="outlined"
+                        onKeyDown={ this.inputRedeemKeyDown }
+                      />
+                      <div className={ classes.scaleContainer }>
+                        <Button
+                          className={ amountPercent === 25 ? classes.scaleActive : classes.scale }
+                          variant='text'
+                          disabled={ loading }
+                          color="primary"
+                          onClick={ () => { this.setRedeemAmount(25) } }>
+                          <Typography variant={'h5'}>25%</Typography>
+                        </Button>
+                        <Button
+                          className={ amountPercent === 50 ? classes.scaleActive : classes.scale }
+                          variant='text'
+                          disabled={ loading }
+                          color="primary"
+                          onClick={ () => { this.setRedeemAmount(50) } }>
+                          <Typography variant={'h5'}>50%</Typography>
+                        </Button>
+                        <Button
+                          className={ amountPercent === 75 ? classes.scaleActive : classes.scale }
+                          variant='text'
+                          disabled={ loading }
+                          color="primary"
+                          onClick={ () => { this.setRedeemAmount(75) } }>
+                          <Typography variant={'h5'}>75%</Typography>
+                        </Button>
+                        <Button
+                          className={ amountPercent === 100 ? classes.scaleActive : classes.scale }
+                          variant='text'
+                          disabled={ loading }
+                          color="primary"
+                          onClick={ () => { this.setRedeemAmount(100) } }>
+                          <Typography variant={'h5'}>Max</Typography>
+                        </Button>
+                      </div>
+                    </div>
                   </div>
-                )}
-                {asset.strategyType === "compound" && (
-                  <div className={classes.withdrawContainer}>
-                    <div className={classes.tradeContainer}>
-                      <div className={classes.balances}>
-                        <Typography
-                          variant="body1"
-                          onClick={() => {
-                            this.setRedeemAmount(100);
-                          }}
-                          className={classes.value}
-                          noWrap
-                        >
-                          {asset.strategyBalance
-                            ? (
-                                Math.floor(
-                                  asset.strategyBalance *
-                                    asset.compoundExchangeRate *
-                                    10000
-                                ) / 10000
-                              ).toFixed(4)
-                            : "0.0000"}{" "}
-                          {asset.symbol} (
-                          {asset.strategyBalance
-                            ? (
-                                Math.floor(asset.strategyBalance * 10000) /
-                                10000
-                              ).toFixed(4)
-                            : "0.0000"}{" "}
-                          {asset.vaultSymbol}){" "}
+                }
+                {
+                  (asset.strategyType === 'citadel') && 
+                  <div className={ classes.withdrawContainer }>
+                    <div className={ classes.tradeContainer }>
+                      <div className={ classes.balances }>
+                        <Typography variant='body1' onClick={ () => { this.setRedeemAmount(100) } }  className={ classes.value } noWrap>
+                          { (asset.strategyBalance ? asset.strategyBalance.toFixed(4) : '0.0000') + 'USD'} 
                         </Typography>
                       </div>
                       <TextField
@@ -1860,9 +2001,16 @@ class Asset extends Component {
 
     const { asset } = this.props;
 
-    const balance = asset.balance;
-    let amount = (balance * percent) / 100;
-    amount = Math.floor(amount * 10000) / 10000;
+    let amount = 0.00; 
+
+    if(asset.strategyType === 'citadel') {
+      amount = this.state.stableCoinBalance * percent /100;
+    } else {
+      const balance = asset.balance
+      amount = balance*percent/100
+      amount = Math.floor(amount*10000)/10000;
+    }
+    
 
     this.setState({ amount: amount.toFixed(4), percent });
   };

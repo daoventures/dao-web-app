@@ -55,6 +55,8 @@ import {
   TOGGLE_THEME, // 切换主题
   CURRENT_THEME_RETURNED, // 返回当前主题
   GET_VAULT_INFO, //获取接口信息
+  CITADEL_CURRENCY_TYPE,
+  CITADEL_CURRENCY_RETURNED,
 } from "../constants";
 import Web3 from "web3";
 
@@ -268,6 +270,7 @@ class Store {
       ethBalance: 0,
       sCrvBalance: 0,
       openDrawer: false,
+      selectedCurrencyForCitadel: "usdt",
     };
 
     dispatcher.register(
@@ -355,6 +358,8 @@ class Store {
           case GET_VAULT_INFO:
             this.getVaultInfo(payload);
             break;
+          case CITADEL_CURRENCY_TYPE:
+            this.setCitadelCurrencyType(payload);
           default: {
           }
         }
@@ -376,6 +381,12 @@ class Store {
     const currentTheme = obj.content.currentTheme;
     store.setStore({ currentTheme: currentTheme });
     emitter.emit(CURRENT_THEME_RETURNED, currentTheme);
+  }
+
+  setCitadelCurrencyType(obj) {
+    const selectedCurrency = obj.content.currency;
+    store.setStore({ selectedCurrencyForCitadel: selectedCurrency });
+    emitter.emit(CITADEL_CURRENCY_RETURNED, selectedCurrency);
   }
 
   resetProfile = () => {
@@ -611,8 +622,12 @@ class Store {
           symbol: ["USDT", "USDC", "DAI"],
           description: "Stablecoins",
           vaultSymbol: "daoCDV",
-          // erc20address: ["0x07de306ff27a2b630b1141956844eb1552b956b5", "0xb7a4f3e9097c08da09517b5ab877f7a917224ede", "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa"],
-          erc20address: "0x07de306ff27a2b630b1141956844eb1552b956b5",
+          erc20address: [
+            "0x07de306ff27a2b630b1141956844eb1552b956b5",
+            "0xb7a4f3e9097c08da09517b5ab877f7a917224ede",
+            "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
+          ],
+          // erc20address:'0x07de306ff27a2b630b1141956844eb1552b956b5',
           vaultContractAddress: "0x542a42496c96b946324f7dce2b030d5643d9ef8a",
           vaultContractABI: config.vaultDAOCDVContractABI,
           balance: 0,
@@ -3636,43 +3651,25 @@ class Store {
         balance,
       });
     } else if (asset.strategyType === "citadel") {
+      const vaultContract = new web3.eth.Contract(
+        asset.vaultContractABI,
+        asset.vaultContractAddress
+      );
+
+      const pool = await vaultContract.methods.getAllPoolInUSD().call();
+      const totalSupply = await vaultContract.methods.totalSupply().call();
+      const depositedShares = await vaultContract.methods
+        .balanceOf(account.address)
+        .call({ from: account.address });
+
+      let balance = (pool * depositedShares) / totalSupply;
+      balance = parseFloat(balance) / 10 ** 6; // Follow USD Decimal
+
       callback(null, {
         earnBalance: 0,
         vaultBalance: 0,
-        balance: 0,
+        balance,
       });
-      // let USDTvaultContract = new web3.eth.Contract(asset.USDTvaultContractABI, asset.USDTvaultContractAddress);
-      // let USDTstrategyAddress = await USDTvaultContract.methods.strategy().call({ from: account.address });
-      // let USDTstrategyContract = new web3.eth.Contract(asset.USDTstrategyContractABI, USDTstrategyAddress);
-      // //USDT
-      // let USDTearnBalance = await USDTstrategyContract.methods.getEarnDepositBalance(account.address).call({ from: account.address });
-      // earnBalance = parseFloat(earnBalance) / 10 ** asset.decimals
-
-      // let USDTvaultBalance = await USDTstrategyContract.methods.getVaultDepositBalance(account.address).call({ from: account.address });
-      // vaultBalance = parseFloat(vaultBalance) / 10 ** asset.decimals
-      // console.log(USDTearnBalance,'USDTearnBalance###');
-      // console.log(USDTvaultBalance,'USDTvaultBalance###');
-
-      // console.log(strategyContract.methods,'strategyContract###3056');
-      // console.log(asset,'assets$$$$$$$$$$$');
-
-      //USDC
-      // let USDCearnBalance = await strategyContract.methods.getEarnDepositBalance(account.address).call({ from: account.address });
-      // earnBalance = parseFloat(earnBalance) / 10 ** asset.decimals
-
-      // let USDCvaultBalance = await strategyContract.methods.getVaultDepositBalance(account.address).call({ from: account.address });
-      // vaultBalance = parseFloat(vaultBalance) / 10 ** asset.decimals
-      // //DAI
-      // let DAIearnBalance = await strategyContract.methods.getEarnDepositBalance(account.address).call({ from: account.address });
-      // earnBalance = parseFloat(earnBalance) / 10 ** asset.decimals
-
-      // let DAIvaultBalance = await strategyContract.methods.getVaultDepositBalance(account.address).call({ from: account.address });
-      // vaultBalance = parseFloat(vaultBalance) / 10 ** asset.decimals
-      // callback(null, {
-      //   earnBalance: parseFloat(earnBalance),
-      //   vaultBalance: parseFloat(vaultBalance),
-      //   balance: 0,
-      // })
     }
   };
 
