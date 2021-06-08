@@ -598,6 +598,8 @@ class Asset extends Component {
     asset.balance = asset.balances[tokenIndex];
     asset.erc20address = asset.erc20addresses[tokenIndex];
 
+    this.props.onCurrencySelected({ id: asset.id, tokenIndex });
+
     this.setState({ 
       selectedCurrency: currencyType,
       tokenIndex: tokenIndex ,

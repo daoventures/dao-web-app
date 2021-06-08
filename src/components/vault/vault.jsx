@@ -698,6 +698,9 @@ class Vault extends Component {
       modalOpen: false,
       currentTab: 'ALL',
       tabList: ['ALL', 'Basic', 'Advance', 'Expert', 'Degen'],
+      selectedCurrencyMap: new Map([
+        ['daoCDV', 0]
+      ])
     }
 
     // TODO: undo comment for this afterwards
@@ -795,6 +798,17 @@ class Vault extends Component {
       that.setState(snackbarObj)
     })
   };
+
+  handleSelectedCurrency = (currency) => {
+    const { id, tokenIndex } = currency;
+
+    this.setState(prevState => {
+      const { selectedCurrencyMap } = prevState;
+      const newCurrencyMap = new Map(selectedCurrencyMap);
+      newCurrencyMap.set(id, tokenIndex);
+      return Object.assign({}, prevState, { selectedCurrencyMap: newCurrencyMap })
+    });
+  }
 
   render() {
     const { classes } = this.props;
@@ -1032,26 +1046,50 @@ class Vault extends Component {
                       </div>   
                   }
                   </Grid>
+
                   <Grid item sm={3} xs={6} className={classes.gridItemColumn}>
+                    {/** Available to deposit */}
                     <div className={classes.showDesktop}>
-                      {/* <Typography variant={ 'h5' } className={ classes.assetLabel }>Available to deposit: <span style={{color: '#222222'}}>
-                          { (asset.balance ? (asset.balance).toFixed(2) : '0.00')+' '+asset.symbol }
-                        </span>
-                      </Typography> */}
                       <Typography variant={'h5'} className={classes.assetLabel1}>
-                        { /* TODO: Left Citadel Symbol as blank first, update later */}
-                        { (asset.strategyType === 'citadel' ? asset.balance.total ? asset.balance.total.toFixed(2) : '0.00' : asset.balance ? (asset.balance).toFixed(2) : '0.00')+' '+ (asset.strategyType === 'citadel' ? 'USD' : asset.symbol)  }
+                        { 
+                          (asset.strategyType === 'citadel') && 
+                          <div> 
+                            { (asset.balances ? asset.balances[this.state.selectedCurrencyMap.get(asset.id)].toFixed(2) : '0.00') }
+                            { (asset.symbols ? asset.symbols[this.state.selectedCurrencyMap.get(asset.id)] : '') }
+                          </div>
+                        }
+                        { 
+                          (asset.strategyType !== 'citadel') && 
+                          <div> 
+                            { (asset.balance ? asset.balance.toFixed(2) : '0.00') }
+                            { (asset.symbol ? asset.symbol : '') }
+                          </div>
+                        }
                       </Typography>
                       <Typography variant={ 'body1' } className={ classes.assetLabel2 }>Available to deposit</Typography>
                     </div>
+
                     <div className={classes.showMobile}>
                       <Typography variant={ 'h3' } noWrap className={classes.assetLabel1}>
-                        { /* TODO: Left Citadel Symbol as blank first, update later */}
-                        { (asset.strategyType === 'citadel' ? asset.balance.total ? asset.balance.total.toFixed(2) : '0.00' : asset.balance ? (asset.balance).toFixed(2) : '0.00')+' '+ (asset.strategyType === 'citadel' ? 'USD' : asset.symbol)  }
+                        { 
+                          (asset.strategyType === 'citadel') && 
+                          <div> 
+                            { (asset.balances ? asset.balances[this.state.selectedCurrencyMap.get(asset.id)].toFixed(2) : '0.00') }
+                            { (asset.symbols ? asset.symbols[this.state.selectedCurrencyMap.get(asset.id)] : '') }
+                          </div>
+                        }
+                        { 
+                          (asset.strategyType !== 'citadel') && 
+                          <div> 
+                            { (asset.balance ? asset.balance.toFixed(2) : '0.00') }
+                            { (asset.symbol ? asset.symbol : '') }
+                          </div>
+                        }
                       </Typography>
                       <Typography variant={ 'h5' } className={ classes.assetLabel2 }>Available to deposit</Typography>
                     </div>
                   </Grid>
+                  
                   <Grid item sm={3} xs={6} className={classes.gridItemColumn}>
                       {/* 暂时不知道取什么 */}
                       <Typography variant={'h5'} className={classes.assetLabel1}>$ {asset.tvl}</Typography>
@@ -1061,7 +1099,7 @@ class Vault extends Component {
               </div>
             </AccordionSummary>
             <AccordionDetails className={ classes.removePadding }>
-              <Asset asset={ asset } startLoading={ this.startLoading } basedOn={ basedOn }/>
+              <Asset asset={ asset } startLoading={ this.startLoading } basedOn={ basedOn } onCurrencySelected={this.handleSelectedCurrency} />
             </AccordionDetails>
           </Accordion>
         </div>
