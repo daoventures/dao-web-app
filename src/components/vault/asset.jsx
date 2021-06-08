@@ -609,7 +609,7 @@ class Asset extends Component {
     this.handleCitadelCurrencyBalance(currencyType);
     dispatcher.dispatch({
       type: CITADEL_CURRENCY_TYPE,
-      content: { currency: currencyType },
+      content: { currency: currencyType, tokenIndex: tokenIndex },
     });
     this.handleModalDisplay(false);
   };
@@ -672,6 +672,7 @@ class Asset extends Component {
       amountPercent,
       openEarnInfo,
       openVaultInfo,
+      tokenIndex,
       displayCurrencyModal,
     } = this.state;
 
@@ -2014,7 +2015,7 @@ class Asset extends Component {
   onDeposit = () => {
     this.setState({ amountError: false });
 
-    const { amount, earnRatio, vaultRatio } = this.state;
+    const { amount, earnRatio, vaultRatio, tokenIndex } = this.state;
     const { asset, startLoading } = this.props;
 
     if (!amount || isNaN(amount) || amount <= 0 || amount > asset.balance) {
@@ -2052,7 +2053,7 @@ class Asset extends Component {
           earnAmount: 0,
           vaultAmount: 0,
           amount: amount.toString(),
-          tokenIndex: 2, // TODO: Change to state variable
+          tokenIndex: tokenIndex, // TODO: Change to state variable
           asset,
         },
       });
@@ -2061,7 +2062,7 @@ class Asset extends Component {
 
   onDepositAll = () => {
     const { asset, startLoading } = this.props;
-    const { earnRatio, vaultRatio } = this.state;
+    const { earnRatio, vaultRatio, tokenIndex } = this.state;
 
     this.setState({ loading: true });
     startLoading();
