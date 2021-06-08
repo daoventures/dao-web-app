@@ -182,7 +182,7 @@ class APR extends Component {
   networkChanged = (obj) => {
     const account = store.getStore('account')
     if(account && account.address) {
-      dispatcher.dispatch({ type: GET_VAULT_BALANCES_FULL, content: { } })
+      dispatcher.dispatch({ type: GET_VAULT_BALANCES_FULL, content: {} })
     }
   }
 
@@ -191,7 +191,7 @@ class APR extends Component {
       account: store.getStore('account'),
       loading: true
     })
-    dispatcher.dispatch({ type: GET_VAULT_BALANCES_FULL, content: { } })
+    dispatcher.dispatch({ type: GET_VAULT_BALANCES_FULL, content: {} })
   };
 
   connectionDisconnected = () => {
