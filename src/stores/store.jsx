@@ -1583,7 +1583,77 @@ class Store {
     }
   };
 
-  _checkApproval = async (
+  _checkApproval = async (asset, account, amount, contract, callback) => {
+    const web3 = new Web3(store.getStore("web3context").library.provider);
+
+    if (asset.erc20address === "Ethereum") {
+      callback();
+    }
+
+    let erc20Contract = new web3.eth.Contract(
+      config.erc20ABI,
+      asset.erc20address
+    );
+
+    try {
+      const allowance = await erc20Contract.methods
+        .allowance(account.address, contract)
+        .call({ from: account.address });
+
+      console.log(
+        await erc20Contract.methods.symbol().call(),
+        account.address,
+        contract
+      );
+
+      const ethAllowance = web3.utils.fromWei(allowance, "ether");
+      if (parseFloat(ethAllowance) < parseFloat(amount)) {
+        /*
+          code to accomodate for "assert _value == 0 or self.allowances[msg.sender][_spender] == 0" in contract
+          We check to see if the allowance is > 0. If > 0 set to 0 before we set it to the correct amount.
+        */
+        if (
+          [
+            "crvV1",
+            "crvV2",
+            "crvV3",
+            "crvV4",
+            "USDTv1",
+            "USDTv2",
+            "USDTv3",
+            "USDT",
+            "sCRV",
+          ].includes(asset.id) &&
+          ethAllowance > 0
+        ) {
+          await erc20Contract.methods
+            .approve(contract, web3.utils.toWei("0", "ether"))
+            .send({
+              from: account.address,
+              gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+            });
+        }
+
+        await erc20Contract.methods
+          .approve(contract, web3.utils.toWei("999999999999", "ether"))
+          .send({
+            from: account.address,
+            gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+          });
+
+        callback();
+      } else {
+        callback();
+      }
+    } catch (error) {
+      if (error.message) {
+        console.log(error.message);
+      }
+      // return callback(error);
+    }
+  };
+
+  _checkApprovalCitadel = async (
     asset,
     account,
     amount,
@@ -1591,8 +1661,10 @@ class Store {
     tokenIndex = null,
     callback
   ) => {
+    const web3 = new Web3(store.getStore("web3context").library.provider);
+
     if (asset.erc20address === "Ethereum") {
-      return callback();
+      callback();
     }
 
     // Handle vaults with multi tokens
@@ -1603,19 +1675,19 @@ class Store {
         tokenIndex < asset.erc20addresses.length
       ) {
         asset.erc20address = asset.erc20addresses[tokenIndex];
+      } else {
       }
     } catch (error) {
       if (error.message) {
-        return callback(error.message);
+        callback(error.message);
       }
-      callback(error);
     }
 
-    const web3 = new Web3(store.getStore("web3context").library.provider);
     let erc20Contract = new web3.eth.Contract(
       config.erc20ABI,
       asset.erc20address
     );
+
     try {
       const allowance = await erc20Contract.methods
         .allowance(account.address, contract)
@@ -3286,7 +3358,7 @@ class Store {
             asset.balance = data[0];
             asset.vaultBalance = data[1].vaultBalance;
             asset.earnBalance = data[1].earnBalance;
-            asset.strategyBalance = data[1].balance;
+            asset.strategyBalance = data[1].strategyBalance;
             asset.stats = data[2];
             asset.vaultHoldings = data[3];
             asset.usdPrice = data[4].usdPrice;
@@ -3648,7 +3720,7 @@ class Store {
       callback(null, {
         earnBalance: 0,
         vaultBalance: 0,
-        balance,
+        strategyBalance: balance,
       });
     } else if (asset.strategyType === "citadel") {
       const vaultContract = new web3.eth.Contract(
@@ -3658,17 +3730,30 @@ class Store {
 
       const pool = await vaultContract.methods.getAllPoolInUSD().call();
       const totalSupply = await vaultContract.methods.totalSupply().call();
-      const depositedShares = await vaultContract.methods
+      let depositedShares = await vaultContract.methods
         .balanceOf(account.address)
         .call({ from: account.address });
+
+      const decimals = await vaultContract.methods.decimals().call();
+
+      depositedShares = parseFloat(depositedShares) / 10 ** decimals;
 
       let balance = (pool * depositedShares) / totalSupply;
       balance = parseFloat(balance) / 10 ** 6; // Follow USD Decimal
 
+      console.log(
+        "CITADEL BALANCE OF:",
+        pool,
+        totalSupply,
+        depositedShares,
+        decimals,
+        balance
+      );
+
       callback(null, {
         earnBalance: 0,
         vaultBalance: 0,
-        balance,
+        strategyBalance: depositedShares,
       });
     }
   };
@@ -3761,7 +3846,7 @@ class Store {
         );
       });
     } else if (asset.strategyType === "citadel") {
-      this._checkApproval(
+      this._checkApprovalCitadel(
         asset,
         account,
         amount,
@@ -4084,7 +4169,8 @@ class Store {
 
   depositAllContract = async (payload) => {
     const account = store.getStore("account");
-    const { asset, earnAmount, vaultAmount } = payload.content;
+    const { asset, earnAmount, vaultAmount, amount, tokenIndex } =
+      payload.content;
 
     const web3 = await this._getWeb3Provider();
     if (!web3) {
@@ -4141,6 +4227,33 @@ class Store {
             asset,
             account,
             asset.balance.toString(),
+            (err, depositResult) => {
+              if (err) {
+                return emitter.emit(ERROR, err);
+              }
+
+              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, depositResult);
+            }
+          );
+        }
+      );
+    } else if (asset.strategyType === "citadel") {
+      this._checkApprovalCitadel(
+        asset,
+        account,
+        asset.balance.toString(),
+        strategyAddress,
+        tokenIndex,
+        (err) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          console.log("Citadel Deposit:", tokenIndex, amount);
+          this._callDepositAmountContractCitadel(
+            asset,
+            account,
+            asset.balance.toString(),
+            tokenIndex,
             (err, depositResult) => {
               if (err) {
                 return emitter.emit(ERROR, err);
@@ -4291,7 +4404,7 @@ class Store {
 
   withdrawAllVault = (payload) => {
     const account = store.getStore("account");
-    const { asset } = payload.content;
+    const { asset, tokenIndex } = payload.content;
 
     if (asset.yVaultCheckAddress) {
       this._checkApprovalForProxy(
@@ -4318,12 +4431,26 @@ class Store {
         }
       );
     } else {
-      this._callWithdrawAllVault(asset, account, (err, withdrawResult) => {
-        if (err) {
-          return emitter.emit(ERROR, err);
-        }
-        return emitter.emit(WITHDRAW_BOTH_VAULT_RETURNED, withdrawResult);
-      });
+      if (asset.strategyType === "citadel") {
+        this._callWithdrawAllVaultCitadel(
+          asset,
+          account,
+          tokenIndex,
+          (err, withdrawResult) => {
+            if (err) {
+              return emitter.emit(ERROR, err);
+            }
+            return emitter.emit(WITHDRAW_BOTH_VAULT_RETURNED, withdrawResult);
+          }
+        );
+      } else {
+        this._callWithdrawAllVault(asset, account, (err, withdrawResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          return emitter.emit(WITHDRAW_BOTH_VAULT_RETURNED, withdrawResult);
+        });
+      }
     }
   };
 
@@ -4376,6 +4503,48 @@ class Store {
     }
 
     functionCall
+      .send({
+        from: account.address,
+        gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+      })
+      .on("transactionHash", function (hash) {
+        console.log(hash);
+        callback(null, hash);
+      })
+      .on("confirmation", function (confirmationNumber, receipt) {
+        console.log(confirmationNumber, receipt);
+      })
+      .on("receipt", function (receipt) {
+        console.log(receipt);
+      })
+      .on("error", function (error) {
+        console.log(error);
+        if (!error.toString().includes("-32601")) {
+          if (error.message) {
+            return callback(error.message);
+          }
+          callback(error);
+        }
+      });
+  };
+
+  _callWithdrawAllVaultCitadel = async (
+    asset,
+    account,
+    tokenIndex,
+    callback
+  ) => {
+    const web3 = new Web3(store.getStore("web3context").library.provider);
+
+    let vaultContract = new web3.eth.Contract(
+      asset.vaultContractABI,
+      asset.vaultContractAddress
+    );
+
+    let maxBalance = await vaultContract.balanceOf(account.address);
+
+    let functionCall = vaultContract.methods
+      .withdraw(maxBalance, tokenIndex)
       .send({
         from: account.address,
         gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
@@ -5021,16 +5190,18 @@ class Store {
   };
 
   withdrawBothAll = (payload) => {
-    let { asset } = payload.content;
+    let { asset, tokenIndex } = payload.content;
     this.withdrawBoth({
       content: {
         earnAmount: asset.earnBalance.toString(),
         vaultAmount: asset.vaultBalance.toString(),
         amount: asset.strategyBalance.toString(),
+        tokenIndex: tokenIndex,
         asset,
       },
     });
   };
+
   // TODO: REFACTOR: Currently all 3 types of vaults use this
   withdrawBoth = async (payload) => {
     const { earnAmount, vaultAmount, asset, amount, tokenIndex } =
@@ -5249,7 +5420,7 @@ class Store {
               return callback(err);
             }
             asset.balance = data[0];
-            asset.strategyBalance = data[1].balance;
+            asset.strategyBalance = data[1].strategyBalance;
             asset.vaultBalance = data[1].vaultBalance;
             asset.earnBalance = data[1].earnBalance;
             asset.stats = data[2];

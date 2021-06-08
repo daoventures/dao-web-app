@@ -1533,7 +1533,7 @@ class Asset extends Component {
                         >
                           {(asset.strategyBalance
                             ? asset.strategyBalance.toFixed(4)
-                            : "0.0000") + "USD"}
+                            : "0.0000") + " USD"}
                         </Typography>
                       </div>
                       <TextField
@@ -2075,6 +2075,18 @@ class Asset extends Component {
         content: {
           earnAmount: 0,
           vaultAmount: 0,
+          amount: asset.balance,
+          asset,
+        },
+      });
+    } else if (asset.strategyType === "citadel") {
+      dispatcher.dispatch({
+        type: DEPOSIT_ALL_CONTRACT,
+        content: {
+          earnAmount: 0,
+          vaultAmount: 0,
+          amount: asset.balance,
+          tokenIndex: tokenIndex,
           asset,
         },
       });
@@ -2174,12 +2186,13 @@ class Asset extends Component {
 
   onWithdrawAll = () => {
     const { asset, startLoading } = this.props;
+    const { tokenIndex } = this.state;
 
     this.setState({ loading: true });
     startLoading();
     dispatcher.dispatch({
       type: WITHDRAW_BOTH_VAULT,
-      content: { asset: asset },
+      content: { asset: asset, tokenIndex: tokenIndex },
     });
   };
 
