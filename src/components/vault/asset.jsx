@@ -2083,11 +2083,13 @@ class Asset extends Component {
 
   onWithdraw = () => {
     this.setState({ redeemAmountError: false });
+    let { redeemVaultAmount, redeemEarnAmount, redeemAmount, tokenIndex } =
+      this.state;
 
     const { asset, startLoading } = this.props;
 
     if (asset.strategyType === "yearn") {
-      let redeemVaultAmount = this.state.redeemVaultAmount.toString();
+      // let redeemVaultAmount = this.state.redeemVaultAmount.toString();
       redeemVaultAmount = (
         Math.floor(redeemVaultAmount * 10000) / 10000
       ).toFixed(4);
@@ -2100,7 +2102,7 @@ class Asset extends Component {
         return false;
       }
 
-      let redeemEarnAmount = this.state.redeemEarnAmount.toString();
+      // let redeemEarnAmount = this.state.redeemEarnAmount.toString();
       redeemEarnAmount = (Math.floor(redeemEarnAmount * 10000) / 10000).toFixed(
         4
       );
@@ -2126,7 +2128,7 @@ class Asset extends Component {
         },
       });
     } else if (asset.strategyType === "compound") {
-      let redeemAmount = this.state.redeemAmount.toString();
+      // let redeemAmount = this.state.redeemAmount.toString();
       redeemAmount = (Math.floor(redeemAmount * 10000) / 10000).toFixed(4);
       if (!redeemAmount || isNaN(redeemAmount) || redeemAmount < 0) {
         this.setState({ redeemAmountError: true });
@@ -2143,6 +2145,28 @@ class Asset extends Component {
           vaultAmount: "0",
           amount: redeemAmount,
           asset: asset,
+        },
+      });
+    } else if (asset.strategyType === "citadel") {
+      // let redeemAmount = this.state.redeemAmount.toString();
+      // let tokenIndex = this.state
+      redeemAmount = (Math.floor(redeemAmount * 10000) / 10000).toFixed(4);
+      if (!redeemAmount || isNaN(redeemAmount) || redeemAmount < 0) {
+        this.setState({ redeemAmountError: true });
+        return false;
+      }
+
+      this.setState({ loading: true });
+      startLoading();
+
+      dispatcher.dispatch({
+        type: WITHDRAW_BOTH,
+        content: {
+          earnAmount: "0",
+          vaultAmount: "0",
+          amount: redeemAmount,
+          asset: asset,
+          tokenIndex: tokenIndex,
         },
       });
     }
