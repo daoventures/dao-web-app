@@ -2225,7 +2225,11 @@ class Store {
         var balance = await erc20Contract.methods
           .balanceOf(account.address)
           .call({ from: account.address });
-        balance = parseFloat(balance) / 10 ** asset.decimals;
+        var decimals = await erc20Contract.methods
+          .decimals()
+          .call({ from: account.address });
+        balance = parseFloat(balance) / 10 ** decimals;
+
         balances.push(parseFloat(balance));
       } catch (ex) {
         console.log(ex);
