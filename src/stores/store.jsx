@@ -861,7 +861,7 @@ class Store {
         {
           id: "daoCDV",
           name: "USDT/USDC/DAI",
-          symbol: "DAI",
+          symbol: "USDT",
           symbols: ["USDT", "USDC", "DAI"],
           description: "Stablecoins",
           vaultSymbol: "daoCDV",
@@ -870,7 +870,7 @@ class Store {
             "0xb7a4f3e9097c08da09517b5ab877f7a917224ede",
             "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
           ],
-          erc20address: "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
+          erc20address: "0x07de306ff27a2b630b1141956844eb1552b956b5",
           vaultContractAddress: "0x542a42496c96b946324f7dce2b030d5643d9ef8a",
           vaultContractABI: config.vaultDAOCDVContractABI,
           balance: 0, // Stores balance of selectedERC20Address
@@ -1621,6 +1621,12 @@ class Store {
         .allowance(account.address, contract)
         .call({ from: account.address });
 
+      console.log(
+        await erc20Contract.methods.symbol().call(),
+        account.address,
+        contract
+      );
+
       const ethAllowance = web3.utils.fromWei(allowance, "ether");
       if (parseFloat(ethAllowance) < parseFloat(amount)) {
         /*
@@ -2225,6 +2231,7 @@ class Store {
         return callback(ex);
       }
     }
+    console.log(balances);
     callback(null, balances);
   };
 
@@ -3703,9 +3710,11 @@ class Store {
       asset.vaultContractABI,
       asset.vaultContractAddress
     );
+
     const strategyAddress = await vaultContract.methods
       .strategy()
       .call({ from: account.address });
+
     if (asset.strategyType === "yearn") {
       this._checkApproval(
         asset,
@@ -3762,6 +3771,7 @@ class Store {
           if (err) {
             return emitter.emit(ERROR, err);
           }
+          console.log("Citadel Deposit:", tokenIndex, amount);
           // TODO: Modify _callDepositAmountContract to handle citadel
           this._callDepositAmountContractCitadel(
             asset,
@@ -3916,10 +3926,14 @@ class Store {
       asset.vaultContractAddress
     );
 
-    var amountToSend = web3.utils.toWei(amount, "ether");
-    if (asset.decimals !== 18) {
-      amountToSend = web3.utils.toBN(amount * 10 ** asset.decimals).toString();
-    }
+    let erc20Contract = new web3.eth.Contract(
+      config.erc20ABI,
+      asset.erc20addresses[tokenIndex]
+    );
+
+    let decimals = await erc20Contract.methods.decimals().call();
+
+    var amountToSend = web3.utils.toBN(amount * 10 ** decimals).toString();
 
     console.log(amountToSend);
     vaultContract.methods
@@ -5093,6 +5107,7 @@ class Store {
   };
 
   getStrategyBalancesFull = async (payload) => {
+    console.log("GSBF");
     const network = store.getStore("network");
     const account = store.getStore("account");
     // const assets = store.getStore('vaultAssets')
