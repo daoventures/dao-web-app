@@ -2225,13 +2225,19 @@ class Store {
         var balance = await erc20Contract.methods
           .balanceOf(account.address)
           .call({ from: account.address });
-        balance = parseFloat(balance) / 10 ** asset.decimals;
+
+        var _decimals = await erc20Contract.methods
+          .decimals()
+          .call({ from: account.address });
+
+        balance = parseFloat(balance) / 10 ** _decimals;
         balances.push(parseFloat(balance));
       } catch (ex) {
         console.log(ex);
         return callback(ex);
       }
     }
+    console.log(balances);
     callback(null, balances);
   };
 
@@ -5100,6 +5106,7 @@ class Store {
   };
 
   getStrategyBalancesFull = async (payload) => {
+    console.log("GSBF");
     const network = store.getStore("network");
     const account = store.getStore("account");
     // const assets = store.getStore('vaultAssets')
