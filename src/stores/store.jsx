@@ -4111,6 +4111,7 @@ class Store {
       asset.vaultContractABI,
       asset.vaultContractAddress
     );
+
     const strategyAddress = await vaultContract.methods
       .strategy()
       .call({ from: account.address });
@@ -4171,7 +4172,7 @@ class Store {
 
   withdrawVault = (payload) => {
     const account = store.getStore("account");
-    const { asset, amount } = payload.content;
+    const { asset, amount, tokenIndex } = payload.content;
 
     if (asset.yVaultCheckAddress) {
       this._checkApprovalForProxy(
@@ -4199,16 +4200,28 @@ class Store {
         }
       );
     } else {
-      this._callWithdrawVault(asset, account, amount, (err, withdrawResult) => {
-        if (err) {
-          return emitter.emit(ERROR, err);
+      this._callWithdrawVault(
+        asset,
+        account,
+        amount,
+        tokenIndex,
+        (err, withdrawResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          return emitter.emit(WITHDRAW_VAULT_RETURNED, withdrawResult);
         }
-        return emitter.emit(WITHDRAW_VAULT_RETURNED, withdrawResult);
-      });
+      );
     }
   };
 
-  _callWithdrawVaultProxy = async (asset, account, amount, callback) => {
+  _callWithdrawVaultProxy = async (
+    asset,
+    account,
+    amount,
+    tokenIndex = null,
+    callback
+  ) => {
     const web3 = new Web3(store.getStore("web3context").library.provider);
 
     let yVaultCheckContract = new web3.eth.Contract(
@@ -5034,9 +5047,10 @@ class Store {
       },
     });
   };
-
+  // TODO: REFACTOR: Currently all 3 types of vaults use this
   withdrawBoth = async (payload) => {
-    const { earnAmount, vaultAmount, asset, amount } = payload.content;
+    const { earnAmount, vaultAmount, asset, amount, tokenIndex } =
+      payload.content;
     const account = store.getStore("account");
     const web3 = new Web3(store.getStore("web3context").library.provider);
 
@@ -5119,9 +5133,47 @@ class Store {
             return emitter.emit(ERROR, error);
           }
         });
+    } else if (asset.strategyType === "citadel") {
+      // TODO: Get decimals from contract
+      // We are withdrawing daoCDV and exchanging for Stablecoin
+      let erc20Contract = new web3.eth.Contract(
+        config.erc20ABI,
+        asset.vaultContractAddress
+      );
+
+      let decimals = await erc20Contract.methods.decimals().call();
+
+      let shares = web3.utils.toBN(amount * 10 ** decimals).toString();
+
+      console.log("Citadel Withdraw:", shares, tokenIndex);
+
+      const functionCall = await vaultContract.methods
+        .withdraw(shares, tokenIndex)
+        .send({
+          from: account.address,
+          gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+        })
+        .on("transactionHash", function (hash) {
+          console.log(hash);
+          return emitter.emit(WITHDRAW_VAULT_RETURNED, hash);
+        })
+        .on("confirmation", function (confirmationNumber, receipt) {
+          console.log(confirmationNumber, receipt);
+        })
+        .on("receipt", function (receipt) {
+          console.log(receipt);
+        })
+        .on("error", function (error) {
+          console.log(error);
+          if (!error.toString().includes("-32601")) {
+            if (error.message) {
+              return emitter.emit(ERROR, error.message);
+            }
+            return emitter.emit(ERROR, error);
+          }
+        });
     }
   };
-
   getStrategyBalancesFull = async (payload) => {
     console.log("GSBF");
     const network = store.getStore("network");
