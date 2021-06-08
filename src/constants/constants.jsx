@@ -104,5 +104,3 @@ export const CHANGE_NETWORK = 'CHANGE_NETWORK' // 设置当前网络
 // 获取接口信息
 export const GET_VAULT_INFO ='GET_VAULT_INFO'
 
-export const CITADEL_CURRENCY_TYPE = 'CITADEL_CURRENCY_TYPE'; // Selected currency type for deposit
-export const CITADEL_CURRENCY_RETURNED = "CITADEL_CURRENCY_RETURNED";

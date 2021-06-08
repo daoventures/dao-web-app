@@ -11,10 +11,8 @@ import {
   Dialog,
   IconButton,
   DialogContent,
-  DialogActions,
   List,
   ListItem,
-  ListItemIcon,
   ListItemText,
   Slide,
   ListItemAvatar,
@@ -34,8 +32,7 @@ import {
   DEPOSIT_ALL_CONTRACT_RETURNED,
   WITHDRAW_BOTH_VAULT,
   WITHDRAW_BOTH_VAULT_RETURNED,
-  CURRENT_THEME_RETURNED,
-  CITADEL_CURRENCY_TYPE,
+  CURRENT_THEME_RETURNED
 } from "../../constants";
 
 import { colors } from "../../theme";
@@ -539,8 +536,8 @@ class Asset extends Component {
       openEarnInfo: false,
       openVaultInfo: false,
       interestTheme: {}, // 当前主题数据,
-      citadelCurrency: "USDT",
-      citadelCoinBalance: 0.0,
+      selectedCurrency: "USDT",
+      tokenIndex:0
     };
   }
 
@@ -601,44 +598,14 @@ class Asset extends Component {
     asset.balance = asset.balances[tokenIndex];
     asset.erc20address = asset.erc20addresses[tokenIndex];
 
-    this.setState({ tokenIndex: tokenIndex });
+    this.setState({ 
+      selectedCurrency: currencyType,
+      tokenIndex: tokenIndex ,
+      amount: "",
+      percent: 0
+    });
 
-    this.setState({
-      citadelCurrency: currencyType,
-    });
-    this.handleCitadelCurrencyBalance(currencyType);
-    dispatcher.dispatch({
-      type: CITADEL_CURRENCY_TYPE,
-      content: { currency: currencyType },
-    });
     this.handleModalDisplay(false);
-  };
-
-  handleCitadelCurrencyBalance = (currencyType) => {
-    const { asset } = this.props;
-    const stableCoinBal = asset.balance.stableCoins;
-
-    if (asset.strategyType === "citadel" && stableCoinBal) {
-      switch (currencyType) {
-        case "USDT":
-          this.setState({ stableCoinBalance: stableCoinBal["tether"].balance });
-          break;
-        case "USDC":
-          this.setState({
-            stableCoinBalance: stableCoinBal["usd-coin"].balance,
-          });
-          break;
-        case "DAI":
-          this.setState({ stableCoinBalance: stableCoinBal["dai"].balance });
-          break;
-        default:
-          this.setState({ stableCoinBalance: 0.0 });
-          break;
-      }
-
-      this.state.amount = "";
-      this.state.percent = 0;
-    }
   };
 
   depositReturned = () => {
@@ -966,8 +933,9 @@ class Asset extends Component {
                       this.setAmount(100);
                     }}
                   >
-                    Your wallet
+                    Your wallet 
                   </Typography>
+
                   <Typography
                     variant="body2"
                     onClick={() => {
@@ -976,10 +944,33 @@ class Asset extends Component {
                     className={classes.value}
                     noWrap
                   >
-                    {asset.balance
-                      ? (Math.floor(asset.balance * 10000) / 10000).toFixed(4)
-                      : "0.0000"}{" "}
-                    {asset.tokenSymbol ? asset.tokenSymbol : asset.symbol}
+                    { /** Wallet Balance */}
+                    {
+                      (asset.strategyType === 'citadel') &&
+                       <div>
+                         {
+                            asset.balances
+                              ? asset.balances[this.state.tokenIndex].toFixed(4)
+                              : "0.0000"
+                         }
+                         {" "}
+                         {  asset.symbols  ? asset.symbols[this.state.tokenIndex] : '' }
+                       </div>
+                    }
+                    {
+                      (asset.strategyType !== 'citadel') &&
+                      <span>
+                        {
+                          asset.balance
+                            ? (Math.floor(asset.balance * 10000) / 10000).toFixed(4)
+                            : "0.0000"
+                        }{" "}
+                        {
+                          asset.tokenSymbol ? asset.tokenSymbol : asset.symbol
+                        }
+                      </span>
+                    }
+                    
                   </Typography>
                   {/* <Typography variant='body2'  className={ classes.value } noWrap>
                      
@@ -997,7 +988,7 @@ class Asset extends Component {
                         <img
                           alt=""
                           src={require("../../assets/" +
-                            this.state.citadelCurrency +
+                            this.state.selectedCurrency +
                             "-logo.png")}
                           className={classes.assetIconImg}
                           style={
@@ -1005,7 +996,7 @@ class Asset extends Component {
                           }
                         />
                         <span className={classes.addressSpan}>
-                          {this.state.citadelCurrency}
+                          {this.state.selectedCurrency}
                         </span>
                         <ArrowDropDownCircleIcon
                           className={classes.arrowDropdownIcon}
@@ -2052,7 +2043,7 @@ class Asset extends Component {
           earnAmount: 0,
           vaultAmount: 0,
           amount: amount.toString(),
-          tokenIndex: 2, // TODO: Change to state variable
+          tokenIndex: this.state.tokenIndex,
           asset,
         },
       });
@@ -2175,7 +2166,7 @@ class Asset extends Component {
     let amount = 0.0;
 
     if (asset.strategyType === "citadel") {
-      amount = (this.state.stableCoinBalance * percent) / 100;
+      amount = (asset.balances[this.state.tokenIndex] * percent) / 100;
     } else {
       const balance = asset.balance;
       amount = (balance * percent) / 100;

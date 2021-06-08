@@ -55,8 +55,6 @@ import {
   TOGGLE_THEME, // 切换主题
   CURRENT_THEME_RETURNED, // 返回当前主题
   GET_VAULT_INFO, //获取接口信息
-  CITADEL_CURRENCY_TYPE,
-  CITADEL_CURRENCY_RETURNED,
 } from "../constants";
 import Web3 from "web3";
 
@@ -270,7 +268,6 @@ class Store {
       ethBalance: 0,
       sCrvBalance: 0,
       openDrawer: false,
-      selectedCurrencyForCitadel: "usdt",
     };
 
     dispatcher.register(
@@ -358,8 +355,6 @@ class Store {
           case GET_VAULT_INFO:
             this.getVaultInfo(payload);
             break;
-          case CITADEL_CURRENCY_TYPE:
-            this.setCitadelCurrencyType(payload);
           default: {
           }
         }
@@ -381,12 +376,6 @@ class Store {
     const currentTheme = obj.content.currentTheme;
     store.setStore({ currentTheme: currentTheme });
     emitter.emit(CURRENT_THEME_RETURNED, currentTheme);
-  }
-
-  setCitadelCurrencyType(obj) {
-    const selectedCurrency = obj.content.currency;
-    store.setStore({ selectedCurrencyForCitadel: selectedCurrency });
-    emitter.emit(CITADEL_CURRENCY_RETURNED, selectedCurrency);
   }
 
   resetProfile = () => {
