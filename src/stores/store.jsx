@@ -1598,7 +1598,77 @@ class Store {
     }
   };
 
-  _checkApproval = async (
+  _checkApproval = async (asset, account, amount, contract, callback) => {
+    const web3 = new Web3(store.getStore("web3context").library.provider);
+
+    if (asset.erc20address === "Ethereum") {
+      callback();
+    }
+
+    let erc20Contract = new web3.eth.Contract(
+      config.erc20ABI,
+      asset.erc20address
+    );
+
+    try {
+      const allowance = await erc20Contract.methods
+        .allowance(account.address, contract)
+        .call({ from: account.address });
+
+      console.log(
+        await erc20Contract.methods.symbol().call(),
+        account.address,
+        contract
+      );
+
+      const ethAllowance = web3.utils.fromWei(allowance, "ether");
+      if (parseFloat(ethAllowance) < parseFloat(amount)) {
+        /*
+          code to accomodate for "assert _value == 0 or self.allowances[msg.sender][_spender] == 0" in contract
+          We check to see if the allowance is > 0. If > 0 set to 0 before we set it to the correct amount.
+        */
+        if (
+          [
+            "crvV1",
+            "crvV2",
+            "crvV3",
+            "crvV4",
+            "USDTv1",
+            "USDTv2",
+            "USDTv3",
+            "USDT",
+            "sCRV",
+          ].includes(asset.id) &&
+          ethAllowance > 0
+        ) {
+          await erc20Contract.methods
+            .approve(contract, web3.utils.toWei("0", "ether"))
+            .send({
+              from: account.address,
+              gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+            });
+        }
+
+        await erc20Contract.methods
+          .approve(contract, web3.utils.toWei("999999999999", "ether"))
+          .send({
+            from: account.address,
+            gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+          });
+
+        callback();
+      } else {
+        callback();
+      }
+    } catch (error) {
+      if (error.message) {
+        console.log(error.message);
+      }
+      // return callback(error);
+    }
+  };
+
+  _checkApprovalCitadel = async (
     asset,
     account,
     amount,
@@ -1606,8 +1676,10 @@ class Store {
     tokenIndex = null,
     callback
   ) => {
+    const web3 = new Web3(store.getStore("web3context").library.provider);
+
     if (asset.erc20address === "Ethereum") {
-      return callback();
+      callback();
     }
 
     // Handle vaults with multi tokens
@@ -1618,19 +1690,19 @@ class Store {
         tokenIndex < asset.erc20addresses.length
       ) {
         asset.erc20address = asset.erc20addresses[tokenIndex];
+      } else {
       }
     } catch (error) {
       if (error.message) {
-        return callback(error.message);
+        callback(error.message);
       }
-      callback(error);
     }
 
-    const web3 = new Web3(store.getStore("web3context").library.provider);
     let erc20Contract = new web3.eth.Contract(
       config.erc20ABI,
       asset.erc20address
     );
+
     try {
       const allowance = await erc20Contract.methods
         .allowance(account.address, contract)
@@ -3777,7 +3849,7 @@ class Store {
         );
       });
     } else if (asset.strategyType === "citadel") {
-      this._checkApproval(
+      this._checkApprovalCitadel(
         asset,
         account,
         amount,
@@ -4144,6 +4216,31 @@ class Store {
       );
     } else if (asset.strategyType === "compound") {
       this._checkApproval(
+        asset,
+        account,
+        asset.balance.toString(),
+        strategyAddress,
+        (err) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+
+          this._callDepositAmountContract(
+            asset,
+            account,
+            asset.balance.toString(),
+            (err, depositResult) => {
+              if (err) {
+                return emitter.emit(ERROR, err);
+              }
+
+              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, depositResult);
+            }
+          );
+        }
+      );
+    } else if (asset.strategyType === "citadel") {
+      this._checkApprovalCitadel(
         asset,
         account,
         asset.balance.toString(),
