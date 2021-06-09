@@ -2289,7 +2289,6 @@ class Store {
         return callback(ex);
       }
     }
-    // }
   };
 
   _getERC20BalancesCitadel = async (web3, asset, account, callback) => {
@@ -2301,7 +2300,6 @@ class Store {
     }
 
     let balances = [];
-    let sumBalances = 0;
     for (let i = 0; i < asset.erc20addresses.length; i++) {
       let erc20Contract = new web3.eth.Contract(
         config.erc20ABI,

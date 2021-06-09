@@ -1181,7 +1181,7 @@ class Vault extends Component {
                           noWrap
                           className={classes.assetLabel1}
                         >
-                          {/* TODO: Left Citadel Symbol as blank first, update later */}
+                          {/* TODO: Left Citadel Symbol as blank first, update later*/}
                           {(asset.strategyType === "citadel"
                             ? asset.sumBalances
                               ? asset.sumBalances.toFixed(2)

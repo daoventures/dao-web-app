@@ -5,6 +5,7 @@
   "conventionalCommits.scopes": [
     "Citadel Withdraw",
     "Citadel Deposit",
-    "DAO-84"
+    "DAO-84",
+    "DAO-82"
   ]
 }
