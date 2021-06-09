@@ -1134,8 +1134,9 @@ class Vault extends Component {
                           <Typography variant={ 'h3' } noWrap className={classes.assetLabel1}>{ (this._getAPY(asset)/1).toFixed(2) }%</Typography>
                           <Typography variant={ 'h5' } className={ classes.assetLabel2 }>Yearly Growth: </Typography>
                         </div>
-                      </div>   
-                  }
+                      </div>
+                      )   
+                    }
                   </Grid>
 
                   <Grid item sm={3} xs={6} className={classes.gridItemColumn}>
