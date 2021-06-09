@@ -35,7 +35,7 @@ import {
   GET_STRATEGY_BALANCES_FULL,
   STRATEGY_BALANCES_FULL_RETURNED,
   CHANGE_NETWORK,
-  VAULT_BALANCES_FULL_RETURNED
+  VAULT_BALANCES_FULL_RETURNED,
 } from '../../constants'
 
 import Store from "../../stores";
@@ -487,6 +487,19 @@ const styles = theme => ({
     top: '0px',
     borderBottomLeftRadius: '15px'
   },
+  riskExpertLabel: {
+    background: '#C715A7',
+    // borderRadius: '5px',
+    color: '#ffffff',
+    padding: '5px 10px',
+    textAlign: 'center',
+    width: '7rem',
+    marginLeft: 'auto',
+    position: 'absolute',
+    right: '0px',
+    top: '0px',
+    borderBottomLeftRadius: '15px'
+  },
   assetName: {
     color: '#222222',
     fontSize: '1rem'
@@ -684,11 +697,16 @@ class Vault extends Component {
       modalOpen: false,
       currentTab: 'ALL',
       tabList: ['ALL', 'Basic', 'Advance', 'Expert', 'Degen'],
+      selectedCurrencyMap: new Map([
+        ['daoCDV', 0]
+      ])
     }
 
-    if(account && account.address) {
-      dispatcher.dispatch({ type: GET_STRATEGY_BALANCES_FULL, content: { interval: '30d' } })
-    }
+    // TODO: undo comment for this afterwards
+    // if(account && account.address) {
+    //   dispatcher.dispatch({ type: GET_STRATEGY_BALANCES_FULL, content: { interval: '30d' } })
+    // }
+    dispatcher.dispatch({ type: GET_STRATEGY_BALANCES_FULL, content: { interval: '30d' } })
   }
 
   componentWillMount() {
@@ -779,6 +797,17 @@ class Vault extends Component {
       that.setState(snackbarObj)
     })
   };
+
+  handleSelectedCurrency = (currency) => {
+    const { id, tokenIndex } = currency;
+
+    this.setState(prevState => {
+      const { selectedCurrencyMap } = prevState;
+      const newCurrencyMap = new Map(selectedCurrencyMap);
+      newCurrencyMap.set(id, tokenIndex);
+      return Object.assign({}, prevState, { selectedCurrencyMap: newCurrencyMap })
+    });
+  }
 
   render() {
     const { classes } = this.props;
@@ -909,7 +938,6 @@ class Vault extends Component {
     const { classes } = this.props
     const width = window.innerWidth
 
-
     return assets.filter((asset) => {
       if(currentTab=='ALL'){
         return true;
@@ -968,7 +996,7 @@ class Vault extends Component {
                     <div className={classes.assetIcon}>
                       <img
                           alt=""
-                          src={ require('../../assets/img_new/'+asset.symbol+'-logo.'+asset.logoFormat) }
+                          src={ require('../../assets/img_new/'+ (asset.strategyType === 'citadel' ? asset.strategyType : asset.symbol ) +'-logo.'+asset.logoFormat) }
                           // height={ '50px' }
                           className={classes.assetIconImg}
                           style={asset.disabled?{filter:'grayscale(100%)'}:{}}
@@ -1017,20 +1045,50 @@ class Vault extends Component {
                       </div>   
                   }
                   </Grid>
+
                   <Grid item sm={3} xs={6} className={classes.gridItemColumn}>
+                    {/** Available to deposit */}
                     <div className={classes.showDesktop}>
-                      {/* <Typography variant={ 'h5' } className={ classes.assetLabel }>Available to deposit: <span style={{color: '#222222'}}>
-                          { (asset.balance ? (asset.balance).toFixed(2) : '0.00')+' '+asset.symbol }
-                        </span>
-                      </Typography> */}
-                      <Typography variant={'h5'} className={classes.assetLabel1}>{ (asset.balance ? (asset.balance).toFixed(2) : '0.00')+' '+asset.symbol }</Typography>
+                      <Typography variant={'h5'} className={classes.assetLabel1}>
+                        { 
+                          (asset.strategyType === 'citadel') && 
+                          <div> 
+                            { (asset.balances ? asset.balances[this.state.selectedCurrencyMap.get(asset.id)].toFixed(2) : '0.00') }
+                            { (asset.symbols ? asset.symbols[this.state.selectedCurrencyMap.get(asset.id)] : '') }
+                          </div>
+                        }
+                        { 
+                          (asset.strategyType !== 'citadel') && 
+                          <div> 
+                            { (asset.balance ? asset.balance.toFixed(2) : '0.00') }
+                            { (asset.symbol ? asset.symbol : '') }
+                          </div>
+                        }
+                      </Typography>
                       <Typography variant={ 'body1' } className={ classes.assetLabel2 }>Available to deposit</Typography>
                     </div>
+
                     <div className={classes.showMobile}>
-                      <Typography variant={ 'h3' } noWrap className={classes.assetLabel1}>{ (asset.balance ? (asset.balance).toFixed(2) : '0.00')+' '+asset.symbol }</Typography>
+                      <Typography variant={ 'h3' } noWrap className={classes.assetLabel1}>
+                        { 
+                          (asset.strategyType === 'citadel') && 
+                          <div> 
+                            { (asset.balances ? asset.balances[this.state.selectedCurrencyMap.get(asset.id)].toFixed(2) : '0.00') }
+                            { (asset.symbols ? asset.symbols[this.state.selectedCurrencyMap.get(asset.id)] : '') }
+                          </div>
+                        }
+                        { 
+                          (asset.strategyType !== 'citadel') && 
+                          <div> 
+                            { (asset.balance ? asset.balance.toFixed(2) : '0.00') }
+                            { (asset.symbol ? asset.symbol : '') }
+                          </div>
+                        }
+                      </Typography>
                       <Typography variant={ 'h5' } className={ classes.assetLabel2 }>Available to deposit</Typography>
                     </div>
                   </Grid>
+                  
                   <Grid item sm={3} xs={6} className={classes.gridItemColumn}>
                       {/* 暂时不知道取什么 */}
                       <Typography variant={'h5'} className={classes.assetLabel1}>$ {asset.tvl}</Typography>
@@ -1040,7 +1098,7 @@ class Vault extends Component {
               </div>
             </AccordionSummary>
             <AccordionDetails className={ classes.removePadding }>
-              <Asset asset={ asset } startLoading={ this.startLoading } basedOn={ basedOn } />
+              <Asset asset={ asset } startLoading={ this.startLoading } basedOn={ basedOn } onCurrencySelected={this.handleSelectedCurrency} />
             </AccordionDetails>
           </Accordion>
         </div>
@@ -1098,7 +1156,7 @@ class Vault extends Component {
   renderRiskLabel = (asset) => {
     const { classes } = this.props;
     return (
-      <div className={asset.risk === 'Low' ? classes.riskLowLabel : asset.risk === 'Medium' ? classes.riskMediumLabel : '' }>
+      <div className={asset.risk === 'Low' ? classes.riskLowLabel : asset.risk === 'Medium' ? classes.riskMediumLabel : asset.risk === 'Expert' ? classes.riskExpertLabel : '' }>
         <Typography variant='caption'>{asset.risk}</Typography>
       </div>
     );
@@ -1127,7 +1185,7 @@ class Vault extends Component {
 
   _getAPY = (asset) => {
     const { basedOn } = this.state
-
+   
     // To calculate APY (Vault + Earn divide by 2 : Estimated)
     // Compound APY is using compoundApy
     if(asset && asset.stats) {
@@ -1148,6 +1206,8 @@ class Vault extends Component {
           default:
             return (asset.apy + parseFloat(asset.earnApr) * 100) / 2
         }
+      } else if (asset.strategyType === 'citadel') {
+        return asset.stats.citadelApy;
       }
     } else {
       return '0.00'
