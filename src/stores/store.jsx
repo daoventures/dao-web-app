@@ -4594,7 +4594,7 @@ class Store {
     );
 
     let maxBalance = await vaultContract.balanceOf(account.address);
-    console.log("CITADEL WITHDRAW ALL", maxBalance, tokenIndex);
+
     let functionCall = vaultContract.methods
       .withdraw(maxBalance, tokenIndex)
       .send({

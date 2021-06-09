@@ -32,7 +32,7 @@ import {
   DEPOSIT_ALL_CONTRACT_RETURNED,
   WITHDRAW_BOTH_VAULT,
   WITHDRAW_BOTH_VAULT_RETURNED,
-  USD_PRICE_RETURNED
+  USD_PRICE_RETURNED,
 } from "../../constants";
 
 import { colors } from "../../theme";
@@ -525,7 +525,7 @@ class Asset extends Component {
       redeemAmount: "",
       redeemAmountError: false,
       account: store.getStore("account"),
-      usdPrices: store.getStore('usdPrices'),
+      usdPrices: store.getStore("usdPrices"),
       ratio: 50,
       earnRatio: 50,
       vaultRatio: 50,
@@ -538,7 +538,7 @@ class Asset extends Component {
       openVaultInfo: false,
       interestTheme: {}, // 当前主题数据,
       selectedCurrency: "USDT",
-      tokenIndex:0,
+      tokenIndex: 0,
     };
   }
 
@@ -549,7 +549,7 @@ class Asset extends Component {
     emitter.on(WITHDRAW_BOTH_VAULT_RETURNED, this.withdrawReturned);
     emitter.on(ERROR, this.errorReturned);
     emitter.on("CURRENT_THEME_RETURNED", this.currentThemeChanged);
-    emitter.on(USD_PRICE_RETURNED, this.handleUSDPricesReturned)
+    emitter.on(USD_PRICE_RETURNED, this.handleUSDPricesReturned);
     const localTheme = localStorage.getItem("daobenturesTheme");
     this.currentThemeChanged(localTheme);
   }
@@ -566,7 +566,7 @@ class Asset extends Component {
     emitter.removeListener(ERROR, this.errorReturned);
     window.removeEventListener("resize", this.resize.bind(this));
     emitter.removeListener("CURRENT_THEME_RETURNED", this.currentThemeChanged);
-    emitter.removeListener(USD_PRICE_RETURNED, this.handleUSDPricesReturned)
+    emitter.removeListener(USD_PRICE_RETURNED, this.handleUSDPricesReturned);
   }
 
   resize() {
@@ -603,12 +603,11 @@ class Asset extends Component {
 
     this.props.onCurrencySelected({ id: asset.id, tokenIndex });
 
-
-    this.setState({ 
+    this.setState({
       selectedCurrency: currencyType,
-      tokenIndex: tokenIndex ,
+      tokenIndex: tokenIndex,
       amount: "",
-      percent: 0
+      percent: 0,
     });
 
     this.handleModalDisplay(false);
@@ -627,8 +626,8 @@ class Asset extends Component {
   };
 
   handleUSDPricesReturned = () => {
-    this.setState({ usdPrices: store.getStore("usdPrices") })
-  }
+    this.setState({ usdPrices: store.getStore("usdPrices") });
+  };
 
   render() {
     const { classes, asset } = this.props;
@@ -652,7 +651,7 @@ class Asset extends Component {
       tokenIndex,
       displayCurrencyModal,
     } = this.state;
-   
+
     return (
       <div className={classes.vaultContainer}>
         <Grid container className={classes.assetSummary}>
@@ -719,30 +718,22 @@ class Asset extends Component {
                   <div className={classes.flexy}>
                     <Typography variant={"h4"} noWrap>
                       {/**Total Earnings */}
-                      {
-                        (asset.strategyType === 'citadel') && 
-                        (this.state.usdPrices) &&
-                        (
-                          asset.addressStatistics
-                            ? (
-                                (asset.addressStatistics.earnings / 
-                                  10 ** asset.decimals
-                                ) * this.state.usdPrices['ethereum'].usd
-                              ).toFixed(2)
-                            : "0.00"
-                        )
-                      }
-                      {
-                        (asset.strategyType !== 'citadel') && 
-                        ( 
-                          asset.addressStatistics
+                      {asset.strategyType === "citadel" &&
+                        this.state.usdPrices &&
+                        (asset.addressStatistics
+                          ? (
+                              (asset.addressStatistics.earnings /
+                                10 ** asset.decimals) *
+                              this.state.usdPrices["ethereum"].usd
+                            ).toFixed(2)
+                          : "0.00")}
+                      {asset.strategyType !== "citadel" &&
+                        (asset.addressStatistics
                           ? (
                               asset.addressStatistics.earnings /
                               10 ** asset.decimals
                             ).toFixed(2)
-                            : "0.00"
-                        )
-                      }
+                          : "0.00")}
                       {asset.strategyType === "citadel" ? "USD" : asset.symbol}
                     </Typography>
                   </div>
@@ -754,30 +745,22 @@ class Asset extends Component {
                   <div className={classes.flexy}>
                     <Typography variant={"h4"} noWrap>
                       {/** Total Deposits */}
-                      {
-                        (asset.strategyType === 'citadel') && 
-                        (this.state.usdPrices) &&
-                        (
-                          asset.addressStatistics
-                            ? (
-                                (asset.addressStatistics.totalDeposits / 
-                                  10 ** asset.decimals
-                                ) * this.state.usdPrices['ethereum'].usd
-                              ).toFixed(2)
-                            : "0.00"
-                        )
-                      }
-                      {
-                        (asset.strategyType !== 'citadel') &&
-                        (
-                          asset.addressStatistics
+                      {asset.strategyType === "citadel" &&
+                        this.state.usdPrices &&
+                        (asset.addressStatistics
+                          ? (
+                              (asset.addressStatistics.totalDeposits /
+                                10 ** asset.decimals) *
+                              this.state.usdPrices["ethereum"].usd
+                            ).toFixed(2)
+                          : "0.00")}
+                      {asset.strategyType !== "citadel" &&
+                        (asset.addressStatistics
                           ? (
                               asset.addressStatistics.totalDeposits /
                               10 ** asset.decimals
                             ).toFixed(2)
-                          : "0.00"
-                        )
-                     }
+                          : "0.00")}
                       {asset.strategyType === "citadel" ? "USD" : asset.symbol}
                     </Typography>
                   </div>
@@ -789,30 +772,22 @@ class Asset extends Component {
                   <div className={classes.flexy}>
                     <Typography variant={"h4"} noWrap>
                       {/** Total Withdrawals */}
-                      {
-                        (asset.strategyType === 'citadel') && 
-                        (this.state.usdPrices) &&
-                        (
-                          asset.addressStatistics
-                            ? (
-                                (asset.addressStatistics.totalWithdrawals / 
-                                  10 ** asset.decimals
-                                ) * this.state.usdPrices['ethereum'].usd
-                              ).toFixed(2)
-                            : "0.00"
-                        )
-                      }
-                      {
-                        (asset.strategyType !== 'citadel') && 
-                        (
-                          asset.addressStatistics
+                      {asset.strategyType === "citadel" &&
+                        this.state.usdPrices &&
+                        (asset.addressStatistics
+                          ? (
+                              (asset.addressStatistics.totalWithdrawals /
+                                10 ** asset.decimals) *
+                              this.state.usdPrices["ethereum"].usd
+                            ).toFixed(2)
+                          : "0.00")}
+                      {asset.strategyType !== "citadel" &&
+                        (asset.addressStatistics
                           ? (
                               asset.addressStatistics.totalWithdrawals /
                               10 ** asset.decimals
                             ).toFixed(2)
-                          : "0.00"
-                        )
-                      }
+                          : "0.00")}
                       {asset.strategyType === "citadel" ? "USD" : asset.symbol}
                     </Typography>
                   </div>
@@ -823,31 +798,23 @@ class Asset extends Component {
                   </Typography>
                   <div className={classes.flexy}>
                     <Typography variant={"h4"} noWrap>
-                       {/** Total Transferred In */}
-                       {
-                        (asset.strategyType === 'citadel') && 
-                        (this.state.usdPrices) &&
-                        (
-                          asset.addressStatistics
-                            ? (
-                                (asset.addressStatistics.totalTransferredIn / 
-                                  10 ** asset.decimals
-                                ) * this.state.usdPrices['ethereum'].usd
-                              ).toFixed(2)
-                            : "0.00"
-                        )
-                      }
-                      {
-                        (asset.strategyType !== 'citadel') && 
-                        (
-                          asset.addressStatistics
+                      {/** Total Transferred In */}
+                      {asset.strategyType === "citadel" &&
+                        this.state.usdPrices &&
+                        (asset.addressStatistics
+                          ? (
+                              (asset.addressStatistics.totalTransferredIn /
+                                10 ** asset.decimals) *
+                              this.state.usdPrices["ethereum"].usd
+                            ).toFixed(2)
+                          : "0.00")}
+                      {asset.strategyType !== "citadel" &&
+                        (asset.addressStatistics
                           ? (
                               asset.addressStatistics.totalTransferredIn /
                               10 ** asset.decimals
                             ).toFixed(2)
-                          : "0.00"
-                        )
-                      }
+                          : "0.00")}
                       {asset.strategyType === "citadel" ? "USD" : asset.symbol}
                     </Typography>
                   </div>
@@ -859,30 +826,22 @@ class Asset extends Component {
                   <div className={classes.flexy}>
                     <Typography variant={"h4"} noWrap>
                       {/**Total Transferred Out */}
-                      {
-                        (asset.strategyType === 'citadel') && 
-                        (this.state.usdPrices) &&
-                        (
-                          asset.addressStatistics
-                            ? (
-                                (asset.addressStatistics.totalTransferredOut / 
-                                  10 ** asset.decimals
-                                ) * this.state.usdPrices['ethereum'].usd
-                              ).toFixed(2)
-                            : "0.00"
-                        )
-                      }
-                      {
-                        (asset.strategyType !== 'citadel') && 
-                        (
-                          asset.addressStatistics
+                      {asset.strategyType === "citadel" &&
+                        this.state.usdPrices &&
+                        (asset.addressStatistics
+                          ? (
+                              (asset.addressStatistics.totalTransferredOut /
+                                10 ** asset.decimals) *
+                              this.state.usdPrices["ethereum"].usd
+                            ).toFixed(2)
+                          : "0.00")}
+                      {asset.strategyType !== "citadel" &&
+                        (asset.addressStatistics
                           ? (
                               asset.addressStatistics.totalTransferredOut /
                               10 ** asset.decimals
                             ).toFixed(2)
-                          : "0.00"
-                        )
-                      }
+                          : "0.00")}
                       {asset.strategyType === "citadel" ? "USD" : asset.symbol}
                     </Typography>
                   </div>
@@ -1039,7 +998,7 @@ class Asset extends Component {
                       this.setAmount(100);
                     }}
                   >
-                    Your wallet 
+                    Your wallet
                   </Typography>
 
                   <Typography
@@ -1050,33 +1009,27 @@ class Asset extends Component {
                     className={classes.value}
                     noWrap
                   >
-                    { /** Wallet Balance */}
-                    {
-                      (asset.strategyType === 'citadel') &&
-                       <div>
-                         {
-                            asset.balances
-                              ? asset.balances[this.state.tokenIndex].toFixed(4)
-                              : "0.0000"
-                         }
-                         {" "}
-                         {  asset.symbols  ? asset.symbols[this.state.tokenIndex] : '' }
-                       </div>
-                    }
-                    {
-                      (asset.strategyType !== 'citadel') &&
+                    {/** Wallet Balance */}
+                    {asset.strategyType === "citadel" && (
+                      <div>
+                        {asset.balances
+                          ? asset.balances[this.state.tokenIndex].toFixed(4)
+                          : "0.0000"}{" "}
+                        {asset.symbols
+                          ? asset.symbols[this.state.tokenIndex]
+                          : ""}
+                      </div>
+                    )}
+                    {asset.strategyType !== "citadel" && (
                       <span>
-                        {
-                          asset.balance
-                            ? (Math.floor(asset.balance * 10000) / 10000).toFixed(4)
-                            : "0.0000"
-                        }{" "}
-                        {
-                          asset.tokenSymbol ? asset.tokenSymbol : asset.symbol
-                        }
+                        {asset.balance
+                          ? (Math.floor(asset.balance * 10000) / 10000).toFixed(
+                              4
+                            )
+                          : "0.0000"}{" "}
+                        {asset.tokenSymbol ? asset.tokenSymbol : asset.symbol}
                       </span>
-                    }
-                    
+                    )}
                   </Typography>
                   {/* <Typography variant='body2'  className={ classes.value } noWrap>
                      
@@ -1634,30 +1587,22 @@ class Asset extends Component {
                           className={classes.value}
                           noWrap
                         >
-                          {
-                            (
-                              asset.strategyBalance
-                                ? asset.strategyBalance.toFixed(4)
-                                : "0.0000"
-                            ) + " daoCDV" 
-                          }
-                          { " " }
-                          {
-                            (asset.strategyBalance > 0) && 
+                          {(asset.strategyBalance
+                            ? asset.strategyBalance.toFixed(4)
+                            : "0.0000") + " daoCDV"}{" "}
+                          {asset.strategyBalance > 0 && (
                             <span>
                               (
-                                { 
-                                  asset.strategyBalance 
-                                    ? ( asset.strategyBalance / asset.priceInUSD[this.state.tokenIndex]).toFixed(4) 
-                                    : "0.0000" 
-                                }
-                                { " " }
-                                { asset.symbols[this.state.tokenIndex] }
-                              )
+                              {asset.strategyBalance
+                                ? (
+                                    asset.strategyBalance /
+                                    asset.priceInUSD[this.state.tokenIndex]
+                                  ).toFixed(4)
+                                : "0.0000"}{" "}
+                              {asset.symbols[this.state.tokenIndex]})
                             </span>
-                          }
+                          )}
                         </Typography>
-                       
                       </div>
                       <TextField
                         style={{ width: "100%" }}
@@ -1866,7 +1811,6 @@ class Asset extends Component {
     }
 
     let options = {};
-    
 
     if (asset.strategyType === "yearn") {
       options = {
@@ -1982,11 +1926,10 @@ class Asset extends Component {
     }
 
     const chartTitle = {
-      yearn: 'Historical Earn & Vault Performance',
-      compound: 'Historical Vault Performance',
-      citadel: 'Historical Vault Performance'
+      yearn: "Historical Earn & Vault Performance",
+      compound: "Historical Vault Performance",
+      citadel: "Historical Vault Performance",
     };
-    
 
     // 调整折线图展示
     options["legend"] = {
@@ -2028,7 +1971,7 @@ class Asset extends Component {
           color: this.state.interestTheme.themeColors.textP,
           fontSize: "12px",
         },
-        format: '{value}%'
+        format: "{value}%",
       },
     };
 
@@ -2050,9 +1993,10 @@ class Asset extends Component {
         color: this.state.interestTheme.themeColors.textT,
       },
       formatter: function () {
-        var label = "<b>" + this.x + "</b><br/>" + this.series.name + ": " + this.y + '%';
+        var label =
+          "<b>" + this.x + "</b><br/>" + this.series.name + ": " + this.y + "%";
         return label;
-      }
+      },
     };
 
     return (
@@ -2148,7 +2092,10 @@ class Asset extends Component {
     const { amount, earnRatio, vaultRatio, tokenIndex } = this.state;
     const { asset, startLoading } = this.props;
 
-    const assetBalance = asset.strategyType !== 'citadel' ? asset.balance : asset.balances[this.state.tokenIndex];
+    const assetBalance =
+      asset.strategyType !== "citadel"
+        ? asset.balance
+        : asset.balances[this.state.tokenIndex];
 
     if (!amount || isNaN(amount) || amount <= 0 || amount > assetBalance) {
       this.setState({ amountError: true });
