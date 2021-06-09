@@ -1015,7 +1015,7 @@ class Vault extends Component {
             <Grid container className={classes.itemTop}>
               <Grid item sm={12} xs={8} className={classes.itemTitle}>
                 <Typography className={classes.itemTitleText} variant="h4">
-                  Strategy {index + 1}: {asset.strategyName}
+                  {asset.strategyName}
                 </Typography>
                 <svg aria-hidden="true" className={classes.warnIcon}>
                   <use xlinkHref="#iconinformation-day"></use>
