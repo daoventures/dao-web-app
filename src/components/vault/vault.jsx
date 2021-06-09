@@ -909,7 +909,7 @@ class Vault extends Component {
     const { classes } = this.props
     const width = window.innerWidth
 
-
+    console.log(assets,'assets912##');
     return assets.filter((asset) => {
       if(currentTab=='ALL'){
         return true;
@@ -1033,7 +1033,7 @@ class Vault extends Component {
                   </Grid>
                   <Grid item sm={3} xs={6} className={classes.gridItemColumn}>
                       {/* 暂时不知道取什么 */}
-                      <Typography variant={'h5'} className={classes.assetLabel1}>$ {asset.tvl}</Typography>
+                      <Typography variant={'h5'} className={classes.assetLabel1}>$ {asset.tvl?Number(asset.tvl).toFixed(2):'0.00'}</Typography>
                       <Typography variant={ 'body1' } className={ classes.assetLabel2 }>Total Value Locked</Typography>
                   </Grid>
                 </Grid>
@@ -1137,7 +1137,9 @@ class Vault extends Component {
         } else {
           return '0.00'
         }
-      } else if (asset.strategyType === 'yearn') {
+      } else if (asset.strategyType === 'yearn'&&JSON.stringify(asset.stats!=='Object')) {
+        console.log(asset.stats.apyOneWeekSample,'asset.stats.apyOneWeekSample##');
+        console.log((parseFloat(asset.earnApr) * 100) / 2,'parseFloat(asset.earnApr) * 100) / 2##');
         switch (basedOn) {
           case 1:
             return (asset.stats.apyOneWeekSample + parseFloat(asset.earnApr) * 100) / 2
