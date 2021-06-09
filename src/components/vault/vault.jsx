@@ -1410,7 +1410,11 @@ class Vault extends Component {
             return (asset.apy + parseFloat(asset.earnApr) * 100) / 2;
         }
       } else if (asset.strategyType === "citadel") {
-        return asset.stats.citadelApy;
+        if (asset.stats.citadelApy) {
+          return asset.stats.citadelApy;
+        } else {
+          return "0.00";
+        }
       }
     } else {
       return "0.00";
