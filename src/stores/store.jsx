@@ -4693,6 +4693,16 @@ class Store {
           asset.vaultContractAddress
         );
 
+        // TODO: Undo this comment once citadel contract updated with latest one
+        // USDT to ETH price feed contract
+        // const usdtEthPriceFeedContract =  new web3.eth.Contract(
+        //   config.USDTETHPriceFeedContractABI,
+        //   config.USDTETHPriceFeedContract
+        // );
+        // // USDT / ETH conversion result
+        // const ethPrice = await usdtEthPriceFeedContract.methods.latestAnswer().call();
+        // const pool = await citadelContract.methods.getAllPoolInETH(ethPrice).call();
+
         const pool = await citadelContract.methods.getAllPoolInETH().call();
         const totalSupply = await citadelContract.methods.totalSupply().call();
 
@@ -5458,6 +5468,7 @@ class Store {
             asset.earnPricePerFullShare = data[4].earnPricePerFullShare;
             asset.vaultPricePerFullShare = data[4].vaultPricePerFullShare;
             asset.compoundExchangeRate = data[4].compoundExchangeRate;
+            asset.citadelPricePerFullShare = data[4].citadelPricePerFullShare ? data[4].citadelPricePerFullShare : null;
             asset.apy = data[4].apy; // Vault APY
             asset.addressStatistics = data[5];
             asset.earnApr = data[6];
