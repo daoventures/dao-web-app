@@ -594,7 +594,7 @@ class Dashboard extends Component {
     if (account && account.address) {
       dispatcher.dispatch({ type: GET_DASHBOARD_SNAPSHOT, content: { interval: this.state.period } })
     }
-    dispatcher.dispatch({ type: GET_VAULT_BALANCES_FULL })
+    dispatcher.dispatch({ type: GET_VAULT_BALANCES_FULL ,content: { interval: this.state.period }})
   }
 
   componentWillMount() {
