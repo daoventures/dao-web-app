@@ -690,7 +690,7 @@ class Store {
           priceInUSD: [0, 0, 0],
           strategyName: "DAO Citadel: USDT USDC DAI",
           strategy: "DAO Citadel",
-          strategyAddress: "0x4996b12560b9a4a85dd437a3e8ff489335dcffa7",
+          strategyAddress: "0xc9939B0b2af53E8BeCBA22ab153795e168140237",
           strategyContractABI: config.strategyDAOCDVContractABI,
           historicalPriceId: "daoCDV_price",
           logoFormat: "svg",
@@ -3411,7 +3411,9 @@ class Store {
             asset.vaultBalance = data[1].vaultBalance;
             asset.earnBalance = data[1].earnBalance;
             asset.strategyBalance = data[1].strategyBalance;
-            asset.depositedSharesInUSD = data[1].depositedSharesInUSD ? data[1].depositedSharesInUSD : null;
+            asset.depositedSharesInUSD = data[1].depositedSharesInUSD
+              ? data[1].depositedSharesInUSD
+              : null;
             asset.stats = data[2];
             asset.vaultHoldings = data[3];
             asset.usdPrice = data[4].usdPrice;
@@ -3803,16 +3805,16 @@ class Store {
         .balanceOf(account.address)
         .call({ from: account.address });
 
-      const depositedSharesInUSD = ((depositedShares * pool) / totalSupply ) /  (10 ** 6);
+      const depositedSharesInUSD =
+        (depositedShares * pool) / totalSupply / 10 ** 6;
 
       depositedShares = parseFloat(depositedShares) / 10 ** decimals;
-
 
       callback(null, {
         earnBalance: 0,
         vaultBalance: 0,
         strategyBalance: depositedShares,
-        depositedSharesInUSD
+        depositedSharesInUSD,
       });
     }
   };
@@ -5492,13 +5494,17 @@ class Store {
             asset.strategyBalance = data[1].strategyBalance;
             asset.vaultBalance = data[1].vaultBalance;
             asset.earnBalance = data[1].earnBalance;
-            asset.depositedSharesInUSD = data[1].depositedSharesInUSD ? data[1].depositedSharesInUSD : null;
+            asset.depositedSharesInUSD = data[1].depositedSharesInUSD
+              ? data[1].depositedSharesInUSD
+              : null;
             asset.stats = data[2];
             asset.usdPrice = data[3].usdPrice;
             asset.earnPricePerFullShare = data[4].earnPricePerFullShare;
             asset.vaultPricePerFullShare = data[4].vaultPricePerFullShare;
             asset.compoundExchangeRate = data[4].compoundExchangeRate;
-            asset.citadelPricePerFullShare = data[4].citadelPricePerFullShare ? data[4].citadelPricePerFullShare : null;
+            asset.citadelPricePerFullShare = data[4].citadelPricePerFullShare
+              ? data[4].citadelPricePerFullShare
+              : null;
             asset.apy = data[4].apy; // Vault APY
             asset.addressStatistics = data[5];
             asset.earnApr = data[6];
