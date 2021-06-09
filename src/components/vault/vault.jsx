@@ -36,7 +36,7 @@ import {
   STRATEGY_BALANCES_FULL_RETURNED,
   CHANGE_NETWORK,
   VAULT_BALANCES_FULL_RETURNED,
-} from '../../constants'
+} from "../../constants";
 
 import Store from "../../stores";
 import UnlockModal from "../unlock/unlockModal";
@@ -700,12 +700,10 @@ class Vault extends Component {
       loading: true,
       expanded: "",
       modalOpen: false,
-      currentTab: 'ALL',
-      tabList: ['ALL', 'Basic', 'Advance', 'Expert', 'Degen'],
-      selectedCurrencyMap: new Map([
-        ['daoCDV', 0]
-      ])
-    }
+      currentTab: "ALL",
+      tabList: ["ALL", "Basic", "Advance", "Expert", "Degen"],
+      selectedCurrencyMap: new Map([["daoCDV", 0]]),
+    };
 
     // TODO: undo comment for this afterwards
     // if(account && account.address) {
@@ -834,13 +832,15 @@ class Vault extends Component {
   handleSelectedCurrency = (currency) => {
     const { id, tokenIndex } = currency;
 
-    this.setState(prevState => {
+    this.setState((prevState) => {
       const { selectedCurrencyMap } = prevState;
       const newCurrencyMap = new Map(selectedCurrencyMap);
       newCurrencyMap.set(id, tokenIndex);
-      return Object.assign({}, prevState, { selectedCurrencyMap: newCurrencyMap })
+      return Object.assign({}, prevState, {
+        selectedCurrencyMap: newCurrencyMap,
+      });
     });
-  }
+  };
 
   render() {
     const { classes } = this.props;
@@ -1129,77 +1129,153 @@ class Vault extends Component {
                               { (this._getAPY(asset)/1).toFixed(2) }%
                             </span>
                           </Typography> */}
-                          <Typography variant={'h5'} className={classes.assetLabel1}>{ (this._getAPY(asset)/1).toFixed(2) }%</Typography>
-                          <Typography variant={ 'body1' } className={ classes.assetLabel2 }>Yearly Growth</Typography>
-                        </div>  
-                        <div className={classes.showMobile}>
-                          <Typography variant={ 'h3' } noWrap className={classes.assetLabel1}>{ (this._getAPY(asset)/1).toFixed(2) }%</Typography>
-                          <Typography variant={ 'h5' } className={ classes.assetLabel2 }>Yearly Growth: </Typography>
-                        </div>
+                              <Typography
+                                variant={"h5"}
+                                className={classes.assetLabel1}
+                              >
+                                {(this._getAPY(asset) / 1).toFixed(2)}%
+                              </Typography>
+                              <Typography
+                                variant={"body1"}
+                                className={classes.assetLabel2}
+                              >
+                                Yearly Growth
+                              </Typography>
+                            </div>
+                            <div className={classes.showMobile}>
+                              <Typography
+                                variant={"h3"}
+                                noWrap
+                                className={classes.assetLabel1}
+                              >
+                                {(this._getAPY(asset) / 1).toFixed(2)}%
+                              </Typography>
+                              <Typography
+                                variant={"h5"}
+                                className={classes.assetLabel2}
+                              >
+                                Yearly Growth:{" "}
+                              </Typography>
+                            </div>
+                          </div>
+                        )}
+                    </Grid>
+
+                    <Grid item sm={3} xs={6} className={classes.gridItemColumn}>
+                      {/** Available to deposit */}
+                      <div className={classes.showDesktop}>
+                        <Typography
+                          variant={"h5"}
+                          className={classes.assetLabel1}
+                        >
+                          {asset.strategyType === "citadel" && (
+                            <div>
+                              {(asset.strategyType === "citadel"
+                                ? asset.sumBalances
+                                  ? asset.sumBalances.toFixed(2)
+                                  : "0.00"
+                                : asset.balance
+                                ? asset.balance.toFixed(2)
+                                : "0.00") +
+                                " " +
+                                (asset.strategyType === "citadel"
+                                  ? "USD"
+                                  : asset.symbol)}
+                            </div>
+                          )}
+                          {asset.strategyType !== "citadel" && (
+                            <div>
+                              {(asset.strategyType === "citadel"
+                                ? asset.sumBalances
+                                  ? asset.sumBalances.toFixed(2)
+                                  : "0.00"
+                                : asset.balance
+                                ? asset.balance.toFixed(2)
+                                : "0.00") +
+                                " " +
+                                (asset.strategyType === "citadel"
+                                  ? "USD"
+                                  : asset.symbol)}
+                            </div>
+                          )}
+                        </Typography>
+                        <Typography
+                          variant={"body1"}
+                          className={classes.assetLabel2}
+                        >
+                          Available to deposit
+                        </Typography>
                       </div>
-                      )   
-                    }
-                  </Grid>
 
-                  <Grid item sm={3} xs={6} className={classes.gridItemColumn}>
-                    {/** Available to deposit */}
-                    <div className={classes.showDesktop}>
-                      <Typography variant={'h5'} className={classes.assetLabel1}>
-                        { 
-                          (asset.strategyType === 'citadel') && 
-                          <div> 
-                            { (asset.balances ? asset.balances[this.state.selectedCurrencyMap.get(asset.id)].toFixed(2) : '0.00') }
-                            { (asset.symbols ? asset.symbols[this.state.selectedCurrencyMap.get(asset.id)] : '') }
-                          </div>
-                        }
-                        { 
-                          (asset.strategyType !== 'citadel') && 
-                          <div> 
-                            { (asset.balance ? asset.balance.toFixed(2) : '0.00') }
-                            { (asset.symbol ? asset.symbol : '') }
-                          </div>
-                        }
-                      </Typography>
-                      <Typography variant={ 'body1' } className={ classes.assetLabel2 }>Available to deposit</Typography>
-                    </div>
+                      <div className={classes.showMobile}>
+                        <Typography
+                          variant={"h3"}
+                          noWrap
+                          className={classes.assetLabel1}
+                        >
+                          {asset.strategyType === "citadel" && (
+                            <div>
+                              {asset.balances
+                                ? asset.balances[
+                                    this.state.selectedCurrencyMap.get(asset.id)
+                                  ].toFixed(2)
+                                : "0.00"}
+                              {asset.symbols
+                                ? asset.symbols[
+                                    this.state.selectedCurrencyMap.get(asset.id)
+                                  ]
+                                : ""}
+                            </div>
+                          )}
+                          {asset.strategyType !== "citadel" && (
+                            <div>
+                              {asset.balance
+                                ? asset.balance.toFixed(2)
+                                : "0.00"}
+                              {asset.symbol ? asset.symbol : ""}
+                            </div>
+                          )}
+                        </Typography>
+                        <Typography
+                          variant={"h5"}
+                          className={classes.assetLabel2}
+                        >
+                          Available to deposit
+                        </Typography>
+                      </div>
+                    </Grid>
 
-                    <div className={classes.showMobile}>
-                      <Typography variant={ 'h3' } noWrap className={classes.assetLabel1}>
-                        { 
-                          (asset.strategyType === 'citadel') && 
-                          <div> 
-                            { (asset.balances ? asset.balances[this.state.selectedCurrencyMap.get(asset.id)].toFixed(2) : '0.00') }
-                            { (asset.symbols ? asset.symbols[this.state.selectedCurrencyMap.get(asset.id)] : '') }
-                          </div>
-                        }
-                        { 
-                          (asset.strategyType !== 'citadel') && 
-                          <div> 
-                            { (asset.balance ? asset.balance.toFixed(2) : '0.00') }
-                            { (asset.symbol ? asset.symbol : '') }
-                          </div>
-                        }
-                      </Typography>
-                      <Typography variant={ 'h5' } className={ classes.assetLabel2 }>Available to deposit</Typography>
-                    </div>
-                  </Grid>
-                  
-                  <Grid item sm={3} xs={6} className={classes.gridItemColumn}>
+                    <Grid item sm={3} xs={6} className={classes.gridItemColumn}>
                       {/* 暂时不知道取什么 */}
-                      <Typography variant={'h5'} className={classes.assetLabel1}>$ {asset.tvl}</Typography>
-                      <Typography variant={ 'body1' } className={ classes.assetLabel2 }>Total Value Locked</Typography>
+                      <Typography
+                        variant={"h5"}
+                        className={classes.assetLabel1}
+                      >
+                        $ {asset.tvl}
+                      </Typography>
+                      <Typography
+                        variant={"body1"}
+                        className={classes.assetLabel2}
+                      >
+                        Total Value Locked
+                      </Typography>
+                    </Grid>
                   </Grid>
-                </Grid>
-              </div>
-            </AccordionSummary>
-            <AccordionDetails className={ classes.removePadding }>
-              <Asset asset={ asset } startLoading={ this.startLoading } basedOn={ basedOn } onCurrencySelected={this.handleSelectedCurrency} />
-            </AccordionDetails>
-          </Accordion>
-        </div>
-      )
-    })
-  }
+                </div>
+              </AccordionSummary>
+              <AccordionDetails className={classes.removePadding}>
+                <Asset
+                  asset={asset}
+                  startLoading={this.startLoading}
+                  basedOn={basedOn}
+                  onCurrencySelected={this.handleSelectedCurrency}
+                />
+              </AccordionDetails>
+            </Accordion>
+          </div>
+        );
+      });
+  };
 
   renderFilters = () => {
     const { loading, search, searchError, hideZero } = this.state;
