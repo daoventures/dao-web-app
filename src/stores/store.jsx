@@ -3395,6 +3395,7 @@ class Store {
             asset.vaultBalance = data[1].vaultBalance;
             asset.earnBalance = data[1].earnBalance;
             asset.strategyBalance = data[1].strategyBalance;
+            asset.depositedSharesInUSD = data[1].depositedSharesInUSD ? data[1].depositedSharesInUSD : null;
             asset.stats = data[2];
             asset.vaultHoldings = data[3];
             asset.usdPrice = data[4].usdPrice;
@@ -3764,18 +3765,24 @@ class Store {
         asset.vaultContractAddress
       );
 
+      const pool = await vaultContract.methods.getAllPoolInUSD().call();
+      const totalSupply = await vaultContract.methods.totalSupply().call();
+      const decimals = await vaultContract.methods.decimals().call();
+
       let depositedShares = await vaultContract.methods
         .balanceOf(account.address)
         .call({ from: account.address });
 
-      const decimals = await vaultContract.methods.decimals().call();
+      const depositedSharesInUSD = ((depositedShares * pool) / totalSupply ) /  (10 ** 6);
 
       depositedShares = parseFloat(depositedShares) / 10 ** decimals;
+
 
       callback(null, {
         earnBalance: 0,
         vaultBalance: 0,
         strategyBalance: depositedShares,
+        depositedSharesInUSD
       });
     }
   };
@@ -5445,6 +5452,7 @@ class Store {
             asset.strategyBalance = data[1].strategyBalance;
             asset.vaultBalance = data[1].vaultBalance;
             asset.earnBalance = data[1].earnBalance;
+            asset.depositedSharesInUSD = data[1].depositedSharesInUSD ? data[1].depositedSharesInUSD : null;
             asset.stats = data[2];
             asset.usdPrice = data[3].usdPrice;
             asset.earnPricePerFullShare = data[4].earnPricePerFullShare;

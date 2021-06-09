@@ -1647,8 +1647,8 @@ class Asset extends Component {
                             <span>
                               (
                                 { 
-                                  asset.strategyBalance 
-                                    ? ( asset.strategyBalance / asset.priceInUSD[this.state.tokenIndex]).toFixed(4) 
+                                  asset.depositedSharesInUSD 
+                                    ? ( asset.depositedSharesInUSD / asset.priceInUSD[this.state.tokenIndex]).toFixed(4) 
                                     : "0.0000" 
                                 }
                                 { " " }
