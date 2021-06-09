@@ -2145,7 +2145,8 @@ class Store {
               },
             ],
             (err, data) => {
-              asset.balance = data[0];
+              asset.balances = data[0].balances;
+              asset.sumBalances = data[0].sumBalances;
               asset.investedBalance = data[1];
 
               callback(null, asset);
@@ -2275,12 +2276,14 @@ class Store {
         return callback(ex);
       }
     }
-    // }
   };
 
   _getERC20BalancesCitadel = async (web3, asset, account, callback) => {
     if (asset.strategyType !== "citadel") {
-      return callback(null, null);
+      return callback(null, {
+        balances: [0, 0, 0],
+        sumBalances: 0,
+      });
     }
 
     let priceInUSD = [];
@@ -2316,7 +2319,11 @@ class Store {
       }
     }
 
-    const returnObj =  { balances, priceInUSD }
+    const returnObj =  { 
+      balances, 
+      priceInUSD,
+      sumBalances: balances.reduce((a, b) => a + b, 0)
+    }
     callback(null, returnObj);
   };
 
@@ -5434,7 +5441,7 @@ class Store {
             asset.tvl = data[9][0].tvl;
             asset.balances = data[10] && data[10].balances ? data[10].balances : null;
             asset.priceInUSD = data[10] && data[10].priceInUSD ? data[10].priceInUSD : null;
-
+            asset.sumBalances = data[10].sumBalances;
             // asset.addressTransactions = data[7]
             // asset.vaultHoldings = data[3]
             callback(null, asset);
