@@ -36,7 +36,6 @@ import {
   STRATEGY_BALANCES_FULL_RETURNED,
   CHANGE_NETWORK,
   VAULT_BALANCES_FULL_RETURNED,
-  CITADEL_CURRENCY_RETURNED
 } from '../../constants'
 
 import Store from "../../stores";

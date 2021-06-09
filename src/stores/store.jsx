@@ -629,6 +629,7 @@ class Store {
           lastMeasurement: 25098423,
           measurement: 1e18,
           price_id: ["tether", "usd-coin", "dai"],
+          priceInUSD: [0,0,0],
           strategyName: "DAO Citadel: USDT USDC DAI",
           strategy: "DAO Citadel",
           strategyAddress: "0x4996b12560b9a4a85dd437a3e8ff489335dcffa7",
@@ -884,6 +885,7 @@ class Store {
           lastMeasurement: 25098423,
           measurement: 1e18,
           price_id: ["tether", "usd-coin", "dai"],
+          priceInUSD: [0,0,0],
           strategyName: "DAO Citadel: USDT USDC DAI",
           strategy: "DAO Citadel",
           strategyAddress: "0x4996b12560b9a4a85dd437a3e8ff489335dcffa7",
@@ -2281,7 +2283,17 @@ class Store {
       return callback(null, null);
     }
 
+    let priceInUSD = [];
+
+    const coinsInUSDPrice = await this._getUSDPrices();
+    
+    for(let i = 0 ; i < asset.price_id.length;  i++) {
+      const coinPrice = coinsInUSDPrice[asset.price_id[i]].usd;
+      priceInUSD.push(coinPrice);
+    }
+  
     let balances = [];
+    
     for (let i = 0; i < asset.erc20addresses.length; i++) {
       let erc20Contract = new web3.eth.Contract(
         config.erc20ABI,
@@ -2303,8 +2315,9 @@ class Store {
         return callback(ex);
       }
     }
-    console.log(balances);
-    callback(null, balances);
+
+    const returnObj =  { balances, priceInUSD }
+    callback(null, returnObj);
   };
 
   _getBalance = async (web3, asset, account, callback) => {
@@ -4680,7 +4693,6 @@ class Store {
       }
     } catch (e) {
       console.log(e);
-      console.log(asset.strategyType, asset.id);
       callback(null, {
         earnPricePerFullShare: 0,
         vaultPricePerFullShare: 0,
@@ -4693,7 +4705,6 @@ class Store {
   getUSDPrices = async () => {
     try {
       const priceJSON = await this._getUSDPrices();
-
       store.setStore({ usdPrices: priceJSON });
       return emitter.emit(USD_PRICE_RETURNED, priceJSON);
     } catch (e) {
@@ -4704,7 +4715,7 @@ class Store {
   _getUSDPrices = async () => {
     try {
       const url =
-        "https://api.coingecko.com/api/v3/simple/price?ids=usd-coin,dai,true-usd,tether,compound-usdt,compound-usd-coin,cdai&vs_currencies=usd,eth";
+        "https://api.coingecko.com/api/v3/simple/price?ids=usd-coin,dai,true-usd,tether,compound-usdt,compound-usd-coin,cdai,ethereum&vs_currencies=usd,eth";
       const priceString = await rp(url);
       const priceJSON = JSON.parse(priceString);
 
@@ -4714,6 +4725,7 @@ class Store {
       return null;
     }
   };
+
 
   getDashboardSnapshot = async (payload) => {
     const { interval } = payload.content;
@@ -5349,6 +5361,7 @@ class Store {
     // const addressTXHitory = await this._getAddressTxHistory(account.address)
 
     const usdPrices = await this._getUSDPrices();
+    await this.getUSDPrices();
 
     async.map(
       assets,
@@ -5433,7 +5446,8 @@ class Store {
             asset.earnApr = data[6];
             asset.historicalAPY = data[7];
             asset.tvl = data[9][0].tvl;
-            asset.balances = data[10];
+            asset.balances = data[10] && data[10].balances ? data[10].balances : null;
+            asset.priceInUSD = data[10] && data[10].priceInUSD ? data[10].priceInUSD : null;
 
             // asset.addressTransactions = data[7]
             // asset.vaultHoldings = data[3]
