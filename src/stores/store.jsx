@@ -3741,8 +3741,6 @@ class Store {
         asset.vaultContractAddress
       );
 
-      const pool = await vaultContract.methods.getAllPoolInUSD().call();
-      const totalSupply = await vaultContract.methods.totalSupply().call();
       let depositedShares = await vaultContract.methods
         .balanceOf(account.address)
         .call({ from: account.address });
@@ -3750,18 +3748,6 @@ class Store {
       const decimals = await vaultContract.methods.decimals().call();
 
       depositedShares = parseFloat(depositedShares) / 10 ** decimals;
-
-      let balance = (pool * depositedShares) / totalSupply;
-      balance = parseFloat(balance) / 10 ** 6; // Follow USD Decimal
-
-      console.log(
-        "CITADEL BALANCE OF:",
-        pool,
-        totalSupply,
-        depositedShares,
-        decimals,
-        balance
-      );
 
       callback(null, {
         earnBalance: 0,

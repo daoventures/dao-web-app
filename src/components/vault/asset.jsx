@@ -1639,7 +1639,7 @@ class Asset extends Component {
                               asset.strategyBalance
                                 ? asset.strategyBalance.toFixed(4)
                                 : "0.0000"
-                            ) + " USD" 
+                            ) + " daoCDV" 
                           }
                           { " " }
                           {
