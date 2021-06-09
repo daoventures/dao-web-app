@@ -674,7 +674,7 @@ class Store {
             "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
           ],
           erc20address: "0x07de306ff27a2b630b1141956844eb1552b956b5",
-          vaultContractAddress: "0x542a42496c96b946324f7dce2b030d5643d9ef8a",
+          vaultContractAddress: "0x626C25cA5b86277f395c0E40DBdF51f2a302aB43",
           vaultContractABI: config.vaultDAOCDVContractABI,
           balance: 0, // Stores balance of selectedERC20Address
           balances: [0, 0, 0],
