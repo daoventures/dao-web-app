@@ -392,6 +392,46 @@ class Store {
     const vaultAssetsObj = {
       1: [
         {
+          id: "daoCDV",
+          name: "USDT/USDC/DAI",
+          symbol: ["USDT", "USDC", "DAI"],
+          description: "Stablecoins",
+          vaultSymbol: "daoCDV",
+          erc20address: [
+            "0x07de306ff27a2b630b1141956844eb1552b956b5",
+            "0xb7a4f3e9097c08da09517b5ab877f7a917224ede",
+            "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
+          ],
+          // erc20address:'0x07de306ff27a2b630b1141956844eb1552b956b5',
+          vaultContractAddress: "0x542a42496c96b946324f7dce2b030d5643d9ef8a",
+          vaultContractABI: config.vaultDAOCDVContractABI,
+          balance: 0,
+          vaultBalance: 0,
+          decimals: 18,
+          deposit: true,
+          depositAll: true,
+          withdraw: true,
+          withdrawAll: true,
+          lastMeasurement: 25098423,
+          measurement: 1e18,
+          price_id: ["tether", "usd-coin", "dai"],
+          priceInUSD: [0, 0, 0],
+          strategyName: "DAO Citadel: USDT USDC DAI",
+          strategy: "DAO Citadel",
+          strategyAddress: "0x4996b12560b9a4a85dd437a3e8ff489335dcffa7",
+          strategyContractABI: config.strategyDAOCDVContractABI,
+          historicalPriceId: "daoCDV_price",
+          logoFormat: "svg",
+          risk: "Expert",
+          strategyType: "citadel",
+          cTokenAddress: "",
+          cAbi: "",
+          group: "Expert",
+          tvlKey: "daoCDV_tvl",
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-citadel-vault",
+        },
+        {
           id: "USDT",
           name: "USDT",
           symbol: "USDT",
@@ -420,6 +460,8 @@ class Store {
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "yUSDT_tvl",
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
         },
         {
           id: "DAI",
@@ -451,6 +493,8 @@ class Store {
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "yDAI_tvl",
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
         },
         {
           id: "TUSD",
@@ -481,6 +525,8 @@ class Store {
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "yTUSD_tvl",
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
         },
         {
           id: "USDC",
@@ -511,6 +557,8 @@ class Store {
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "yUSDC_tvl",
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
         },
         {
           id: "cUSDT",
@@ -542,6 +590,8 @@ class Store {
           cAbi: config.cUSDTContract,
           group: "Basic",
           tvlKey: "cUSDT_tvl",
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
         },
         {
           id: "cUSDC",
@@ -573,6 +623,8 @@ class Store {
           cAbi: config.cUSDCContract,
           group: "Basic",
           tvlKey: "cUSDT_tvl",
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
         },
         {
           id: "cDAI",
@@ -604,22 +656,28 @@ class Store {
           cAbi: config.cDAIContract,
           group: "Basic",
           tvlKey: "cDAI_tvl",
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
         },
+      ],
+      42: [
         {
           id: "daoCDV",
           name: "USDT/USDC/DAI",
-          symbol: ["USDT", "USDC", "DAI"],
+          symbol: "USDT",
+          symbols: ["USDT", "USDC", "DAI"],
           description: "Stablecoins",
           vaultSymbol: "daoCDV",
-          erc20address: [
+          erc20addresses: [
             "0x07de306ff27a2b630b1141956844eb1552b956b5",
             "0xb7a4f3e9097c08da09517b5ab877f7a917224ede",
             "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
           ],
-          // erc20address:'0x07de306ff27a2b630b1141956844eb1552b956b5',
-          vaultContractAddress: "0x542a42496c96b946324f7dce2b030d5643d9ef8a",
+          erc20address: "0x07de306ff27a2b630b1141956844eb1552b956b5",
+          vaultContractAddress: "0x626C25cA5b86277f395c0E40DBdF51f2a302aB43",
           vaultContractABI: config.vaultDAOCDVContractABI,
-          balance: 0,
+          balance: 0, // Stores balance of selectedERC20Address
+          balances: [0, 0, 0],
           vaultBalance: 0,
           decimals: 18,
           deposit: true,
@@ -629,10 +687,10 @@ class Store {
           lastMeasurement: 25098423,
           measurement: 1e18,
           price_id: ["tether", "usd-coin", "dai"],
-          priceInUSD: [0,0,0],
+          priceInUSD: [0, 0, 0],
           strategyName: "DAO Citadel: USDT USDC DAI",
           strategy: "DAO Citadel",
-          strategyAddress: "0x4996b12560b9a4a85dd437a3e8ff489335dcffa7",
+          strategyAddress: "0xc9939B0b2af53E8BeCBA22ab153795e168140237",
           strategyContractABI: config.strategyDAOCDVContractABI,
           historicalPriceId: "daoCDV_price",
           logoFormat: "svg",
@@ -642,9 +700,9 @@ class Store {
           cAbi: "",
           group: "Expert",
           tvlKey: "daoCDV_tvl",
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-citadel-vault",
         },
-      ],
-      42: [
         {
           id: "USDT",
           name: "USDT",
@@ -674,6 +732,8 @@ class Store {
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "yUSDT_tvl",
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
         },
         {
           id: "DAI",
@@ -705,6 +765,8 @@ class Store {
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "yDAI_tvl",
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
         },
         {
           id: "TUSD",
@@ -735,6 +797,8 @@ class Store {
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "yTUSD_tvl",
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
         },
         {
           id: "USDC",
@@ -765,6 +829,8 @@ class Store {
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "cUSDC_tvl",
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
         },
         {
           id: "cUSDT",
@@ -796,6 +862,8 @@ class Store {
           cAbi: config.cUSDTContract,
           group: "Basic",
           tvlKey: "cUSDT_tvl",
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
         },
         {
           id: "cUSDC",
@@ -827,6 +895,8 @@ class Store {
           cAbi: config.cUSDCContract,
           group: "Basic",
           tvlKey: "cUSDT_tvl",
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
         },
         {
           id: "cDAI",
@@ -858,46 +928,8 @@ class Store {
           cAbi: config.cDAIContract,
           group: "Basic",
           tvlKey: "cDAI_tvl",
-        },
-        {
-          id: "daoCDV",
-          name: "USDT/USDC/DAI",
-          symbol: "USDT",
-          symbols: ["USDT", "USDC", "DAI"],
-          description: "Stablecoins",
-          vaultSymbol: "daoCDV",
-          erc20addresses: [
-            "0x07de306ff27a2b630b1141956844eb1552b956b5",
-            "0xb7a4f3e9097c08da09517b5ab877f7a917224ede",
-            "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
-          ],
-          erc20address: "0x07de306ff27a2b630b1141956844eb1552b956b5",
-          vaultContractAddress: "0x542a42496c96b946324f7dce2b030d5643d9ef8a",
-          vaultContractABI: config.vaultDAOCDVContractABI,
-          balance: 0, // Stores balance of selectedERC20Address
-          balances: [0, 0, 0],
-          vaultBalance: 0,
-          decimals: 18,
-          deposit: true,
-          depositAll: true,
-          withdraw: true,
-          withdrawAll: true,
-          lastMeasurement: 25098423,
-          measurement: 1e18,
-          price_id: ["tether", "usd-coin", "dai"],
-          priceInUSD: [0,0,0],
-          strategyName: "DAO Citadel: USDT USDC DAI",
-          strategy: "DAO Citadel",
-          strategyAddress: "0x4996b12560b9a4a85dd437a3e8ff489335dcffa7",
-          strategyContractABI: config.strategyDAOCDVContractABI,
-          historicalPriceId: "daoCDV_price",
-          logoFormat: "svg",
-          risk: "Expert",
-          strategyType: "citadel",
-          cTokenAddress: "",
-          cAbi: "",
-          group: "Expert",
-          tvlKey: "daoCDV_tvl",
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
         },
       ],
     };
@@ -2145,7 +2177,8 @@ class Store {
               },
             ],
             (err, data) => {
-              asset.balance = data[0];
+              asset.balances = data[0].balances;
+              asset.sumBalances = data[0].sumBalances;
               asset.investedBalance = data[1];
 
               callback(null, asset);
@@ -2275,25 +2308,27 @@ class Store {
         return callback(ex);
       }
     }
-    // }
   };
 
   _getERC20BalancesCitadel = async (web3, asset, account, callback) => {
     if (asset.strategyType !== "citadel") {
-      return callback(null, null);
+      return callback(null, {
+        balances: [0, 0, 0],
+        sumBalances: 0,
+      });
     }
 
     let priceInUSD = [];
 
     const coinsInUSDPrice = await this._getUSDPrices();
-    
-    for(let i = 0 ; i < asset.price_id.length;  i++) {
+
+    for (let i = 0; i < asset.price_id.length; i++) {
       const coinPrice = coinsInUSDPrice[asset.price_id[i]].usd;
       priceInUSD.push(coinPrice);
     }
-  
+
     let balances = [];
-    
+
     for (let i = 0; i < asset.erc20addresses.length; i++) {
       let erc20Contract = new web3.eth.Contract(
         config.erc20ABI,
@@ -2316,7 +2351,11 @@ class Store {
       }
     }
 
-    const returnObj =  { balances, priceInUSD }
+    const returnObj = {
+      balances,
+      priceInUSD,
+      sumBalances: balances.reduce((a, b) => a + b, 0),
+    };
     callback(null, returnObj);
   };
 
@@ -3372,6 +3411,9 @@ class Store {
             asset.vaultBalance = data[1].vaultBalance;
             asset.earnBalance = data[1].earnBalance;
             asset.strategyBalance = data[1].strategyBalance;
+            asset.depositedSharesInUSD = data[1].depositedSharesInUSD
+              ? data[1].depositedSharesInUSD
+              : null;
             asset.stats = data[2];
             asset.vaultHoldings = data[3];
             asset.usdPrice = data[4].usdPrice;
@@ -3487,24 +3529,38 @@ class Store {
 
       let vault = [];
 
-      if (
-        asset.strategyType === "compound" ||
-        asset.strategyType === "citadel"
-      ) {
+      if (asset.strategyType === "compound") {
         vault = vaultStatistics.filter((stats) => {
           return (
             stats.address.toLowerCase() ===
             asset.vaultContractAddress.toLowerCase()
           );
         });
+        console.log(asset.strategyType, vault);
       } else if (asset.strategyType === "yearn") {
         vault = vaultStatistics.filter((stats) => {
+          if (typeof stats.tokenAddress == "string") {
+            return (
+              stats.tokenAddress.toLowerCase() ===
+              asset.erc20address.toLowerCase()
+            );
+          } else if (Array.isArray(stats.tokenAddress)) {
+            return stats.tokenAddress.find(
+              (t) => t.toLowerCase() === asset.erc20address.toLowerCase()
+            );
+          }
+        });
+        console.log(asset.strategyType, vault);
+      } else if (asset.strategyType === "citadel") {
+        vault = vaultStatistics.filter((stats) => {
           return (
-            stats.tokenAddress.toLowerCase() ===
-            asset.erc20address.toLowerCase()
+            stats.address.toLowerCase() ===
+            asset.vaultContractAddress.toLowerCase()
           );
         });
+        console.log(asset.strategyType, vault);
       }
+
       if (vault.length === 0) {
         return callback(null, {});
       }
@@ -3741,11 +3797,16 @@ class Store {
         asset.vaultContractAddress
       );
 
+      const pool = await vaultContract.methods.getAllPoolInUSD().call();
+      const totalSupply = await vaultContract.methods.totalSupply().call();
+      const decimals = await vaultContract.methods.decimals().call();
+
       let depositedShares = await vaultContract.methods
         .balanceOf(account.address)
         .call({ from: account.address });
 
-      const decimals = await vaultContract.methods.decimals().call();
+      const depositedSharesInUSD =
+        (depositedShares * pool) / totalSupply / 10 ** 6;
 
       depositedShares = parseFloat(depositedShares) / 10 ** decimals;
 
@@ -3753,6 +3814,7 @@ class Store {
         earnBalance: 0,
         vaultBalance: 0,
         strategyBalance: depositedShares,
+        depositedSharesInUSD,
       });
     }
   };
@@ -4663,6 +4725,16 @@ class Store {
           asset.vaultContractAddress
         );
 
+        // TODO: Undo this comment once citadel contract updated with latest one
+        // USDT to ETH price feed contract
+        // const usdtEthPriceFeedContract =  new web3.eth.Contract(
+        //   config.USDTETHPriceFeedContractABI,
+        //   config.USDTETHPriceFeedContract
+        // );
+        // // USDT / ETH conversion result
+        // const ethPrice = await usdtEthPriceFeedContract.methods.latestAnswer().call();
+        // const pool = await citadelContract.methods.getAllPoolInETH(ethPrice).call();
+
         const pool = await citadelContract.methods.getAllPoolInETH().call();
         const totalSupply = await citadelContract.methods.totalSupply().call();
 
@@ -4711,7 +4783,6 @@ class Store {
       return null;
     }
   };
-
 
   getDashboardSnapshot = async (payload) => {
     const { interval } = payload.content;
@@ -5011,6 +5082,7 @@ class Store {
       const url = config.statsProvider + "vaults/apy";
       const statisticsString = await rp(url);
       const statistics = JSON.parse(statisticsString);
+      console.log("STATS", statistics.body);
       return statistics.body;
     } catch (e) {
       console.log(e);
@@ -5422,19 +5494,27 @@ class Store {
             asset.strategyBalance = data[1].strategyBalance;
             asset.vaultBalance = data[1].vaultBalance;
             asset.earnBalance = data[1].earnBalance;
+            asset.depositedSharesInUSD = data[1].depositedSharesInUSD
+              ? data[1].depositedSharesInUSD
+              : null;
             asset.stats = data[2];
             asset.usdPrice = data[3].usdPrice;
             asset.earnPricePerFullShare = data[4].earnPricePerFullShare;
             asset.vaultPricePerFullShare = data[4].vaultPricePerFullShare;
             asset.compoundExchangeRate = data[4].compoundExchangeRate;
+            asset.citadelPricePerFullShare = data[4].citadelPricePerFullShare
+              ? data[4].citadelPricePerFullShare
+              : null;
             asset.apy = data[4].apy; // Vault APY
             asset.addressStatistics = data[5];
             asset.earnApr = data[6];
             asset.historicalAPY = data[7];
             asset.tvl = data[9][0].tvl;
-            asset.balances = data[10] && data[10].balances ? data[10].balances : null;
-            asset.priceInUSD = data[10] && data[10].priceInUSD ? data[10].priceInUSD : null;
-
+            asset.balances =
+              data[10] && data[10].balances ? data[10].balances : null;
+            asset.priceInUSD =
+              data[10] && data[10].priceInUSD ? data[10].priceInUSD : null;
+            asset.sumBalances = data[10].sumBalances;
             // asset.addressTransactions = data[7]
             // asset.vaultHoldings = data[3]
             callback(null, asset);
