@@ -428,6 +428,7 @@ class Store {
           cAbi: "",
           group: "Expert",
           tvlKey: "daoCDV_tvl",
+          infoLink: "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-citadel-vault"
         },
         {
           id: "USDT",
@@ -458,6 +459,7 @@ class Store {
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "yUSDT_tvl",
+          infoLink:"https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter"
         },
         {
           id: "DAI",
@@ -489,6 +491,7 @@ class Store {
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "yDAI_tvl",
+          infoLink:"https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter"
         },
         {
           id: "TUSD",
@@ -519,6 +522,7 @@ class Store {
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "yTUSD_tvl",
+          infoLink:"https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter"
         },
         {
           id: "USDC",
@@ -549,6 +553,7 @@ class Store {
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "yUSDC_tvl",
+          infoLink:"https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter"
         },
         {
           id: "cUSDT",
@@ -580,6 +585,7 @@ class Store {
           cAbi: config.cUSDTContract,
           group: "Basic",
           tvlKey: "cUSDT_tvl",
+          infoLink:"https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter"
         },
         {
           id: "cUSDC",
@@ -611,6 +617,7 @@ class Store {
           cAbi: config.cUSDCContract,
           group: "Basic",
           tvlKey: "cUSDT_tvl",
+          infoLink:"https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter"
         },
         {
           id: "cDAI",
@@ -642,6 +649,7 @@ class Store {
           cAbi: config.cDAIContract,
           group: "Basic",
           tvlKey: "cDAI_tvl",
+          infoLink:"https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter"
         },
       ],
       42: [
@@ -684,6 +692,7 @@ class Store {
           cAbi: "",
           group: "Expert",
           tvlKey: "daoCDV_tvl",
+          infoLink: "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-citadel-vault"
         },
         {
           id: "USDT",
@@ -714,6 +723,7 @@ class Store {
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "yUSDT_tvl",
+          infoLink:"https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter"
         },
         {
           id: "DAI",
@@ -745,6 +755,7 @@ class Store {
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "yDAI_tvl",
+          infoLink:"https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter"
         },
         {
           id: "TUSD",
@@ -775,6 +786,7 @@ class Store {
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "yTUSD_tvl",
+          infoLink:"https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter"
         },
         {
           id: "USDC",
@@ -805,6 +817,7 @@ class Store {
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "cUSDC_tvl",
+          infoLink:"https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter"
         },
         {
           id: "cUSDT",
@@ -836,6 +849,7 @@ class Store {
           cAbi: config.cUSDTContract,
           group: "Basic",
           tvlKey: "cUSDT_tvl",
+          infoLink:"https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter"
         },
         {
           id: "cUSDC",
@@ -867,6 +881,7 @@ class Store {
           cAbi: config.cUSDCContract,
           group: "Basic",
           tvlKey: "cUSDT_tvl",
+          infoLink:"https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter"
         },
         {
           id: "cDAI",
@@ -898,6 +913,7 @@ class Store {
           cAbi: config.cDAIContract,
           group: "Basic",
           tvlKey: "cDAI_tvl",
+          infoLink:"https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter"
         },
       ],
     };

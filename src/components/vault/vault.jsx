@@ -1017,9 +1017,11 @@ class Vault extends Component {
                 <Typography className={classes.itemTitleText} variant="h4">
                   {asset.strategyName}
                 </Typography>
-                <svg aria-hidden="true" className={classes.warnIcon}>
-                  <use xlinkHref="#iconinformation-day"></use>
-                </svg>
+                <a href={asset.infoLink} target="_blank">
+                  <svg aria-hidden="true" className={classes.warnIcon}>
+                    <use xlinkHref="#iconinformation-day"></use>
+                  </svg>
+                </a>
               </Grid>
               {/* <Grid item sm={6} xs={6}> */}
               {this.renderRiskLabel(asset)}
