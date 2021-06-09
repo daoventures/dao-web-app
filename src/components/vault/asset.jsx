@@ -1866,6 +1866,8 @@ class Asset extends Component {
     }
 
     let options = {};
+    
+
     if (asset.strategyType === "yearn") {
       options = {
         chart: {
@@ -1913,7 +1915,7 @@ class Asset extends Component {
           width: hideNav ? 300 : 420,
         },
         title: {
-          text: "Historical Earn & Vault Performance",
+          text: "Historical Vault Performance",
         },
         xAxis: {
           categories: labels,
@@ -1948,7 +1950,7 @@ class Asset extends Component {
           width: hideNav ? 300 : 420,
         },
         title: {
-          text: "Historical Earn & Vault Performance",
+          text: "Historical Vault Performance",
         },
         xAxis: {
           categories: labels,
@@ -1979,6 +1981,13 @@ class Asset extends Component {
       };
     }
 
+    const chartTitle = {
+      yearn: 'Historical Earn & Vault Performance',
+      compound: 'Historical Vault Performance',
+      citadel: 'Historical Vault Performance'
+    };
+    
+
     // 调整折线图展示
     options["legend"] = {
       align: "right",
@@ -1993,7 +2002,7 @@ class Asset extends Component {
     };
 
     options["title"] = {
-      text: "Historical Earn & Vault Performance",
+      text: chartTitle[asset.strategyType],
       align: "left",
       floating: true,
       y: 20,
@@ -2019,6 +2028,7 @@ class Asset extends Component {
           color: this.state.interestTheme.themeColors.textP,
           fontSize: "12px",
         },
+        format: '{value}%'
       },
     };
 
@@ -2039,6 +2049,10 @@ class Asset extends Component {
       style: {
         color: this.state.interestTheme.themeColors.textT,
       },
+      formatter: function () {
+        var label = "<b>" + this.x + "</b><br/>" + this.series.name + ": " + this.y + '%';
+        return label;
+      }
     };
 
     return (
