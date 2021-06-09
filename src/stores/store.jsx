@@ -415,7 +415,7 @@ class Store {
           lastMeasurement: 25098423,
           measurement: 1e18,
           price_id: ["tether", "usd-coin", "dai"],
-          priceInUSD: [0,0,0],
+          priceInUSD: [0, 0, 0],
           strategyName: "DAO Citadel: USDT USDC DAI",
           strategy: "DAO Citadel",
           strategyAddress: "0x4996b12560b9a4a85dd437a3e8ff489335dcffa7",
@@ -428,7 +428,8 @@ class Store {
           cAbi: "",
           group: "Expert",
           tvlKey: "daoCDV_tvl",
-          infoLink: "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-citadel-vault"
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-citadel-vault",
         },
         {
           id: "USDT",
@@ -459,7 +460,8 @@ class Store {
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "yUSDT_tvl",
-          infoLink:"https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter"
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
         },
         {
           id: "DAI",
@@ -491,7 +493,8 @@ class Store {
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "yDAI_tvl",
-          infoLink:"https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter"
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
         },
         {
           id: "TUSD",
@@ -522,7 +525,8 @@ class Store {
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "yTUSD_tvl",
-          infoLink:"https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter"
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
         },
         {
           id: "USDC",
@@ -553,7 +557,8 @@ class Store {
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "yUSDC_tvl",
-          infoLink:"https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter"
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
         },
         {
           id: "cUSDT",
@@ -585,7 +590,8 @@ class Store {
           cAbi: config.cUSDTContract,
           group: "Basic",
           tvlKey: "cUSDT_tvl",
-          infoLink:"https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter"
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
         },
         {
           id: "cUSDC",
@@ -617,7 +623,8 @@ class Store {
           cAbi: config.cUSDCContract,
           group: "Basic",
           tvlKey: "cUSDT_tvl",
-          infoLink:"https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter"
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
         },
         {
           id: "cDAI",
@@ -649,7 +656,8 @@ class Store {
           cAbi: config.cDAIContract,
           group: "Basic",
           tvlKey: "cDAI_tvl",
-          infoLink:"https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter"
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
         },
       ],
       42: [
@@ -679,7 +687,7 @@ class Store {
           lastMeasurement: 25098423,
           measurement: 1e18,
           price_id: ["tether", "usd-coin", "dai"],
-          priceInUSD: [0,0,0],
+          priceInUSD: [0, 0, 0],
           strategyName: "DAO Citadel: USDT USDC DAI",
           strategy: "DAO Citadel",
           strategyAddress: "0x4996b12560b9a4a85dd437a3e8ff489335dcffa7",
@@ -692,7 +700,8 @@ class Store {
           cAbi: "",
           group: "Expert",
           tvlKey: "daoCDV_tvl",
-          infoLink: "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-citadel-vault"
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-citadel-vault",
         },
         {
           id: "USDT",
@@ -723,7 +732,8 @@ class Store {
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "yUSDT_tvl",
-          infoLink:"https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter"
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
         },
         {
           id: "DAI",
@@ -755,7 +765,8 @@ class Store {
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "yDAI_tvl",
-          infoLink:"https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter"
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
         },
         {
           id: "TUSD",
@@ -786,7 +797,8 @@ class Store {
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "yTUSD_tvl",
-          infoLink:"https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter"
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
         },
         {
           id: "USDC",
@@ -817,7 +829,8 @@ class Store {
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "cUSDC_tvl",
-          infoLink:"https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter"
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
         },
         {
           id: "cUSDT",
@@ -849,7 +862,8 @@ class Store {
           cAbi: config.cUSDTContract,
           group: "Basic",
           tvlKey: "cUSDT_tvl",
-          infoLink:"https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter"
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
         },
         {
           id: "cUSDC",
@@ -881,7 +895,8 @@ class Store {
           cAbi: config.cUSDCContract,
           group: "Basic",
           tvlKey: "cUSDT_tvl",
-          infoLink:"https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter"
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
         },
         {
           id: "cDAI",
@@ -913,7 +928,8 @@ class Store {
           cAbi: config.cDAIContract,
           group: "Basic",
           tvlKey: "cDAI_tvl",
-          infoLink:"https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter"
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
         },
       ],
     };
@@ -2305,14 +2321,14 @@ class Store {
     let priceInUSD = [];
 
     const coinsInUSDPrice = await this._getUSDPrices();
-    
-    for(let i = 0 ; i < asset.price_id.length;  i++) {
+
+    for (let i = 0; i < asset.price_id.length; i++) {
       const coinPrice = coinsInUSDPrice[asset.price_id[i]].usd;
       priceInUSD.push(coinPrice);
     }
-  
+
     let balances = [];
-    
+
     for (let i = 0; i < asset.erc20addresses.length; i++) {
       let erc20Contract = new web3.eth.Contract(
         config.erc20ABI,
@@ -2335,11 +2351,11 @@ class Store {
       }
     }
 
-    const returnObj =  { 
-      balances, 
+    const returnObj = {
+      balances,
       priceInUSD,
-      sumBalances: balances.reduce((a, b) => a + b, 0)
-    }
+      sumBalances: balances.reduce((a, b) => a + b, 0),
+    };
     callback(null, returnObj);
   };
 
@@ -3510,24 +3526,38 @@ class Store {
 
       let vault = [];
 
-      if (
-        asset.strategyType === "compound" ||
-        asset.strategyType === "citadel"
-      ) {
+      if (asset.strategyType === "compound") {
         vault = vaultStatistics.filter((stats) => {
           return (
             stats.address.toLowerCase() ===
             asset.vaultContractAddress.toLowerCase()
           );
         });
+        console.log(asset.strategyType, vault);
       } else if (asset.strategyType === "yearn") {
         vault = vaultStatistics.filter((stats) => {
+          if (typeof stats.tokenAddress == "string") {
+            return (
+              stats.tokenAddress.toLowerCase() ===
+              asset.erc20address.toLowerCase()
+            );
+          } else if (Array.isArray(stats.tokenAddress)) {
+            return stats.tokenAddress.find(
+              (t) => t.toLowerCase() === asset.erc20address.toLowerCase()
+            );
+          }
+        });
+        console.log(asset.strategyType, vault);
+      } else if (asset.strategyType === "citadel") {
+        vault = vaultStatistics.filter((stats) => {
           return (
-            stats.tokenAddress.toLowerCase() ===
-            asset.erc20address.toLowerCase()
+            stats.address.toLowerCase() ===
+            asset.vaultContractAddress.toLowerCase()
           );
         });
+        console.log(asset.strategyType, vault);
       }
+
       if (vault.length === 0) {
         return callback(null, {});
       }
@@ -4564,7 +4594,7 @@ class Store {
     );
 
     let maxBalance = await vaultContract.balanceOf(account.address);
-
+    console.log("CITADEL WITHDRAW ALL", maxBalance, tokenIndex);
     let functionCall = vaultContract.methods
       .withdraw(maxBalance, tokenIndex)
       .send({
@@ -4734,7 +4764,6 @@ class Store {
       return null;
     }
   };
-
 
   getDashboardSnapshot = async (payload) => {
     const { interval } = payload.content;
@@ -5034,6 +5063,7 @@ class Store {
       const url = config.statsProvider + "vaults/apy";
       const statisticsString = await rp(url);
       const statistics = JSON.parse(statisticsString);
+      console.log("STATS", statistics.body);
       return statistics.body;
     } catch (e) {
       console.log(e);
@@ -5455,8 +5485,10 @@ class Store {
             asset.earnApr = data[6];
             asset.historicalAPY = data[7];
             asset.tvl = data[9][0].tvl;
-            asset.balances = data[10] && data[10].balances ? data[10].balances : null;
-            asset.priceInUSD = data[10] && data[10].priceInUSD ? data[10].priceInUSD : null;
+            asset.balances =
+              data[10] && data[10].balances ? data[10].balances : null;
+            asset.priceInUSD =
+              data[10] && data[10].priceInUSD ? data[10].priceInUSD : null;
             asset.sumBalances = data[10].sumBalances;
             // asset.addressTransactions = data[7]
             // asset.vaultHoldings = data[3]
