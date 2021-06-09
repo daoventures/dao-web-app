@@ -539,7 +539,6 @@ class Asset extends Component {
       interestTheme: {}, // 当前主题数据,
       selectedCurrency: "USDT",
       tokenIndex:0,
-      strategyBalByCurrency: 0
     };
   }
 
@@ -613,7 +612,6 @@ class Asset extends Component {
     });
 
     this.handleModalDisplay(false);
-    this.getStrategyBalanceByCurrency(asset);
   };
 
   depositReturned = () => {
@@ -626,16 +624,6 @@ class Asset extends Component {
 
   errorReturned = (error) => {
     this.setState({ loading: false });
-  };
-
-  getStrategyBalanceByCurrency = (asset) => {
-    const { strategyBalance, priceInUSD } = asset;
-    if(!strategyBalance) {
-      return 0.00;
-    }
-
-    const strategyBalByCurrency = ( strategyBalance / priceInUSD[this.state.tokenIndex] );
-    this.setState({strategyBalByCurrency});
   };
 
   handleUSDPricesReturned = () => {
@@ -1658,7 +1646,11 @@ class Asset extends Component {
                             (asset.strategyBalance > 0) && 
                             <span>
                               (
-                                { this.state.strategyBalByCurrency.toFixed(4) }
+                                { 
+                                  asset.strategyBalance 
+                                    ? ( asset.strategyBalance / asset.priceInUSD[this.state.tokenIndex]).toFixed(4) 
+                                    : "0.0000" 
+                                }
                                 { " " }
                                 { asset.symbols[this.state.tokenIndex] }
                               )
