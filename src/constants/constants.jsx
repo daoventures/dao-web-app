@@ -104,3 +104,5 @@ export const CHANGE_NETWORK = 'CHANGE_NETWORK' // 设置当前网络
 // 获取接口信息
 export const GET_VAULT_INFO ='GET_VAULT_INFO'
 
+// 获取DVG信息
+export const GET_DVG_INFO ='GET_DVG_INFO'

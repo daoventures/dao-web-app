@@ -26,6 +26,8 @@ import SideDrawer from './components/sideDrawer';
 import MainContainer from './components/mainContainer';
 
 import Stake from './components/stake/stakeComingSoon';
+import StakeDvgVip from './components/stake/stakeDvgVip';
+
 import Swap from './components/swap';
 
 import { injected } from "./stores/connectors";
@@ -206,7 +208,7 @@ class App extends Component {
                 <Header />
                 <SideDrawer />
                 <MainContainer />
-                <Stake />
+                <StakeDvgVip />
               </Route>
               <Route path="/swap">
                 <Header />

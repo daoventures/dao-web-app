@@ -5452,7 +5452,60 @@ class Store {
       }
     );
   };
+
+  //stake开始
+  //获取vipdvg
+  getDvgbalance=async()=>{  
+    const network = store.getStore('network')
+    const account = store.getStore('account')
+    console.log(111111);
+    const assets = [
+      {
+        name:'VIPDVG',
+        symbol:'xDVG',
+        decimals:18,
+        erc20address:'0x3aa8e8B6D3562a1E7aCB0dddD02b27896C00c424',
+        abi:config.xDvgAbi
+
+      },
+      {
+        name:'DVGToken',
+        symbol:'DVG',
+        decimals:18,
+        erc20address:'0xea9726eFc9831EF0499fD4Db4Ab143F15a797673',
+        abi:config.DvgAbi
+      }
+    ]
+    console.log(!account || !account.address,'!account || !account.address##');
+    if (!account || !account.address) {
+      return false
+    }
+    const web3 = await this._getWeb3Provider()
+    if (!web3) {
+      return null
+    }
+    async.map(assets, (asset, callback) => {
+      async.parallel([
+        (callbackInner) => { this._getERC20Balance(web3, asset, account, callbackInner) },
+      ], (err, data) => {
+        if (err) {
+          return callback(err)
+        }
+        asset.stats = data[2]
+        callback(null, asset)
+      })
+    }, (err, assets) => {
+      if (err) {
+        console.log(err)
+        return emitter.emit(ERROR, err)
+      }
+      store.setStore({ vaultAssets: assets })
+      return emitter.emit(STRATEGY_BALANCES_FULL_RETURNED, assets)
+    })
+  }
 }
+
+
 
 var store = new Store();
 
