@@ -452,7 +452,7 @@ const styles = (theme) => ({
     position: "absolute",
     right: theme.spacing(1),
     top: theme.spacing(1),
-    color: theme.palette.grey[500],
+    color: theme.themeColors.menuSelText,
   },
   modalListItem: {
     border: "1px solid " + theme.themeColors.border,
