@@ -2158,7 +2158,8 @@ class Store {
               },
             ],
             (err, data) => {
-              asset.balance = data[0];
+              asset.balances = data[0].balances;
+              asset.sumBalances = data[0].sumBalances;
               asset.investedBalance = data[1];
 
               callback(null, asset);
@@ -2293,10 +2294,14 @@ class Store {
 
   _getERC20BalancesCitadel = async (web3, asset, account, callback) => {
     if (asset.strategyType !== "citadel") {
-      return callback(null, null);
+      return callback(null, {
+        balances: [0, 0, 0],
+        sumBalances: 0,
+      });
     }
 
     let balances = [];
+    let sumBalances = 0;
     for (let i = 0; i < asset.erc20addresses.length; i++) {
       let erc20Contract = new web3.eth.Contract(
         config.erc20ABI,
@@ -2320,7 +2325,10 @@ class Store {
       }
     }
     console.log(balances);
-    callback(null, balances);
+    callback(null, {
+      balances: balances,
+      sumBalances: balances.reduce((a, b) => a + b, 0),
+    });
   };
 
   _getBalance = async (web3, asset, account, callback) => {
@@ -5449,7 +5457,8 @@ class Store {
             asset.earnApr = data[6];
             asset.historicalAPY = data[7];
             asset.tvl = data[9][0].tvl;
-            asset.balances = data[10];
+            asset.balances = data[10].balances;
+            asset.sumBalances = data[10].sumBalances;
 
             // asset.addressTransactions = data[7]
             // asset.vaultHoldings = data[3]

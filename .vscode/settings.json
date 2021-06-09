@@ -4,6 +4,7 @@
   "liveServer.settings.port": 5501,
   "conventionalCommits.scopes": [
     "Citadel Withdraw",
-    "Citadel Deposit"
+    "Citadel Deposit",
+    "DAO-84"
   ]
 }
