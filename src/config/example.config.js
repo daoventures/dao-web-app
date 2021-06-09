@@ -13782,6 +13782,13 @@ const config = {
     },
     {
       inputs: [],
+      name: "yield",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [],
       name: "yieldFeePerc",
       outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
       stateMutability: "view",
@@ -13789,6 +13796,7 @@ const config = {
     },
     { stateMutability: "payable", type: "receive" },
   ],
+
   strategyUSDTContractABI: [
     {
       inputs: [
