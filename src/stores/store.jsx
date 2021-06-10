@@ -398,18 +398,21 @@ class Store {
         {
           id: "daoCDV",
           name: "USDT/USDC/DAI",
-          symbol: ["USDT", "USDC", "DAI"],
+          symbol: "USDT",
+          symbols: ["USDT", "USDC", "DAI"],
           description: "Stablecoins",
           vaultSymbol: "daoCDV",
-          erc20address: [
-            "0x07de306ff27a2b630b1141956844eb1552b956b5",
-            "0xb7a4f3e9097c08da09517b5ab877f7a917224ede",
-            "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
+          erc20addresses: [
+            "0x07de306ff27a2b630b1141956844eb1552b956b5", // Get Mainnet usdt address
+            "0xb7a4f3e9097c08da09517b5ab877f7a917224ede", // Get Mainnet usdc address
+            "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa", // Get Mainnet dai address
           ],
+          erc20address: "0x07de306ff27a2b630b1141956844eb1552b956b5",
           // erc20address:'0x07de306ff27a2b630b1141956844eb1552b956b5',
           vaultContractAddress: "0x542a42496c96b946324f7dce2b030d5643d9ef8a",
           vaultContractABI: config.vaultDAOCDVContractABI,
           balance: 0,
+          balances: [0, 0, 0],
           vaultBalance: 0,
           decimals: 18,
           deposit: true,
@@ -4342,7 +4345,7 @@ class Store {
         asset,
         account,
         asset.balance.toString(),
-        strategyAddress,
+        asset.vaultContractAddress,
         tokenIndex,
         (err) => {
           if (err) {
@@ -4820,13 +4823,17 @@ class Store {
 
         // TODO: Undo this comment once citadel contract updated with latest one
         // USDT to ETH price feed contract
-        const usdtEthPriceFeedContract =  new web3.eth.Contract(
+        const usdtEthPriceFeedContract = new web3.eth.Contract(
           config.USDTETHPriceFeedContractABI,
           config.USDTETHPriceFeedContract
         );
         // USDT / ETH conversion result
-        const ethPrice = await usdtEthPriceFeedContract.methods.latestAnswer().call();
-        const pool = await citadelContract.methods.getAllPoolInETH(ethPrice).call();
+        const ethPrice = await usdtEthPriceFeedContract.methods
+          .latestAnswer()
+          .call();
+        const pool = await citadelContract.methods
+          .getAllPoolInETH(ethPrice)
+          .call();
 
         const totalSupply = await citadelContract.methods.totalSupply().call();
 
@@ -5364,6 +5371,30 @@ class Store {
     });
   };
 
+  _isSufficientLiquidityCitadel = async (
+    asset,
+    citadelContract,
+    withdrawAmount,
+    tokenIndex
+  ) => {
+    const web3 = new Web3(store.getStore("web3context").library.provider);
+
+    let erc20Contract = new web3.eth.Contract(
+      config.erc20ABI,
+      asset.erc20addresses[tokenIndex]
+    );
+
+    let balance = await erc20Contract.methods
+      .balanceOf(asset.vaultContractAddress)
+      .call();
+
+    let withdrawAmountUSD = withdrawAmount * asset.citadelPricePerFullShare;
+    console.log(withdrawAmount, withdrawAmountUSD, balance);
+    if (withdrawAmountUSD > balance) {
+      alert("Citadel might have insufficient liquidity");
+    }
+  };
+
   // TODO: REFACTOR: Currently all 3 types of vaults use this
   withdrawBoth = async (payload) => {
     const { earnAmount, vaultAmount, asset, amount, tokenIndex } =
@@ -5489,6 +5520,14 @@ class Store {
 
       console.log("Citadel Withdraw:", shares, tokenIndex);
 
+      // Soft Check for sufficient liquidity
+      this._isSufficientLiquidityCitadel(
+        asset,
+        erc20Contract,
+        shares,
+        tokenIndex
+      );
+
       const functionCall = await vaultContract.methods
         .withdraw(shares, tokenIndex)
         .send({
@@ -5528,6 +5567,7 @@ class Store {
         });
     }
   };
+
   getStrategyBalancesFull = async (payload) => {
     console.log("GSBF");
     const network = store.getStore("network");
