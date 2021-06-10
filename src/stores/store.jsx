@@ -4288,12 +4288,19 @@ class Store {
             account,
             earnAmount,
             vaultAmount,
-            (err, depositResult) => {
+            (err, txnHash, depositResult) => {
               if (err) {
                 return emitter.emit(ERROR, err);
               }
-
-              return emitter.emit(DEPOSIT_ALL_CONTRACT_RETURNED, depositResult);
+              if (txnHash) {
+                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+              }
+              if (depositResult) {
+                return emitter.emit(
+                  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                  depositResult.transactionHash
+                );
+              }
             }
           );
         }
@@ -4313,12 +4320,19 @@ class Store {
             asset,
             account,
             asset.balance.toString(),
-            (err, depositResult) => {
+            (err, txnHash, depositResult) => {
               if (err) {
                 return emitter.emit(ERROR, err);
               }
-
-              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, depositResult);
+              if (txnHash) {
+                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+              }
+              if (depositResult) {
+                return emitter.emit(
+                  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                  depositResult.transactionHash
+                );
+              }
             }
           );
         }
@@ -4340,11 +4354,18 @@ class Store {
             account,
             asset.balance.toString(),
             tokenIndex,
-            (err, depositResult) => {
+            (err, txnHash, depositResult) => {
               if (err) {
                 return emitter.emit(ERROR, err);
-              } else {
-                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, depositResult);
+              }
+              if (txnHash) {
+                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+              }
+              if (depositResult) {
+                return emitter.emit(
+                  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                  depositResult.transactionHash
+                );
               }
             }
           );
@@ -4372,11 +4393,18 @@ class Store {
             asset,
             account,
             amount,
-            (err, withdrawResult) => {
+            (err, txnHash, withdrawalResult) => {
               if (err) {
                 return emitter.emit(ERROR, err);
-              } else {
-                return emitter.emit(WITHDRAW_VAULT_RETURNED, withdrawResult);
+              }
+              if (txnHash) {
+                return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
+              }
+              if (withdrawalResult) {
+                return emitter.emit(
+                  WITHDRAW_VAULT_RETURNED_COMPLETED,
+                  withdrawalResult.transactionHash
+                );
               }
             }
           );
@@ -4388,11 +4416,19 @@ class Store {
         account,
         amount,
         tokenIndex,
-        (err, withdrawResult) => {
+        (err, txnHash, withdrawalResult) => {
           if (err) {
             return emitter.emit(ERROR, err);
           }
-          return emitter.emit(WITHDRAW_VAULT_RETURNED, withdrawResult);
+          if (txnHash) {
+            return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
+          }
+          if (withdrawalResult) {
+            return emitter.emit(
+              WITHDRAW_VAULT_RETURNED_COMPLETED,
+              withdrawalResult.transactionHash
+            );
+          }
         }
       );
     }
@@ -4516,12 +4552,19 @@ class Store {
           this._callWithdrawAllVaultProxy(
             asset,
             account,
-            (err, withdrawResult) => {
+            (err, txnHash, withdrawalResult) => {
               if (err) {
                 return emitter.emit(ERROR, err);
               }
-
-              return emitter.emit(WITHDRAW_BOTH_VAULT_RETURNED, withdrawResult);
+              if (txnHash) {
+                return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
+              }
+              if (withdrawalResult) {
+                return emitter.emit(
+                  WITHDRAW_VAULT_RETURNED_COMPLETED,
+                  withdrawalResult.transactionHash
+                );
+              }
             }
           );
         }
@@ -5353,28 +5396,41 @@ class Store {
         earnAmountSend,
         vaultAmountSend,
       ]);
+
       functionCall
         .send({
           from: account.address,
           gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
         })
-        .on("transactionHash", function (hash) {
-          console.log(hash);
-          return emitter.emit(WITHDRAW_VAULT_RETURNED, hash);
-        })
-        .on("confirmation", function (confirmationNumber, receipt) {
-          console.log(confirmationNumber, receipt);
+        .on("transactionHash", function (txnHash) {
+          console.log(txnHash);
+          return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
+          // callback(null, txnHash, null);
         })
         .on("receipt", function (receipt) {
-          console.log(receipt);
+          console.log("Reciept", receipt);
+          emitter.emit(
+            WITHDRAW_VAULT_RETURNED_COMPLETED,
+            receipt.transactionHash
+          );
+          // callback(null, null, receipt);
         })
         .on("error", function (error) {
-          console.log(error);
           if (!error.toString().includes("-32601")) {
             if (error.message) {
-              return emitter.emit(ERROR, error.message);
+              emitter.emit(ERROR, error);
+              // return callback(error.message);
             }
-            return emitter.emit(ERROR, error);
+            // callback(error, null, null);
+          }
+        })
+        .catch((error) => {
+          if (!error.toString().includes("-32601")) {
+            if (error.message) {
+              // return callback(error.message);
+              emitter.emit(ERROR, error);
+            }
+            // callback(error, null, null);
           }
         });
     } else if (asset.strategyType === "compound") {
@@ -5389,23 +5445,35 @@ class Store {
           from: account.address,
           gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
         })
-        .on("transactionHash", function (hash) {
-          console.log(hash);
-          return emitter.emit(WITHDRAW_VAULT_RETURNED, hash);
-        })
-        .on("confirmation", function (confirmationNumber, receipt) {
-          console.log(confirmationNumber, receipt);
+        .on("transactionHash", function (txnHash) {
+          console.log(txnHash);
+          return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
+          // callback(null, txnHash, null);
         })
         .on("receipt", function (receipt) {
-          console.log(receipt);
+          console.log("Reciept", receipt);
+          emitter.emit(
+            WITHDRAW_VAULT_RETURNED_COMPLETED,
+            receipt.transactionHash
+          );
+          // callback(null, null, receipt);
         })
         .on("error", function (error) {
-          console.log(error);
           if (!error.toString().includes("-32601")) {
             if (error.message) {
-              return emitter.emit(ERROR, error.message);
+              emitter.emit(ERROR, error);
+              // return callback(error.message);
             }
-            return emitter.emit(ERROR, error);
+            // callback(error, null, null);
+          }
+        })
+        .catch((error) => {
+          if (!error.toString().includes("-32601")) {
+            if (error.message) {
+              // return callback(error.message);
+              emitter.emit(ERROR, error);
+            }
+            // callback(error, null, null);
           }
         });
     } else if (asset.strategyType === "citadel") {
@@ -5428,23 +5496,35 @@ class Store {
           from: account.address,
           gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
         })
-        .on("transactionHash", function (hash) {
-          console.log(hash);
-          return emitter.emit(WITHDRAW_VAULT_RETURNED, hash);
-        })
-        .on("confirmation", function (confirmationNumber, receipt) {
-          console.log(confirmationNumber, receipt);
+        .on("transactionHash", function (txnHash) {
+          console.log(txnHash);
+          return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
+          // callback(null, txnHash, null);
         })
         .on("receipt", function (receipt) {
-          console.log(receipt);
+          console.log("Reciept", receipt);
+          emitter.emit(
+            WITHDRAW_VAULT_RETURNED_COMPLETED,
+            receipt.transactionHash
+          );
+          // callback(null, null, receipt);
         })
         .on("error", function (error) {
-          console.log(error);
           if (!error.toString().includes("-32601")) {
             if (error.message) {
-              return emitter.emit(ERROR, error.message);
+              emitter.emit(ERROR, error);
+              // return callback(error.message);
             }
-            return emitter.emit(ERROR, error);
+            // callback(error, null, null);
+          }
+        })
+        .catch((error) => {
+          if (!error.toString().includes("-32601")) {
+            if (error.message) {
+              // return callback(error.message);
+              emitter.emit(ERROR, error);
+            }
+            // callback(error, null, null);
           }
         });
     }
