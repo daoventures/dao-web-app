@@ -27,9 +27,13 @@ import Loader from "../loader";
 import {
   ERROR,
   DEPOSIT_CONTRACT_RETURNED,
+  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
   WITHDRAW_VAULT_RETURNED,
+  WITHDRAW_VAULT_RETURNED_COMPLETED,
   DEPOSIT_ALL_CONTRACT_RETURNED,
+  DEPOSIT_ALL_CONTRACT_RETURNED_COMPLETED,
   WITHDRAW_BOTH_VAULT_RETURNED,
+  WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
   CONNECTION_CONNECTED,
   CONNECTION_DISCONNECTED,
   GET_STRATEGY_BALANCES_FULL,
@@ -717,9 +721,19 @@ class Vault extends Component {
 
   componentWillMount() {
     emitter.on(DEPOSIT_CONTRACT_RETURNED, this.showHash);
+    emitter.on(DEPOSIT_CONTRACT_RETURNED_COMPLETED, this.onDepositCompleted);
     emitter.on(WITHDRAW_VAULT_RETURNED, this.showHash);
+    emitter.on(WITHDRAW_VAULT_RETURNED_COMPLETED, this.onWithdrawalCompleted);
     emitter.on(DEPOSIT_ALL_CONTRACT_RETURNED, this.showHash);
+    emitter.on(
+      DEPOSIT_ALL_CONTRACT_RETURNED_COMPLETED,
+      this.onDepositCompleted
+    );
     emitter.on(WITHDRAW_BOTH_VAULT_RETURNED, this.showHash);
+    emitter.on(
+      WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
+      this.onWithdrawalCompleted
+    );
     emitter.on(ERROR, this.errorReturned);
     emitter.on(STRATEGY_BALANCES_FULL_RETURNED, this.balancesReturned);
     emitter.on(CONNECTION_CONNECTED, this.connectionConnected);
@@ -730,9 +744,19 @@ class Vault extends Component {
 
   componentWillUnmount() {
     emitter.removeListener(DEPOSIT_CONTRACT_RETURNED, this.showHash);
+    emitter.removeListener(DEPOSIT_CONTRACT_RETURNED_COMPLETED, this.showHash);
     emitter.removeListener(WITHDRAW_VAULT_RETURNED, this.showHash);
+    emitter.removeListener(WITHDRAW_VAULT_RETURNED_COMPLETED, this.showHash);
     emitter.removeListener(DEPOSIT_ALL_CONTRACT_RETURNED, this.showHash);
+    emitter.removeListener(
+      DEPOSIT_ALL_CONTRACT_RETURNED_COMPLETED,
+      this.onDepositCompleted
+    );
     emitter.removeListener(WITHDRAW_BOTH_VAULT_RETURNED, this.showHash);
+    emitter.removeListener(
+      WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
+      this.showHash
+    );
     emitter.removeListener(ERROR, this.errorReturned);
     emitter.removeListener(CONNECTION_CONNECTED, this.connectionConnected);
     emitter.removeListener(
@@ -813,6 +837,43 @@ class Vault extends Component {
       const snackbarObj = {
         snackbarMessage: error.toString(),
         snackbarType: "Error",
+      };
+      that.setState(snackbarObj);
+    });
+  };
+
+  onDepositCompleted = (txHash) => {
+    dispatcher.dispatch({
+      type: GET_STRATEGY_BALANCES_FULL,
+      content: { interval: "30d" },
+    });
+
+    const snackbarObj = { snackbarMessage: null, snackbarType: null };
+    this.setState(snackbarObj);
+    this.setState({ loading: false });
+    const that = this;
+    setTimeout(() => {
+      const snackbarObj = {
+        snackbarMessage: txHash,
+        snackbarType: "Deposit Success",
+      };
+      that.setState(snackbarObj);
+    });
+  };
+
+  onWithdrawalCompleted = (txHash) => {
+    dispatcher.dispatch({
+      type: GET_STRATEGY_BALANCES_FULL,
+      content: { interval: "30d" },
+    });
+    const snackbarObj = { snackbarMessage: null, snackbarType: null };
+    this.setState(snackbarObj);
+    this.setState({ loading: false });
+    const that = this;
+    setTimeout(() => {
+      const snackbarObj = {
+        snackbarMessage: txHash,
+        snackbarType: "Withdrawal Success",
       };
       that.setState(snackbarObj);
     });
@@ -1251,6 +1312,7 @@ class Vault extends Component {
                   startLoading={this.startLoading}
                   basedOn={basedOn}
                   onCurrencySelected={this.handleSelectedCurrency}
+                  // refreshVault={this.refreshVault}
                 />
               </AccordionDetails>
             </Accordion>
@@ -1450,6 +1512,14 @@ class Vault extends Component {
       </div>
     );
   };
+
+  // refreshVault = () => {
+  //   dispatcher.dispatch({
+  //     type: GET_STRATEGY_BALANCES_FULL,
+  //     content: { interval: "30d" },
+  //   });
+  //   this.setState({ loading: false });
+  // };
 
   onSelectChange = (event) => {
     let val = [];
