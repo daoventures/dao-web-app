@@ -403,13 +403,12 @@ class Store {
           description: "Stablecoins",
           vaultSymbol: "daoCDV",
           erc20addresses: [
-            "0x07de306ff27a2b630b1141956844eb1552b956b5", // Get Mainnet usdt address
-            "0xb7a4f3e9097c08da09517b5ab877f7a917224ede", // Get Mainnet usdc address
-            "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa", // Get Mainnet dai address
+            "0xdac17f958d2ee523a2206206994597c13d831ec7",
+            "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+            "0x6b175474e89094c44da98b954eedeac495271d0f",
           ],
-          erc20address: "0x07de306ff27a2b630b1141956844eb1552b956b5",
-          // erc20address:'0x07de306ff27a2b630b1141956844eb1552b956b5',
-          vaultContractAddress: "0x542a42496c96b946324f7dce2b030d5643d9ef8a",
+          erc20address:'0xdac17f958d2ee523aW2206206994597c13d831ec7',
+          vaultContractAddress: "0x8fe826cc1225b03aa06477ad5af745aed5fe7066",
           vaultContractABI: config.vaultDAOCDVContractABI,
           balance: 0,
           balances: [0, 0, 0],
@@ -4271,16 +4270,12 @@ class Store {
       asset.vaultContractAddress
     );
 
-    const strategyAddress = await vaultContract.methods
-      .strategy()
-      .call({ from: account.address });
-
     if (asset.strategyType === "yearn") {
       this._checkApproval(
         asset,
         account,
         asset.balance,
-        strategyAddress,
+        asset.vaultContractAddress,
         (err) => {
           if (err) {
             return emitter.emit(ERROR, err);
@@ -4313,7 +4308,7 @@ class Store {
         asset,
         account,
         asset.balance.toString(),
-        strategyAddress,
+        asset.vaultContractAddress,
         (err) => {
           if (err) {
             return emitter.emit(ERROR, err);
