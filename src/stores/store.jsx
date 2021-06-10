@@ -397,12 +397,12 @@ class Store {
           symbol: ["USDT", "USDC", "DAI"],
           description: "Stablecoins",
           vaultSymbol: "daoCDV",
-          erc20address: [
+          erc20addresses: [
             "0xdac17f958d2ee523a2206206994597c13d831ec7",
             "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
             "0x6b175474e89094c44da98b954eedeac495271d0f",
           ],
-          // erc20address:'0x07de306ff27a2b630b1141956844eb1552b956b5',
+          erc20address:'0xdac17f958d2ee523a2206206994597c13d831ec7',
           vaultContractAddress: "0x8fe826cc1225b03aa06477ad5af745aed5fe7066",
           vaultContractABI: config.vaultDAOCDVContractABI,
           balance: 0,
@@ -1727,12 +1727,6 @@ class Store {
         .allowance(account.address, contract)
         .call({ from: account.address });
 
-      console.log(
-        await erc20Contract.methods.symbol().call(),
-        account.address,
-        contract
-      );
-
       const ethAllowance = web3.utils.fromWei(allowance, "ether");
       if (parseFloat(ethAllowance) < parseFloat(amount)) {
         /*
@@ -2149,7 +2143,6 @@ class Store {
   };
 
   getBalances = async () => {
-    console.log("GB");
     const account = store.getStore("account");
 
     const assets = store.getStore("assets");
@@ -2273,7 +2266,6 @@ class Store {
         }
 
         store.setStore({ assets: assets });
-        console.log("AAAAAAAAAAAAAAAAAAA", assets);
         return emitter.emit(BALANCES_RETURNED, assets);
       }
     );
@@ -2461,7 +2453,6 @@ class Store {
       }
       callback(null, parseFloat(value));
     } catch (e) {
-      console.log(asset);
       console.log(e);
       callback(null, 0);
     }
@@ -2784,7 +2775,6 @@ class Store {
           );
 
           const trxs = transactions.map(async (tx) => {
-            //console.log(tx.address)
             const balance = await this._getIEthBalance(
               web3,
               iEarnContract,
@@ -3536,7 +3526,6 @@ class Store {
             asset.vaultContractAddress.toLowerCase()
           );
         });
-        console.log(asset.strategyType, vault);
       } else if (asset.strategyType === "yearn") {
         vault = vaultStatistics.filter((stats) => {
           if (typeof stats.tokenAddress == "string") {
@@ -3550,7 +3539,6 @@ class Store {
             );
           }
         });
-        console.log(asset.strategyType, vault);
       } else if (asset.strategyType === "citadel") {
         vault = vaultStatistics.filter((stats) => {
           return (
@@ -3558,7 +3546,6 @@ class Store {
             asset.vaultContractAddress.toLowerCase()
           );
         });
-        console.log(asset.strategyType, vault);
       }
 
       if (vault.length === 0) {
@@ -3665,7 +3652,6 @@ class Store {
       balance = parseFloat(balance - available) / 10 ** asset.decimals;
       callback(null, parseFloat(balance));
     } catch (ex) {
-      console.log(asset);
       console.log(ex);
     }
   };
@@ -3917,7 +3903,6 @@ class Store {
           if (err) {
             return emitter.emit(ERROR, err);
           }
-          console.log("Citadel Deposit:", tokenIndex, amount);
           // TODO: Modify _callDepositAmountContract to handle citadel
           this._callDepositAmountContractCitadel(
             asset,
@@ -4081,7 +4066,6 @@ class Store {
 
     var amountToSend = web3.utils.toBN(amount * 10 ** decimals).toString();
 
-    console.log(amountToSend);
     vaultContract.methods
       .deposit(amountToSend, tokenIndex)
       .send({
@@ -4129,7 +4113,6 @@ class Store {
       amountToSend = web3.utils.toBN(amount * 10 ** asset.decimals).toString();
     }
 
-    console.log(amountToSend);
     vaultContract.methods
       .deposit(amountToSend)
       .send({
@@ -4193,7 +4176,6 @@ class Store {
         .toString();
     }
 
-    console.log([earnAmountToSend, vaultAmountToSend]);
     vaultContract.methods
       .deposit([earnAmountToSend, vaultAmountToSend])
       .send({
@@ -4309,7 +4291,6 @@ class Store {
           if (err) {
             return emitter.emit(ERROR, err);
           }
-          console.log("Citadel Deposit:", tokenIndex, amount);
           this._callDepositAmountContractCitadel(
             asset,
             account,
@@ -4431,7 +4412,6 @@ class Store {
     if (asset.decimals !== 18) {
       amountSend = Math.round(amount * 10 ** asset.decimals);
     }
-    console.log(amountSend);
     let functionCall = vaultContract.methods.withdrawVault(amountSend);
     if (asset.erc20address === "Ethereum") {
       functionCall = vaultContract.methods.withdrawETH(amountSend);
@@ -5081,7 +5061,6 @@ class Store {
       const url = config.statsProvider + "vaults/apy";
       const statisticsString = await rp(url);
       const statistics = JSON.parse(statisticsString);
-      console.log("STATS", statistics.body);
       return statistics.body;
     } catch (e) {
       console.log(e);
@@ -5399,7 +5378,6 @@ class Store {
     }
   };
   getStrategyBalancesFull = async (payload) => {
-    console.log("GSBF");
     const network = store.getStore("network");
     const account = store.getStore("account");
     // const assets = store.getStore('vaultAssets')
