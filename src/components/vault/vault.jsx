@@ -141,10 +141,10 @@ const styles = (theme) => ({
     "&:hover": {
       backgroundColor: "#2F80ED",
     },
-    padding: "12px",
-    backgroundColor: "#2F80ED",
-    border: "1px solid #E1E1E1",
-    fontWeight: 500,
+    "padding": "12px",
+    "backgroundColor": "#2F80ED",
+    "border": "1px solid #E1E1E1",
+    "fontWeight": 500,
     [theme.breakpoints.up("md")]: {
       padding: "15px",
     },
@@ -567,19 +567,19 @@ const styles = (theme) => ({
     },
   },
   typeTabItem: {
-    width: "148px",
-    height: "48px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "16px",
-    marginRight: "20px",
-    background: theme.themeColors.blockBack,
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: theme.themeColors.blockBorder,
-    cursor: "pointer",
-    color: theme.themeColors.blockTextColor,
+    "width": "148px",
+    "height": "48px",
+    "display": "flex",
+    "alignItems": "center",
+    "justifyContent": "center",
+    "fontSize": "16px",
+    "marginRight": "20px",
+    "background": theme.themeColors.blockBack,
+    "borderWidth": "1px",
+    "borderStyle": "solid",
+    "borderColor": theme.themeColors.blockBorder,
+    "cursor": "pointer",
+    "color": theme.themeColors.blockTextColor,
     "&.active": {
       background: "linear-gradient(135deg, #0B2663 0%, #1152DF 100%)",
       border: "none",
@@ -587,9 +587,9 @@ const styles = (theme) => ({
     },
     [theme.breakpoints.up("md")]: {},
     [theme.breakpoints.down("md")]: {
-      height: "34px",
-      width: "32px",
-      marginRight: "10px",
+      "height": "34px",
+      "width": "32px",
+      "marginRight": "10px",
       "&.active": {
         width: "90px",
       },
@@ -610,7 +610,7 @@ const styles = (theme) => ({
       display: "inline-block",
     },
     [theme.breakpoints.down("md")]: {
-      display: "none",
+      "display": "none",
       "&.active": {
         display: "inline-block",
       },
@@ -935,22 +935,19 @@ class Vault extends Component {
           className={`${classes.typeTabItem} ${
             currentTab === item ? "active" : ""
           }`}
-          onClick={() => this.selectTab(item)}
-        >
+          onClick={() => this.selectTab(item)}>
           <svg
             aria-hidden="true"
             className={classes.typeTabSvg}
             style={{
               fill: currentTab === item ? "#ffffff" : svgColorObj[item],
-            }}
-          >
+            }}>
             <use xlinkHref={svgHrefObj[item]}></use>
           </svg>
           <span
             className={`${classes.typeTabText} ${
               currentTab === item ? "active" : ""
-            }`}
-          >
+            }`}>
             {item}
           </span>
         </li>
@@ -1034,8 +1031,7 @@ class Vault extends Component {
               expanded={expanded === asset.id}
               onChange={() => {
                 this.handleChange(asset.id, asset);
-              }}
-            >
+              }}>
               <AccordionSummary
                 // expandIcon={<ExpandMoreIcon className={classes.roundIconClass} />}
                 expandIcon={
@@ -1045,8 +1041,7 @@ class Vault extends Component {
                 }
                 aria-controls="panel1bh-content"
                 id="panel1bh-header"
-                className={classes.accordionsummary}
-              >
+                className={classes.accordionsummary}>
                 <div className={classes.assetSummary}>
                   <Grid container>
                     <Grid item sm={1} xs={2} className={classes.gridItemColumn}>
@@ -1072,14 +1067,15 @@ class Vault extends Component {
                     <Grid item sm={2} xs={4} className={classes.gridItemColumn}>
                       <Typography
                         variant={"h5"}
-                        className={classes.assetLabel1}
-                      >
+                        style={{
+                          wordWrap: "break-word",
+                        }}
+                        className={classes.assetLabel1}>
                         {asset.name}
                       </Typography>
                       <Typography
                         variant={"body1"}
-                        className={classes.assetLabel2}
-                      >
+                        className={classes.assetLabel2}>
                         {asset.description}
                       </Typography>
                     </Grid>
@@ -1091,29 +1087,25 @@ class Vault extends Component {
                             {/* <Typography variant={ 'h5' } className={ classes.assetLabel }>Yearly Growth: <span style={{color: '#222222'}}>{ (this._getAPY(asset)/1).toFixed(2) }%</span></Typography> */}
                             <Typography
                               variant={"h5"}
-                              className={classes.assetLabel1}
-                            >
+                              className={classes.assetLabel1}>
                               {(this._getAPY(asset) / 1).toFixed(2)}%
                             </Typography>
                             <Typography
                               variant={"body1"}
-                              className={classes.assetLabel2}
-                            >
+                              className={classes.assetLabel2}>
                               Yearly Growth
                             </Typography>
                           </div>
                           <div className={classes.showMobile}>
                             <Typography
                               variant={"h5"}
-                              className={classes.assetLabel2}
-                            >
+                              className={classes.assetLabel2}>
                               Yearly Growth:{" "}
                             </Typography>
                             <Typography
                               variant={"h3"}
                               noWrap
-                              className={classes.assetLabel1}
-                            >
+                              className={classes.assetLabel1}>
                               {(this._getAPY(asset) / 1).toFixed(2)}%
                             </Typography>
                           </div>
@@ -1131,14 +1123,12 @@ class Vault extends Component {
                           </Typography> */}
                               <Typography
                                 variant={"h5"}
-                                className={classes.assetLabel1}
-                              >
+                                className={classes.assetLabel1}>
                                 {(this._getAPY(asset) / 1).toFixed(2)}%
                               </Typography>
                               <Typography
                                 variant={"body1"}
-                                className={classes.assetLabel2}
-                              >
+                                className={classes.assetLabel2}>
                                 Yearly Growth
                               </Typography>
                             </div>
@@ -1146,14 +1136,12 @@ class Vault extends Component {
                               <Typography
                                 variant={"h3"}
                                 noWrap
-                                className={classes.assetLabel1}
-                              >
+                                className={classes.assetLabel1}>
                                 {(this._getAPY(asset) / 1).toFixed(2)}%
                               </Typography>
                               <Typography
                                 variant={"h5"}
-                                className={classes.assetLabel2}
-                              >
+                                className={classes.assetLabel2}>
                                 Yearly Growth:{" "}
                               </Typography>
                             </div>
@@ -1166,8 +1154,7 @@ class Vault extends Component {
                       <div className={classes.showDesktop}>
                         <Typography
                           variant={"h5"}
-                          className={classes.assetLabel1}
-                        >
+                          className={classes.assetLabel1}>
                           {asset.strategyType === "citadel" && (
                             <div>
                               {(asset.strategyType === "citadel"
@@ -1201,8 +1188,7 @@ class Vault extends Component {
                         </Typography>
                         <Typography
                           variant={"body1"}
-                          className={classes.assetLabel2}
-                        >
+                          className={classes.assetLabel2}>
                           Available to deposit
                         </Typography>
                       </div>
@@ -1211,8 +1197,7 @@ class Vault extends Component {
                         <Typography
                           variant={"h3"}
                           noWrap
-                          className={classes.assetLabel1}
-                        >
+                          className={classes.assetLabel1}>
                           {asset.strategyType === "citadel" && (
                             <div>
                               {asset.balances
@@ -1238,8 +1223,7 @@ class Vault extends Component {
                         </Typography>
                         <Typography
                           variant={"h5"}
-                          className={classes.assetLabel2}
-                        >
+                          className={classes.assetLabel2}>
                           Available to deposit
                         </Typography>
                       </div>
@@ -1249,14 +1233,12 @@ class Vault extends Component {
                       {/* 暂时不知道取什么 */}
                       <Typography
                         variant={"h5"}
-                        className={classes.assetLabel1}
-                      >
+                        className={classes.assetLabel1}>
                         $ {asset.tvl}
                       </Typography>
                       <Typography
                         variant={"body1"}
-                        className={classes.assetLabel2}
-                      >
+                        className={classes.assetLabel2}>
                         Total Value Locked
                       </Typography>
                     </Grid>
@@ -1306,8 +1288,7 @@ class Vault extends Component {
                 </Typography>
               </React.Fragment>
             }
-            arrow
-          >
+            arrow>
             <InfoIcon />
           </Tooltip>
         </div>
@@ -1345,8 +1326,7 @@ class Vault extends Component {
             : asset.risk === "Expert"
             ? classes.riskExpertLabel
             : ""
-        }
-      >
+        }>
         <Typography variant="caption">{asset.risk}</Typography>
       </div>
     );
@@ -1457,8 +1437,7 @@ class Vault extends Component {
             native: false,
           }}
           disabled={loading}
-          className={classes.assetSelectRoot}
-        >
+          className={classes.assetSelectRoot}>
           {options &&
             options.map((option) => {
               return (
