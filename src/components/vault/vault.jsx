@@ -1020,7 +1020,7 @@ class Vault extends Component {
                   </svg>
                 </a>
               </Grid>
-              {/* <Grid item sm={6} xs={6}> */}
+              {/* <Grid item sm={6} xs={6}>  */}
               {this.renderRiskLabel(asset)}
               {/* </Grid> */}
             </Grid>
