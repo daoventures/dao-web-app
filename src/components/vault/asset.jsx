@@ -1300,8 +1300,8 @@ class Asset extends Component {
                         <Button
                           className={
                             earnPercent === 25
-                              ? classes.scaleActive
-                              : classes.scale
+                              ? classes.depositScaleActive
+                              : classes.depositScale
                           }
                           variant="text"
                           disabled={loading}
@@ -1315,8 +1315,8 @@ class Asset extends Component {
                         <Button
                           className={
                             earnPercent === 50
-                              ? classes.scaleActive
-                              : classes.scale
+                              ? classes.depositScaleActive
+                              : classes.depositScale
                           }
                           variant="text"
                           disabled={loading}
@@ -1330,8 +1330,8 @@ class Asset extends Component {
                         <Button
                           className={
                             earnPercent === 75
-                              ? classes.scaleActive
-                              : classes.scale
+                              ? classes.depositScaleActive
+                              : classes.depositScale
                           }
                           variant="text"
                           disabled={loading}
@@ -1345,8 +1345,8 @@ class Asset extends Component {
                         <Button
                           className={
                             earnPercent === 100
-                              ? classes.scaleActive
-                              : classes.scale
+                              ? classes.depositScaleActive
+                              : classes.depositScale
                           }
                           variant="text"
                           disabled={loading}
@@ -1408,8 +1408,8 @@ class Asset extends Component {
                         <Button
                           className={
                             vaultPercent === 25
-                              ? classes.scaleActive
-                              : classes.scale
+                              ? classes.depositScaleActive
+                              : classes.depositScale
                           }
                           variant="text"
                           disabled={loading}
@@ -1423,8 +1423,8 @@ class Asset extends Component {
                         <Button
                           className={
                             vaultPercent === 50
-                              ? classes.scaleActive
-                              : classes.scale
+                              ? classes.depositScaleActive
+                              : classes.depositScale
                           }
                           variant="text"
                           disabled={loading}
@@ -1438,8 +1438,8 @@ class Asset extends Component {
                         <Button
                           className={
                             vaultPercent === 75
-                              ? classes.scaleActive
-                              : classes.scale
+                              ? classes.depositScaleActive
+                              : classes.depositScale
                           }
                           variant="text"
                           disabled={loading}
@@ -1453,8 +1453,8 @@ class Asset extends Component {
                         <Button
                           className={
                             vaultPercent === 100
-                              ? classes.scaleActive
-                              : classes.scale
+                              ? classes.depositScaleActive
+                              : classes.depositScale
                           }
                           variant="text"
                           disabled={loading}
