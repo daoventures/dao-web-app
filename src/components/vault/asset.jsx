@@ -1595,7 +1595,7 @@ class Asset extends Component {
                           noWrap
                         >
                           {(asset.strategyBalance
-                            ? asset.strategyBalance.toFixed(4)
+                            ? (Math.floor(asset.strategyBalance * 10000) / 10000).toFixed(4)
                             : "0.0000") + " daoCDV"}{" "}
                           {asset.strategyBalance > 0 && (
                             <span>
