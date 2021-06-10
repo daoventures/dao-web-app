@@ -597,7 +597,7 @@ class Asset extends Component {
 
     const tokenMap = { USDT: "0", USDC: "1", DAI: "2" };
     const tokenIndex = tokenMap[currencyType];
-
+    
     asset.symbol = asset.symbols[tokenIndex];
     asset.balance = asset.balances[tokenIndex];
     asset.erc20address = asset.erc20addresses[tokenIndex];
@@ -2155,7 +2155,6 @@ class Asset extends Component {
   onDepositAll = () => {
     const { asset, startLoading } = this.props;
     const { earnRatio, vaultRatio, tokenIndex } = this.state;
-
     this.setState({ loading: true });
     startLoading();
 
