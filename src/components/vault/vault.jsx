@@ -1429,7 +1429,7 @@ class Vault extends Component {
         } else {
           return "0.00";
         }
-      } else if (asset.strategyType === "yearn") {
+      } else if (asset.strategyType === "yearn" && JSON.stringify(asset.stats!=='Object')) {
         switch (basedOn) {
           case 1:
             return (
