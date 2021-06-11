@@ -36,12 +36,16 @@ import {
   VAULT_BALANCES_RETURNED,
   DEPOSIT_CONTRACT,
   DEPOSIT_CONTRACT_RETURNED,
+  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
   DEPOSIT_ALL_CONTRACT,
   DEPOSIT_ALL_CONTRACT_RETURNED,
+  DEPOSIT_ALL_CONTRACT_RETURNED_COMPLETED,
   WITHDRAW_VAULT,
   WITHDRAW_VAULT_RETURNED,
+  WITHDRAW_VAULT_RETURNED_COMPLETED,
   WITHDRAW_BOTH_VAULT,
   WITHDRAW_BOTH_VAULT_RETURNED,
+  WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
   GET_DASHBOARD_SNAPSHOT,
   DASHBOARD_SNAPSHOT_RETURNED,
   USD_PRICE_RETURNED,
@@ -398,15 +402,16 @@ class Store {
           symbols: ["USDT", "USDC", "DAI"],
           description: "Stablecoins",
           vaultSymbol: "daoCDV",
-          erc20address: [
-            "0x07de306ff27a2b630b1141956844eb1552b956b5",
-            "0xb7a4f3e9097c08da09517b5ab877f7a917224ede",
-            "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
+          erc20addresses: [
+            "0xdac17f958d2ee523a2206206994597c13d831ec7",
+            "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+            "0x6b175474e89094c44da98b954eedeac495271d0f",
           ],
-          // erc20address:'0x07de306ff27a2b630b1141956844eb1552b956b5',
-          vaultContractAddress: "0x542a42496c96b946324f7dce2b030d5643d9ef8a",
+          erc20address:'0xdac17f958d2ee523aW2206206994597c13d831ec7',
+          vaultContractAddress: "0x8fe826cc1225b03aa06477ad5af745aed5fe7066",
           vaultContractABI: config.vaultDAOCDVContractABI,
           balance: 0,
+          balances: [0, 0, 0],
           vaultBalance: 0,
           decimals: 18,
           deposit: true,
@@ -3878,12 +3883,19 @@ class Store {
             account,
             earnAmount,
             vaultAmount,
-            (err, depositResult) => {
+            (err, txnHash, depositResult) => {
               if (err) {
                 return emitter.emit(ERROR, err);
               }
-
-              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, depositResult);
+              if (txnHash) {
+                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+              }
+              if (depositResult) {
+                return emitter.emit(
+                  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                  depositResult.transactionHash
+                );
+              }
             }
           );
         }
@@ -3898,12 +3910,19 @@ class Store {
           asset,
           account,
           amount,
-          (err, depositResult) => {
+          (err, txnHash, depositResult) => {
             if (err) {
               return emitter.emit(ERROR, err);
             }
-
-            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, depositResult);
+            if (txnHash) {
+              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+            }
+            if (depositResult) {
+              return emitter.emit(
+                DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                depositResult.transactionHash
+              );
+            }
           }
         );
       });
@@ -3925,12 +3944,19 @@ class Store {
             account,
             amount,
             tokenIndex,
-            (err, depositResult) => {
+            (err, txnHash, depositResult) => {
               if (err) {
                 return emitter.emit(ERROR, err);
               }
-
-              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, depositResult);
+              if (txnHash) {
+                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+              }
+              if (depositResult) {
+                return emitter.emit(
+                  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                  depositResult.transactionHash
+                );
+              }
             }
           );
         }
@@ -4089,15 +4115,13 @@ class Store {
         from: account.address,
         gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
       })
-      .on("transactionHash", function (hash) {
-        console.log(hash);
-        callback(null, hash);
-      })
-      .on("confirmation", function (confirmationNumber, receipt) {
-        console.log(confirmationNumber, receipt);
+      .on("transactionHash", function (txnHash) {
+        console.log(txnHash);
+        callback(null, txnHash, null);
       })
       .on("receipt", function (receipt) {
         console.log(receipt);
+        callback(null, null, receipt);
       })
       .on("error", function (error) {
         if (!error.toString().includes("-32601")) {
@@ -4137,12 +4161,13 @@ class Store {
         from: account.address,
         gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
       })
-      .on("transactionHash", function (hash) {
-        console.log(hash);
-        callback(null, hash);
+      .on("transactionHash", function (txnHash) {
+        console.log(txnHash);
+        callback(null, txnHash, null);
       })
       .on("confirmation", function (confirmationNumber, receipt) {
-        console.log(confirmationNumber, receipt);
+        console.log("Confirmation", confirmationNumber, receipt);
+        callback(null, null, receipt);
       })
       .on("receipt", function (receipt) {
         console.log(receipt);
@@ -4201,22 +4226,23 @@ class Store {
         from: account.address,
         gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
       })
-      .on("transactionHash", function (hash) {
-        console.log(hash);
-        callback(null, hash);
+      .on("transactionHash", function (txnHash) {
+        console.log(txnHash);
+        callback(null, txnHash, null);
       })
       .on("confirmation", function (confirmationNumber, receipt) {
-        console.log(confirmationNumber, receipt);
+        console.log("Confirmation", confirmationNumber, receipt);
+        callback(null, null, receipt);
       })
       .on("receipt", function (receipt) {
-        console.log(receipt);
+        console.log("Reciept", receipt);
       })
       .on("error", function (error) {
         if (!error.toString().includes("-32601")) {
           if (error.message) {
             return callback(error.message);
           }
-          callback(error);
+          callback(error, null, null);
         }
       })
       .catch((error) => {
@@ -4224,7 +4250,7 @@ class Store {
           if (error.message) {
             return callback(error.message);
           }
-          callback(error);
+          callback(error, null, null);
         }
       });
   };
@@ -4244,16 +4270,12 @@ class Store {
       asset.vaultContractAddress
     );
 
-    const strategyAddress = await vaultContract.methods
-      .strategy()
-      .call({ from: account.address });
-
     if (asset.strategyType === "yearn") {
       this._checkApproval(
         asset,
         account,
         asset.balance,
-        strategyAddress,
+        asset.vaultContractAddress,
         (err) => {
           if (err) {
             return emitter.emit(ERROR, err);
@@ -4264,12 +4286,19 @@ class Store {
             account,
             earnAmount,
             vaultAmount,
-            (err, depositResult) => {
+            (err, txnHash, depositResult) => {
               if (err) {
                 return emitter.emit(ERROR, err);
               }
-
-              return emitter.emit(DEPOSIT_ALL_CONTRACT_RETURNED, depositResult);
+              if (txnHash) {
+                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+              }
+              if (depositResult) {
+                return emitter.emit(
+                  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                  depositResult.transactionHash
+                );
+              }
             }
           );
         }
@@ -4279,7 +4308,7 @@ class Store {
         asset,
         account,
         asset.balance.toString(),
-        strategyAddress,
+        asset.vaultContractAddress,
         (err) => {
           if (err) {
             return emitter.emit(ERROR, err);
@@ -4289,12 +4318,19 @@ class Store {
             asset,
             account,
             asset.balance.toString(),
-            (err, depositResult) => {
+            (err, txnHash, depositResult) => {
               if (err) {
                 return emitter.emit(ERROR, err);
               }
-
-              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, depositResult);
+              if (txnHash) {
+                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+              }
+              if (depositResult) {
+                return emitter.emit(
+                  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                  depositResult.transactionHash
+                );
+              }
             }
           );
         }
@@ -4304,7 +4340,7 @@ class Store {
         asset,
         account,
         asset.balance.toString(),
-        strategyAddress,
+        asset.vaultContractAddress,
         tokenIndex,
         (err) => {
           if (err) {
@@ -4316,12 +4352,19 @@ class Store {
             account,
             asset.balance.toString(),
             tokenIndex,
-            (err, depositResult) => {
+            (err, txnHash, depositResult) => {
               if (err) {
                 return emitter.emit(ERROR, err);
               }
-
-              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, depositResult);
+              if (txnHash) {
+                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+              }
+              if (depositResult) {
+                return emitter.emit(
+                  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                  depositResult.transactionHash
+                );
+              }
             }
           );
         }
@@ -4348,12 +4391,19 @@ class Store {
             asset,
             account,
             amount,
-            (err, withdrawResult) => {
+            (err, txnHash, withdrawalResult) => {
               if (err) {
                 return emitter.emit(ERROR, err);
               }
-
-              return emitter.emit(WITHDRAW_VAULT_RETURNED, withdrawResult);
+              if (txnHash) {
+                return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
+              }
+              if (withdrawalResult) {
+                return emitter.emit(
+                  WITHDRAW_VAULT_RETURNED_COMPLETED,
+                  withdrawalResult.transactionHash
+                );
+              }
             }
           );
         }
@@ -4364,11 +4414,19 @@ class Store {
         account,
         amount,
         tokenIndex,
-        (err, withdrawResult) => {
+        (err, txnHash, withdrawalResult) => {
           if (err) {
             return emitter.emit(ERROR, err);
           }
-          return emitter.emit(WITHDRAW_VAULT_RETURNED, withdrawResult);
+          if (txnHash) {
+            return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
+          }
+          if (withdrawalResult) {
+            return emitter.emit(
+              WITHDRAW_VAULT_RETURNED_COMPLETED,
+              withdrawalResult.transactionHash
+            );
+          }
         }
       );
     }
@@ -4399,23 +4457,28 @@ class Store {
         from: account.address,
         gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
       })
-      .on("transactionHash", function (hash) {
-        console.log(hash);
-        callback(null, hash);
-      })
-      .on("confirmation", function (confirmationNumber, receipt) {
-        console.log(confirmationNumber, receipt);
+      .on("transactionHash", function (txnHash) {
+        console.log(txnHash);
+        callback(null, txnHash, null);
       })
       .on("receipt", function (receipt) {
-        console.log(receipt);
+        console.log("Reciept", receipt);
+        callback(null, null, receipt);
       })
       .on("error", function (error) {
-        console.log(error);
         if (!error.toString().includes("-32601")) {
           if (error.message) {
             return callback(error.message);
           }
-          callback(error);
+          callback(error, null, null);
+        }
+      })
+      .catch((error) => {
+        if (!error.toString().includes("-32601")) {
+          if (error.message) {
+            return callback(error.message);
+          }
+          callback(error, null, null);
         }
       });
   };
@@ -4443,23 +4506,28 @@ class Store {
         from: account.address,
         gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
       })
-      .on("transactionHash", function (hash) {
-        console.log(hash);
-        callback(null, hash);
-      })
-      .on("confirmation", function (confirmationNumber, receipt) {
-        console.log(confirmationNumber, receipt);
+      .on("transactionHash", function (txnHash) {
+        console.log(txnHash);
+        callback(null, txnHash, null);
       })
       .on("receipt", function (receipt) {
-        console.log(receipt);
+        console.log("Reciept", receipt);
+        callback(null, null, receipt);
       })
       .on("error", function (error) {
-        console.log(error);
         if (!error.toString().includes("-32601")) {
           if (error.message) {
             return callback(error.message);
           }
-          callback(error);
+          callback(error, null, null);
+        }
+      })
+      .catch((error) => {
+        if (!error.toString().includes("-32601")) {
+          if (error.message) {
+            return callback(error.message);
+          }
+          callback(error, null, null);
         }
       });
   };
@@ -4482,12 +4550,19 @@ class Store {
           this._callWithdrawAllVaultProxy(
             asset,
             account,
-            (err, withdrawResult) => {
+            (err, txnHash, withdrawalResult) => {
               if (err) {
                 return emitter.emit(ERROR, err);
               }
-
-              return emitter.emit(WITHDRAW_BOTH_VAULT_RETURNED, withdrawResult);
+              if (txnHash) {
+                return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
+              }
+              if (withdrawalResult) {
+                return emitter.emit(
+                  WITHDRAW_VAULT_RETURNED_COMPLETED,
+                  withdrawalResult.transactionHash
+                );
+              }
             }
           );
         }
@@ -4530,23 +4605,28 @@ class Store {
         from: account.address,
         gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
       })
-      .on("transactionHash", function (hash) {
-        console.log(hash);
-        callback(null, hash);
-      })
-      .on("confirmation", function (confirmationNumber, receipt) {
-        console.log(confirmationNumber, receipt);
+      .on("transactionHash", function (txnHash) {
+        console.log(txnHash);
+        callback(null, txnHash, null);
       })
       .on("receipt", function (receipt) {
-        console.log(receipt);
+        console.log("Reciept", receipt);
+        callback(null, null, receipt);
       })
       .on("error", function (error) {
-        console.log(error);
         if (!error.toString().includes("-32601")) {
           if (error.message) {
             return callback(error.message);
           }
-          callback(error);
+          callback(error, null, null);
+        }
+      })
+      .catch((error) => {
+        if (!error.toString().includes("-32601")) {
+          if (error.message) {
+            return callback(error.message);
+          }
+          callback(error, null, null);
         }
       });
   };
@@ -4569,23 +4649,28 @@ class Store {
         from: account.address,
         gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
       })
-      .on("transactionHash", function (hash) {
-        console.log(hash);
-        callback(null, hash);
-      })
-      .on("confirmation", function (confirmationNumber, receipt) {
-        console.log(confirmationNumber, receipt);
+      .on("transactionHash", function (txnHash) {
+        console.log(txnHash);
+        callback(null, txnHash, null);
       })
       .on("receipt", function (receipt) {
-        console.log(receipt);
+        console.log("Reciept", receipt);
+        callback(null, null, receipt);
       })
       .on("error", function (error) {
-        console.log(error);
         if (!error.toString().includes("-32601")) {
           if (error.message) {
             return callback(error.message);
           }
-          callback(error);
+          callback(error, null, null);
+        }
+      })
+      .catch((error) => {
+        if (!error.toString().includes("-32601")) {
+          if (error.message) {
+            return callback(error.message);
+          }
+          callback(error, null, null);
         }
       });
   };
@@ -4611,23 +4696,28 @@ class Store {
         from: account.address,
         gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
       })
-      .on("transactionHash", function (hash) {
-        console.log(hash);
-        callback(null, hash);
-      })
-      .on("confirmation", function (confirmationNumber, receipt) {
-        console.log(confirmationNumber, receipt);
+      .on("transactionHash", function (txnHash) {
+        console.log(txnHash);
+        callback(null, txnHash, null);
       })
       .on("receipt", function (receipt) {
-        console.log(receipt);
+        console.log("Reciept", receipt);
+        callback(null, null, receipt);
       })
       .on("error", function (error) {
-        console.log(error);
         if (!error.toString().includes("-32601")) {
           if (error.message) {
             return callback(error.message);
           }
-          callback(error);
+          callback(error, null, null);
+        }
+      })
+      .catch((error) => {
+        if (!error.toString().includes("-32601")) {
+          if (error.message) {
+            return callback(error.message);
+          }
+          callback(error, null, null);
         }
       });
   };
@@ -4728,13 +4818,17 @@ class Store {
 
         // TODO: Undo this comment once citadel contract updated with latest one
         // USDT to ETH price feed contract
-        const usdtEthPriceFeedContract =  new web3.eth.Contract(
+        const usdtEthPriceFeedContract = new web3.eth.Contract(
           config.USDTETHPriceFeedContractABI,
           config.USDTETHPriceFeedContract
         );
         // USDT / ETH conversion result
-        const ethPrice = await usdtEthPriceFeedContract.methods.latestAnswer().call();
-        const pool = await citadelContract.methods.getAllPoolInETH(ethPrice).call();
+        const ethPrice = await usdtEthPriceFeedContract.methods
+          .latestAnswer()
+          .call();
+        const pool = await citadelContract.methods
+          .getAllPoolInETH(ethPrice)
+          .call();
 
         const totalSupply = await citadelContract.methods.totalSupply().call();
 
@@ -5272,6 +5366,30 @@ class Store {
     });
   };
 
+  _isSufficientLiquidityCitadel = async (
+    asset,
+    citadelContract,
+    withdrawAmount,
+    tokenIndex
+  ) => {
+    const web3 = new Web3(store.getStore("web3context").library.provider);
+
+    let erc20Contract = new web3.eth.Contract(
+      config.erc20ABI,
+      asset.erc20addresses[tokenIndex]
+    );
+
+    let balance = await erc20Contract.methods
+      .balanceOf(asset.vaultContractAddress)
+      .call();
+
+    let withdrawAmountUSD = withdrawAmount * asset.citadelPricePerFullShare;
+    console.log(withdrawAmount, withdrawAmountUSD, balance);
+    if (withdrawAmountUSD > balance) {
+      alert("Citadel might have insufficient liquidity");
+    }
+  };
+
   // TODO: REFACTOR: Currently all 3 types of vaults use this
   withdrawBoth = async (payload) => {
     const { earnAmount, vaultAmount, asset, amount, tokenIndex } =
@@ -5303,28 +5421,41 @@ class Store {
         earnAmountSend,
         vaultAmountSend,
       ]);
+
       functionCall
         .send({
           from: account.address,
           gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
         })
-        .on("transactionHash", function (hash) {
-          console.log(hash);
-          return emitter.emit(WITHDRAW_VAULT_RETURNED, hash);
-        })
-        .on("confirmation", function (confirmationNumber, receipt) {
-          console.log(confirmationNumber, receipt);
+        .on("transactionHash", function (txnHash) {
+          console.log(txnHash);
+          return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
+          // callback(null, txnHash, null);
         })
         .on("receipt", function (receipt) {
-          console.log(receipt);
+          console.log("Reciept", receipt);
+          emitter.emit(
+            WITHDRAW_VAULT_RETURNED_COMPLETED,
+            receipt.transactionHash
+          );
+          // callback(null, null, receipt);
         })
         .on("error", function (error) {
-          console.log(error);
           if (!error.toString().includes("-32601")) {
             if (error.message) {
-              return emitter.emit(ERROR, error.message);
+              emitter.emit(ERROR, error);
+              // return callback(error.message);
             }
-            return emitter.emit(ERROR, error);
+            // callback(error, null, null);
+          }
+        })
+        .catch((error) => {
+          if (!error.toString().includes("-32601")) {
+            if (error.message) {
+              // return callback(error.message);
+              emitter.emit(ERROR, error);
+            }
+            // callback(error, null, null);
           }
         });
     } else if (asset.strategyType === "compound") {
@@ -5339,23 +5470,35 @@ class Store {
           from: account.address,
           gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
         })
-        .on("transactionHash", function (hash) {
-          console.log(hash);
-          return emitter.emit(WITHDRAW_VAULT_RETURNED, hash);
-        })
-        .on("confirmation", function (confirmationNumber, receipt) {
-          console.log(confirmationNumber, receipt);
+        .on("transactionHash", function (txnHash) {
+          console.log(txnHash);
+          return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
+          // callback(null, txnHash, null);
         })
         .on("receipt", function (receipt) {
-          console.log(receipt);
+          console.log("Reciept", receipt);
+          emitter.emit(
+            WITHDRAW_VAULT_RETURNED_COMPLETED,
+            receipt.transactionHash
+          );
+          // callback(null, null, receipt);
         })
         .on("error", function (error) {
-          console.log(error);
           if (!error.toString().includes("-32601")) {
             if (error.message) {
-              return emitter.emit(ERROR, error.message);
+              emitter.emit(ERROR, error);
+              // return callback(error.message);
             }
-            return emitter.emit(ERROR, error);
+            // callback(error, null, null);
+          }
+        })
+        .catch((error) => {
+          if (!error.toString().includes("-32601")) {
+            if (error.message) {
+              // return callback(error.message);
+              emitter.emit(ERROR, error);
+            }
+            // callback(error, null, null);
           }
         });
     } else if (asset.strategyType === "citadel") {
@@ -5372,33 +5515,54 @@ class Store {
 
       console.log("Citadel Withdraw:", shares, tokenIndex);
 
+      // Soft Check for sufficient liquidity
+      this._isSufficientLiquidityCitadel(
+        asset,
+        erc20Contract,
+        shares,
+        tokenIndex
+      );
+
       const functionCall = await vaultContract.methods
         .withdraw(shares, tokenIndex)
         .send({
           from: account.address,
           gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
         })
-        .on("transactionHash", function (hash) {
-          console.log(hash);
-          return emitter.emit(WITHDRAW_VAULT_RETURNED, hash);
-        })
-        .on("confirmation", function (confirmationNumber, receipt) {
-          console.log(confirmationNumber, receipt);
+        .on("transactionHash", function (txnHash) {
+          console.log(txnHash);
+          return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
+          // callback(null, txnHash, null);
         })
         .on("receipt", function (receipt) {
-          console.log(receipt);
+          console.log("Reciept", receipt);
+          emitter.emit(
+            WITHDRAW_VAULT_RETURNED_COMPLETED,
+            receipt.transactionHash
+          );
+          // callback(null, null, receipt);
         })
         .on("error", function (error) {
-          console.log(error);
           if (!error.toString().includes("-32601")) {
             if (error.message) {
-              return emitter.emit(ERROR, error.message);
+              emitter.emit(ERROR, error);
+              // return callback(error.message);
             }
-            return emitter.emit(ERROR, error);
+            // callback(error, null, null);
+          }
+        })
+        .catch((error) => {
+          if (!error.toString().includes("-32601")) {
+            if (error.message) {
+              // return callback(error.message);
+              emitter.emit(ERROR, error);
+            }
+            // callback(error, null, null);
           }
         });
     }
   };
+
   getStrategyBalancesFull = async (payload) => {
     console.log("GSBF");
     const network = store.getStore("network");
