@@ -3777,8 +3777,8 @@ class Store {
       vaultBalance = (sharePerDepositAmt * vaultBalance) / 10 ** asset.decimals;
 
       callback(null, {
-        earnBalance: parseFloat(earnBalance),
-        vaultBalance: parseFloat(vaultBalance),
+        earnBalance: isNaN(parseFloat(earnBalance)) ? 0 : parseFloat(earnBalance),
+        vaultBalance: isNaN(parseFloat(vaultBalance)) ? 0 : parseFloat(vaultBalance),
         strategyBalance: 0,
       });
     } else if (asset.strategyType === "compound") {
@@ -4772,6 +4772,8 @@ class Store {
 
         balance = balance / diff;
         balance = balance * 242584600;
+
+        console.log(asset.symbol);
 
         const returnObj = {
           earnPricePerFullShare: parseFloat(earnPricePerFullShare) / 10 ** 18,
