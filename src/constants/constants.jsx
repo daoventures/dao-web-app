@@ -107,3 +107,9 @@ export const CHANGE_NETWORK = "CHANGE_NETWORK"; // 设置当前网络
 
 // 获取接口信息
 export const GET_VAULT_INFO = "GET_VAULT_INFO";
+
+// Strategy Risk Level
+export const BASIC = "Basic";
+export const ADVANCE = "Advance";
+export const EXPERT = "Expert";
+export const DEGEN = "Degen";
