@@ -3751,6 +3751,11 @@ class Store {
         asset.vaultContractABI,
         asset.vaultContractAddress
       );
+      let sharesBalance = await vaultContract.methods
+      .balanceOf(account.address)
+      .call({ from: account.address });
+      sharesBalance = parseFloat(sharesBalance);
+
       let strategyAddress = await vaultContract.methods
         .strategy()
         .call({ from: account.address });
@@ -3762,12 +3767,16 @@ class Store {
       let earnBalance = await strategyContract.methods
         .getEarnDepositBalance(account.address)
         .call({ from: account.address });
-      earnBalance = parseFloat(earnBalance) / 10 ** asset.decimals;
+      earnBalance = parseFloat(earnBalance);
 
       let vaultBalance = await strategyContract.methods
         .getVaultDepositBalance(account.address)
         .call({ from: account.address });
-      vaultBalance = parseFloat(vaultBalance) / 10 ** asset.decimals;
+      vaultBalance = parseFloat(vaultBalance);
+
+      const sharePerDepositAmt = sharesBalance / (earnBalance + vaultBalance);
+      earnBalance = (sharePerDepositAmt * earnBalance) / 10 ** asset.decimals;
+      vaultBalance = (sharePerDepositAmt * vaultBalance) / 10 ** asset.decimals;
 
       callback(null, {
         earnBalance: parseFloat(earnBalance),
@@ -5357,9 +5366,9 @@ class Store {
     let { asset, tokenIndex } = payload.content;
     this.withdrawBoth({
       content: {
-        earnAmount: asset.earnBalance.toString(),
-        vaultAmount: asset.vaultBalance.toString(),
-        amount: asset.strategyBalance.toString(),
+        earnAmount: Math.floor(asset.earnBalance).toString(), // Round down decimals
+        vaultAmount: Math.floor(asset.vaultBalance).toString(), // Round down decimals
+        amount: asset.balance.toString(),
         tokenIndex: tokenIndex,
         asset,
       },
