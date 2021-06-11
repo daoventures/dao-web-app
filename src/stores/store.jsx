@@ -407,7 +407,7 @@ class Store {
             "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
             "0x6b175474e89094c44da98b954eedeac495271d0f",
           ],
-          erc20address: "0xdac17f958d2ee523aW2206206994597c13d831ec7",
+          erc20address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
           vaultContractAddress: "0x8fe826cc1225b03aa06477ad5af745aed5fe7066",
           vaultContractABI: config.vaultDAOCDVContractABI,
           balance: 0,
@@ -3751,6 +3751,11 @@ class Store {
         asset.vaultContractABI,
         asset.vaultContractAddress
       );
+      let sharesBalance = await vaultContract.methods
+      .balanceOf(account.address)
+      .call({ from: account.address });
+      sharesBalance = parseFloat(sharesBalance);
+
       let strategyAddress = await vaultContract.methods
         .strategy()
         .call({ from: account.address });
@@ -3762,12 +3767,16 @@ class Store {
       let earnBalance = await strategyContract.methods
         .getEarnDepositBalance(account.address)
         .call({ from: account.address });
-      earnBalance = parseFloat(earnBalance) / 10 ** asset.decimals;
+      earnBalance = parseFloat(earnBalance);
 
       let vaultBalance = await strategyContract.methods
         .getVaultDepositBalance(account.address)
         .call({ from: account.address });
-      vaultBalance = parseFloat(vaultBalance) / 10 ** asset.decimals;
+      vaultBalance = parseFloat(vaultBalance);
+
+      const sharePerDepositAmt = sharesBalance / (earnBalance + vaultBalance);
+      earnBalance = (sharePerDepositAmt * earnBalance) / 10 ** asset.decimals;
+      vaultBalance = (sharePerDepositAmt * vaultBalance) / 10 ** asset.decimals;
 
       callback(null, {
         earnBalance: parseFloat(earnBalance),
@@ -5361,9 +5370,9 @@ class Store {
     console.log(asset.strategyBalance);
     this.withdrawBoth({
       content: {
-        earnAmount: asset.earnBalance.toString(),
-        vaultAmount: asset.vaultBalance.toString(),
-        amount: asset.strategyBalance.toString(),
+        earnAmount: Math.floor(asset.earnBalance).toString(), // Round down decimals
+        vaultAmount: Math.floor(asset.vaultBalance).toString(), // Round down decimals
+        amount: asset.balance.toString(),
         tokenIndex: tokenIndex,
         asset,
       },

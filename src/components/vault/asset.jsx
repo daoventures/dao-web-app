@@ -2068,11 +2068,12 @@ class Asset extends Component {
     const { amount, earnRatio, vaultRatio, tokenIndex } = this.state;
     const { asset, startLoading } = this.props;
 
-    const assetBalance =
-      asset.strategyType !== "citadel"
-        ? asset.balance
-        : asset.balances[this.state.tokenIndex];
+    let assetBalance = asset.strategyType !== "citadel"
+                          ? asset.balance
+                          : asset.balances[this.state.tokenIndex];
 
+    assetBalance = (Math.floor(assetBalance * 10000) / 10000).toFixed(4);
+    
     if (!amount || isNaN(amount) || amount <= 0 || amount > assetBalance) {
       this.setState({ amountError: true });
       return false;
