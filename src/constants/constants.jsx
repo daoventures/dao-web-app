@@ -106,3 +106,17 @@ export const GET_VAULT_INFO ='GET_VAULT_INFO'
 
 // 获取DVG信息
 export const GET_DVG_INFO ='GET_DVG_INFO'
+// 获取DVG成功
+export const GET_DVG_BALANCE_SUCCESS ='GET_DVG_BALANCE_SUCCESS'
+// 充值XDVG
+export const DEPOSIT_XDVG = 'DEPOSIT_XDVG';
+//获取xdvg
+export const GET_XDVG_BALANCE = 'GET_XDVG_BALANCE';
+//获取xdvg可用成功
+export const GET_XDVG_BALANCE_SUCCESS='GET_XDVG_BALANCE_SUCCESS';
+//取消质押中的DVG
+export const WIDTHDRAW_XDVG = 'WIDTHDRAW_XDVG';
+//获取DVG APR
+export const GET_DVG_APR = 'GET_DVG_APR';
+//获取DVG APR 成功
+export const GET_XDVG_APR_SUCCESS = 'GET_XDVG_APR_SUCCESS';

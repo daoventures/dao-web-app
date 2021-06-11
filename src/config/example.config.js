@@ -26000,7 +26000,9 @@ const config = {
     }],
     "stateMutability": "view",
     "type": "function"
-  }]
+  }],
+  dvgAddress:'0xea9726eFc9831EF0499fD4Db4Ab143F15a797673',
+  xDvgAddress:'0x3aa8e8B6D3562a1E7aCB0dddD02b27896C00c424'
 };
 
 export default config;

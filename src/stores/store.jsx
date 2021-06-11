@@ -55,6 +55,14 @@ import {
   TOGGLE_THEME, // 切换主题
   CURRENT_THEME_RETURNED, // 返回当前主题
   GET_VAULT_INFO, //获取接口信息
+  GET_DVG_INFO,//获取DVG信息
+  GET_DVG_BALANCE_SUCCESS,//获取DVG成功
+  DEPOSIT_XDVG,//充值xdvg
+  GET_XDVG_BALANCE_SUCCESS,//获取xdvg余额
+  GET_XDVG_BALANCE,//获取xdvg余额
+  WIDTHDRAW_XDVG,//提现xdvg
+  GET_DVG_APR,//获取dvgApr
+  GET_XDVG_APR_SUCCESS,
 } from "../constants";
 import Web3 from "web3";
 
@@ -81,6 +89,7 @@ class Store {
       aprs: this._getDefaultValues().aprs,
       assets: this._getDefaultValues().assets,
       vaultAssets: this._getDefaultValues().vaultAssets,
+      dvg: this._getDefaultValues().dvg,
       vaultApiInfo: {},
       totalValue: "",
       usdPrices: null,
@@ -268,6 +277,7 @@ class Store {
       ethBalance: 0,
       sCrvBalance: 0,
       openDrawer: false,
+      dvgApr:''
     };
 
     dispatcher.register(
@@ -354,6 +364,18 @@ class Store {
             break;
           case GET_VAULT_INFO:
             this.getVaultInfo(payload);
+            break;
+          case GET_DVG_INFO:
+            this.getDvgbalance(payload);
+            break;
+          case DEPOSIT_XDVG:
+            this.depositXdvg(payload);
+            break;
+          case WIDTHDRAW_XDVG:
+            this.withdrawXdvg(payload);
+            break;
+          case GET_DVG_APR:
+          this.getDvgApr(payload);
             break;
           default: {
           }
@@ -629,7 +651,7 @@ class Store {
           lastMeasurement: 25098423,
           measurement: 1e18,
           price_id: ["tether", "usd-coin", "dai"],
-          priceInUSD: [0,0,0],
+          priceInUSD: [0, 0, 0],
           strategyName: "DAO Citadel: USDT USDC DAI",
           strategy: "DAO Citadel",
           strategyAddress: "0x4996b12560b9a4a85dd437a3e8ff489335dcffa7",
@@ -885,7 +907,7 @@ class Store {
           lastMeasurement: 25098423,
           measurement: 1e18,
           price_id: ["tether", "usd-coin", "dai"],
-          priceInUSD: [0,0,0],
+          priceInUSD: [0, 0, 0],
           strategyName: "DAO Citadel: USDT USDC DAI",
           strategy: "DAO Citadel",
           strategyAddress: "0x4996b12560b9a4a85dd437a3e8ff489335dcffa7",
@@ -1508,6 +1530,26 @@ class Store {
         portfolio_growth_eth_weekly_perc: 0,
         portfolio_growth_eth_yearly_perc: 0,
       },
+      dvg: [
+        {
+          id: 'xDVG',
+          name: 'VIPDVG',
+          symbol: 'xDVG',
+          decimals: 18,
+          erc20address: '0x3aa8e8B6D3562a1E7aCB0dddD02b27896C00c424',
+          abi: config.xDvgAbi,
+          balance: 1
+        },
+        {
+          id: 'DVG',
+          name: 'DVGToken',
+          symbol: 'DVG',
+          decimals: 18,
+          erc20address: '0xea9726eFc9831EF0499fD4Db4Ab143F15a797673',
+          abi: config.DvgAbi,
+          balance: 0
+        }
+      ]
     };
   };
 
@@ -2240,7 +2282,6 @@ class Store {
         }
 
         store.setStore({ assets: assets });
-        console.log("AAAAAAAAAAAAAAAAAAA", assets);
         return emitter.emit(BALANCES_RETURNED, assets);
       }
     );
@@ -2272,7 +2313,7 @@ class Store {
         callback(null, parseFloat(balance));
       } catch (ex) {
         console.log(ex);
-        return callback(ex);
+        // return callback(ex);
       }
     }
     // }
@@ -2286,14 +2327,14 @@ class Store {
     let priceInUSD = [];
 
     const coinsInUSDPrice = await this._getUSDPrices();
-    
-    for(let i = 0 ; i < asset.price_id.length;  i++) {
+
+    for (let i = 0; i < asset.price_id.length; i++) {
       const coinPrice = coinsInUSDPrice[asset.price_id[i]].usd;
       priceInUSD.push(coinPrice);
     }
-  
+
     let balances = [];
-    
+
     for (let i = 0; i < asset.erc20addresses.length; i++) {
       let erc20Contract = new web3.eth.Contract(
         config.erc20ABI,
@@ -2316,7 +2357,7 @@ class Store {
       }
     }
 
-    const returnObj =  { balances, priceInUSD }
+    const returnObj = { balances, priceInUSD }
     callback(null, returnObj);
   };
 
@@ -3576,13 +3617,15 @@ class Store {
       asset.strategyContractABI,
       strategyAddress
     );
-    let pool = await strategyContract.methods
-      .pool()
-      .call({ from: account.address });
+    let balance = '';
+    // if(typeof await strategyContract.methods.pool()=='function'){
+
+    let pool = await strategyContract.methods.pool().call({ from: account.address });
     let decimals = await strategyContract.methods
       .decimals()
       .call({ from: account.address });
-    let balance = parseFloat(pool) / 10 ** parseInt(decimals);
+    balance = parseFloat(pool) / 10 ** parseInt(decimals);
+    // }
     callback(null, parseFloat(balance));
   };
 
@@ -4834,9 +4877,9 @@ class Store {
                 farmer.portfolioBalance.push([
                   price.timestamp,
                   (parseFloat(price.earnPrice) / 10 ** 18) *
-                    farmer.earnBalance +
-                    (parseFloat(price.vaultPrice) / 10 ** 18) *
-                      farmer.vaultBalance,
+                  farmer.earnBalance +
+                  (parseFloat(price.vaultPrice) / 10 ** 18) *
+                  farmer.vaultBalance,
                 ]);
               });
             } else if (farmer.strategyType === "compound") {
@@ -4844,7 +4887,7 @@ class Store {
                 farmer.portfolioBalance.push([
                   price.timestamp,
                   (parseFloat(price.compoundExchangeRate) / 10 ** 18) *
-                    farmer.strategyBalance,
+                  farmer.strategyBalance,
                 ]);
               });
             }
@@ -5455,28 +5498,10 @@ class Store {
 
   //stake开始
   //获取vipdvg
-  getDvgbalance=async()=>{  
+  getDvgbalance = async () => {
     const network = store.getStore('network')
     const account = store.getStore('account')
-    console.log(111111);
-    const assets = [
-      {
-        name:'VIPDVG',
-        symbol:'xDVG',
-        decimals:18,
-        erc20address:'0x3aa8e8B6D3562a1E7aCB0dddD02b27896C00c424',
-        abi:config.xDvgAbi
-
-      },
-      {
-        name:'DVGToken',
-        symbol:'DVG',
-        decimals:18,
-        erc20address:'0xea9726eFc9831EF0499fD4Db4Ab143F15a797673',
-        abi:config.DvgAbi
-      }
-    ]
-    console.log(!account || !account.address,'!account || !account.address##');
+    const assets = this._getDefaultValues(network).dvg
     if (!account || !account.address) {
       return false
     }
@@ -5491,7 +5516,7 @@ class Store {
         if (err) {
           return callback(err)
         }
-        asset.stats = data[2]
+        asset.balance = data[0];
         callback(null, asset)
       })
     }, (err, assets) => {
@@ -5499,10 +5524,237 @@ class Store {
         console.log(err)
         return emitter.emit(ERROR, err)
       }
-      store.setStore({ vaultAssets: assets })
-      return emitter.emit(STRATEGY_BALANCES_FULL_RETURNED, assets)
+      console.log(assets,'assets55221###');
+      store.setStore({ dvg: assets })
+      return emitter.emit(GET_DVG_BALANCE_SUCCESS, assets)
     })
   }
+  //stake 充值dvg
+  depositXdvg = async (payload) => {
+    const account = store.getStore("account");
+
+    const { asset, amount } =
+      payload.content;
+    //asset 是dvg
+    this._callDepositDvg(asset, amount, (err, withdrawResult) => {
+      if (err) {
+        return emitter.emit(ERROR, err);
+      }
+
+      // return emitter.emit(WITHDRAW_VAULT_RETURNED, withdrawResult);
+    })
+
+  }
+  _callDepositDvg = async (asset, amount, callback) => {
+    const account = this.getStore('account');
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      return null;
+    }
+    //创建dvg合约对象
+    const dvgContract = new web3.eth.Contract(
+      asset.abi,
+      asset.erc20address
+    );
+    //判断dvg质押金额是否大于dvg授权数量
+    let xdvg = this.getStore('dvg')[0];
+    //创建xdvg合约对象
+    const xDVGCOntract = new web3.eth.Contract(
+      xdvg.abi,
+      xdvg.erc20address
+    );
+    console.log(xdvg, 'xdvg##5555');
+    //查询xdvg授权数量
+    const allowance = await dvgContract.methods
+      .allowance(account.address, xdvg.erc20address)
+      .call({ from: account.address });
+    console.log(allowance, 'allowance###5552');
+    //xdvg授权数量小于金额的话 需要重新授权
+    if (parseFloat(amount) > parseFloat(allowance)) {
+      let _amount = web3.utils.toWei(amount, "ether");
+
+      this._callDvgApproval(account, amount, (err) => {
+        if (err) {
+          return emitter.emit(ERROR, err);
+        }
+        xDVGCOntract.methods
+          .deposit(_amount)
+          .send({
+            from: account.address,
+          })
+          .on("transactionHash", function (hash) {
+            console.log(hash, 'hash###');
+            callback(null, hash);
+          })
+          .on("confirmation", function (confirmationNumber, receipt) {
+            console.log(confirmationNumber, receipt);
+          })
+          .on("receipt", function (receipt) {
+            console.log(receipt);
+          })
+          .on("error", function (error) {
+            if (!error.toString().includes("-32601")) {
+              if (error.message) {
+                return callback(error.message);
+              }
+              callback(error);
+            }
+          })
+          .catch((error) => {
+            if (!error.toString().includes("-32601")) {
+              if (error.message) {
+                return callback(error.message);
+              }
+              callback(error);
+            }
+          })
+      })
+    } else {
+      let _amount = web3.utils.toWei(amount, "ether");
+      console.log(_amount, '_amount##');
+      xDVGCOntract.methods
+        .deposit(_amount)
+        .send({
+          from: account.address,
+        })
+        .on("transactionHash", function (hash) {
+          console.log(hash, 'hash###');
+          callback(null, hash);
+        })
+        .on("confirmation", function (confirmationNumber, receipt) {
+          console.log(confirmationNumber, receipt);
+        })
+        .on("receipt", function (receipt) {
+          console.log(receipt);
+        })
+        .on("error", function (error) {
+          if (!error.toString().includes("-32601")) {
+            if (error.message) {
+              return callback(error.message);
+            }
+            callback(error);
+          }
+        })
+        .catch((error) => {
+          if (!error.toString().includes("-32601")) {
+            if (error.message) {
+              return callback(error.message);
+            }
+            callback(error);
+          }
+        })
+    }
+  }
+
+  _callDvgApproval = async (account, amount, callback) => {
+    const web3 = new Web3(store.getStore("web3context").library.provider);
+    let asset = store.getStore('dvg')[1];//dvg
+    let xdvg = store.getStore('dvg')[0];//xdvg
+    let dvgContract = new web3.eth.Contract(
+      asset.abi,
+      asset.erc20address
+    );
+    dvgContract.methods
+      .approve(xdvg.erc20address, web3.utils.toWei("999999999999", "ether"))
+      .send({
+        from: account.address,
+      })
+      .on("transactionHash", function (hash) {
+        //success...
+        callback();
+      })
+      .on("error", function (error) {
+        console.log('5682');
+        if (!error.toString().includes("-32601")) {
+          if (error.message) {
+            return callback(error.message);
+          }
+          callback(error);
+        }
+      });
+  };
+  //unstake 提现dvg
+  withdrawXdvg = async (payload) => {
+    const account = store.getStore("account");
+    const { asset, amount } =
+      payload.content;
+    //asset 是dvg
+    this._callWithdrawXdvg(asset, amount, (err, withdrawResult) => {
+      if (err) {
+        return emitter.emit(ERROR, err);
+      }
+      dispatcher.dispatch({ type: GET_DVG_INFO })
+      // return emitter.emit(WITHDRAW_VAULT_RETURNED, withdrawResult);
+    })
+  }
+
+  _callWithdrawXdvg = async (asset, amount, callback) => {
+    const account = this.getStore('account');
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      return null;
+    }
+    let xdvg = this.getStore('dvg')[0];
+    //创建xdvg合约对象
+    const xDVGCOntract = new web3.eth.Contract(
+      xdvg.abi,
+      xdvg.erc20address
+    );
+    let _amount = web3.utils.toWei(amount, "ether");
+    xDVGCOntract.methods
+      .withdraw(_amount)
+      .send({
+        from: account.address,
+      })
+      .on("transactionHash", function (hash) {
+        console.log(hash, 'hash###');
+        callback(null, hash);
+      })
+      .on("confirmation", function (confirmationNumber, receipt) {
+        console.log(confirmationNumber, receipt);
+      })
+      .on("receipt", function (receipt) {
+        console.log(receipt);
+      })
+      .on("error", function (error) {
+        if (!error.toString().includes("-32601")) {
+          if (error.message) {
+            return callback(error.message);
+          }
+          callback(error);
+        }
+      })
+      .catch((error) => {
+        if (!error.toString().includes("-32601")) {
+          if (error.message) {
+            return callback(error.message);
+          }
+          callback(error);
+        }
+      })
+
+  }
+  getDvgApr=async()=>{
+    const apr= await this._getDvgApr();
+    const aprInfo = apr.xdvg;
+    store.setStore({
+      dvgApr:apr.xdvg
+    });
+    return emitter.emit(GET_XDVG_APR_SUCCESS, aprInfo);
+
+  }
+  _getDvgApr = async () => {
+    try {
+      const url = config.statsProvider + "staking/get-xdvg-stake";
+      const statisticsString = await rp(url);
+      const statistics = JSON.parse(statisticsString);
+      return statistics.body;
+    } catch (e) {
+      console.log(e);
+      // return store.getStore('universalGasPrice')
+    }
+  };
+
 }
 
 

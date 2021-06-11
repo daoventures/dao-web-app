@@ -9,7 +9,14 @@ import {
     CHANGE_NETWORK,
     GET_DASHBOARD_SNAPSHOT,
     DASHBOARD_SNAPSHOT_RETURNED,
-    GET_VAULT_BALANCES_FULL
+    GET_VAULT_BALANCES_FULL,
+    GET_DVG_BALANCE_SUCCESS,
+    DEPOSIT_XDVG,
+    GET_XDVG_BALANCE,
+    GET_XDVG_BALANCE_SUCCESS,
+    WIDTHDRAW_XDVG,
+    GET_DVG_APR,
+    GET_XDVG_APR_SUCCESS
 } from '../../constants'
 import Store from "../../stores";
 import ConnectWallet from "../connectWallet";
@@ -128,13 +135,15 @@ const styles = theme => ({
         background: theme.themeColors.blockBorder,
         color: theme.themeColors.textT,
         lineHeight: '32px',
-        textAlign: 'center'
+        textAlign: 'center',
+        cursor:'pointer'
     },
     unStake: {
         width: '90px',
         color: theme.themeColors.textP,
         lineHeight: '32px',
-        textAlign: 'center'
+        textAlign: 'center',
+        cursor:'pointer'
     },
     available: {
         fontSize: '16px',
@@ -151,7 +160,8 @@ const styles = theme => ({
         height: '56px',
         background: 'rgba(0,0,0,.2)',
         padding: '0 20px',
-        border: 'none'
+        border: 'none',
+        color:theme.themeColors.textT
     },
     approveStaking: {
         height: '44px',
@@ -176,7 +186,8 @@ const styles = theme => ({
         position: 'absolute',
         right: '20px',
         top: '50%',
-        marginTop: '-12px'
+        marginTop: '-12px',
+        cursor:'pointer'
     },
     contentRight: {
         // width: '460px',
@@ -357,15 +368,19 @@ class StakeDvgVip extends Component {
         this.state = {
             assets: store.getStore('account'),
             account: account,
-            onboard: ''
+            onboard: '',
+            dvgInfoObj:'',
+            amount:'',
+            type:'stake',
+            aprInfo:{}
         }
-
-        console.log(account, dashboard, 'account##');
-        console.log(this.state.account, 'account##');
+        console.log(account,'account####');
         if (account && account.address) {
             dispatcher.dispatch({ type: GET_DVG_INFO })
+            dispatcher.dispatch({ type: GET_XDVG_BALANCE })
         }
         dispatcher.dispatch({ type: GET_VAULT_BALANCES_FULL })
+        dispatcher.dispatch({type:GET_DVG_APR})
     }
     componentWillMount() {
         const onboard = initOnboard({
@@ -396,20 +411,21 @@ class StakeDvgVip extends Component {
         this.setState({
             onboard: onboard
         });
-        console.log(onboard.getState(), 'onboard.getState(###');
         store.setStore({ 'onboard': onboard });
-        // dispatcher.dispatch({ type: GET_DVG_INFO })
         emitter.on(CHANGE_NETWORK, this.networkChanged);
         emitter.on(DASHBOARD_SNAPSHOT_RETURNED, this.dashboardSnapshotReturned);
         emitter.on(CONNECTION_CONNECTED, this.connectionConnected);
-
+        emitter.on(GET_DVG_BALANCE_SUCCESS,this.dvgBalance)
+        emitter.on(GET_XDVG_BALANCE_SUCCESS,this.xdvgBalance)
+        emitter.on(GET_XDVG_APR_SUCCESS,this.getAprInfo)
     }
 
     componentWillUnmount() {
         emitter.removeListener(CHANGE_NETWORK, this.networkChanged);
         emitter.removeListener(DASHBOARD_SNAPSHOT_RETURNED, this.dashboardSnapshotReturned);
         emitter.removeListener(CONNECTION_CONNECTED, this.connectionConnected);
-
+        emitter.on(GET_DVG_BALANCE_SUCCESS,this.dvgBalance)
+        emitter.on(GET_XDVG_BALANCE_SUCCESS,this.xdvgBalance)
     }
 
 
@@ -429,9 +445,70 @@ class StakeDvgVip extends Component {
     connectionConnected = () => {
         const { period } = this.state;
         const account = store.getStore('account')
+        console.log(account,'account428##3');
         this.setState({ loading: true, account: account })
+            if (account && account.address) {
+                dispatcher.dispatch({ type: GET_DVG_INFO })
+            }
         dispatcher.dispatch({ type: GET_DASHBOARD_SNAPSHOT, content: { interval: period } })
     };
+    
+    dvgBalance =(asset)=>{
+            this.setState({
+                dvgInfoObj:asset
+            })
+    }
+
+
+    xdvgBalance =(asset)=>{
+        this.setState({
+            dvgInfoObj:asset
+        })
+    }
+
+    submitStake=()=>{
+        if(this.state.type=='stake'){
+            dispatcher.dispatch({type:DEPOSIT_XDVG,content:{amount:this.state.amount,asset:this.state.dvgInfoObj[0]}})
+        }else{
+            dispatcher.dispatch({type:WIDTHDRAW_XDVG,content:{amount:this.state.amount,asset:this.state.dvgInfoObj[1]}})
+        }
+    }
+
+    onChange = (event) => {
+        this.setState({
+            amount:event.target.value
+        })
+      }
+
+    stakeTab = (type) =>{
+        if(type!==this.state.type){
+            this.setState({
+                type:type,
+                amount:''
+            })
+        }
+    }
+
+    maxAmount(){
+        const {type,dvgInfoObj} = this.state;
+        if(type=='stake'){
+            this.setState({
+                amount:dvgInfoObj&&dvgInfoObj[1].balance
+            })
+        }else{
+            this.setState({
+                amount:dvgInfoObj&&dvgInfoObj[0].balance
+            })
+        }
+    }
+
+    getAprInfo=()=>{
+        const aprInfo = store.getStore('dvgApr');
+        console.log(aprInfo,'aprInfo##');
+        this.setState({
+            aprInfo:aprInfo
+        })
+    }
 
     render() {
         const {
@@ -439,12 +516,14 @@ class StakeDvgVip extends Component {
         } = this.props;
         const {
             loading,
-            dashboard,
-            growth,
-            currency,
             account,
-            modalOpen,
+            amount,
+            type,
+            dvgInfoObj,
+            aprInfo
         } = this.state
+        const dvgBalance=dvgInfoObj&&dvgInfoObj[1].balance;
+        const xdvgBalance=dvgInfoObj&&dvgInfoObj[0].balance;
         if (!account || !account.address) {
             return <ConnectWallet></ConnectWallet>
         } else {
@@ -475,17 +554,17 @@ class StakeDvgVip extends Component {
                         <div className={classes.contentCenter}>
                             <div className={classes.contentHeader}>
                                 <div className={classes.stakeTab}>
-                                    <div className={classes.stake}>Stake</div>
-                                    <div className={classes.unStake}>Unstake</div>
+                                    <div className={type=='stake'?classes.stake:classes.unStake} onClick={()=>this.stakeTab('stake')}>Stake</div>
+                                    <div className={type=='stake'?classes.unStake:classes.stake} onClick={()=>this.stakeTab('unStake')}>Unstake</div>
                                 </div>
-                                <div className={classes.available}>Available：0.112100DVG</div>
+                                <div className={classes.available}>Available：{Number(dvgBalance).toFixed(2)}DVG</div>
                             </div>
                             <div className={classes.stakeInput}>
 
-                                <input className={classes.input} type="text" />
-                                <div className={classes.max}>Max</div>
+                                <input className={classes.input} value={amount} onChange={this.onChange} type="text" />
+                                <div className={classes.max} onClick={()=>this.maxAmount()}>Max</div>
                             </div>
-                            <div className={classes.approveStaking}>
+                            <div className={classes.approveStaking} onClick={()=>{this.submitStake()}}>
                                 Approve Staking
                         </div>
                         </div>
@@ -503,7 +582,7 @@ class StakeDvgVip extends Component {
                                 <img className={classes.smallImg} src={require("../../assets/stakeImg/apy-icon@2x.png")} alt="" />
                                 <div className={classes.aprText}>
                                     <p className={classes.totalTextTile}>APR</p>
-                                    <p className={classes.totalTextNum}>12.09%</p>
+                                    <p className={classes.totalTextNum}>{aprInfo.apr} %</p>
                                 </div>
                             </div>
                         </div>
@@ -511,7 +590,7 @@ class StakeDvgVip extends Component {
                             <img className={classes.bigImg} src={require("../../assets/stakeImg/liquidity-icon@2x.png")} alt="" />
                             <div className={classes.myAssetstext}>
                                 <p className={classes.myAssetsTitle}>My vipDVG</p>
-                                <p className={classes.myAssetsNum}>2300,120.12234</p>
+                                <p className={classes.myAssetsNum}>{Number(xdvgBalance).toFixed(2)}</p>
                                 <p className={classes.myAssetsRate}>≈ $ 1,0002.00</p>
                             </div>
                         </div>
