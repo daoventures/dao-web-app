@@ -602,7 +602,7 @@ class Asset extends Component {
 
     const tokenMap = { USDT: "0", USDC: "1", DAI: "2" };
     const tokenIndex = tokenMap[currencyType];
-    
+
     asset.symbol = asset.symbols[tokenIndex];
     asset.balance = asset.balances[tokenIndex];
     asset.erc20address = asset.erc20addresses[tokenIndex];
@@ -1452,8 +1452,9 @@ class Asset extends Component {
                           {asset.strategyBalance
                             ? (
                                 Math.floor(
-                                  asset.strategyBalance *
-                                    asset.compoundExchangeRate *
+                                  ((asset.strategyBalance *
+                                    asset.compoundExchangeRate) /
+                                    10 ** 6) *
                                     10000
                                 ) / 10000
                               ).toFixed(4)
@@ -1559,8 +1560,8 @@ class Asset extends Component {
                           noWrap>
                           {(asset.strategyBalance
                             ? (
-                                Math.floor(asset.strategyBalance * 10000) /
-                                10000
+                                asset.strategyBalance /
+                                10 ** asset.decimals
                               ).toFixed(4)
                             : "0.0000") + " daoCDV"}{" "}
                           {asset.strategyBalance > 0 && (
@@ -2227,6 +2228,8 @@ class Asset extends Component {
         return false;
       }
 
+      let shares = (redeemAmount * 10 ** asset.decimals).toString();
+
       this.setState({ loading: true });
       startLoading();
 
@@ -2235,7 +2238,7 @@ class Asset extends Component {
         content: {
           earnAmount: "0",
           vaultAmount: "0",
-          amount: redeemAmount,
+          amount: shares,
           asset: asset,
           tokenIndex: tokenIndex,
         },
@@ -2295,8 +2298,17 @@ class Asset extends Component {
     }
 
     const balance = this.props.asset.strategyBalance;
-    let amount = (balance * percent) / 100;
-    amount = Math.floor(amount * 10000) / 10000;
+    const decimals = this.props.asset.decimals;
+    const asset = this.props.asset;
+    let amount;
+
+    if (asset.strategyType === "citadel") {
+      amount = (balance * percent) / 100;
+      amount = Math.floor((amount / 10 ** decimals) * 10000) / 10000;
+    } else {
+      amount = (balance * percent) / 100;
+      amount = Math.floor((amount * 10000) / 10000);
+    }
 
     this.setState({
       redeemAmount: amount.toFixed(4),
@@ -2310,6 +2322,7 @@ class Asset extends Component {
     }
 
     const balance = this.props.asset.vaultBalance;
+
     let amount = (balance * percent) / 100;
     amount = Math.floor(amount * 10000) / 10000;
 
