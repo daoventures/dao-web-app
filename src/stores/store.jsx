@@ -3811,16 +3811,19 @@ class Store {
         .balanceOf(account.address)
         .call({ from: account.address });
 
+      console.log(account.address, depositedShares);
+      console.log(account.address, depositedShares.toString());
+
       const depositedSharesInUSD =
         (depositedShares * pool) / totalSupply / 10 ** 6;
 
-      depositedShares = parseFloat(depositedShares) / 10 ** decimals;
+      // depositedShares = parseFloat(depositedShares) / 10 ** decimals;
 
       callback(null, {
         earnBalance: 0,
         vaultBalance: 0,
         strategyBalance: depositedShares,
-        depositedSharesInUSD,
+        depositedSharesInUSD: depositedSharesInUSD,
       });
     }
   };
@@ -5355,6 +5358,7 @@ class Store {
 
   withdrawBothAll = (payload) => {
     let { asset, tokenIndex } = payload.content;
+    console.log(asset.strategyBalance);
     this.withdrawBoth({
       content: {
         earnAmount: asset.earnBalance.toString(),
@@ -5383,8 +5387,22 @@ class Store {
       .balanceOf(asset.vaultContractAddress)
       .call();
 
-    let withdrawAmountUSD = withdrawAmount * asset.citadelPricePerFullShare;
-    console.log(withdrawAmount, withdrawAmountUSD, balance);
+    const pool = await citadelContract.methods.getAllPoolInUSD().call();
+    const totalSupply = await citadelContract.methods.totalSupply().call();
+    const decimals = await citadelContract.methods.decimals().call();
+
+    const withdrawAmountUSD = (withdrawAmount * pool) / totalSupply / 10 ** 6;
+    const withdawAmountInToken =
+      withdrawAmountUSD / asset.priceInUSD[tokenIndex];
+
+    console.log(
+      withdrawAmount,
+      withdawAmountInToken,
+      balance,
+      asset.citadelPricePerFullShare
+    );
+
+    console.log("withdrawAmount", withdrawAmountUSD, "balance", balance);
     if (withdrawAmountUSD > balance) {
       alert("Citadel might have insufficient liquidity");
     }
@@ -5502,29 +5520,33 @@ class Store {
           }
         });
     } else if (asset.strategyType === "citadel") {
-      // TODO: Get decimals from contract
       // We are withdrawing daoCDV and exchanging for Stablecoin
       let erc20Contract = new web3.eth.Contract(
         config.erc20ABI,
         asset.vaultContractAddress
       );
 
-      let decimals = await erc20Contract.methods.decimals().call();
+      const citadelContract = new web3.eth.Contract(
+        asset.vaultContractABI,
+        asset.vaultContractAddress
+      );
 
-      let shares = web3.utils.toBN(amount * 10 ** decimals).toString();
+      // let decimals = await erc20Contract.methods.decimals().call();
 
-      console.log("Citadel Withdraw:", shares, tokenIndex);
+      // let shares = web3.utils.toBN(amount * 10 ** decimals).toString();
+
+      console.log("Citadel Withdraw:", amount, tokenIndex);
 
       // Soft Check for sufficient liquidity
       this._isSufficientLiquidityCitadel(
         asset,
-        erc20Contract,
-        shares,
+        citadelContract,
+        amount,
         tokenIndex
       );
 
       const functionCall = await vaultContract.methods
-        .withdraw(shares, tokenIndex)
+        .withdraw(amount, tokenIndex)
         .send({
           from: account.address,
           gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
