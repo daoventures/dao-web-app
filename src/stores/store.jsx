@@ -59,6 +59,10 @@ import {
   TOGGLE_THEME, // 切换主题
   CURRENT_THEME_RETURNED, // 返回当前主题
   GET_VAULT_INFO, //获取接口信息
+  BASIC,
+  ADVANCE,
+  EXPERT,
+  DEGEN
 } from "../constants";
 import Web3 from "web3";
 
@@ -428,14 +432,15 @@ class Store {
           strategyContractABI: config.strategyDAOCDVContractABI,
           historicalPriceId: "daoCDV_price",
           logoFormat: "svg",
-          risk: "Expert",
+          risk: EXPERT,
           strategyType: "citadel",
           cTokenAddress: "",
           cAbi: "",
-          group: "Expert",
+          group: EXPERT,
           tvlKey: "daoCDV_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-citadel-vault",
+          isPopularItem: true // use to render popular item icon
         },
         {
           id: "USDT",
@@ -462,12 +467,13 @@ class Store {
           vaultABI: config.vaultContractV3ABI,
           historicalPriceId: "yUSDT_price",
           logoFormat: "png",
-          risk: "Medium",
+          risk: ADVANCE,
           strategyType: "yearn",
-          group: "Advance",
+          group: ADVANCE,
           tvlKey: "yUSDT_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
+          isPopularItem: false
         },
         {
           id: "DAI",
@@ -495,12 +501,13 @@ class Store {
           vaultABI: config.vaultContractV3ABI,
           historicalPriceId: "yDAI_price",
           logoFormat: "png",
-          risk: "Medium",
+          risk: ADVANCE,
           strategyType: "yearn",
-          group: "Advance",
+          group: ADVANCE,
           tvlKey: "yDAI_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
+          isPopularItem: false
         },
         {
           id: "TUSD",
@@ -527,12 +534,13 @@ class Store {
           vaultABI: config.vaultContractV3ABI,
           historicalPriceId: "yTUSD_price",
           logoFormat: "png",
-          risk: "Medium",
+          risk: ADVANCE,
           strategyType: "yearn",
-          group: "Advance",
+          group: ADVANCE,
           tvlKey: "yTUSD_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
+          isPopularItem: false
         },
         {
           id: "USDC",
@@ -559,12 +567,13 @@ class Store {
           vaultABI: config.vaultContractABI,
           historicalPriceId: "yUSDC_price",
           logoFormat: "png",
-          risk: "Medium",
+          risk: ADVANCE,
           strategyType: "yearn",
-          group: "Advance",
+          group: ADVANCE,
           tvlKey: "yUSDC_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
+          isPopularItem: false
         },
         {
           id: "cUSDT",
@@ -590,14 +599,15 @@ class Store {
           strategyContractABI: config.compundStrategyCompundABI,
           historicalPriceId: "cUSDT_price",
           logoFormat: "png",
-          risk: "Low",
+          risk: BASIC,
           strategyType: "compound",
           cTokenAddress: "0xf650c3d88d12db855b8bf7d11be6c55a4e07dcc9",
           cAbi: config.cUSDTContract,
-          group: "Basic",
+          group: BASIC,
           tvlKey: "cUSDT_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
+          isPopularItem: false
         },
         {
           id: "cUSDC",
@@ -623,14 +633,15 @@ class Store {
           strategyContractABI: config.compundStrategyCompundABI,
           historicalPriceId: "cUSDC_price",
           logoFormat: "png",
-          risk: "Low",
+          risk: BASIC,
           strategyType: "compound",
           cTokenAddress: "0x39aa39c021dfbae8fac545936693ac917d5e7563",
           cAbi: config.cUSDCContract,
-          group: "Basic",
+          group: BASIC,
           tvlKey: "cUSDT_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
+          isPopularItem: false
         },
         {
           id: "cDAI",
@@ -656,14 +667,15 @@ class Store {
           strategyContractABI: config.compundStrategyCompundABI,
           historicalPriceId: "cDAI_price",
           logoFormat: "png",
-          risk: "Low",
+          risk: BASIC,
           strategyType: "compound",
           cTokenAddress: "0x5d3a536e4d6dbd6114cc1ead35777bab948e3643",
           cAbi: config.cDAIContract,
-          group: "Basic",
+          group: BASIC,
           tvlKey: "cDAI_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
+          isPopularItem: false
         },
       ],
       42: [
@@ -700,14 +712,15 @@ class Store {
           strategyContractABI: config.strategyDAOCDVContractABI,
           historicalPriceId: "daoCDV_price",
           logoFormat: "svg",
-          risk: "Expert",
+          risk: EXPERT,
           strategyType: "citadel",
           cTokenAddress: "",
           cAbi: "",
-          group: "Expert",
+          group: EXPERT,
           tvlKey: "daoCDV_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-citadel-vault",
+          isPopularItem: true
         },
         {
           id: "USDT",
@@ -734,12 +747,13 @@ class Store {
           vaultABI: config.vaultContractV3ABI,
           historicalPriceId: "yUSDT_price",
           logoFormat: "png",
-          risk: "Medium",
+          risk: ADVANCE,
           strategyType: "yearn",
-          group: "Advance",
+          group: ADVANCE,
           tvlKey: "yUSDT_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
+          isPopularItem: false
         },
         {
           id: "DAI",
@@ -767,12 +781,13 @@ class Store {
           vaultABI: config.vaultContractV3ABI,
           historicalPriceId: "yDAI_price",
           logoFormat: "png",
-          risk: "Medium",
+          risk: ADVANCE,
           strategyType: "yearn",
-          group: "Advance",
+          group: ADVANCE,
           tvlKey: "yDAI_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
+          isPopularItem: false
         },
         {
           id: "TUSD",
@@ -799,12 +814,13 @@ class Store {
           vaultABI: config.vaultContractV3ABI,
           historicalPriceId: "yTUSD_price",
           logoFormat: "png",
-          risk: "Medium",
+          risk: ADVANCE,
           strategyType: "yearn",
-          group: "Advance",
+          group: ADVANCE,
           tvlKey: "yTUSD_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
+          isPopularItem: false
         },
         {
           id: "USDC",
@@ -831,12 +847,13 @@ class Store {
           vaultABI: config.vaultContractABI,
           historicalPriceId: "yUSDC_price",
           logoFormat: "png",
-          risk: "Medium",
+          risk: ADVANCE,
           strategyType: "yearn",
-          group: "Advance",
+          group: ADVANCE,
           tvlKey: "cUSDC_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
+          isPopularItem: false
         },
         {
           id: "cUSDT",
@@ -862,14 +879,15 @@ class Store {
           strategyContractABI: config.compundStrategyCompundABI,
           historicalPriceId: "cUSDT_price",
           logoFormat: "png",
-          risk: "Low",
+          risk: BASIC,
           strategyType: "compound",
           cTokenAddress: "0x3f0A0EA2f86baE6362CF9799B523BA06647Da018",
           cAbi: config.cUSDTContract,
-          group: "Basic",
+          group: BASIC,
           tvlKey: "cUSDT_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
+          isPopularItem: false
         },
         {
           id: "cUSDC",
@@ -895,14 +913,15 @@ class Store {
           strategyContractABI: config.compundStrategyCompundABI,
           historicalPriceId: "cUSDC_price",
           logoFormat: "png",
-          risk: "Low",
+          risk: BASIC,
           strategyType: "compound",
           cTokenAddress: "0x39aa39c021dfbae8fac545936693ac917d5e7563",
           cAbi: config.cUSDCContract,
-          group: "Basic",
+          group: BASIC,
           tvlKey: "cUSDT_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
+          isPopularItem: false
         },
         {
           id: "cDAI",
@@ -928,14 +947,15 @@ class Store {
           strategyContractABI: config.compundStrategyCompundABI,
           historicalPriceId: "cDAI_price",
           logoFormat: "png",
-          risk: "Low",
+          risk: BASIC,
           strategyType: "compound",
           cTokenAddress: "0x5d3a536e4d6dbd6114cc1ead35777bab948e3643",
           cAbi: config.cDAIContract,
-          group: "Basic",
+          group: BASIC,
           tvlKey: "cDAI_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
+          isPopularItem: false
         },
       ],
     };
@@ -1640,12 +1660,6 @@ class Store {
         .allowance(account.address, contract)
         .call({ from: account.address });
 
-      console.log(
-        await erc20Contract.methods.symbol().call(),
-        account.address,
-        contract
-      );
-
       const ethAllowance = web3.utils.fromWei(allowance, "ether");
       if (parseFloat(ethAllowance) < parseFloat(amount)) {
         /*
@@ -1732,12 +1746,6 @@ class Store {
       const allowance = await erc20Contract.methods
         .allowance(account.address, contract)
         .call({ from: account.address });
-
-      console.log(
-        await erc20Contract.methods.symbol().call(),
-        account.address,
-        contract
-      );
 
       const ethAllowance = web3.utils.fromWei(allowance, "ether");
       if (parseFloat(ethAllowance) < parseFloat(amount)) {
@@ -2137,8 +2145,6 @@ class Store {
             asset.investedBalance = data[1];
             asset.price = data[2];
             asset.maxApr = data[3];
-
-            console.log(asset);
             callback(null, asset);
           }
         );
@@ -2155,7 +2161,6 @@ class Store {
   };
 
   getBalances = async () => {
-    console.log("GB");
     const account = store.getStore("account");
 
     const assets = store.getStore("assets");
@@ -2277,9 +2282,7 @@ class Store {
         if (err) {
           return emitter.emit(ERROR, err);
         }
-
         store.setStore({ assets: assets });
-        console.log("AAAAAAAAAAAAAAAAAAA", assets);
         return emitter.emit(BALANCES_RETURNED, assets);
       }
     );
@@ -2467,7 +2470,6 @@ class Store {
       }
       callback(null, parseFloat(value));
     } catch (e) {
-      console.log(asset);
       console.log(e);
       callback(null, 0);
     }
@@ -3542,7 +3544,6 @@ class Store {
             asset.vaultContractAddress.toLowerCase()
           );
         });
-        console.log(asset.strategyType, vault);
       } else if (asset.strategyType === "yearn") {
         vault = vaultStatistics.filter((stats) => {
           if (typeof stats.tokenAddress == "string") {
@@ -3556,7 +3557,6 @@ class Store {
             );
           }
         });
-        console.log(asset.strategyType, vault);
       } else if (asset.strategyType === "citadel") {
         vault = vaultStatistics.filter((stats) => {
           return (
@@ -3564,7 +3564,6 @@ class Store {
             asset.vaultContractAddress.toLowerCase()
           );
         });
-        console.log(asset.strategyType, vault);
       }
 
       if (vault.length === 0) {
@@ -3671,7 +3670,6 @@ class Store {
       balance = parseFloat(balance - available) / 10 ** asset.decimals;
       callback(null, parseFloat(balance));
     } catch (ex) {
-      console.log(asset);
       console.log(ex);
     }
   };
@@ -3937,7 +3935,6 @@ class Store {
           if (err) {
             return emitter.emit(ERROR, err);
           }
-          console.log("Citadel Deposit:", tokenIndex, amount);
           // TODO: Modify _callDepositAmountContract to handle citadel
           this._callDepositAmountContractCitadel(
             asset,
@@ -4108,7 +4105,6 @@ class Store {
 
     var amountToSend = web3.utils.toBN(amount * 10 ** decimals).toString();
 
-    console.log(amountToSend);
     vaultContract.methods
       .deposit(amountToSend, tokenIndex)
       .send({
@@ -4154,7 +4150,6 @@ class Store {
       amountToSend = web3.utils.toBN(amount * 10 ** asset.decimals).toString();
     }
 
-    console.log(amountToSend);
     vaultContract.methods
       .deposit(amountToSend)
       .send({
@@ -4346,7 +4341,7 @@ class Store {
           if (err) {
             return emitter.emit(ERROR, err);
           }
-          console.log("Citadel Deposit:", tokenIndex, amount);
+
           this._callDepositAmountContractCitadel(
             asset,
             account,
@@ -4495,7 +4490,7 @@ class Store {
     if (asset.decimals !== 18) {
       amountSend = Math.round(amount * 10 ** asset.decimals);
     }
-    console.log(amountSend);
+
     let functionCall = vaultContract.methods.withdrawVault(amountSend);
     if (asset.erc20address === "Ethereum") {
       functionCall = vaultContract.methods.withdrawETH(amountSend);
@@ -5176,7 +5171,6 @@ class Store {
       const url = config.statsProvider + "vaults/apy";
       const statisticsString = await rp(url);
       const statistics = JSON.parse(statisticsString);
-      console.log("STATS", statistics.body);
       return statistics.body;
     } catch (e) {
       console.log(e);
@@ -5384,7 +5378,6 @@ class Store {
       .call();
 
     let withdrawAmountUSD = withdrawAmount * asset.citadelPricePerFullShare;
-    console.log(withdrawAmount, withdrawAmountUSD, balance);
     if (withdrawAmountUSD > balance) {
       alert("Citadel might have insufficient liquidity");
     }
@@ -5513,8 +5506,6 @@ class Store {
 
       let shares = web3.utils.toBN(amount * 10 ** decimals).toString();
 
-      console.log("Citadel Withdraw:", shares, tokenIndex);
-
       // Soft Check for sufficient liquidity
       this._isSufficientLiquidityCitadel(
         asset,
@@ -5564,7 +5555,6 @@ class Store {
   };
 
   getStrategyBalancesFull = async (payload) => {
-    console.log("GSBF");
     const network = store.getStore("network");
     const account = store.getStore("account");
     // const assets = store.getStore('vaultAssets')

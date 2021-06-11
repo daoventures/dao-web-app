@@ -40,6 +40,10 @@ import {
   STRATEGY_BALANCES_FULL_RETURNED,
   CHANGE_NETWORK,
   VAULT_BALANCES_FULL_RETURNED,
+  BASIC,
+  ADVANCE,
+  EXPERT,
+  DEGEN
 } from "../../constants";
 
 import Store from "../../stores";
@@ -705,18 +709,12 @@ class Vault extends Component {
       expanded: "",
       modalOpen: false,
       currentTab: "ALL",
-      tabList: ["ALL", "Basic", "Advance", "Expert", "Degen"],
-      selectedCurrencyMap: new Map([["daoCDV", 0]]),
+      tabList: ["ALL", BASIC, ADVANCE, EXPERT, DEGEN],
     };
 
-    // TODO: undo comment for this afterwards
-    // if(account && account.address) {
-    //   dispatcher.dispatch({ type: GET_STRATEGY_BALANCES_FULL, content: { interval: '30d' } })
-    // }
-    dispatcher.dispatch({
-      type: GET_STRATEGY_BALANCES_FULL,
-      content: { interval: "30d" },
-    });
+    if(account && account.address) {
+      dispatcher.dispatch({ type: GET_STRATEGY_BALANCES_FULL, content: { interval: '30d' } })
+    }
   }
 
   componentWillMount() {
@@ -890,19 +888,6 @@ class Vault extends Component {
     });
   };
 
-  handleSelectedCurrency = (currency) => {
-    const { id, tokenIndex } = currency;
-
-    this.setState((prevState) => {
-      const { selectedCurrencyMap } = prevState;
-      const newCurrencyMap = new Map(selectedCurrencyMap);
-      newCurrencyMap.set(id, tokenIndex);
-      return Object.assign({}, prevState, {
-        selectedCurrencyMap: newCurrencyMap,
-      });
-    });
-  };
-
   render() {
     const { classes } = this.props;
     const { loading, account, snackbarMessage, modalOpen } = this.state;
@@ -1042,30 +1027,7 @@ class Vault extends Component {
 
     return assets
       .filter((asset) => {
-        if (currentTab == "ALL") {
-          return true;
-        } else if (asset.group == currentTab) {
-          return true;
-        } else {
-          return false;
-        }
-        if (hideZero && asset.balance === 0 && asset.vaultBalance === 0) {
-          return false;
-        }
-
-        if (search && search !== "") {
-          return (
-            asset.id.toLowerCase().includes(search.toLowerCase()) ||
-            asset.name.toLowerCase().includes(search.toLowerCase()) ||
-            asset.symbol.toLowerCase().includes(search.toLowerCase()) ||
-            asset.description.toLowerCase().includes(search.toLowerCase()) ||
-            asset.vaultSymbol.toLowerCase().includes(search.toLowerCase())
-          );
-          // asset.erc20address.toLowerCase().includes(search.toLowerCase()) ||
-          // asset.vaultContractAddress.toLowerCase().includes(search.toLowerCase())
-        } else {
-          return true;
-        }
+        return (currentTab == "ALL" || asset.group === currentTab) ? true : false;
       })
       .map((asset, index) => {
         return (
@@ -1080,10 +1042,9 @@ class Vault extends Component {
                     <use xlinkHref="#iconinformation-day"></use>
                   </svg>
                 </a>
+                { this.renderPopularIcon(asset) }
               </Grid>
-              {/* <Grid item sm={6} xs={6}>  */}
               {this.renderRiskLabel(asset)}
-              {/* </Grid> */}
             </Grid>
             <Accordion
               className={classes.expansionPanel}
@@ -1122,7 +1083,6 @@ class Vault extends Component {
                           }
                         />
                       </div>
-                      {/* <Typography variant={ 'body1' } noWrap className={classes.assetName}>{ asset.name }</Typography> */}
                     </Grid>
 
                     <Grid item sm={2} xs={4} className={classes.gridItemColumn}>
@@ -1212,12 +1172,12 @@ class Vault extends Component {
 
                     <Grid item sm={3} xs={6} className={classes.gridItemColumn}>
                       {/** Available to deposit */}
+                      {/** Desktop */}
                       <div className={classes.showDesktop}>
                         <Typography
                           variant={"h5"}
                           className={classes.assetLabel1}>
-                          {asset.strategyType === "citadel" && (
-                            <div>
+                          <div>
                               {(asset.strategyType === "citadel"
                                 ? asset.sumBalances
                                   ? asset.sumBalances.toFixed(2)
@@ -1229,23 +1189,7 @@ class Vault extends Component {
                                 (asset.strategyType === "citadel"
                                   ? "USD"
                                   : asset.symbol)}
-                            </div>
-                          )}
-                          {asset.strategyType !== "citadel" && (
-                            <div>
-                              {(asset.strategyType === "citadel"
-                                ? asset.sumBalances
-                                  ? asset.sumBalances.toFixed(2)
-                                  : "0.00"
-                                : asset.balance
-                                ? asset.balance.toFixed(2)
-                                : "0.00") +
-                                " " +
-                                (asset.strategyType === "citadel"
-                                  ? "USD"
-                                  : asset.symbol)}
-                            </div>
-                          )}
+                          </div>
                         </Typography>
                         <Typography
                           variant={"body1"}
@@ -1254,33 +1198,25 @@ class Vault extends Component {
                         </Typography>
                       </div>
 
+                      {/** Mobile */}
                       <div className={classes.showMobile}>
                         <Typography
                           variant={"h3"}
                           noWrap
                           className={classes.assetLabel1}>
-                          {asset.strategyType === "citadel" && (
-                            <div>
-                              {asset.balances
-                                ? asset.balances[
-                                    this.state.selectedCurrencyMap.get(asset.id)
-                                  ].toFixed(2)
-                                : "0.00"}
-                              {asset.symbols
-                                ? asset.symbols[
-                                    this.state.selectedCurrencyMap.get(asset.id)
-                                  ]
-                                : ""}
-                            </div>
-                          )}
-                          {asset.strategyType !== "citadel" && (
-                            <div>
-                              {asset.balance
+                          <div>
+                              {(asset.strategyType === "citadel"
+                                ? asset.sumBalances
+                                  ? asset.sumBalances.toFixed(2)
+                                  : "0.00"
+                                : asset.balance
                                 ? asset.balance.toFixed(2)
-                                : "0.00"}
-                              {asset.symbol ? asset.symbol : ""}
-                            </div>
-                          )}
+                                : "0.00") +
+                                " " +
+                                (asset.strategyType === "citadel"
+                                  ? "USD"
+                                  : asset.symbol)}
+                          </div>
                         </Typography>
                         <Typography
                           variant={"h5"}
@@ -1311,7 +1247,6 @@ class Vault extends Component {
                   asset={asset}
                   startLoading={this.startLoading}
                   basedOn={basedOn}
-                  onCurrencySelected={this.handleSelectedCurrency}
                   // refreshVault={this.refreshVault}
                 />
               </AccordionDetails>
@@ -1381,11 +1316,11 @@ class Vault extends Component {
     return (
       <div
         className={
-          asset.risk === "Low"
+          asset.risk === BASIC
             ? classes.riskLowLabel
-            : asset.risk === "Medium"
+            : asset.risk === ADVANCE
             ? classes.riskMediumLabel
-            : asset.risk === "Expert"
+            : asset.risk === EXPERT
             ? classes.riskExpertLabel
             : ""
         }>
@@ -1393,6 +1328,17 @@ class Vault extends Component {
       </div>
     );
   };
+
+  renderPopularIcon = (asset) => {
+      return asset.isPopularItem && (
+        <div>
+            <img alt="icon-popular"
+                  src={require('../../assets/img_new/icon_popular.svg')}
+                  style={{marginLeft:'10px'}}
+            />
+        </div>
+      )  
+  }
 
   handleChecked = (event) => {
     this.setState({ hideZero: event.target.checked });
