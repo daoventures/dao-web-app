@@ -38,6 +38,7 @@ import {
   WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
   USD_PRICE_RETURNED,
   GET_STRATEGY_BALANCES_FULL,
+  WITHDRAW_BOTH_VAULT_FAIL_RETURNED,
 } from "../../constants";
 
 import { colors } from "../../theme";
@@ -553,6 +554,7 @@ class Asset extends Component {
     emitter.on(WITHDRAW_VAULT_RETURNED, this.withdrawReturned);
     emitter.on(DEPOSIT_ALL_CONTRACT_RETURNED, this.depositReturned);
     emitter.on(WITHDRAW_BOTH_VAULT_RETURNED, this.withdrawReturned);
+    emitter.on(WITHDRAW_BOTH_VAULT_FAIL_RETURNED, this.errorReturned);
     emitter.on(ERROR, this.errorReturned);
     emitter.on("CURRENT_THEME_RETURNED", this.currentThemeChanged);
     emitter.on(USD_PRICE_RETURNED, this.handleUSDPricesReturned);
@@ -569,6 +571,7 @@ class Asset extends Component {
     emitter.removeListener(WITHDRAW_VAULT_RETURNED, this.withdrawReturned);
     emitter.removeListener(DEPOSIT_ALL_CONTRACT_RETURNED, this.depositReturned);
     emitter.removeListener(WITHDRAW_BOTH_VAULT_RETURNED, this.withdrawReturned);
+    emitter.removeListener(WITHDRAW_BOTH_VAULT_FAIL_RETURNED, this.errorReturned);
     emitter.removeListener(ERROR, this.errorReturned);
     window.removeEventListener("resize", this.resize.bind(this));
     emitter.removeListener("CURRENT_THEME_RETURNED", this.currentThemeChanged);
@@ -1453,8 +1456,7 @@ class Asset extends Component {
                             ? (
                                 Math.floor(
                                   ((asset.strategyBalance *
-                                    asset.compoundExchangeRate) /
-                                    10 ** 6) *
+                                    asset.compoundExchangeRate)) *
                                     10000
                                 ) / 10000
                               ).toFixed(4)

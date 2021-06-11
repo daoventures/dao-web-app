@@ -42,6 +42,7 @@ import {
   DEPOSIT_ALL_CONTRACT_RETURNED_COMPLETED,
   WITHDRAW_VAULT,
   WITHDRAW_VAULT_RETURNED,
+  WITHDRAW_BOTH_VAULT_FAIL_RETURNED,
   WITHDRAW_VAULT_RETURNED_COMPLETED,
   WITHDRAW_BOTH_VAULT,
   WITHDRAW_BOTH_VAULT_RETURNED,
@@ -440,7 +441,7 @@ class Store {
           tvlKey: "daoCDV_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-citadel-vault",
-          isPopularItem: true // use to render popular item icon
+          isPopularItem: true, // use to render popular item icon
         },
         {
           id: "USDT",
@@ -720,7 +721,7 @@ class Store {
           tvlKey: "daoCDV_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-citadel-vault",
-          isPopularItem: true
+          isPopularItem: true,
         },
         {
           id: "USDT",
@@ -3812,19 +3813,13 @@ class Store {
 
       const pool = await vaultContract.methods.getAllPoolInUSD().call();
       const totalSupply = await vaultContract.methods.totalSupply().call();
-      const decimals = await vaultContract.methods.decimals().call();
 
       let depositedShares = await vaultContract.methods
         .balanceOf(account.address)
         .call({ from: account.address });
 
-      console.log(account.address, depositedShares);
-      console.log(account.address, depositedShares.toString());
-
       const depositedSharesInUSD =
         (depositedShares * pool) / totalSupply / 10 ** 6;
-
-      // depositedShares = parseFloat(depositedShares) / 10 ** decimals;
 
       callback(null, {
         earnBalance: 0,
@@ -4807,6 +4802,7 @@ class Store {
         const daysPerYear = 365;
         const supplyRatePerBlock = parseFloat(await compoundContract.methods.supplyRatePerBlock().call());
         const supplyApy = (((Math.pow((supplyRatePerBlock / ethMantissa * blocksPerDay) + 1, daysPerYear))) - 1) * 100;
+
         const returnObj = {
           earnPricePerFullShare: 0,
           vaultPricePerFullShare: 0,
@@ -5359,12 +5355,11 @@ class Store {
 
   withdrawBothAll = (payload) => {
     let { asset, tokenIndex } = payload.content;
-    console.log(asset.strategyBalance);
     this.withdrawBoth({
       content: {
-        earnAmount: Math.floor(asset.earnBalance).toString(), // Round down decimals
-        vaultAmount: Math.floor(asset.vaultBalance).toString(), // Round down decimals
-        amount: asset.balance.toString(),
+        earnAmount: asset.earnBalance.toString(), 
+        vaultAmount: asset.vaultBalance.toString(),
+        amount: asset.strategyBalance.toString(),
         tokenIndex: tokenIndex,
         asset,
       },
@@ -5384,29 +5379,23 @@ class Store {
       asset.erc20addresses[tokenIndex]
     );
 
-    let balance = await erc20Contract.methods
+    let balance = parseFloat(await erc20Contract.methods
       .balanceOf(asset.vaultContractAddress)
-      .call();
+      .call());
 
+    const decimals = parseInt(await erc20Contract.methods.decimals().call());
     const pool = await citadelContract.methods.getAllPoolInUSD().call();
     const totalSupply = await citadelContract.methods.totalSupply().call();
-    const decimals = await citadelContract.methods.decimals().call();
 
-    const withdrawAmountUSD = (withdrawAmount * pool) / totalSupply / 10 ** 6;
+    const withdrawAmountUSD = (withdrawAmount * pool) / totalSupply * 10 ** (decimals - 6);
     const withdawAmountInToken =
       withdrawAmountUSD / asset.priceInUSD[tokenIndex];
 
-    console.log(
-      withdrawAmount,
-      withdawAmountInToken,
-      balance,
-      asset.citadelPricePerFullShare
-    );
-
-    console.log("withdrawAmount", withdrawAmountUSD, "balance", balance);
-    if (withdrawAmountUSD > balance) {
+    if (withdawAmountInToken > balance) {
       alert("Citadel might have insufficient liquidity");
+      return false;
     }
+    return true;
   };
 
   // TODO: REFACTOR: Currently all 3 types of vaults use this
@@ -5425,14 +5414,14 @@ class Store {
       var earnAmountSend = web3.utils.toWei(earnAmount, "ether");
       if (asset.decimals !== 18) {
         earnAmountSend = web3.utils
-          .toBN(earnAmount * 10 ** asset.decimals)
+          .toBN(Math.floor(earnAmount * 10 ** asset.decimals))
           .toString();
       }
 
       var vaultAmountSend = web3.utils.toWei(vaultAmount, "ether");
       if (asset.decimals !== 18) {
         vaultAmountSend = web3.utils
-          .toBN(vaultAmount * 10 ** asset.decimals)
+          .toBN(Math.floor(vaultAmount * 10 ** asset.decimals))
           .toString();
       }
 
@@ -5532,21 +5521,15 @@ class Store {
         asset.vaultContractAddress
       );
 
-      // let decimals = await erc20Contract.methods.decimals().call();
-
-      // let shares = web3.utils.toBN(amount * 10 ** decimals).toString();
-
-      console.log("Citadel Withdraw:", amount, tokenIndex);
-
       // Soft Check for sufficient liquidity
-      this._isSufficientLiquidityCitadel(
+      if (await this._isSufficientLiquidityCitadel(
         asset,
         citadelContract,
         amount,
         tokenIndex
-      );
+      )) {
 
-      const functionCall = await vaultContract.methods
+      await vaultContract.methods
         .withdraw(amount, tokenIndex)
         .send({
           from: account.address,
@@ -5583,6 +5566,9 @@ class Store {
             // callback(error, null, null);
           }
         });
+      } else {
+        return emitter.emit(WITHDRAW_BOTH_VAULT_FAIL_RETURNED);
+      }
     }
   };
 
