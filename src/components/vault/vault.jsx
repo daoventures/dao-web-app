@@ -504,6 +504,19 @@ const styles = (theme) => ({
     top: "0px",
     borderBottomLeftRadius: "15px",
   },
+  riskDegenLabel: {
+    background: "#DC0B0C",
+    // borderRadius: '5px',
+    color: "#ffffff",
+    padding: "5px 10px",
+    textAlign: "center",
+    width: "7rem",
+    marginLeft: "auto",
+    position: "absolute",
+    right: "0px",
+    top: "0px",
+    borderBottomLeftRadius: "15px",
+  },
   assetName: {
     color: "#222222",
     fontSize: "1rem",
@@ -1381,13 +1394,16 @@ class Vault extends Component {
     return (
       <div
         className={
-          asset.risk === "Low"
+          asset.risk === "Basic"
             ? classes.riskLowLabel
-            : asset.risk === "Medium"
+            : asset.risk === "Advance"
             ? classes.riskMediumLabel
             : asset.risk === "Expert"
             ? classes.riskExpertLabel
+            : asset.risk === "Degen" 
+            ? classes.riskDegenLabel
             : ""
+
         }>
         <Typography variant="caption">{asset.risk}</Typography>
       </div>

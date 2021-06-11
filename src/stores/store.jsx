@@ -462,7 +462,7 @@ class Store {
           vaultABI: config.vaultContractV3ABI,
           historicalPriceId: "yUSDT_price",
           logoFormat: "png",
-          risk: "Medium",
+          risk: "Advance",
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "yUSDT_tvl",
@@ -495,7 +495,7 @@ class Store {
           vaultABI: config.vaultContractV3ABI,
           historicalPriceId: "yDAI_price",
           logoFormat: "png",
-          risk: "Medium",
+          risk: "Advance",
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "yDAI_tvl",
@@ -527,7 +527,7 @@ class Store {
           vaultABI: config.vaultContractV3ABI,
           historicalPriceId: "yTUSD_price",
           logoFormat: "png",
-          risk: "Medium",
+          risk: "Advance",
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "yTUSD_tvl",
@@ -559,7 +559,7 @@ class Store {
           vaultABI: config.vaultContractABI,
           historicalPriceId: "yUSDC_price",
           logoFormat: "png",
-          risk: "Medium",
+          risk: "Advance",
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "yUSDC_tvl",
@@ -590,7 +590,7 @@ class Store {
           strategyContractABI: config.compundStrategyCompundABI,
           historicalPriceId: "cUSDT_price",
           logoFormat: "png",
-          risk: "Low",
+          risk: "Basic",
           strategyType: "compound",
           cTokenAddress: "0xf650c3d88d12db855b8bf7d11be6c55a4e07dcc9",
           cAbi: config.cUSDTContract,
@@ -623,7 +623,7 @@ class Store {
           strategyContractABI: config.compundStrategyCompundABI,
           historicalPriceId: "cUSDC_price",
           logoFormat: "png",
-          risk: "Low",
+          risk: "Basic",
           strategyType: "compound",
           cTokenAddress: "0x39aa39c021dfbae8fac545936693ac917d5e7563",
           cAbi: config.cUSDCContract,
@@ -656,7 +656,7 @@ class Store {
           strategyContractABI: config.compundStrategyCompundABI,
           historicalPriceId: "cDAI_price",
           logoFormat: "png",
-          risk: "Low",
+          risk: "Basic",
           strategyType: "compound",
           cTokenAddress: "0x5d3a536e4d6dbd6114cc1ead35777bab948e3643",
           cAbi: config.cDAIContract,
@@ -734,7 +734,7 @@ class Store {
           vaultABI: config.vaultContractV3ABI,
           historicalPriceId: "yUSDT_price",
           logoFormat: "png",
-          risk: "Medium",
+          risk: "Advance",
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "yUSDT_tvl",
@@ -767,7 +767,7 @@ class Store {
           vaultABI: config.vaultContractV3ABI,
           historicalPriceId: "yDAI_price",
           logoFormat: "png",
-          risk: "Medium",
+          risk: "Advance",
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "yDAI_tvl",
@@ -799,7 +799,7 @@ class Store {
           vaultABI: config.vaultContractV3ABI,
           historicalPriceId: "yTUSD_price",
           logoFormat: "png",
-          risk: "Medium",
+          risk: "Advance",
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "yTUSD_tvl",
@@ -831,7 +831,7 @@ class Store {
           vaultABI: config.vaultContractABI,
           historicalPriceId: "yUSDC_price",
           logoFormat: "png",
-          risk: "Medium",
+          risk: "Advance",
           strategyType: "yearn",
           group: "Advance",
           tvlKey: "cUSDC_tvl",
@@ -862,7 +862,7 @@ class Store {
           strategyContractABI: config.compundStrategyCompundABI,
           historicalPriceId: "cUSDT_price",
           logoFormat: "png",
-          risk: "Low",
+          risk: "Basic",
           strategyType: "compound",
           cTokenAddress: "0x3f0A0EA2f86baE6362CF9799B523BA06647Da018",
           cAbi: config.cUSDTContract,
@@ -895,9 +895,9 @@ class Store {
           strategyContractABI: config.compundStrategyCompundABI,
           historicalPriceId: "cUSDC_price",
           logoFormat: "png",
-          risk: "Low",
+          risk: "Basic",
           strategyType: "compound",
-          cTokenAddress: "0x39aa39c021dfbae8fac545936693ac917d5e7563",
+          cTokenAddress: "0x4a92e71227d294f041bd82dd8f78591b75140d63",
           cAbi: config.cUSDCContract,
           group: "Basic",
           tvlKey: "cUSDT_tvl",
@@ -928,9 +928,9 @@ class Store {
           strategyContractABI: config.compundStrategyCompundABI,
           historicalPriceId: "cDAI_price",
           logoFormat: "png",
-          risk: "Low",
+          risk: "Basic",
           strategyType: "compound",
-          cTokenAddress: "0x5d3a536e4d6dbd6114cc1ead35777bab948e3643",
+          cTokenAddress: "0xf0d0eb522cfa50b716b3b1604c4f0fa6f04376ad",
           cAbi: config.cDAIContract,
           group: "Basic",
           tvlKey: "cDAI_tvl",
@@ -3781,7 +3781,7 @@ class Store {
       callback(null, {
         earnBalance: parseFloat(earnBalance),
         vaultBalance: parseFloat(vaultBalance),
-        balance: 0,
+        strategyBalance: 0,
       });
     } else if (asset.strategyType === "compound") {
       let compoundContract = new web3.eth.Contract(
@@ -4793,29 +4793,27 @@ class Store {
 
         return callback(null, returnObj);
       } else if (asset.strategyType === "compound") {
+        const cTokenDecimals = 8; // all cTokens have 8 decimal places
         const compoundContract = new web3.eth.Contract(
           asset.cAbi,
           asset.cTokenAddress
         );
-        const getCash = await compoundContract.methods
-          .getCash()
-          .call({ from: account.address });
-        const totalBorrows = await compoundContract.methods
-          .totalBorrows()
-          .call({ from: account.address });
-        const totalReserves = await compoundContract.methods
-          .totalReserves()
-          .call({ from: account.address });
-        const totalSupply = await compoundContract.methods
-          .totalSupply()
-          .call({ from: account.address });
-        const exchangeRate =
-          (getCash + totalBorrows - totalReserves) / totalSupply;
+        
+        // Exchange Rate
+        const exchangeRateCurrent = await compoundContract.methods.exchangeRateCurrent().call();
+        const mantissa = 18 + asset.decimals - cTokenDecimals;
+
+        // APY Calculation
+        const ethMantissa = 1e18;
+        const blocksPerDay = 6570; // 13.15 seconds per block
+        const daysPerYear = 365;
+        const supplyRatePerBlock = parseFloat(await compoundContract.methods.supplyRatePerBlock().call());
+        const supplyApy = (((Math.pow((supplyRatePerBlock / ethMantissa * blocksPerDay) + 1, daysPerYear))) - 1) * 100;
         const returnObj = {
           earnPricePerFullShare: 0,
           vaultPricePerFullShare: 0,
-          compoundExchangeRate: parseFloat(exchangeRate) / 10 ** asset.decimals,
-          apy: parseFloat(exchangeRate),
+          compoundExchangeRate: parseFloat(exchangeRateCurrent) / Math.pow(10, mantissa),
+          apy: parseFloat(supplyApy),
         };
 
         return callback(null, returnObj);
