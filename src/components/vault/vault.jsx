@@ -700,7 +700,7 @@ class Vault extends Component {
       searchError: false,
       hideZero:
         localStorage.getItem("yearn.finance-hideZero") === "1" ? true : false,
-      basedOn: basedOn ? parseInt(basedOn > 3 ? 3 : basedOn) : 1,
+      basedOn: basedOn ? parseInt(basedOn > 3 ? 3 : basedOn) : 3,
       loading: true,
       expanded: "",
       modalOpen: false,

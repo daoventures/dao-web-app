@@ -407,7 +407,7 @@ class Store {
             "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
             "0x6b175474e89094c44da98b954eedeac495271d0f",
           ],
-          erc20address: "0xdac17f958d2ee523aW2206206994597c13d831ec7",
+          erc20address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
           vaultContractAddress: "0x8fe826cc1225b03aa06477ad5af745aed5fe7066",
           vaultContractABI: config.vaultDAOCDVContractABI,
           balance: 0,
