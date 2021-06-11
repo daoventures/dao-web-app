@@ -394,7 +394,8 @@ class Store {
         {
           id: "daoCDV",
           name: "USDT/USDC/DAI",
-          symbol: ["USDT", "USDC", "DAI"],
+          symbol: "USDT",
+          symbols: ["USDT", "USDC", "DAI"],
           description: "Stablecoins",
           vaultSymbol: "daoCDV",
           erc20address: [
