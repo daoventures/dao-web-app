@@ -10,6 +10,8 @@ import {
 import { colors } from "../../theme";
 import { withNamespaces } from "react-i18next";
 
+import { BLOCK_EXPLORERS } from "../../constants";
+
 const iconStyle = {
   fontSize: "22px",
   marginRight: "10px",
@@ -95,13 +97,14 @@ class MySnackbar extends Component {
   };
 
   render() {
-    const { type, message, t } = this.props;
+    const { type, message, networkId, t } = this.props;
 
+    console.log("NETWORK ID", networkId);
     // Default Settings
     let icon = <SuccessIcon color={colors.blue} />;
     let color = colors.blue;
     let messageType = "";
-    let messageLink = "https://etherscan.io/tx/" + message;
+    let messageLink = BLOCK_EXPLORERS[networkId] + message;
     let autoHideDuration = 6000;
     let actions = [
       <IconButton key="close" aria-label="Close" onClick={this.handleClose}>
