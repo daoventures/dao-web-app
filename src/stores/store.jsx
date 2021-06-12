@@ -5394,7 +5394,9 @@ class Store {
       withdrawAmountUSD / asset.priceInUSD[tokenIndex];
 
     if (withdawAmountInToken > balance) {
-      alert("Citadel might have insufficient liquidity");
+      alert(
+        "The vault currently does not have sufficient token for your withdrawal. Please try a smaller amount or a different token."
+      );
       return false;
     }
     return true;
