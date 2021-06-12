@@ -578,7 +578,7 @@ class Store {
         },
         {
           id: "cUSDT",
-          name: "cUSDT",
+          name: "USDT",
           symbol: "USDT",
           description: "compound USDT",
           vaultSymbol: "dvlUSDT",
@@ -612,7 +612,7 @@ class Store {
         },
         {
           id: "cUSDC",
-          name: "cUSDC",
+          name: "USDC",
           symbol: "USDC",
           description: "Compound USDC",
           vaultSymbol: "dvlUSDC",
@@ -646,7 +646,7 @@ class Store {
         },
         {
           id: "cDAI",
-          name: "cDAI",
+          name: "DAI",
           symbol: "DAI",
           description: "Compound DAI",
           vaultSymbol: "dvlDAI",
