@@ -63,7 +63,7 @@ import {
   BASIC,
   ADVANCE,
   EXPERT,
-  DEGEN
+  DEGEN,
 } from "../constants";
 import Web3 from "web3";
 
@@ -474,7 +474,7 @@ class Store {
           tvlKey: "yUSDT_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
-          isPopularItem: false
+          isPopularItem: false,
         },
         {
           id: "DAI",
@@ -508,7 +508,7 @@ class Store {
           tvlKey: "yDAI_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
-          isPopularItem: false
+          isPopularItem: false,
         },
         {
           id: "TUSD",
@@ -541,7 +541,7 @@ class Store {
           tvlKey: "yTUSD_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
-          isPopularItem: false
+          isPopularItem: false,
         },
         {
           id: "USDC",
@@ -574,7 +574,7 @@ class Store {
           tvlKey: "yUSDC_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
-          isPopularItem: false
+          isPopularItem: false,
         },
         {
           id: "cUSDT",
@@ -608,7 +608,7 @@ class Store {
           tvlKey: "cUSDT_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
-          isPopularItem: false
+          isPopularItem: false,
         },
         {
           id: "cUSDC",
@@ -642,7 +642,7 @@ class Store {
           tvlKey: "cUSDT_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
-          isPopularItem: false
+          isPopularItem: false,
         },
         {
           id: "cDAI",
@@ -676,7 +676,7 @@ class Store {
           tvlKey: "cDAI_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
-          isPopularItem: false
+          isPopularItem: false,
         },
       ],
       42: [
@@ -754,7 +754,7 @@ class Store {
           tvlKey: "yUSDT_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
-          isPopularItem: false
+          isPopularItem: false,
         },
         {
           id: "DAI",
@@ -788,7 +788,7 @@ class Store {
           tvlKey: "yDAI_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
-          isPopularItem: false
+          isPopularItem: false,
         },
         {
           id: "TUSD",
@@ -821,7 +821,7 @@ class Store {
           tvlKey: "yTUSD_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
-          isPopularItem: false
+          isPopularItem: false,
         },
         {
           id: "USDC",
@@ -854,7 +854,7 @@ class Store {
           tvlKey: "cUSDC_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
-          isPopularItem: false
+          isPopularItem: false,
         },
         {
           id: "cUSDT",
@@ -888,7 +888,7 @@ class Store {
           tvlKey: "cUSDT_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
-          isPopularItem: false
+          isPopularItem: false,
         },
         {
           id: "cUSDC",
@@ -922,7 +922,7 @@ class Store {
           tvlKey: "cUSDT_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
-          isPopularItem: false
+          isPopularItem: false,
         },
         {
           id: "cDAI",
@@ -956,7 +956,7 @@ class Store {
           tvlKey: "cDAI_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
-          isPopularItem: false
+          isPopularItem: false,
         },
       ],
     };
@@ -3751,8 +3751,8 @@ class Store {
         asset.vaultContractAddress
       );
       let sharesBalance = await vaultContract.methods
-      .balanceOf(account.address)
-      .call({ from: account.address });
+        .balanceOf(account.address)
+        .call({ from: account.address });
       sharesBalance = parseFloat(sharesBalance);
 
       let strategyAddress = await vaultContract.methods
@@ -3778,8 +3778,12 @@ class Store {
       vaultBalance = (sharePerDepositAmt * vaultBalance) / 10 ** asset.decimals;
 
       callback(null, {
-        earnBalance: isNaN(parseFloat(earnBalance)) ? 0 : parseFloat(earnBalance),
-        vaultBalance: isNaN(parseFloat(vaultBalance)) ? 0 : parseFloat(vaultBalance),
+        earnBalance: isNaN(parseFloat(earnBalance))
+          ? 0
+          : parseFloat(earnBalance),
+        vaultBalance: isNaN(parseFloat(vaultBalance))
+          ? 0
+          : parseFloat(vaultBalance),
         strategyBalance: 0,
       });
     } else if (asset.strategyType === "compound") {
@@ -4793,22 +4797,33 @@ class Store {
           asset.cAbi,
           asset.cTokenAddress
         );
-        
+
         // Exchange Rate
-        const exchangeRateCurrent = await compoundContract.methods.exchangeRateCurrent().call();
+        const exchangeRateCurrent = await compoundContract.methods
+          .exchangeRateCurrent()
+          .call();
         const mantissa = 18 + asset.decimals - cTokenDecimals;
 
         // APY Calculation
         const ethMantissa = 1e18;
         const blocksPerDay = 6570; // 13.15 seconds per block
         const daysPerYear = 365;
-        const supplyRatePerBlock = parseFloat(await compoundContract.methods.supplyRatePerBlock().call());
-        const supplyApy = (((Math.pow((supplyRatePerBlock / ethMantissa * blocksPerDay) + 1, daysPerYear))) - 1) * 100;
+        const supplyRatePerBlock = parseFloat(
+          await compoundContract.methods.supplyRatePerBlock().call()
+        );
+        const supplyApy =
+          (Math.pow(
+            (supplyRatePerBlock / ethMantissa) * blocksPerDay + 1,
+            daysPerYear
+          ) -
+            1) *
+          100;
 
         const returnObj = {
           earnPricePerFullShare: 0,
           vaultPricePerFullShare: 0,
-          compoundExchangeRate: parseFloat(exchangeRateCurrent) / Math.pow(10, mantissa),
+          compoundExchangeRate:
+            parseFloat(exchangeRateCurrent) / Math.pow(10, mantissa),
           apy: parseFloat(supplyApy),
         };
 
@@ -5359,7 +5374,7 @@ class Store {
     let { asset, tokenIndex } = payload.content;
     this.withdrawBoth({
       content: {
-        earnAmount: asset.earnBalance.toString(), 
+        earnAmount: asset.earnBalance.toString(),
         vaultAmount: asset.vaultBalance.toString(),
         amount: asset.strategyBalance.toString(),
         tokenIndex: tokenIndex,
@@ -5381,15 +5396,16 @@ class Store {
       asset.erc20addresses[tokenIndex]
     );
 
-    let balance = parseFloat(await erc20Contract.methods
-      .balanceOf(asset.vaultContractAddress)
-      .call());
+    let balance = parseFloat(
+      await erc20Contract.methods.balanceOf(asset.vaultContractAddress).call()
+    );
 
     const decimals = parseInt(await erc20Contract.methods.decimals().call());
     const pool = await citadelContract.methods.getAllPoolInUSD().call();
     const totalSupply = await citadelContract.methods.totalSupply().call();
 
-    const withdrawAmountUSD = (withdrawAmount * pool) / totalSupply * 10 ** (decimals - 6);
+    const withdrawAmountUSD =
+      ((withdrawAmount * pool) / totalSupply) * 10 ** (decimals - 6);
     const withdawAmountInToken =
       withdrawAmountUSD / asset.priceInUSD[tokenIndex];
 
@@ -5526,50 +5542,51 @@ class Store {
       );
 
       // Soft Check for sufficient liquidity
-      if (await this._isSufficientLiquidityCitadel(
-        asset,
-        citadelContract,
-        amount,
-        tokenIndex
-      )) {
-
-      await vaultContract.methods
-        .withdraw(amount, tokenIndex)
-        .send({
-          from: account.address,
-          gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-        })
-        .on("transactionHash", function (txnHash) {
-          console.log(txnHash);
-          return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
-          // callback(null, txnHash, null);
-        })
-        .on("receipt", function (receipt) {
-          console.log("Reciept", receipt);
-          emitter.emit(
-            WITHDRAW_VAULT_RETURNED_COMPLETED,
-            receipt.transactionHash
-          );
-          // callback(null, null, receipt);
-        })
-        .on("error", function (error) {
-          if (!error.toString().includes("-32601")) {
-            if (error.message) {
-              emitter.emit(ERROR, error);
-              // return callback(error.message);
+      if (
+        await this._isSufficientLiquidityCitadel(
+          asset,
+          citadelContract,
+          amount,
+          tokenIndex
+        )
+      ) {
+        await vaultContract.methods
+          .withdraw(amount, tokenIndex)
+          .send({
+            from: account.address,
+            gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+          })
+          .on("transactionHash", function (txnHash) {
+            console.log(txnHash);
+            return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
+            // callback(null, txnHash, null);
+          })
+          .on("receipt", function (receipt) {
+            console.log("Reciept", receipt);
+            emitter.emit(
+              WITHDRAW_VAULT_RETURNED_COMPLETED,
+              receipt.transactionHash
+            );
+            // callback(null, null, receipt);
+          })
+          .on("error", function (error) {
+            if (!error.toString().includes("-32601")) {
+              if (error.message) {
+                emitter.emit(ERROR, error);
+                // return callback(error.message);
+              }
+              // callback(error, null, null);
             }
-            // callback(error, null, null);
-          }
-        })
-        .catch((error) => {
-          if (!error.toString().includes("-32601")) {
-            if (error.message) {
-              // return callback(error.message);
-              emitter.emit(ERROR, error);
+          })
+          .catch((error) => {
+            if (!error.toString().includes("-32601")) {
+              if (error.message) {
+                // return callback(error.message);
+                emitter.emit(ERROR, error);
+              }
+              // callback(error, null, null);
             }
-            // callback(error, null, null);
-          }
-        });
+          });
       } else {
         return emitter.emit(WITHDRAW_BOTH_VAULT_FAIL_RETURNED);
       }
