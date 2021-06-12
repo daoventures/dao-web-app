@@ -25241,7 +25241,7 @@ const config = {
   ],
   yFarmerVaultContract: "0x2f08119c6f07c006695e079aafc638b8789faf18",
   yFarmerEarnContract: "0xE6354ed5bC4b393a5Aad09f21c46E101e692d447",
-  USDTETHPriceFeedContract: "0x0bf499444525a23e7bb61997539725ca2e928138",
+  USDTETHPriceFeedContract: "0xEe9F2375b4bdF6387aa8265dD4FB8F16512A1d46",
   USDTETHPriceFeedContractABI: [
     {
       inputs: [
