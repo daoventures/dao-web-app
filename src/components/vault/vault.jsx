@@ -43,7 +43,7 @@ import {
   BASIC,
   ADVANCE,
   EXPERT,
-  DEGEN
+  DEGEN,
 } from "../../constants";
 
 import Store from "../../stores";
@@ -702,6 +702,7 @@ class Vault extends Component {
     this.state = {
       assets: store.getStore("vaultAssets"),
       usdPrices: store.getStore("usdPrices"),
+      networkId: store.getStore("networkId"),
       account: account,
       address: account.address
         ? account.address.substring(0, 6) +
@@ -725,8 +726,11 @@ class Vault extends Component {
       tabList: ["ALL", BASIC, ADVANCE, EXPERT, DEGEN],
     };
 
-    if(account && account.address) {
-      dispatcher.dispatch({ type: GET_STRATEGY_BALANCES_FULL, content: { interval: '30d' } })
+    if (account && account.address) {
+      dispatcher.dispatch({
+        type: GET_STRATEGY_BALANCES_FULL,
+        content: { interval: "30d" },
+      });
     }
   }
 
@@ -785,12 +789,18 @@ class Vault extends Component {
   networkChanged = (obj) => {
     const account = store.getStore("account");
     const basedOn = localStorage.getItem("yearn.finance-dashboard-basedon");
+
+    const networkId = obj.network;
     if (account && account.address) {
       dispatcher.dispatch({
         type: GET_STRATEGY_BALANCES_FULL,
         content: { interval: "30d" },
       });
     }
+
+    this.setState({
+      networkId: networkId,
+    });
   };
 
   balancesReturned = (balances) => {
@@ -1040,7 +1050,7 @@ class Vault extends Component {
 
     return assets
       .filter((asset) => {
-        return (currentTab == "ALL" || asset.group === currentTab) ? true : false;
+        return currentTab == "ALL" || asset.group === currentTab ? true : false;
       })
       .map((asset, index) => {
         return (
@@ -1055,7 +1065,7 @@ class Vault extends Component {
                     <use xlinkHref="#iconinformation-day"></use>
                   </svg>
                 </a>
-                { this.renderPopularIcon(asset) }
+                {this.renderPopularIcon(asset)}
               </Grid>
               {this.renderRiskLabel(asset)}
             </Grid>
@@ -1191,17 +1201,17 @@ class Vault extends Component {
                           variant={"h5"}
                           className={classes.assetLabel1}>
                           <div>
-                              {(asset.strategyType === "citadel"
-                                ? asset.sumBalances
-                                  ? asset.sumBalances.toFixed(2)
-                                  : "0.00"
-                                : asset.balance
-                                ? asset.balance.toFixed(2)
-                                : "0.00") +
-                                " " +
-                                (asset.strategyType === "citadel"
-                                  ? "USD"
-                                  : asset.symbol)}
+                            {(asset.strategyType === "citadel"
+                              ? asset.sumBalances
+                                ? asset.sumBalances.toFixed(2)
+                                : "0.00"
+                              : asset.balance
+                              ? asset.balance.toFixed(2)
+                              : "0.00") +
+                              " " +
+                              (asset.strategyType === "citadel"
+                                ? "USD"
+                                : asset.symbol)}
                           </div>
                         </Typography>
                         <Typography
@@ -1218,17 +1228,17 @@ class Vault extends Component {
                           noWrap
                           className={classes.assetLabel1}>
                           <div>
-                              {(asset.strategyType === "citadel"
-                                ? asset.sumBalances
-                                  ? asset.sumBalances.toFixed(2)
-                                  : "0.00"
-                                : asset.balance
-                                ? asset.balance.toFixed(2)
-                                : "0.00") +
-                                " " +
-                                (asset.strategyType === "citadel"
-                                  ? "USD"
-                                  : asset.symbol)}
+                            {(asset.strategyType === "citadel"
+                              ? asset.sumBalances
+                                ? asset.sumBalances.toFixed(2)
+                                : "0.00"
+                              : asset.balance
+                              ? asset.balance.toFixed(2)
+                              : "0.00") +
+                              " " +
+                              (asset.strategyType === "citadel"
+                                ? "USD"
+                                : asset.symbol)}
                           </div>
                         </Typography>
                         <Typography
@@ -1335,10 +1345,9 @@ class Vault extends Component {
             ? classes.riskMediumLabel
             : asset.risk === EXPERT
             ? classes.riskExpertLabel
-            : asset.risk === DEGEN 
+            : asset.risk === DEGEN
             ? classes.riskDegenLabel
             : ""
-
         }>
         <Typography variant="caption">{asset.risk}</Typography>
       </div>
@@ -1346,15 +1355,18 @@ class Vault extends Component {
   };
 
   renderPopularIcon = (asset) => {
-      return asset.isPopularItem && (
+    return (
+      asset.isPopularItem && (
         <div>
-            <img alt="icon-popular"
-                  src={require('../../assets/img_new/icon_popular.svg')}
-                  style={{marginLeft:'10px'}}
-            />
+          <img
+            alt="icon-popular"
+            src={require("../../assets/img_new/icon_popular.svg")}
+            style={{ marginLeft: "10px" }}
+          />
         </div>
-      )  
-  }
+      )
+    );
+  };
 
   handleChecked = (event) => {
     this.setState({ hideZero: event.target.checked });
@@ -1373,9 +1385,14 @@ class Vault extends Component {
   };
 
   renderSnackbar = () => {
-    var { snackbarType, snackbarMessage } = this.state;
+    var { snackbarType, snackbarMessage, networkId } = this.state;
     return (
-      <Snackbar type={snackbarType} message={snackbarMessage} open={true} />
+      <Snackbar
+        type={snackbarType}
+        message={snackbarMessage}
+        networkId={networkId}
+        open={true}
+      />
     );
   };
 
@@ -1391,7 +1408,10 @@ class Vault extends Component {
         } else {
           return "0.00";
         }
-      } else if (asset.strategyType === "yearn" && JSON.stringify(asset.stats!=='Object')) {
+      } else if (
+        asset.strategyType === "yearn" &&
+        JSON.stringify(asset.stats !== "Object")
+      ) {
         switch (basedOn) {
           case 1:
             return (

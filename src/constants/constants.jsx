@@ -53,7 +53,8 @@ export const WITHDRAW_BOTH_VAULT = "WITHDRAW_BOTH_VAULT";
 export const WITHDRAW_BOTH_VAULT_RETURNED = "WITHDRAW_BOTH_VAULT_RETURNED";
 export const WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED =
   "WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED";
-export const WITHDRAW_BOTH_VAULT_FAIL_RETURNED = "WITHDRAW_BOTH_VAULT_FAIL_RETURNED";
+export const WITHDRAW_BOTH_VAULT_FAIL_RETURNED =
+  "WITHDRAW_BOTH_VAULT_FAIL_RETURNED";
 
 // #Zap
 export const ZAP = "ZAP";
@@ -114,3 +115,11 @@ export const BASIC = "Basic";
 export const ADVANCE = "Advance";
 export const EXPERT = "Expert";
 export const DEGEN = "Degen";
+
+// Block Explorers
+export const BLOCK_EXPLORERS = {
+  1: "https://etherscan.io/tx/",
+  42: "https://kovan.etherscan.io/tx/",
+  56: "https://bscscan.com/tx/",
+  97: "https://testnet.bscscan.com/tx/",
+};
