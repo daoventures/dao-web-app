@@ -99,7 +99,6 @@ class MySnackbar extends Component {
   render() {
     const { type, message, networkId, t } = this.props;
 
-    console.log("NETWORK ID", networkId);
     // Default Settings
     let icon = <SuccessIcon color={colors.blue} />;
     let color = colors.blue;

@@ -4824,7 +4824,6 @@ class Store {
             parseFloat(exchangeRateCurrent) / Math.pow(10, mantissa),
           apy: parseFloat(supplyApy),
         };
-
         return callback(null, returnObj);
       } else if (asset.strategyType === "citadel") {
         const citadelContract = new web3.eth.Contract(
@@ -4856,7 +4855,6 @@ class Store {
           compoundExchangeRate: 0,
           citadelPricePerFullShare: pricePerFullShare,
         };
-
         return callback(null, returnObj);
       }
     } catch (e) {

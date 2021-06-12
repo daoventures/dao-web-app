@@ -1386,7 +1386,6 @@ class Vault extends Component {
 
   renderSnackbar = () => {
     var { snackbarType, snackbarMessage, networkId } = this.state;
-    console.log("NETWORKID", networkId);
     return (
       <Snackbar
         type={snackbarType}

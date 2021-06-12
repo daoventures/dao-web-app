@@ -1820,7 +1820,7 @@ class Asset extends Component {
             } else if (asset.strategyType === "compound") {
               compoundAPY.push([
                 date,
-                parseFloat(groups[date][halfCount].compoundAPY.toFixed(4)),
+                parseFloat(groups[date][halfCount].compoundApy.toFixed(4)),
               ]);
             } else if (asset.strategyType === "citadel") {
               citadelAPY.push([
