@@ -2031,10 +2031,10 @@ class Asset extends Component {
     const { earnRatio, vaultRatio } = this.state;
 
     const earnAPY = asset.earnApr ? parseFloat(asset.earnApr) * 100 : 0;
-    const vaultAPY = asset && asset.stats ? asset.stats.apyOneWeekSample : 0;
+    const vaultAPY = asset && asset.stats ? asset.stats.apyInceptionSample : 0;
+    const apy = earnAPY * earnRatio/100 + vaultAPY * vaultRatio/100;
     return (
-      (earnAPY * earnRatio) / 100 +
-      (vaultAPY * vaultRatio) / 100 / 2
+      isNaN(apy) ? 0 : apy
     ).toFixed(2);
   };
 

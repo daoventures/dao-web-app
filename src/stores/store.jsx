@@ -4777,8 +4777,6 @@ class Store {
         balance = balance / diff;
         balance = balance * 242584600;
 
-        console.log(asset.symbol);
-
         const returnObj = {
           earnPricePerFullShare: parseFloat(earnPricePerFullShare) / 10 ** 18,
           vaultPricePerFullShare: parseFloat(vaultPricePerFullShare) / 10 ** 18,
