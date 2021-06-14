@@ -1254,7 +1254,7 @@ class Vault extends Component {
                       <Typography
                         variant={"h5"}
                         className={classes.assetLabel1}>
-                        $ {asset.tvl}
+                        $ {asset.tvl ? asset.tvl.toFixed(2) : "0.00"}
                       </Typography>
                       <Typography
                         variant={"body1"}
