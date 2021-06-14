@@ -598,7 +598,7 @@ class SideDrawer extends Component {
             </div>
             <div className={classes.totalValueLeft}>
               <div className={classes.totalValueRightText}>Total Value Locked</div>
-              <div className={classes.totalValueRightNum}>$ 3,500,289.749</div>
+              <div className={classes.totalValueRightNum}>$ {this.state.totalValue}</div>
             </div>
           </div>
         </div>}
