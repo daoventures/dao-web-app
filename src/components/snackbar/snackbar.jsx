@@ -4,6 +4,7 @@ import {
   IconButton,
   Button,
   Typography,
+  LinearProgress,
   SvgIcon,
 } from "@material-ui/core";
 
@@ -77,7 +78,20 @@ function InfoIcon(props) {
     </SvgIcon>
   );
 }
-
+function ProgressBar(props) {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: 4.5,
+        top: 0,
+        bottom: 0,
+        right: 0,
+      }}>
+      <LinearProgress />
+    </div>
+  );
+}
 class MySnackbar extends Component {
   state = {
     open: this.props.open,
@@ -104,6 +118,7 @@ class MySnackbar extends Component {
     let color = colors.blue;
     let messageType = "";
     let messageLink = BLOCK_EXPLORERS[networkId] + message;
+    let progressBar = null;
     let autoHideDuration = 6000;
     let actions = [
       <IconButton key="close" aria-label="Close" onClick={this.handleClose}>
@@ -179,6 +194,7 @@ class MySnackbar extends Component {
         messageType = t("Info");
         break;
       case "Hash":
+        progressBar = <ProgressBar />;
         icon = <SuccessIcon color={colors.blue} />;
         color = colors.blue;
         messageType = t("Transaction in Progress");
@@ -224,6 +240,7 @@ class MySnackbar extends Component {
               borderRadius: "4px",
               maxWidth: "400px",
             }}>
+            {progressBar}
             {icon}
             <div
               style={{
