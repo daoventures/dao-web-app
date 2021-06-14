@@ -58,10 +58,10 @@ const styles = (theme) => ({
   },
   actionInput: {
     // padding: '0px 0px 12px 0px',
-    "fontSize": "0.5rem",
-    "marginTop": "1rem",
-    "height": "42px",
-    "background": theme.themeColors.inputBack,
+    fontSize: "0.5rem",
+    marginTop: "1rem",
+    height: "42px",
+    background: theme.themeColors.inputBack,
     "& input": {
       color: theme.themeColors.textT,
     },
@@ -112,12 +112,12 @@ const styles = (theme) => ({
     paddingRight: "24px",
   },
   actionButton: {
-    "height": "47px",
-    "margin": "auto",
-    "borderRadius": "5px",
-    "background": "#18a0fb",
-    "color": "#ffffff",
-    "width": "49%",
+    height: "47px",
+    margin: "auto",
+    borderRadius: "5px",
+    background: "#18a0fb",
+    color: "#ffffff",
+    width: "49%",
     "&:hover": {
       background: "#00c2ff",
     },
@@ -128,16 +128,16 @@ const styles = (theme) => ({
     marginTop: "10px",
   },
   withdrawButton: {
-    "height": "42px",
-    "margin": "auto",
-    "borderRadius": "0px",
-    "background": "none",
-    "borderColor": theme.themeColors.border,
-    "borderStyle": "solid",
-    "borderWidth": "1px",
-    "color": theme.themeColors.textT,
-    "flex": 1,
-    "marginLeft": "20px",
+    height: "42px",
+    margin: "auto",
+    borderRadius: "0px",
+    background: "none",
+    borderColor: theme.themeColors.border,
+    borderStyle: "solid",
+    borderWidth: "1px",
+    color: theme.themeColors.textT,
+    flex: 1,
+    marginLeft: "20px",
     "&:hover": {
       background: theme.themeColors.btnBack,
     },
@@ -197,11 +197,11 @@ const styles = (theme) => ({
   },
   scale: {
     // width: '24%',
-    "minWidth": "auto",
-    "width": "auto",
-    "padding": "0px",
-    "color": theme.themeColors.textP,
-    "marginLeft": "12px",
+    minWidth: "auto",
+    width: "auto",
+    padding: "0px",
+    color: theme.themeColors.textP,
+    marginLeft: "12px",
     "&:first-child": {
       marginLeft: "0px",
     },
@@ -356,18 +356,18 @@ const styles = (theme) => ({
     justifyContent: "space-between",
   },
   depositActionButton: {
-    "height": "42px",
-    "margin": "auto",
-    "background": "none",
-    "borderColor": theme.themeColors.border,
-    "color": theme.themeColors.textT,
-    "borderWidth": "1px",
-    "borderStyle": "solid",
-    "marginLeft": "20px",
+    height: "42px",
+    margin: "auto",
+    background: "none",
+    borderColor: theme.themeColors.border,
+    color: theme.themeColors.textT,
+    borderWidth: "1px",
+    borderStyle: "solid",
+    marginLeft: "20px",
     // width: '49%',
-    "borderRadius": "0px",
-    "cursor": "pointer",
-    "flex": "1",
+    borderRadius: "0px",
+    cursor: "pointer",
+    flex: "1",
     "&:hover": {
       background: theme.themeColors.btnBack,
     },
@@ -408,8 +408,8 @@ const styles = (theme) => ({
     },
   },
   yearnEarnAndVaultItem: {
-    "flex": 1,
-    "marginLeft": "20px",
+    flex: 1,
+    marginLeft: "20px",
     "&:first-child": {
       marginLeft: "0px",
     },
@@ -571,7 +571,10 @@ class Asset extends Component {
     emitter.removeListener(WITHDRAW_VAULT_RETURNED, this.withdrawReturned);
     emitter.removeListener(DEPOSIT_ALL_CONTRACT_RETURNED, this.depositReturned);
     emitter.removeListener(WITHDRAW_BOTH_VAULT_RETURNED, this.withdrawReturned);
-    emitter.removeListener(WITHDRAW_BOTH_VAULT_FAIL_RETURNED, this.errorReturned);
+    emitter.removeListener(
+      WITHDRAW_BOTH_VAULT_FAIL_RETURNED,
+      this.errorReturned
+    );
     emitter.removeListener(ERROR, this.errorReturned);
     window.removeEventListener("resize", this.resize.bind(this));
     emitter.removeListener("CURRENT_THEME_RETURNED", this.currentThemeChanged);
@@ -724,22 +727,12 @@ class Asset extends Component {
                   <div className={classes.flexy}>
                     <Typography variant={"h4"} noWrap>
                       {/**Total Earnings */}
-                      {asset.strategyType === "citadel" &&
-                        this.state.usdPrices &&
-                        (asset.addressStatistics
-                          ? (
-                              (asset.addressStatistics.earnings /
-                                10 ** asset.decimals) *
-                              this.state.usdPrices["ethereum"].usd
-                            ).toFixed(2)
-                          : "0.00")}
-                      {asset.strategyType !== "citadel" &&
-                        (asset.addressStatistics
-                          ? (
-                              asset.addressStatistics.earnings /
-                              10 ** asset.decimals
-                            ).toFixed(2)
-                          : "0.00")}
+                      {asset.addressStatistics
+                        ? (
+                            asset.addressStatistics.earnings /
+                            10 ** asset.decimals
+                          ).toFixed(2)
+                        : "0.00"}
                       {asset.strategyType === "citadel" ? "USD" : asset.symbol}
                     </Typography>
                   </div>
@@ -1600,11 +1593,8 @@ class Asset extends Component {
                         >
                           {(asset.strategyBalance
                             ? (
-                                Math.floor(
-                                  (asset.strategyBalance /
-                                    10 ** asset.decimals) *
-                                    10000
-                                ) / 10000
+                                asset.strategyBalance /
+                                10 ** asset.decimals
                               ).toFixed(4)
                             : "0.0000") + " daoCDV"}{" "}
                           {asset.strategyBalance > 0 && (
@@ -1820,7 +1810,7 @@ class Asset extends Component {
             } else if (asset.strategyType === "compound") {
               compoundAPY.push([
                 date,
-                parseFloat(groups[date][halfCount].compoundApy.toFixed(4)),
+                parseFloat(groups[date][halfCount].compoundAPY.toFixed(4)),
               ]);
             } else if (asset.strategyType === "citadel") {
               citadelAPY.push([
@@ -2078,10 +2068,10 @@ class Asset extends Component {
     const { earnRatio, vaultRatio } = this.state;
 
     const earnAPY = asset.earnApr ? parseFloat(asset.earnApr) * 100 : 0;
-    const vaultAPY = asset && asset.stats ? asset.stats.apyInceptionSample : 0;
-    const apy = earnAPY * earnRatio/100 + vaultAPY * vaultRatio/100;
+    const vaultAPY = asset && asset.stats ? asset.stats.apyOneWeekSample : 0;
     return (
-      isNaN(apy) ? 0 : apy
+      (earnAPY * earnRatio) / 100 +
+      (vaultAPY * vaultRatio) / 100 / 2
     ).toFixed(2);
   };
 
@@ -2115,12 +2105,13 @@ class Asset extends Component {
     const { amount, earnRatio, vaultRatio, tokenIndex } = this.state;
     const { asset, startLoading } = this.props;
 
-    let assetBalance = asset.strategyType !== "citadel"
-                          ? asset.balance
-                          : asset.balances[this.state.tokenIndex];
+    let assetBalance =
+      asset.strategyType !== "citadel"
+        ? asset.balance
+        : asset.balances[this.state.tokenIndex];
 
     assetBalance = (Math.floor(assetBalance * 10000) / 10000).toFixed(4);
-    
+
     if (!amount || isNaN(amount) || amount <= 0 || amount > assetBalance) {
       this.setState({ amountError: true });
       return false;
