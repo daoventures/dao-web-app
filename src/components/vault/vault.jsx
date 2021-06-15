@@ -1490,11 +1490,12 @@ class Vault extends Component {
             return this.calculateYearnAPY(parseFloat(asset.earnApr), asset.apy);
         }
       } else if (asset.strategyType === "citadel") {
-        if (asset.stats.citadelApy) {
-          return (asset.stats.citadelApy / 1).toFixed(2) + '%';
-        } else {
-          return "0.00%";
-        }
+        // if (asset.stats.citadelApy) {
+        //   return (asset.stats.citadelApy / 1).toFixed(2) + '%';
+        // } else {
+        //   return "0.00%";
+        // }
+        return '55% - 75%';
       }
     } else {
       return "0.00%";
@@ -1502,10 +1503,10 @@ class Vault extends Component {
   };
 
   calculateYearnAPY = (earnAPR, vaultAPY) => {
-    if (earnAPR > vaultAPY) {
-      return (earnAPR * 100 / 1).toFixed(2) + "% - " + (vaultAPY * 100 / 1).toFixed(2) + '%';
+    if (earnAPR * 100 > vaultAPY) {
+      return (vaultAPY / 1).toFixed(2) + "% - " + (earnAPR * 100 / 1).toFixed(2) + '%';
     } else {
-      return (vaultAPY * 100 / 1).toFixed(2) + "% - " + (earnAPR * 100 / 1).toFixed(2) + '%';
+      return (earnAPR * 100 / 1).toFixed(2) + "% - " + (vaultAPY / 1).toFixed(2) + '%';
     }
   }
 
