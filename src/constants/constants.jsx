@@ -126,3 +126,9 @@ export const BLOCK_EXPLORERS = {
   56: "https://bscscan.com/tx/",
   97: "https://testnet.bscscan.com/tx/",
 };
+
+// Header title on top of page
+export const HEADER_TITLE_DAOMINE = 'DAOmine';
+export const HEADER_TITLE_INVEST = 'Invest';
+export const HEADER_TITLE_PORTFOLIO = 'Portfolio';
+export const HEADER_TITLE_SWAP = 'Swap'
