@@ -149,11 +149,11 @@ class MySnackbar extends Component {
           </IconButton>,
         ];
         break;
-      case "Deposit Success":
+      case "Transaction Success":
         icon = <SuccessIcon color={colors.green} />;
         color = colors.green;
         autoHideDuration = 6000;
-        messageType = t("Deposit Success");
+        messageType = t("Transaction Success");
         actions = [
           <Button
             variant="text"
