@@ -748,9 +748,8 @@ class Asset extends Component {
                         this.state.usdPrices &&
                         (asset.addressStatistics
                           ? (
-                              (asset.addressStatistics.totalDeposits /
-                                10 ** asset.decimals) *
-                              this.state.usdPrices["ethereum"].usd
+                              asset.addressStatistics.totalDepositsInUSD /
+                               10 ** 6
                             ).toFixed(2)
                           : "0.00")}
                       {asset.strategyType !== "citadel" &&
@@ -775,9 +774,8 @@ class Asset extends Component {
                         this.state.usdPrices &&
                         (asset.addressStatistics
                           ? (
-                              (asset.addressStatistics.totalWithdrawals /
-                                10 ** asset.decimals) *
-                              this.state.usdPrices["ethereum"].usd
+                              asset.addressStatistics.totalWithdrawalsInUSD /
+                              10 ** 6
                             ).toFixed(2)
                           : "0.00")}
                       {asset.strategyType !== "citadel" &&
@@ -1593,8 +1591,12 @@ class Asset extends Component {
                         >
                           {(asset.strategyBalance
                             ? (
-                                asset.strategyBalance /
-                                10 ** asset.decimals
+                                Math.floor(
+                                  asset.strategyBalance /
+                                  10 ** asset.decimals *
+                                  10000
+                                ) / 10000
+                                 
                               ).toFixed(4)
                             : "0.0000") + " daoCDV"}{" "}
                           {asset.strategyBalance > 0 && (
