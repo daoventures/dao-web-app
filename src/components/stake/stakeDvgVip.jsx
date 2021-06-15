@@ -2,7 +2,9 @@ import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import { withNamespaces } from 'react-i18next';
-
+import {
+    Grid,
+} from '@material-ui/core';
 import {
     GET_DVG_INFO,
     CONNECTION_CONNECTED,
@@ -43,17 +45,49 @@ const styles = theme => ({
         }
     },
     banner: {
+        width: '100%',
         height: '120px',
         padding: '12px 50px',
         display: 'flex',
         justifyContent: 'space-between',
-        backgroundImage: 'url(' + require('../../assets/stakeImg/Daovip_banner@2x.png') + ')'
+        backgroundImage: 'url(' + require('../../assets/stakeImg/Daovip_banner@2x.png') + ')',
+        [theme.breakpoints.down('sm')]: {
+            height: '170px',
+            padding: '12px 10px',
+            position: 'relative',
+            flexWrap: 'wrap',
+            justifyContent: 'flex-start',
+        }
     },
     text: {
         fontSize: '30px',
         fontWeight: '500',
-        color: theme.themeColors.textT,
-        lineHeight: '96px'
+        color: '#FFFFFF',
+        lineHeight: '96px',
+        [theme.breakpoints.down('sm')]: {
+            widht:'100%',
+            lineHeight: 1,
+            textAlign:'center',
+            fontSize: '20px',
+            marginTop: '20px'
+        }
+    },
+    bannerRight: {
+        [theme.breakpoints.down('sm')]: {
+            width: '100%',
+            display: 'flex',
+            marginTop: '30px',
+            justifyContent: 'space-between',
+        }
+    },
+    toTrade: {
+
+        [theme.breakpoints.down('sm')]: {
+            width: '100%',
+            display: 'flex',
+            marginTop: '30px',
+            justifyContent: 'space-between',
+        }
     },
     toTradeUniswap: {
         width: '214px',
@@ -65,7 +99,16 @@ const styles = theme => ({
         color: theme.themeColors.textT,
         backgroundSize: '100% 100%',
         textAlign: 'center',
-        marginBottom: '8px'
+        color:'#FFFFFF',
+        marginBottom: '8px',
+        cursor: 'pointer',
+        [theme.breakpoints.down('sm')]: {
+            width: '148px',
+            fontSize: '14px'
+        },
+        '&:hover':{
+            backgroundImage: 'url(' + require('../../assets/stakeImg/button_Uniswap_hover.png') + ')',
+        }
     },
     toTradePancakeswap: {
         width: '214px',
@@ -75,21 +118,35 @@ const styles = theme => ({
         lineHeight: '44px',
         fontSize: '18px',
         fontWeight: '500',
-        color: theme.themeColors.textT,
-        textAlign: 'center'
+        color: '#FFFFFF',
+        textAlign: 'center',
+        cursor: 'pointer',
+        [theme.breakpoints.down('sm')]: {
+            width: '148px',
+            fontSize: '14px'
+        },
+        '&:hover':{
+            backgroundImage: 'url(' + require('../../assets/stakeImg/button_pancakeswap_hover.png') + ')',
+        }
     },
     content: {
         display: 'flex',
-        marginTop: '35px'
+        marginTop: '35px',
+        [theme.breakpoints.down('sm')]: {
+            display: 'block'
+        }
     },
     contentLeft: {
         width: '80%',
         // width: '556px',
         // background:'red'
-        background: 'linear-gradient(223deg, rgba(36, 33, 81, 0.54) 0%, rgba(38, 35, 83, 0.8) 40%, rgba(28, 26, 67, 0.45) 100%)',
+        background: theme.themeColors.modelBack,
         // padding:'0 19px',
-        boxShadow: '0px 2px 10px 0px rgba(23, 18, 43, 0.85)',
-        border: ' 1px solid #7367F7'
+        // boxShadow: '0px 2px 10px 0px rgba(23, 18, 43, 0.85)',
+        border: ' 1px solid #7367F7',
+        [theme.breakpoints.down('sm')]: {
+            width: '100%'
+        }
     },
     contentLeftTitle: {
         height: '48px',
@@ -121,47 +178,67 @@ const styles = theme => ({
         justifyContent: 'space-between',
         alignItems: 'center',
         marginTop: '25px',
+        [theme.breakpoints.down('sm')]: {
+            display:'block'            
+        },
     },
     stakeTab: {
         borderWidth: '1px',
         borderStyle: 'solid',
-        borderColor: theme.themeColors.blockBorder,
+        borderColor: 'rgba(110,103,247,1)',
         width: '180px',
         height: '32px',
         display: 'flex'
     },
     stake: {
         width: '90px',
-        background: theme.themeColors.blockBorder,
-        color: theme.themeColors.textT,
+        background: theme.themeColors.stakeTextBg,
+        color: theme.themeColors.stakeTextText,
         lineHeight: '32px',
         textAlign: 'center',
-        cursor:'pointer'
+        cursor: 'pointer'
     },
     unStake: {
         width: '90px',
-        color: theme.themeColors.textP,
+        color: theme.themeColors.stakeTextBg,
         lineHeight: '32px',
         textAlign: 'center',
-        cursor:'pointer'
+        cursor: 'pointer'
     },
     available: {
         fontSize: '16px',
         fontWeight: '400',
         lineHeight: '16px',
-        color: theme.themeColors.textT
+        color: theme.themeColors.textT,
+        [theme.breakpoints.down('sm')]: {
+            marginTop:'23px',
+            textAlign:'right'       
+        },
     },
     stakeInput: {
         marginTop: '30px',
-        position: 'relative'
+        position: 'relative',
+        [theme.breakpoints.down('sm')]: {
+            marginTop: '10px',     
+        },
     },
     input: {
         width: '100%',
         height: '56px',
-        background: 'rgba(0,0,0,.2)',
         padding: '0 20px',
-        border: 'none',
-        color:theme.themeColors.textT
+        border: '1px solid' + theme.themeColors.borderH,
+        color: theme.themeColors.textT,
+        background: theme.themeColors.inputBack,
+        "& input": {
+            color: theme.themeColors.textT,
+        },
+        "& .MuiInputBase-root": {
+            borderRadius: "0px",
+            height: "42px",
+        },
+        "& input::placeholder": {
+            color: theme.themeColors.textP,
+        },
     },
     approveStaking: {
         height: '44px',
@@ -170,7 +247,18 @@ const styles = theme => ({
         lineHeight: '44px',
         textAlign: 'center',
         marginBottom: '31px',
-        color: 'rgba(115, 103, 247, 0.4)'
+        color: 'rgba(115, 103, 247, 0.4)',
+        cursor: 'pointer'
+    },
+    approveStakingActive:{
+        height: '44px',
+        marginTop: '31px',
+        lineHeight: '44px',
+        textAlign: 'center',
+        marginBottom: '31px',
+        color: 'rgba(115, 103, 247,1)',
+        border: '1px solid rgba(115, 103, 247, 1);',
+        cursor: 'pointer'
     },
     contentCenter: {
         padding: '0 19px'
@@ -187,11 +275,14 @@ const styles = theme => ({
         right: '20px',
         top: '50%',
         marginTop: '-12px',
-        cursor:'pointer'
+        cursor: 'pointer'
     },
     contentRight: {
         // width: '460px',
         marginLeft: '20px',
+        [theme.breakpoints.down('sm')]: {
+            margin: '19px 0px 0px 0px'
+        }
         // background:'red'
         // background: 'linear-gradient(223deg, rgba(36, 33, 81, 0.54) 0%, rgba(38, 35, 83, 0.8) 40%, rgba(28, 26, 67, 0.45) 100%)',
         // padding:'0 19px',
@@ -200,12 +291,17 @@ const styles = theme => ({
     },
     total: {
         display: 'flex',
-        background: 'linear-gradient(223deg, rgba(36, 33, 81, 0.54) 0%, rgba(38, 35, 83, 0.8) 40%, rgba(28, 26, 67, 0.45) 100%)',
+        background: theme.themeColors.modelBack,
         // padding:'0 19px',
-        boxShadow: '0px 2px 10px 0px rgba(23, 18, 43, 0.85)',
+        // boxShadow: '0px 2px 10px 0px rgba(23, 18, 43, 0.85)',
         border: ' 1px solid #7367F7',
         padding: '23px 16px',
-        alignItems: 'center'
+        alignItems: 'center',
+        [theme.breakpoints.down('sm')]: {
+            width:'167px',
+            padding: '23px 9px',
+        }
+
     },
     totalText: {
 
@@ -213,13 +309,17 @@ const styles = theme => ({
     apr: {
         display: 'flex',
         width: '220px',
-        background: 'linear-gradient(223deg, rgba(36, 33, 81, 0.54) 0%, rgba(38, 35, 83, 0.8) 40%, rgba(28, 26, 67, 0.45) 100%)',
+        background: theme.themeColors.modelBack,
         // padding:'0 19px',
-        boxShadow: '0px 2px 10px 0px rgba(23, 18, 43, 0.85)',
-        border: ' 1px solid #7367F7',
+        // boxShadow: '0px 2px 10px 0px rgba(23, 18, 43, 0.85)',
+        border: '1px solid #7367F7',
         padding: '23px 16px',
         alignItems: 'center',
-        marginLeft: '20px'
+        marginLeft: '20px',
+        [theme.breakpoints.down('sm')]: {
+            width:'167px',
+            padding: '23px 9px',
+        }
     },
     totalApr: {
         display: 'flex',
@@ -231,25 +331,39 @@ const styles = theme => ({
     smallImg: {
         width: '40px',
         height: '40px',
-        marginRight: '12px'
+        marginRight: '12px',
+        [theme.breakpoints.down('sm')]: {
+            marginRight: '5px',
+            width:'28px',
+            height:'28px',
+            marginRight: '8px',
+        }
     },
     totalTextTile: {
         fontSize: '16px',
         fontWeight: '400',
-        color: theme.themeColors.textT
+        display:'flex',
+        alignItems:'center',
+        color: theme.themeColors.textT,
+        [theme.breakpoints.down('sm')]: {
+            fontSize: '12px',
+        }
     },
     totalTextNum: {
         fontSize: '20px',
         fontWeight: '500',
-        color: theme.themeColors.textT
+        color: theme.themeColors.textT,
+        [theme.breakpoints.down('sm')]: {
+            fontSize: '12px',
+        }
     },
     myAssets: {
         padding: '49px 40px',
         display: 'flex',
         marginTop: '21px',
-        background: 'linear-gradient(223deg, rgba(36, 33, 81, 0.54) 0%, rgba(38, 35, 83, 0.8) 40%, rgba(28, 26, 67, 0.45) 100%)',
+        background: theme.themeColors.modelBack,
         // padding:'0 19px',
-        boxShadow: '0px 2px 10px 0px rgba(23, 18, 43, 0.85)',
+        // boxShadow: '0px 2px 10px 0px rgba(23, 18, 43, 0.85)',
         border: ' 1px solid #7367F7',
         alignItems: 'center'
     },
@@ -264,9 +378,9 @@ const styles = theme => ({
         color: theme.themeColors.textT
     },
     myAssetsRate: {
-        fontSize: '24px',
+        fontSize: '20px',
         fontWeight: '500',
-        color: theme.themeColors.textT,
+        color:theme.themeColors.myAssetsRateText,
     },
     bigImg: {
         width: '80px',
@@ -277,18 +391,27 @@ const styles = theme => ({
         width: '100%',
         height: '100%',
         position: 'fixed',
+        background:'rgba(0,0,0,.6)',
+        zIndex:'999999',
         top: 0,
-        left: 0
+        left: 0,
     },
     shareBox: {
         width: '419px',
         position: 'absolute',
-        left: '50%',
+        left: '40%',
         top: '30%',
         trantransform: 'translate(-50%)',
-        background: 'linear-gradient(223deg, rgba(36, 33, 81, 0.54) 0%, rgba(38, 35, 83, 0.8) 40%, rgba(28, 26, 67, 0.45) 100%)',
-        boxShadow: '0px 2px 10px 0px rgba(23, 18, 43, 0.85)',
+        background: theme.themeColors.modelBack,
         border: '1px solid #7367F7',
+        [theme.breakpoints.down('sm')]: {
+            width:'335px',
+            position:'absolute',
+            left:'50%',
+            top:'15%',
+            transform: 'translate(-50%)',
+            // transform: 'translateX(-50%)',
+        }
     },
     shareTitle: {
         display: 'flex',
@@ -305,7 +428,7 @@ const styles = theme => ({
     closeIcon: {
         width: '24px',
         height: '24px',
-        fill: '#FFFFFF'
+        fill: theme.themeColors.textT
     },
     aprTitle: {
         fontSize: '14px',
@@ -350,6 +473,12 @@ const styles = theme => ({
         width: '12px',
         height: '12px',
         fill: theme.themeColors.textT
+    },
+    calculator:{
+        width:'14px',
+        height:'14px',
+        fill:theme.themeColors.textT,
+        marginLeft:'5px'
     }
 
 
@@ -369,18 +498,19 @@ class StakeDvgVip extends Component {
             assets: store.getStore('account'),
             account: account,
             onboard: '',
-            dvgInfoObj:'',
-            amount:'',
-            type:'stake',
-            aprInfo:{}
+            dvgInfoObj: '',
+            amount: '',
+            type: 'stake',
+            isShowApr:false,
+            aprInfo: {}
         }
-        console.log(account,'account####');
+        console.log(account, 'account####');
         if (account && account.address) {
             dispatcher.dispatch({ type: GET_DVG_INFO })
             dispatcher.dispatch({ type: GET_XDVG_BALANCE })
         }
         dispatcher.dispatch({ type: GET_VAULT_BALANCES_FULL })
-        dispatcher.dispatch({type:GET_DVG_APR})
+        dispatcher.dispatch({ type: GET_DVG_APR })
     }
     componentWillMount() {
         const onboard = initOnboard({
@@ -415,17 +545,18 @@ class StakeDvgVip extends Component {
         emitter.on(CHANGE_NETWORK, this.networkChanged);
         emitter.on(DASHBOARD_SNAPSHOT_RETURNED, this.dashboardSnapshotReturned);
         emitter.on(CONNECTION_CONNECTED, this.connectionConnected);
-        emitter.on(GET_DVG_BALANCE_SUCCESS,this.dvgBalance)
-        emitter.on(GET_XDVG_BALANCE_SUCCESS,this.xdvgBalance)
-        emitter.on(GET_XDVG_APR_SUCCESS,this.getAprInfo)
+        emitter.on(GET_DVG_BALANCE_SUCCESS, this.dvgBalance)
+        emitter.on(GET_XDVG_BALANCE_SUCCESS, this.xdvgBalance)
+        emitter.on(GET_XDVG_APR_SUCCESS, this.getAprInfo)
     }
 
     componentWillUnmount() {
         emitter.removeListener(CHANGE_NETWORK, this.networkChanged);
         emitter.removeListener(DASHBOARD_SNAPSHOT_RETURNED, this.dashboardSnapshotReturned);
         emitter.removeListener(CONNECTION_CONNECTED, this.connectionConnected);
-        emitter.on(GET_DVG_BALANCE_SUCCESS,this.dvgBalance)
-        emitter.on(GET_XDVG_BALANCE_SUCCESS,this.xdvgBalance)
+        emitter.removeListener(GET_DVG_BALANCE_SUCCESS, this.dvgBalance)
+        emitter.removeListener(GET_XDVG_BALANCE_SUCCESS, this.xdvgBalance)
+        emitter.removeListener(GET_XDVG_APR_SUCCESS, this.getAprInfo)
     }
 
 
@@ -445,68 +576,79 @@ class StakeDvgVip extends Component {
     connectionConnected = () => {
         const { period } = this.state;
         const account = store.getStore('account')
-        console.log(account,'account428##3');
+        console.log(account, 'account428##3');
         this.setState({ loading: true, account: account })
-            if (account && account.address) {
-                dispatcher.dispatch({ type: GET_DVG_INFO })
-            }
+        if (account && account.address) {
+            dispatcher.dispatch({ type: GET_DVG_INFO })
+        }
         dispatcher.dispatch({ type: GET_DASHBOARD_SNAPSHOT, content: { interval: period } })
     };
-    
-    dvgBalance =(asset)=>{
-            this.setState({
-                dvgInfoObj:asset
-            })
-    }
 
-
-    xdvgBalance =(asset)=>{
+    dvgBalance = (asset) => {
         this.setState({
-            dvgInfoObj:asset
+            dvgInfoObj: asset
         })
     }
 
-    submitStake=()=>{
-        if(this.state.type=='stake'){
-            dispatcher.dispatch({type:DEPOSIT_XDVG,content:{amount:this.state.amount,asset:this.state.dvgInfoObj[0]}})
-        }else{
-            dispatcher.dispatch({type:WIDTHDRAW_XDVG,content:{amount:this.state.amount,asset:this.state.dvgInfoObj[1]}})
+
+    xdvgBalance = (asset) => {
+        this.setState({
+            dvgInfoObj: asset
+        })
+    }
+
+    submitStake = () => {
+        if (this.state.type == 'stake') {
+            dispatcher.dispatch({ type: DEPOSIT_XDVG, content: { amount: this.state.amount, asset: this.state.dvgInfoObj[0] } })
+        } else {
+            dispatcher.dispatch({ type: WIDTHDRAW_XDVG, content: { amount: this.state.amount, asset: this.state.dvgInfoObj[1] } })
         }
     }
 
     onChange = (event) => {
         this.setState({
-            amount:event.target.value
+            amount: event.target.value
         })
-      }
+    }
 
-    stakeTab = (type) =>{
-        if(type!==this.state.type){
+    stakeTab = (type) => {
+        if (type !== this.state.type) {
             this.setState({
-                type:type,
-                amount:''
+                type: type,
+                amount: ''
             })
         }
     }
 
-    maxAmount(){
-        const {type,dvgInfoObj} = this.state;
-        if(type=='stake'){
+    maxAmount() {
+        const { type, dvgInfoObj } = this.state;
+        if (type == 'stake') {
             this.setState({
-                amount:dvgInfoObj&&dvgInfoObj[1].balance
+                amount: dvgInfoObj && dvgInfoObj[1].balance
             })
-        }else{
+        } else {
             this.setState({
-                amount:dvgInfoObj&&dvgInfoObj[0].balance
+                amount: dvgInfoObj && dvgInfoObj[0].balance
             })
         }
     }
 
-    getAprInfo=()=>{
+    getAprInfo = () => {
         const aprInfo = store.getStore('dvgApr');
-        console.log(aprInfo,'aprInfo##');
+        console.log(aprInfo, 'aprInfo##');
         this.setState({
-            aprInfo:aprInfo
+            aprInfo: aprInfo
+        })
+    }
+
+    goUrl = (url) => {
+        let tempwindow = window.open('_blank');
+        tempwindow.location = url;
+    }
+
+    showAprDetail=()=>{
+        this.setState({
+            isShowApr:!this.state.isShowApr
         })
     }
 
@@ -520,51 +662,60 @@ class StakeDvgVip extends Component {
             amount,
             type,
             dvgInfoObj,
+            isShowApr,
             aprInfo
         } = this.state
-        const dvgBalance=dvgInfoObj&&dvgInfoObj[1].balance;
-        const xdvgBalance=dvgInfoObj&&dvgInfoObj[0].balance;
+        const dvgBalance = dvgInfoObj && dvgInfoObj[1].balance;
+        const xdvgBalance = dvgInfoObj && dvgInfoObj[0].balance;
         if (!account || !account.address) {
             return <ConnectWallet></ConnectWallet>
         } else {
 
             return <div className={classes.root}>
 
-                <div className={classes.banner}>
-                    <div className={classes.bannerLeft}>
-                        <div className={classes.text}>Buy DVG on DEX Liquidity Pools</div>
-                    </div>
-                    <div className={classes.bannerRight}>
-                        <div className={classes.toTrade}>
-                            <div className={classes.toTradeUniswap}>Buy on Uniswap</div>
-                            <div className={classes.toTradePancakeswap}>Buy on Pancakeswap</div>
+                <Grid>
 
+                    <div className={classes.banner}>
+                        <div className={classes.bannerLeft}>
+                            <div className={classes.text}>Buy DVG on DEX Liquidity Pools</div>
                         </div>
-                    </div>
+                        <div className={classes.bannerRight}>
+                            <div className={classes.toTrade}>
+                                <div className={classes.toTradeUniswap} onClick={() => this.goUrl('https://app.uniswap.org/#/swap?outputCurrency=0x51e00a95748dbd2a3f47bc5c3b3e7b3f0fea666c')}>Buy on Uniswap</div>
+                                <div className={classes.toTradePancakeswap} onClick={() => this.goUrl('https://exchange.pancakeswap.finance/#/swap?outputCurrency=0x51e00a95748dbd2a3f47bc5c3b3e7b3f0fea666c')}>Buy on Pancakeswap</div>
 
-                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </Grid>
                 <div className={classes.content}>
                     <div className={classes.contentLeft}>
                         <div className={classes.contentLeftTitle}>
                             <div className={classes.titleText}>Stake Pool</div>
                             <div className={classes.titleRate}>
-                                1 xDVG = 1.001 DVG
+                                1 vipDVG = {aprInfo.xDVGPrice && aprInfo.xDVGPrice.toFixed(2)}DVG
+
                         </div>
                         </div>
                         <div className={classes.contentCenter}>
                             <div className={classes.contentHeader}>
                                 <div className={classes.stakeTab}>
-                                    <div className={type=='stake'?classes.stake:classes.unStake} onClick={()=>this.stakeTab('stake')}>Stake</div>
-                                    <div className={type=='stake'?classes.unStake:classes.stake} onClick={()=>this.stakeTab('unStake')}>Unstake</div>
+                                    <div className={type == 'stake' ? classes.stake : classes.unStake} onClick={() => this.stakeTab('stake')}>Stake</div>
+                                    <div className={type == 'stake' ? classes.unStake : classes.stake} onClick={() => this.stakeTab('unStake')}>Unstake</div>
                                 </div>
-                                <div className={classes.available}>Available：{Number(dvgBalance).toFixed(2)}DVG</div>
+                                {type == 'stake' ?
+                                    <div className={classes.available}>Available：{dvgBalance && Number(dvgBalance).toFixed(2)}DVG</div>
+                                    : <div className={classes.available}>Available：{xdvgBalance && Number(xdvgBalance).toFixed(2)}vipDVG</div>
+
+                                }
                             </div>
                             <div className={classes.stakeInput}>
 
                                 <input className={classes.input} value={amount} onChange={this.onChange} type="text" />
-                                <div className={classes.max} onClick={()=>this.maxAmount()}>Max</div>
+                                <div className={classes.max} onClick={() => this.maxAmount()}>Max</div>
                             </div>
-                            <div className={classes.approveStaking} onClick={()=>{this.submitStake()}}>
+                            <div className={amount?classes.approveStakingActive:classes.approveStaking} onClick={() => { this.submitStake() }}>
                                 Approve Staking
                         </div>
                         </div>
@@ -575,14 +726,18 @@ class StakeDvgVip extends Component {
                                 <img className={classes.smallImg} src={require("../../assets/stakeImg/lock-icon@2x.png")} alt="" />
                                 <div className={classes.totalText}>
                                     <p className={classes.totalTextTile}>Total Value Locked</p>
-                                    <p className={classes.totalTextNum}>$ 1,0002.00</p>
+                                    <p className={classes.totalTextNum}>$ {Number(aprInfo.tvl).toFixed(2)}</p>
                                 </div>
                             </div>
                             <div className={classes.apr}>
                                 <img className={classes.smallImg} src={require("../../assets/stakeImg/apy-icon@2x.png")} alt="" />
                                 <div className={classes.aprText}>
-                                    <p className={classes.totalTextTile}>APR</p>
-                                    <p className={classes.totalTextNum}>{aprInfo.apr} %</p>
+                                    <p className={classes.totalTextTile}>APR
+                                    <svg className={classes.calculator} aria-hidden="true" onClick={()=>{this.showAprDetail()}}>
+                                        <use xlinkHref="#iconcalculator-line"></use>
+                                    </svg>
+                                    </p>
+                                    <p className={classes.totalTextNum}>{aprInfo.apr && Number(aprInfo.apr).toFixed(2)} %</p>
                                 </div>
                             </div>
                         </div>
@@ -590,18 +745,18 @@ class StakeDvgVip extends Component {
                             <img className={classes.bigImg} src={require("../../assets/stakeImg/liquidity-icon@2x.png")} alt="" />
                             <div className={classes.myAssetstext}>
                                 <p className={classes.myAssetsTitle}>My vipDVG</p>
-                                <p className={classes.myAssetsNum}>{Number(xdvgBalance).toFixed(2)}</p>
-                                <p className={classes.myAssetsRate}>≈ $ 1,0002.00</p>
+                                <p className={classes.myAssetsNum}>{xdvgBalance && Number(xdvgBalance).toFixed(2)}</p>
+                                <p className={classes.myAssetsRate}>≈ $ {xdvgBalance && aprInfo.xDVGPrice && aprInfo.dvgPrice && Number(xdvgBalance * aprInfo.xDVGPrice * aprInfo.dvgPrice).toFixed(2)}</p>
                             </div>
                         </div>
                     </div>
                 </div>
-                {false ?
+                {isShowApr ?
                     <div className={classes.share}>
                         <div className={classes.shareBox}>
                             <div className={classes.shareTitle}>
                                 <p className={classes.shareTitleText}>Est. ROI</p>
-                                <svg className={classes.closeIcon} aria-hidden="true">
+                                <svg className={classes.closeIcon} aria-hidden="true" onClick={()=>{this.showAprDetail()}}>
                                     <use xlinkHref="#iconclose"></use>
                                 </svg>
                             </div>
@@ -612,25 +767,25 @@ class StakeDvgVip extends Component {
                                 </div>
                                 <div className={classes.shareText}>
                                     <p className={classes.aprText}>1d</p>
-                                    <p className={classes.aprText}>0.26%</p>
+                                    <p className={classes.aprText}>{aprInfo.aprOneDay.toFixed(2)}%</p>
                                 </div>
                                 <div className={classes.shareText}>
                                     <p className={classes.aprText}>7d</p>
-                                    <p className={classes.aprText}>1.73%</p>
+                                    <p className={classes.aprText}>{aprInfo.aprOneWeek.toFixed(2)}%</p>
                                 </div>
                                 <div className={classes.shareText}>
                                     <p className={classes.aprText}>30d</p>
-                                    <p className={classes.aprText}>7.72%</p>
+                                    <p className={classes.aprText}>{aprInfo.aprOneMonth.toFixed(2)}%</p>
                                 </div>
                                 <div className={classes.shareText}>
                                     <p className={classes.aprText}>365d(APY)</p>
-                                    <p className={classes.aprText}>147.45%</p>
+                                    <p className={classes.aprText}>{aprInfo.aprOneYear.toFixed(2)}%</p>
                                 </div>
                                 <div className={classes.aprIntroduction}>
                                     Calculated based on current rates. Rates are estimates provided for your convenience and reference only, which does not represent any guaranteed returns.
                         </div>
                                 <div className={classes.shareBtn}>
-                                    <span>Get DVG</span>
+                                    <span onClick={()=>{this.goUrl('https://app.uniswap.org/#/swap?outputCurrency=0x51e00a95748dbd2a3f47bc5c3b3e7b3f0fea666c')}}>Get DVG</span>
                                     <svg className={classes.shareIcon} aria-hidden="true">
                                         <use xlinkHref="#iconshare"></use>
                                     </svg>

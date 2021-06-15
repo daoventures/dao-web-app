@@ -5611,7 +5611,6 @@ class Store {
       })
     } else {
       let _amount = web3.utils.toWei(amount, "ether");
-      console.log(_amount, '_amount##');
       xDVGCOntract.methods
         .deposit(_amount)
         .send({

@@ -38,7 +38,7 @@ const styles = theme => ({
     width: 'calc(100% - 240px)',
     display: 'flex',
     padding: '40px 80px 0px 80px',
-    background: theme.themeColors.back,
+    // background: theme.themeColors.back,
     zIndex: theme.zIndex.drawer - 1,
     position: 'fixed',
     // left: '319px',
@@ -63,8 +63,9 @@ const styles = theme => ({
     justifyContent: 'center',
     [theme.breakpoints.down('sm')]: {
       justifyContent: 'space-between',
-      padding: '15px'
-    }
+      padding: '15px',
+      background:theme.themeColors.itemBack
+    },
   },
   icon: {
     display: 'flex',
@@ -227,7 +228,7 @@ class Header extends Component {
       menuObj: {
         '/portfolio': 'Portfolio',
         '/invest': 'Invest',
-        '/stake': 'Grow',
+        '/stake': 'DAOvip',
         '/swap': 'Swap'
       },
       currentTheme: store.getStore('currentTheme'),
