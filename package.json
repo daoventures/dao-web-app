@@ -98,7 +98,7 @@
   },
   "scripts": {
     "start": "node scripts/start.js",
-    "build": "NODE_OPTIONS=--max_old_space_size=4096 node scripts/build.js",
+    "build": "NODE_OPTIONS=--max_old_space_size=8192 node scripts/build.js",
     "test": "node scripts/test.js"
   },
   "eslintConfig": {
