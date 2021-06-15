@@ -44,6 +44,8 @@ import {
   ADVANCE,
   EXPERT,
   DEGEN,
+  APPROVE_TRANSACTING,
+  APPROVE_COMPLETED,
 } from "../../constants";
 
 import Store from "../../stores";
@@ -749,6 +751,8 @@ class Vault extends Component {
       WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
       this.onWithdrawalCompleted
     );
+    emitter.on(APPROVE_TRANSACTING, this.showHashApproval);
+    emitter.on(APPROVE_COMPLETED, this.onApprovalCompleted);
     emitter.on(ERROR, this.errorReturned);
     emitter.on(STRATEGY_BALANCES_FULL_RETURNED, this.balancesReturned);
     emitter.on(CONNECTION_CONNECTED, this.connectionConnected);
@@ -863,6 +867,20 @@ class Vault extends Component {
     });
   };
 
+  onApprovalCompleted = (txHash) => {
+    const snackbarObj = { snackbarMessage: null, snackbarType: null };
+    this.setState(snackbarObj);
+    this.setState({ loading: false });
+    const that = this;
+    setTimeout(() => {
+      const snackbarObj = {
+        snackbarMessage: "Approved.",
+        snackbarType: "Transaction Success",
+      };
+      that.setState(snackbarObj);
+    });
+  };
+
   onDepositCompleted = (txHash) => {
     dispatcher.dispatch({
       type: GET_STRATEGY_BALANCES_FULL,
@@ -876,7 +894,7 @@ class Vault extends Component {
     setTimeout(() => {
       const snackbarObj = {
         snackbarMessage: txHash,
-        snackbarType: "Deposit Success",
+        snackbarType: "Transaction Success",
       };
       that.setState(snackbarObj);
     });
@@ -894,7 +912,7 @@ class Vault extends Component {
     setTimeout(() => {
       const snackbarObj = {
         snackbarMessage: txHash,
-        snackbarType: "Withdrawal Success",
+        snackbarType: "Transaction Success",
       };
       that.setState(snackbarObj);
     });
@@ -907,6 +925,20 @@ class Vault extends Component {
     const that = this;
     setTimeout(() => {
       const snackbarObj = { snackbarMessage: txHash, snackbarType: "Hash" };
+      that.setState(snackbarObj);
+    });
+  };
+
+  showHashApproval = (txHash) => {
+    const snackbarObj = { snackbarMessage: null, snackbarType: null };
+    this.setState(snackbarObj);
+    this.setState({ loading: false });
+    const that = this;
+    setTimeout(() => {
+      const snackbarObj = {
+        snackbarMessage: "Approving...",
+        snackbarType: "Hash",
+      };
       that.setState(snackbarObj);
     });
   };
@@ -1203,10 +1235,16 @@ class Vault extends Component {
                           <div>
                             {(asset.strategyType === "citadel"
                               ? asset.sumBalances
-                                ? asset.sumBalances.toFixed(2)
+                                ? asset.sumBalances.toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  })
                                 : "0.00"
                               : asset.balance
-                              ? asset.balance.toFixed(2)
+                              ? asset.balance.toLocaleString(undefined, {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })
                               : "0.00") +
                               " " +
                               (asset.strategyType === "citadel"
@@ -1230,10 +1268,16 @@ class Vault extends Component {
                           <div>
                             {(asset.strategyType === "citadel"
                               ? asset.sumBalances
-                                ? asset.sumBalances.toFixed(2)
+                                ? asset.sumBalances.toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  })
                                 : "0.00"
                               : asset.balance
-                              ? asset.balance.toFixed(2)
+                              ? asset.balance.toLocaleString(undefined, {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })
                               : "0.00") +
                               " " +
                               (asset.strategyType === "citadel"
@@ -1254,7 +1298,13 @@ class Vault extends Component {
                       <Typography
                         variant={"h5"}
                         className={classes.assetLabel1}>
-                        $ {asset.tvl}
+                        ${" "}
+                        {asset.tvl
+                          ? asset.tvl.toLocaleString(undefined, {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })
+                          : "0.00"}
                       </Typography>
                       <Typography
                         variant={"body1"}

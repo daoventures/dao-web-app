@@ -47,6 +47,8 @@ import {
   WITHDRAW_BOTH_VAULT,
   WITHDRAW_BOTH_VAULT_RETURNED,
   WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
+  APPROVE_TRANSACTING,
+  APPROVE_COMPLETED,
   GET_DASHBOARD_SNAPSHOT,
   DASHBOARD_SNAPSHOT_RETURNED,
   USD_PRICE_RETURNED,
@@ -1632,6 +1634,7 @@ class Store {
             from: account.address,
             gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
           });
+
         callback();
       } else {
         callback();
@@ -1694,6 +1697,30 @@ class Store {
           .send({
             from: account.address,
             gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+          })
+          .on("transactionHash", function (txnHash) {
+            console.log(txnHash);
+            callback(null, txnHash, null);
+          })
+          .on("receipt", function (receipt) {
+            console.log(receipt);
+            callback(null, null, receipt);
+          })
+          .on("error", function (error) {
+            if (!error.toString().includes("-32601")) {
+              if (error.message) {
+                return callback(error.message);
+              }
+              callback(error);
+            }
+          })
+          .catch((error) => {
+            if (!error.toString().includes("-32601")) {
+              if (error.message) {
+                return callback(error.message);
+              }
+              callback(error);
+            }
           });
 
         callback();
@@ -1781,6 +1808,30 @@ class Store {
           .send({
             from: account.address,
             gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+          })
+          .on("transactionHash", function (txnHash) {
+            console.log(txnHash);
+            callback(null, txnHash, null);
+          })
+          .on("receipt", function (receipt) {
+            console.log(receipt);
+            callback(null, null, receipt);
+          })
+          .on("error", function (error) {
+            if (!error.toString().includes("-32601")) {
+              if (error.message) {
+                return callback(error.message);
+              }
+              callback(error);
+            }
+          })
+          .catch((error) => {
+            if (!error.toString().includes("-32601")) {
+              if (error.message) {
+                return callback(error.message);
+              }
+              callback(error);
+            }
           });
 
         callback();
@@ -3881,59 +3932,75 @@ class Store {
         account,
         earnAmount + vaultAmount,
         strategyAddress,
-        (err) => {
+        (err, txnHash, approvalResult) => {
           if (err) {
             return emitter.emit(ERROR, err);
           }
-
-          this._callDepositContract(
-            asset,
-            account,
-            earnAmount,
-            vaultAmount,
-            (err, txnHash, depositResult) => {
-              if (err) {
-                return emitter.emit(ERROR, err);
+          if (txnHash) {
+            return emitter.emit(APPROVE_TRANSACTING, txnHash);
+          }
+          if (approvalResult) {
+            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
+            this._callDepositContract(
+              asset,
+              account,
+              earnAmount,
+              vaultAmount,
+              (err, txnHash, depositResult) => {
+                if (err) {
+                  return emitter.emit(ERROR, err);
+                }
+                if (txnHash) {
+                  return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+                }
+                if (depositResult) {
+                  return emitter.emit(
+                    DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                    depositResult.transactionHash
+                  );
+                }
               }
-              if (txnHash) {
-                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-              }
-              if (depositResult) {
-                return emitter.emit(
-                  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                  depositResult.transactionHash
-                );
-              }
-            }
-          );
+            );
+          }
         }
       );
     } else if (asset.strategyType === "compound") {
-      this._checkApproval(asset, account, amount, strategyAddress, (err) => {
-        if (err) {
-          return emitter.emit(ERROR, err);
-        }
-
-        this._callDepositAmountContract(
-          asset,
-          account,
-          amount,
-          (err, txnHash, depositResult) => {
-            if (err) {
-              return emitter.emit(ERROR, err);
-            }
-            if (txnHash) {
-              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-            }
-            if (depositResult) {
-              return emitter.emit(
-                DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                depositResult.transactionHash
-              );
-            }
+      this._checkApproval(
+        asset,
+        account,
+        amount,
+        strategyAddress,
+        (err, txnHash, approvalResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
           }
-        );
-      });
+          if (txnHash) {
+            return emitter.emit(APPROVE_TRANSACTING, txnHash);
+          }
+          if (approvalResult) {
+            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
+            this._callDepositAmountContract(
+              asset,
+              account,
+              amount,
+              (err, txnHash, depositResult) => {
+                if (err) {
+                  return emitter.emit(ERROR, err);
+                }
+                if (txnHash) {
+                  return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+                }
+                if (depositResult) {
+                  return emitter.emit(
+                    DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                    depositResult.transactionHash
+                  );
+                }
+              }
+            );
+          }
+        }
+      );
     } else if (asset.strategyType === "citadel") {
       this._checkApprovalCitadel(
         asset,
@@ -3941,31 +4008,36 @@ class Store {
         amount,
         asset.vaultContractAddress,
         tokenIndex,
-        (err) => {
+        (err, txnHash, approvalResult) => {
           if (err) {
             return emitter.emit(ERROR, err);
           }
-          // TODO: Modify _callDepositAmountContract to handle citadel
-          this._callDepositAmountContractCitadel(
-            asset,
-            account,
-            amount,
-            tokenIndex,
-            (err, txnHash, depositResult) => {
-              if (err) {
-                return emitter.emit(ERROR, err);
+          if (txnHash) {
+            return emitter.emit(APPROVE_TRANSACTING, txnHash);
+          }
+          if (approvalResult) {
+            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
+            this._callDepositAmountContractCitadel(
+              asset,
+              account,
+              amount,
+              tokenIndex,
+              (err, txnHash, depositResult) => {
+                if (err) {
+                  return emitter.emit(ERROR, err);
+                }
+                if (txnHash) {
+                  return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+                }
+                if (depositResult) {
+                  return emitter.emit(
+                    DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                    depositResult.transactionHash
+                  );
+                }
               }
-              if (txnHash) {
-                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-              }
-              if (depositResult) {
-                return emitter.emit(
-                  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                  depositResult.transactionHash
-                );
-              }
-            }
-          );
+            );
+          }
         }
       );
     }
