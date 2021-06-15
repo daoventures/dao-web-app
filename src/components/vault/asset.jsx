@@ -730,7 +730,7 @@ class Asset extends Component {
                       {asset.addressStatistics
                         ? (
                             asset.addressStatistics.earnings /
-                            10 ** asset.decimals
+                            10 ** 6
                           ).toFixed(2)
                         : "0.00"}
                       {asset.strategyType === "citadel" ? "USD" : asset.symbol}
