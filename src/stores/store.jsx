@@ -1776,6 +1776,8 @@ class Store {
         .call({ from: account.address });
 
       const ethAllowance = web3.utils.fromWei(allowance, "ether");
+
+      console.log(allowance, amount);
       if (parseFloat(ethAllowance) < parseFloat(amount)) {
         /*
           code to accomodate for "assert _value == 0 or self.allowances[msg.sender][_spender] == 0" in contract
@@ -3928,7 +3930,7 @@ class Store {
       .call({ from: account.address });
 
     if (asset.strategyType === "yearn") {
-      this._checkApproval(
+      await this._checkApproval(
         asset,
         account,
         earnAmount + vaultAmount,
@@ -3942,31 +3944,31 @@ class Store {
           }
           if (approvalResult) {
             emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
-            this._callDepositContract(
-              asset,
-              account,
-              earnAmount,
-              vaultAmount,
-              (err, txnHash, depositResult) => {
-                if (err) {
-                  return emitter.emit(ERROR, err);
-                }
-                if (txnHash) {
-                  return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-                }
-                if (depositResult) {
-                  return emitter.emit(
-                    DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                    depositResult.transactionHash
-                  );
-                }
-              }
+          }
+        }
+      );
+      await this._callDepositContract(
+        asset,
+        account,
+        earnAmount,
+        vaultAmount,
+        (err, txnHash, depositResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+          }
+          if (depositResult) {
+            return emitter.emit(
+              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+              depositResult.transactionHash
             );
           }
         }
       );
     } else if (asset.strategyType === "compound") {
-      this._checkApproval(
+      await this._checkApproval(
         asset,
         account,
         amount,
@@ -3980,30 +3982,30 @@ class Store {
           }
           if (approvalResult) {
             emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
-            this._callDepositAmountContract(
-              asset,
-              account,
-              amount,
-              (err, txnHash, depositResult) => {
-                if (err) {
-                  return emitter.emit(ERROR, err);
-                }
-                if (txnHash) {
-                  return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-                }
-                if (depositResult) {
-                  return emitter.emit(
-                    DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                    depositResult.transactionHash
-                  );
-                }
-              }
+          }
+        }
+      );
+      await this._callDepositAmountContract(
+        asset,
+        account,
+        amount,
+        (err, txnHash, depositResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+          }
+          if (depositResult) {
+            return emitter.emit(
+              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+              depositResult.transactionHash
             );
           }
         }
       );
     } else if (asset.strategyType === "citadel") {
-      this._checkApprovalCitadel(
+      await this._checkApprovalCitadel(
         asset,
         account,
         amount,
@@ -4018,25 +4020,25 @@ class Store {
           }
           if (approvalResult) {
             emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
-            this._callDepositAmountContractCitadel(
-              asset,
-              account,
-              amount,
-              tokenIndex,
-              (err, txnHash, depositResult) => {
-                if (err) {
-                  return emitter.emit(ERROR, err);
-                }
-                if (txnHash) {
-                  return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-                }
-                if (depositResult) {
-                  return emitter.emit(
-                    DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                    depositResult.transactionHash
-                  );
-                }
-              }
+          }
+        }
+      );
+      await this._callDepositAmountContractCitadel(
+        asset,
+        account,
+        amount,
+        tokenIndex,
+        (err, txnHash, depositResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+          }
+          if (depositResult) {
+            return emitter.emit(
+              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+              depositResult.transactionHash
             );
           }
         }
@@ -4187,6 +4189,10 @@ class Store {
     let decimals = await erc20Contract.methods.decimals().call();
 
     var amountToSend = web3.utils.toBN(amount * 10 ** decimals).toString();
+
+    var amountToSend = web3.utils
+      .toBN((amount * 10 ** decimals).toString())
+      .toString();
 
     vaultContract.methods
       .deposit(amountToSend, tokenIndex)
@@ -4349,102 +4355,120 @@ class Store {
     );
 
     if (asset.strategyType === "yearn") {
-      this._checkApproval(
+      await this._checkApproval(
         asset,
         account,
-        asset.balance,
+        amount,
         asset.vaultContractAddress,
-        (err) => {
+        (err, txnHash, approvalResult) => {
           if (err) {
             return emitter.emit(ERROR, err);
           }
+          if (txnHash) {
+            return emitter.emit(APPROVE_TRANSACTING, txnHash);
+          }
+          if (approvalResult) {
+            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
+          }
+        }
+      );
 
-          this._callDepositContract(
-            asset,
-            account,
-            earnAmount,
-            vaultAmount,
-            (err, txnHash, depositResult) => {
-              if (err) {
-                return emitter.emit(ERROR, err);
-              }
-              if (txnHash) {
-                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-              }
-              if (depositResult) {
-                return emitter.emit(
-                  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                  depositResult.transactionHash
-                );
-              }
-            }
-          );
+      await this._callDepositContract(
+        asset,
+        account,
+        earnAmount,
+        vaultAmount,
+        (err, txnHash, depositResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+          }
+          if (depositResult) {
+            return emitter.emit(
+              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+              depositResult.transactionHash
+            );
+          }
         }
       );
     } else if (asset.strategyType === "compound") {
-      this._checkApproval(
+      await this._checkApproval(
         asset,
         account,
-        asset.balance.toString(),
+        amount,
         asset.vaultContractAddress,
-        (err) => {
+        (err, txnHash, approvalResult) => {
           if (err) {
             return emitter.emit(ERROR, err);
           }
+          if (txnHash) {
+            return emitter.emit(APPROVE_TRANSACTING, txnHash);
+          }
+          if (approvalResult) {
+            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
+          }
+        }
+      );
 
-          this._callDepositAmountContract(
-            asset,
-            account,
-            asset.balance.toString(),
-            (err, txnHash, depositResult) => {
-              if (err) {
-                return emitter.emit(ERROR, err);
-              }
-              if (txnHash) {
-                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-              }
-              if (depositResult) {
-                return emitter.emit(
-                  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                  depositResult.transactionHash
-                );
-              }
-            }
-          );
+      await this._callDepositAmountContract(
+        asset,
+        account,
+        amount,
+        (err, txnHash, depositResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+          }
+          if (depositResult) {
+            return emitter.emit(
+              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+              depositResult.transactionHash
+            );
+          }
         }
       );
     } else if (asset.strategyType === "citadel") {
-      this._checkApprovalCitadel(
+      await this._checkApprovalCitadel(
         asset,
         account,
-        asset.balance.toString(),
+        amount,
         asset.vaultContractAddress,
         tokenIndex,
-        (err) => {
+        (err, txnHash, approvalResult) => {
           if (err) {
             return emitter.emit(ERROR, err);
           }
+          if (txnHash) {
+            return emitter.emit(APPROVE_TRANSACTING, txnHash);
+          }
+          if (approvalResult) {
+            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
+          }
+        }
+      );
 
-          this._callDepositAmountContractCitadel(
-            asset,
-            account,
-            asset.balance.toString(),
-            tokenIndex,
-            (err, txnHash, depositResult) => {
-              if (err) {
-                return emitter.emit(ERROR, err);
-              }
-              if (txnHash) {
-                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-              }
-              if (depositResult) {
-                return emitter.emit(
-                  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                  depositResult.transactionHash
-                );
-              }
-            }
-          );
+      await this._callDepositAmountContractCitadel(
+        asset,
+        account,
+        amount,
+        tokenIndex,
+        (err, txnHash, depositResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+          }
+          if (depositResult) {
+            return emitter.emit(
+              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+              depositResult.transactionHash
+            );
+          }
         }
       );
     }
