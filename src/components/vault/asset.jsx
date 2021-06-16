@@ -759,7 +759,7 @@ class Asset extends Component {
                         this.state.usdPrices &&
                         (asset.addressStatistics
                           ? (
-                              asset.addressStatistics.totalDepositsInUSD 
+                              Number(asset.addressStatistics.totalDepositsInUSD)
                             ).toFixed(2)
                           : "0.00")}
                       {asset.strategyType !== "citadel" &&
@@ -784,7 +784,7 @@ class Asset extends Component {
                         this.state.usdPrices &&
                         (asset.addressStatistics
                           ? (
-                              asset.addressStatistics.totalWithdrawalsInUSD 
+                              Number(asset.addressStatistics.totalWithdrawalsInUSD)
                             ).toFixed(2)
                           : "0.00")}
                       {asset.strategyType !== "citadel" &&
