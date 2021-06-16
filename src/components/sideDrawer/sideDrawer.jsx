@@ -9,15 +9,23 @@ import {
   CURRENT_THEME_RETURNED,
   CHANGE_NETWORK,
   CONNECTION_CONNECTED,
-  CONNECTION_DISCONNECTED,
-  GET_VAULT_BALANCES_FULL,
   GET_VAULT_INFO
 } from '../../constants/constants';
+import {
+  INVEST_PATH,
+  PORTFOLIO_PATH,
+  STAKE_PATH,
+  INVEST,
+  PORTFOLIO,
+  SWAP_PATH,
+  SWAP
+} from '../../constants/page-constant';
 import { drawerWidth } from "../../theme/theme";
 import ToggleTheme from '../toggleTheme'
 
 import copy from 'copy-to-clipboard';
 import Snackbar from '../snackbar'
+
 const emitter = Store.emitter
 const dispatcher = Store.dispatcher
 const store = Store.store
@@ -237,7 +245,7 @@ const styles = theme => ({
     fontSize: '14px',
     fontWeight: '500',
     color: theme.themeColors.textT,
-    whiteSpace:'nowrap'
+    whiteSpace: 'nowrap'
   },
   lockImg: {
     width: '36px',
@@ -262,12 +270,18 @@ class SideDrawer extends Component {
       openDrawer: store.getStore('openDrawer'),
       currentTheme: store.getStore('currentTheme'),
       currentNetwork: 0,
-      currentAddress: store.getStore('account') && store.getStore('account').address || '',
+      currentAddress: (store.getStore('account') && store.getStore('account').address) || '',
       isShowWalletSelect: false,
       snackbarType: '',
       snackbarMessage: '',
-      balance: store.getStore('account') && store.getStore('account').balance || '',
-      totalValue: ''
+      balance: (store.getStore('account') && store.getStore('account').balance) || '',
+      totalValue: '',
+      listItem: [
+        // { key: PORTFOLIO, name:"portfolio", path: PORTFOLIO_PATH, icon: "#iconmenu_porftfolio_nor_day" },
+        { key: INVEST, name: "invest", path: INVEST_PATH, icon: "#iconmenu_porftfolio_normal_nightbeifen1" },
+        { key: "GROW", name: "stake", path: STAKE_PATH, icon: "#iconmenu_stake_normal_night" },
+        { key: SWAP, name: "swap", path: SWAP_PATH, icon: "#iconmenu_features_nor_night" },
+      ]
     }
   }
 
@@ -389,9 +403,97 @@ class SideDrawer extends Component {
     return <Snackbar type={snackbarType} message={snackbarMessage} open={true} />
   };
 
+  renderWalletInfo = () => {
+    const {
+      classes
+    } = this.props;
+
+    return (
+      <div className={classes.accountInfoBlock}>
+        {/* {this.state.currentNetwork && <div className={classes.accountInfo}>
+          <svg aria-hidden="true" className={classes.netWorkIcon}>
+            <use xlinkHref="#iconETH"></use>
+          </svg>
+          <span>{networkObj[this.state.currentNetwork]}</span>
+        </div>} */}
+
+        {
+          this.state.currentAddress &&
+          <div className={classes.accountInfo} onClick={() => { this.showWalletSelect() }}>
+            <img alt="wallet"
+              src={require('../../assets/img_new/wallet/metamask.c879a582@2x.png')}
+              style={{ width: '18px', height: '18px', marginRight: '10px' }} />
+            <span className={classes.addressSpan}>{this.state.currentAddress}</span>
+            <i style={{
+              display: 'block',
+              width: '6px',
+              height: '6px',
+              background: '#15C73E',
+              borderRadius: '100%',
+              marginLeft: '6px'
+            }}></i>
+            <svg className={this.state.isShowWalletSelect ? classes.selectIconActive : classes.selectIcon} aria-hidden="true">
+              <use xlinkHref="#iconicon_menu_dropDown__day"></use>
+            </svg>
+
+            {
+              this.state.isShowWalletSelect
+                ?
+                (
+                  <div className={classes.walletList}>
+                    <div className={classes.walletInfo}>
+                      <img alt="wallet"
+                        src={require('../../assets/img_new/wallet/metamask.c879a582@2x.png')}
+                        style={{ width: '28px', height: '26px', textAlign: 'center' }} />
+
+                      <p className={classes.addressP}>{this.state.currentAddress}</p>
+
+                      <svg className={classes.addressIcon} aria-hidden="true" onClick={() => { this.copyAddress() }} >
+                        <use xlinkHref="#iconcopy"></use>
+                      </svg>
+
+                      <svg onClick={() => { this.nav('https://twitter.com/VenturesDao') }} className={classes.addressIcon} aria-hidden="true" >
+                        <use xlinkHref="#iconshare"></use>
+                      </svg>
+
+                    </div>
+                    <div className={classes.actionWallet}>
+                      <div className={classes.changeWallet} onClick={() => { this.changeWallet() }}>CHANGE WALLET</div>
+                      <div className={classes.changeWallet} onClick={() => { this.disConnect() }}>DISCONNECT</div>
+                    </div>
+                  </div>
+                )
+                : null
+            }
+          </div>
+        }
+      </div>
+    )
+  }
+
+  renderTotalValueLocked = () => {
+    const { classes } = this.props;
+    return this.state.currentAddress 
+            ? (
+              <div className={classes.accountInfoBlock} >
+                <div className={classes.totalValue}>
+                  <div className={classes.totalValueLeft}>
+                    <img className={classes.lockImg} src={require('../../assets/lock-icon@2x.png')} alt="" />
+                  </div>
+                  <div className={classes.totalValueLeft}>
+                    <div className={classes.totalValueRightText}>Total Value Locked</div>
+                    <div className={classes.totalValueRightNum}>$ {this.state.totalValue}</div>
+                  </div>
+                </div>
+              </div>
+            )
+          : null;
+  }
+
   renderDrawer = () => {
     const {
       snackbarMessage,
+      listItem,
     } = this.state
     const {
       classes
@@ -414,127 +516,57 @@ class SideDrawer extends Component {
           // paperAnchorLeft: classes.drawerLeft,
         }}
         style={{
-          WebkitScrollbarTrack: 
+          WebkitScrollbarTrack:
             "'background-color': 'red','-webkit-border-radius': '2em','-moz-border-radius': '2em','border-radius': '2em'"
-          
+
         }}
       >
+        {/**  DAOventures Logo */}
         <div className={classes.logo}>
           <img
             alt=""
-            // src={ require('../../assets/DAOventures-logo.png') }
             src={this.state.currentTheme === 'light' ? require('../../assets/img_new/logo_light@2x.png') : require('../../assets/img_new/logo_dark@2x.png')}
-            // height={ '30px' }
             style={{ cursor: 'pointer', width: '100%' }}
             onClick={() => { this.nav('https://daoventures.co/') }}
           />
         </div>
 
-        <div className={classes.accountInfoBlock}>
-          {/* {this.state.currentNetwork && <div className={classes.accountInfo}>
-            <svg aria-hidden="true" className={classes.netWorkIcon}>
-              <use xlinkHref="#iconETH"></use>
-            </svg>
-            <span>{networkObj[this.state.currentNetwork]}</span>
-          </div>} */}
-          {this.state.currentAddress && <div className={classes.accountInfo} onClick={() => { this.showWalletSelect() }}>
-            <img src={require('../../assets/img_new/wallet/metamask.c879a582@2x.png')} style={{ width: '18px', height: '18px', marginRight: '10px' }} />
-            <span className={classes.addressSpan}>{this.state.currentAddress}</span>
-            <i style={{
-              display: 'block',
-              width: '6px',
-              height: '6px',
-              background: '#15C73E',
-              borderRadius: '100%',
-              marginLeft: '6px'
-            }}></i>
-            <svg className={this.state.isShowWalletSelect ? classes.selectIconActive : classes.selectIcon} aria-hidden="true">
-              <use xlinkHref="#iconicon_menu_dropDown__day"></use>
-            </svg>
-            {this.state.isShowWalletSelect ? <div className={classes.walletList}>
-              <div className={classes.walletInfo}>
-                <img alt="" src={require('../../assets/img_new/wallet/metamask.c879a582@2x.png')} style={{ width: '28px', height: '26px', textAlign: 'center' }} />
-                <p className={classes.addressP}>{this.state.currentAddress}</p>
-                <svg className={classes.addressIcon} aria-hidden="true" onClick={() => { this.copyAddress() }} >
-                  <use xlinkHref="#iconcopy"></use>
-                </svg>
-                <svg onClick={() => { this.nav('https://twitter.com/VenturesDao') }} className={classes.addressIcon} aria-hidden="true" >
-                  <use xlinkHref="#iconshare"></use>
-                </svg>
-              </div>
-              <div className={classes.actionWallet}>
-                <div className={classes.changeWallet} onClick={() => { this.changeWallet() }}>CHANGE WALLET</div>
-                <div className={classes.changeWallet} onClick={() => { this.disConnect() }}>DISCONNECT</div>
-              </div>
-            </div> : null}
+        {/** Wallet information */}
+        {this.renderWalletInfo()}
 
-          </div>}
-        </div>
-        {this.state.currentAddress && <div className={classes.accountInfoBlock}>
-          <div className={classes.totalValue}>
-            <div className={classes.totalValueLeft}>
-              <img className={classes.lockImg} src={require('../../assets/lock-icon@2x.png')} alt="" />
-            </div>
-            <div className={classes.totalValueLeft}>
-              <div className={classes.totalValueRightText}>Total Value Locked</div>
-              <div className={classes.totalValueRightNum}>$ {this.state.totalValue}</div>
-            </div>
-          </div>
-        </div>}
+        {/** Total Value Locked */}
+        {this.renderTotalValueLocked()}
+
+        {/** Side Navigation Bar */}
         <List>
-          {/**
-             * <ListItem button key={'PORTFOLIO'} className={this.linkSelected('/portfolio') ? classes.selected : classes.menuItem} onClick={() => { this.navInApp('portfolio') }}>
-                <ListItemIcon>
-                  <svg className={(this.linkSelected('/portfolio')) ? classes.selectedSvg : classes.menuSvg} aria-hidden="true">
-                    <use xlinkHref="#iconmenu_porftfolio_nor_day"></use>
-                  </svg>
-                </ListItemIcon>
-                <ListItemText primary={'PORTFOLIO'} />
-              </ListItem>
-           */}
-          
+          {
+            (listItem && listItem.length > 0)
+              ?
+              listItem.map(item => {
+                return (
+                  <ListItem button
+                    key={item.key}
+                    className={this.linkSelected(item.path)
+                      ? classes.selected
+                      : classes.menuItem}
+                    onClick={() => { this.navInApp(item.name) }}>
+                    <ListItemIcon>
+                      <svg className={(this.linkSelected(item.path)) ? classes.selectedSvg : classes.menuSvg} aria-hidden="true">
+                        <use xlinkHref={item.icon}></use>
+                      </svg>
+                    </ListItemIcon>
+                    <ListItemText primary={item.key} />
+                  </ListItem>
+                );
+              })
+              : null
+          }
 
-          <ListItem button key={'INVEST'} className={this.linkSelected('/invest') ? classes.selected : classes.menuItem} onClick={() => { this.navInApp('invest') }}>
-            <ListItemIcon>
-              {/* {this.renderIcon('line-chart', '/invest')} */}
-              <svg className={(this.linkSelected('/invest')) ? classes.selectedSvg : classes.menuSvg} aria-hidden="true">
-                <use xlinkHref="#iconmenu_porftfolio_normal_nightbeifen1"></use>
-              </svg>
-            </ListItemIcon>
-            <ListItemText primary={'INVEST'} />
-          </ListItem>
-
-          <ListItem button key={'GROW'} className={this.linkSelected('/stake') ? classes.selected : classes.menuItem} onClick={() => { this.navInApp('stake') }}>
-            <ListItemIcon>
-              {/* {this.renderIcon('pie-chart', '/portfolio')} */}
-              <svg className={(this.linkSelected('/stake')) ? classes.selectedSvg : classes.menuSvg} aria-hidden="true">
-                <use xlinkHref="#iconmenu_stake_normal_night"></use>
-              </svg>
-            </ListItemIcon>
-            <ListItemText primary={'GROW'} />
-          </ListItem>
-
-          <ListItem button key={'SWAP'} className={this.linkSelected('/swap') ? classes.selected : classes.menuItem} onClick={() => { this.navInApp('swap') }}>
-            <ListItemIcon>
-              {/* {this.renderIcon('pie-chart', '/portfolio')} */}
-              <svg className={(this.linkSelected('/swap')) ? classes.selectedSvg : classes.menuSvg} aria-hidden="true">
-                <use xlinkHref="#iconmenu_features_nor_night"></use>
-              </svg>
-            </ListItemIcon>
-            <ListItemText primary={'SWAP'} />
-          </ListItem>
-
-
-          {/* <div className={classes.selectNetwork}>
-          <div className={classes.selectNetworkTitle}>Select network</div>
-          <div className={classes.netWork}>
-                <div className={classes.changeWallet} onClick={() => { this.changeWallet() }}>ETH Mainnet</div>
-                <div className={classes.changeWallet} onClick={() => { this.disConnect() }}>BSC Mainnet</div>
-          </div>
-        </div> */}
         </List>
-        { this.renderFooterMenu()}
-        { snackbarMessage && this.renderSnackbar()}
+
+        {/** Footer */}
+        {this.renderFooterMenu(false)}
+        {snackbarMessage && this.renderSnackbar()}
       </Drawer >
     );
   }
@@ -543,6 +575,10 @@ class SideDrawer extends Component {
     const {
       classes
     } = this.props;
+
+    const {
+      listItem
+    } = this.state;
 
     return (
       <Drawer
@@ -553,397 +589,129 @@ class SideDrawer extends Component {
         open={this.state.openDrawer}
         onClose={this.dispatchToggle}
       >
-        <div className={classes.accountInfoBlock}>
-          {/* {this.state.currentNetwork && <div className={classes.accountInfo}>
-            <svg aria-hidden="true" className={classes.netWorkIcon}>
-              <use xlinkHref="#iconETH"></use>
-            </svg>
-            <span>{networkObj[this.state.currentNetwork]}</span>
-          </div>} */}
-          {this.state.currentAddress && <div className={classes.accountInfo} onClick={() => { this.showWalletSelect() }}>
-            <img src={require('../../assets/img_new/wallet/metamask.c879a582@2x.png')} style={{ width: '18px', height: '18px', marginRight: '10px' }} />
-            <span className={classes.addressSpan}>{this.state.currentAddress}</span>
-            <i style={{
-              display: 'block',
-              width: '6px',
-              height: '6px',
-              background: '#15C73E',
-              borderRadius: '100%',
-              marginLeft: '6px'
-            }}></i>
-            <svg className={this.state.isShowWalletSelect ? classes.selectIconActive : classes.selectIcon} aria-hidden="true">
-              <use xlinkHref="#iconicon_menu_dropDown__day"></use>
-            </svg>
-            {this.state.isShowWalletSelect ? <div className={classes.walletList}>
-              <div className={classes.walletInfo}>
-                <img alt="" src={require('../../assets/img_new/wallet/metamask.c879a582@2x.png')} style={{ width: '28px', height: '26px', textAlign: 'center' }} />
-                <p className={classes.addressP}>{this.state.currentAddress}</p>
-                <svg className={classes.addressIcon} aria-hidden="true" onClick={() => { this.copyAddress() }} >
-                  <use xlinkHref="#iconcopy"></use>
-                </svg>
-                <svg onClick={() => { this.nav('https://twitter.com/VenturesDao') }} className={classes.addressIcon} aria-hidden="true" >
-                  <use xlinkHref="#iconshare"></use>
-                </svg>
-              </div>
-              <div className={classes.actionWallet}>
-                <div className={classes.changeWallet} onClick={() => { this.changeWallet() }}>CHANGE WALLET</div>
-                <div className={classes.changeWallet} onClick={() => { this.disConnect() }}>DISCONNECT</div>
-              </div>
-            </div> : null}
+         {/** Wallet information */}
+         {this.renderWalletInfo()}
 
-          </div>}
-        </div>
-        {this.state.currentAddress && <div className={classes.accountInfoBlock}>
-          <div className={classes.totalValue}>
-            <div className={classes.totalValueLeft}>
-              <img className={classes.lockImg} src={require('../../assets/lock-icon@2x.png')} alt="" />
-            </div>
-            <div className={classes.totalValueLeft}>
-              <div className={classes.totalValueRightText}>Total Value Locked</div>
-              <div className={classes.totalValueRightNum}>$ {this.state.totalValue}</div>
-            </div>
-          </div>
-        </div>}
-        <List>
-          {/**
-           * <ListItem button key={'Portfolios'} className={this.linkSelected('/portfolio') ? classes.selected : classes.menuItem} onClick={() => { this.navInApp('portfolio') }}>
-                <ListItemIcon>
-                  <svg className={(this.linkSelected('/portfolio')) ? classes.selectedSvg : classes.menuSvg} aria-hidden="true">
-                    <use xlinkHref="#iconmenu_porftfolio_nor_day"></use>
-                  </svg>
-                </ListItemIcon>
-              <ListItemText primary={'Portfolios'} />
-          </ListItem>
-           */}
-         
-
-          <ListItem button key={'Invest'} className={this.linkSelected('/invest') ? classes.selected : classes.menuItem} onClick={() => { this.navInApp('invest') }}>
-            <ListItemIcon>
-              {/* {this.renderIcon('line-chart', '/invest')} */}
-              <svg className={(this.linkSelected('/invest')) ? classes.selectedSvg : classes.menuSvg} aria-hidden="true">
-                <use xlinkHref="#iconmenu_porftfolio_normal_nightbeifen1"></use>
-              </svg>
-            </ListItemIcon>
-            <ListItemText primary={'Invest'} />
-          </ListItem>
-
-          <ListItem button key={'GROW'} className={this.linkSelected('/stake') ? classes.selected : classes.menuItem} onClick={() => { this.navInApp('stake') }}>
-            <ListItemIcon>
-              {/* {this.renderIcon('pie-chart', '/portfolio')} */}
-              <svg className={(this.linkSelected('/stake')) ? classes.selectedSvg : classes.menuSvg} aria-hidden="true">
-                <use xlinkHref="#iconmenu_stake_normal_night"></use>
-              </svg>
-            </ListItemIcon>
-            <ListItemText primary={'GROW11'} />
-          </ListItem>
-
-          <ListItem button key={'SWAP'} className={this.linkSelected('/swap') ? classes.selected : classes.menuItem} onClick={() => { this.navInApp('swap') }}>
-            <ListItemIcon>
-              {/* {this.renderIcon('pie-chart', '/portfolio')} */}
-              <svg className={(this.linkSelected('/swap')) ? classes.selectedSvg : classes.menuSvg} aria-hidden="true">
-                <use xlinkHref="#iconmenu_features_nor_night"></use>
-              </svg>
-            </ListItemIcon>
-            <ListItemText primary={'SWAP'} />
-          </ListItem>
-
-
+         {/** Total Value Locked */}
+         {this.renderTotalValueLocked()}
+       
+         {/** Side Navigation Bar */}
+         <List>
+          {
+            (listItem && listItem.length > 0)
+              ?
+              listItem.map(item => {
+                return (
+                  <ListItem button key={item.key} 
+                            className={this.linkSelected(item.path) 
+                                        ? classes.selected 
+                                        : classes.menuItem} 
+                            onClick={() => { this.navInApp(item.name) }}>
+                    <ListItemIcon>
+                      <svg className={(this.linkSelected(item.path)) ? classes.selectedSvg : classes.menuSvg} aria-hidden="true">
+                        <use xlinkHref={item.icon}></use>
+                      </svg>
+                    </ListItemIcon>
+                  <ListItemText primary={item.key} />
+                </ListItem>
+                );
+              })
+              : null
+          }
         </List>
 
-        {this.renderFooterMenuH5()}
+        {/* *Footer */}
+        {this.renderFooterMenu(true)}
       </Drawer>
     );
   }
 
-  renderFooterMenu = () => {
+  renderFooterMenu = (isMobile) => {
     const { classes } = this.props;
     const {
       hideNav
     } = this.state;
+
+    const subMenus = [
+      { title: 'Your Feedback', path: '/user-feedback', link: "http://feedback.daoventures.co/beta-product-v1" },
+      { title: 'FAQ', path: '/faq', link: "https://daoventures.gitbook.io/daoventures/frequently-asked-question" },
+      { title: 'About Us', path: '/about-us', link: "https://daoventures.co/about" },
+    ];
+
+    const socialMedias = [
+      [
+        { icon: "#iconfacebook", link: "https://www.facebook.com/DAOventuresCo/"},
+        { icon: "#icontwitter", link: "https://twitter.com/VenturesDao"},
+        { icon: "#iconlinked", link: "https://www.linkedin.com/company/daoventuresco/"},
+        { icon: "#icondiscord", link: ""},
+        { icon: "#iconmedium", link: "https://daoventuresco.medium.com/"},
+      ],
+      [
+        { icon: "#iconreddit", link: "https://www.reddit.com/r/DAOVentures/"},
+        { icon: "#icontelegram", link: "https://t.me/DAOventures"},
+        { icon: "#iconemail", link: "mailto:support@daoventures.co"},
+        { icon: "#iconslack", link: "https://join.slack.com/t/daoventures/shared_invite/zt-k4hmm44g-p5ME~5I~fm0pkfY2U8AUIw"},
+        { icon: "#iconweibo", link: ""},
+      ],
+      [
+        { icon: "#iconweixin1", link: ""},
+        { icon: "#iconcoinMarketCap", link: ""},
+        { icon: "#iconcoingecko", link: ""},
+      ],
+    ];
+
     return (
-      <div className={classes.footerMenu}>
+      <div className={isMobile ? classes.footerMenuH5 : classes.footerMenu}>
         <List className={classes.bottomLinkBox}>
-          <ListItem button key={'Your Feedback'} className={`${(this.linkSelected('/user-feedback')) ? classes.selected : classes.menuItem2} ${classes.bottomLink}`} onClick={() => { this.nav('http://feedback.daoventures.co/beta-product-v1') }}>
-            <ListItemText primary={'Your Feedback'} />
-          </ListItem>
-
-          <ListItem button key={'FAQ'} className={`${(this.linkSelected('/faq')) ? classes.selected : classes.menuItem2} ${classes.bottomLink}`} onClick={() => { this.nav('https://daoventures.gitbook.io/daoventures/frequently-asked-question') }}>
-            <ListItemText primary={'FAQ'} />
-          </ListItem>
-
-          <ListItem button key={'About Us'} className={`${(this.linkSelected('/about-us')) ? classes.selected : classes.menuItem2} ${classes.bottomLink}`} onClick={() => { this.nav('https://daoventures.co/about') }}>
-            <ListItemText primary={'About Us'} />
-          </ListItem>
+          {
+            (subMenus && subMenus.length > 0) 
+              ? subMenus.map(menu => {
+                  return (
+                    <ListItem button key={menu.title} 
+                              className={`${(this.linkSelected(menu.link)) 
+                                ? classes.selected 
+                                : classes.menuItem2} ${classes.bottomLink}`} 
+                              onClick={() => { this.nav(menu.link) }}>
+                      <ListItemText primary={menu.title} />
+                    </ListItem>
+                  )
+                })
+              : null
+          }
         </List>
 
         {hideNav && <div style={{ marginLeft: '20px', paddingBottom: '40px' }}><ToggleTheme></ToggleTheme></div>}
 
-        {/* <Grid container spacing={2} className={classes.paddingGitter}>
-            <Grid item>
-              <img alt="" src={require('../../assets/reddit.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('https://www.reddit.com/r/DAOVentures/') } } />
-            </Grid>
-            <Grid item>
-              <img alt="" src={require('../../assets/twitter.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('https://twitter.com/VenturesDao') } } />
-            </Grid>
-            <Grid item>
-              <img alt="" src={require('../../assets/facebook.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('https://www.facebook.com/DAOventuresCo/') } } />
-            </Grid>
-            <Grid item>
-              <img alt="" src={require('../../assets/medium.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('https://daoventuresco.medium.com/ ') } } />
-            </Grid>
-          </Grid>
-
-          <Grid container spacing={2} className={classes.paddingGitter}>
-            <Grid item>
-              <img alt="" src={require('../../assets/slack.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('https://join.slack.com/t/daoventures/shared_invite/zt-k4hmm44g-p5ME~5I~fm0pkfY2U8AUIw') } } />
-            </Grid>
-            <Grid item>
-              <img alt="" src={require('../../assets/linkedin.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('https://www.linkedin.com/company/daoventuresco/') } } />
-            </Grid>
-            <Grid item>
-              <img alt="" src={require('../../assets/email.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('mailto:support@daoventures.co') } } />
-            </Grid>
-            <Grid item>
-              <img alt="" src={require('../../assets/telegram.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('https://t.me/DAOventures') } } />
-            </Grid>
-          </Grid> */}
-        <Grid container spacing={2} className={classes.paddingGitter}>
-
-          <Grid item>
-            {/* <img alt="" src={require('../../assets/facebook.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('https://www.facebook.com/DAOventuresCo/') } } /> */}
-            <svg className={classes.contactIcon} aria-hidden="true" onClick={() => { this.nav('https://www.facebook.com/DAOventuresCo/') }}>
-              <use xlinkHref="#iconfacebook"></use>
-            </svg>
-          </Grid>
-          <Grid item>
-            {/* <img alt="" src={require('../../assets/twitter.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('https://twitter.com/VenturesDao') } } /> */}
-            <svg className={classes.contactIcon} aria-hidden="true" onClick={() => { this.nav('https://twitter.com/VenturesDao') }}>
-              <use xlinkHref="#icontwitter"></use>
-            </svg>
-          </Grid>
-          <Grid item>
-            {/* <img alt="" src={require('../../assets/linkedin.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('https://www.linkedin.com/company/daoventuresco/') } } /> */}
-            <svg className={classes.contactIcon} aria-hidden="true" onClick={() => { this.nav('https://www.linkedin.com/company/daoventuresco/') }} >
-              <use xlinkHref="#iconlinked"></use>
-            </svg>
-          </Grid>
-          <Grid item>
-            <svg className={classes.contactIcon} aria-hidden="true">
-              <use xlinkHref="#icondiscord"></use>
-            </svg>
-          </Grid>
-          <Grid item>
-            {/* <img alt="" src={require('../../assets/medium.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('https://daoventuresco.medium.com/ ') } } /> */}
-            <svg className={classes.contactIcon} aria-hidden="true" onClick={() => { this.nav('https://daoventuresco.medium.com/ ') }}>
-              <use xlinkHref="#iconmedium"></use>
-            </svg>
-          </Grid>
-        </Grid>
-
-        <Grid container spacing={2} className={classes.paddingGitter}>
-          <Grid item>
-            {/* <img alt="" src={require('../../assets/reddit.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('https://www.reddit.com/r/DAOVentures/') } } /> */}
-            <svg className={classes.contactIcon} aria-hidden="true" onClick={() => { this.nav('https://www.reddit.com/r/DAOVentures/') }}>
-              <use xlinkHref="#iconreddit"></use>
-            </svg>
-          </Grid>
-          <Grid item>
-            {/* <img alt="" src={require('../../assets/telegram.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('https://t.me/DAOventures') } } /> */}
-            <svg className={classes.contactIcon} aria-hidden="true" onClick={() => { this.nav('https://t.me/DAOventures') }}>
-              <use xlinkHref="#icontelegram"></use>
-            </svg>
-          </Grid>
-          <Grid item>
-            {/* <img alt="" src={require('../../assets/email.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('mailto:support@daoventures.co') } } /> */}
-            <svg className={classes.contactIcon} aria-hidden="true" onClick={() => { this.nav('mailto:support@daoventures.co') }}>
-              <use xlinkHref="#iconemail"></use>
-            </svg>
-          </Grid>
-          <Grid item>
-            {/* <img alt="" src={require('../../assets/slack.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('https://join.slack.com/t/daoventures/shared_invite/zt-k4hmm44g-p5ME~5I~fm0pkfY2U8AUIw') } } /> */}
-            <svg className={classes.contactIcon} aria-hidden="true" onClick={() => { this.nav('https://join.slack.com/t/daoventures/shared_invite/zt-k4hmm44g-p5ME~5I~fm0pkfY2U8AUIw') }} >
-              <use xlinkHref="#iconslack"></use>
-            </svg>
-          </Grid>
-          <Grid item>
-            <svg className={classes.contactIcon} aria-hidden="true">
-              <use xlinkHref="#iconweibo"></use>
-            </svg>
-          </Grid>
-        </Grid>
-
-        <Grid container spacing={2} className={classes.paddingGitter}>
-          <Grid item>
-            <svg className={classes.contactIcon} aria-hidden="true">
-              <use xlinkHref="#iconweixin1"></use>
-            </svg>
-          </Grid>
-          <Grid item>
-            <svg className={classes.contactIcon} aria-hidden="true">
-              <use xlinkHref="#iconcoinMarketCap"></use>
-            </svg>
-          </Grid>
-          <Grid item>
-            <svg className={classes.contactIcon} aria-hidden="true">
-              <use xlinkHref="#iconcoingecko"></use>
-            </svg>
-          </Grid>
-        </Grid>
+        {/** Social Medias */}
+        {
+          socialMedias && 
+          socialMedias.map((row, index) => { 
+            return (
+                 <Grid container spacing={2} className={classes.paddingGitter} key={index}>
+                    {
+                      row.map((item) => {
+                        return this.renderSocialMediaIcon(item)
+                      })
+                    }
+                 </Grid>
+            )
+          })
+        }
       </div>
     )
   }
-  renderFooterMenuH5 = () => {
+
+  renderSocialMediaIcon = (contact) => {
     const { classes } = this.props;
-    const {
-      hideNav
-    } = this.state;
     return (
-      <div className={classes.footerMenuH5}>
-        <List className={classes.bottomLinkBox}>
-          <ListItem button key={'Your Feedback'} className={`${(this.linkSelected('/user-feedback')) ? classes.selected : classes.menuItem2} ${classes.bottomLink}`} onClick={() => { this.nav('http://feedback.daoventures.co/beta-product-v1') }}>
-            <ListItemText primary={'Your Feedback'} />
-          </ListItem>
-
-          <ListItem button key={'FAQ'} className={`${(this.linkSelected('/faq')) ? classes.selected : classes.menuItem2} ${classes.bottomLink}`} onClick={() => { this.nav('https://daoventures.gitbook.io/daoventures/frequently-asked-question') }}>
-            <ListItemText primary={'FAQ'} />
-          </ListItem>
-
-          <ListItem button key={'About Us'} className={`${(this.linkSelected('/about-us')) ? classes.selected : classes.menuItem2} ${classes.bottomLink}`} onClick={() => { this.nav('https://daoventures.co/about') }}>
-            <ListItemText primary={'About Us'} />
-          </ListItem>
-        </List>
-
-        {hideNav && <div style={{ marginLeft: '20px', paddingBottom: '40px' }}><ToggleTheme></ToggleTheme></div>}
-
-        {/* <Grid container spacing={2} className={classes.paddingGitter}>
-            <Grid item>
-              <img alt="" src={require('../../assets/reddit.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('https://www.reddit.com/r/DAOVentures/') } } />
-            </Grid>
-            <Grid item>
-              <img alt="" src={require('../../assets/twitter.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('https://twitter.com/VenturesDao') } } />
-            </Grid>
-            <Grid item>
-              <img alt="" src={require('../../assets/facebook.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('https://www.facebook.com/DAOventuresCo/') } } />
-            </Grid>
-            <Grid item>
-              <img alt="" src={require('../../assets/medium.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('https://daoventuresco.medium.com/ ') } } />
-            </Grid>
-          </Grid>
-
-          <Grid container spacing={2} className={classes.paddingGitter}>
-            <Grid item>
-              <img alt="" src={require('../../assets/slack.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('https://join.slack.com/t/daoventures/shared_invite/zt-k4hmm44g-p5ME~5I~fm0pkfY2U8AUIw') } } />
-            </Grid>
-            <Grid item>
-              <img alt="" src={require('../../assets/linkedin.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('https://www.linkedin.com/company/daoventuresco/') } } />
-            </Grid>
-            <Grid item>
-              <img alt="" src={require('../../assets/email.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('mailto:support@daoventures.co') } } />
-            </Grid>
-            <Grid item>
-              <img alt="" src={require('../../assets/telegram.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('https://t.me/DAOventures') } } />
-            </Grid>
-          </Grid> */}
-        <Grid container spacing={2} className={classes.paddingGitter}>
-
-          <Grid item>
-            {/* <img alt="" src={require('../../assets/facebook.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('https://www.facebook.com/DAOventuresCo/') } } /> */}
-            <svg className={classes.contactIcon} aria-hidden="true" onClick={() => { this.nav('https://www.facebook.com/DAOventuresCo/') }}>
-              <use xlinkHref="#iconfacebook"></use>
-            </svg>
-          </Grid>
-          <Grid item>
-            {/* <img alt="" src={require('../../assets/twitter.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('https://twitter.com/VenturesDao') } } /> */}
-            <svg className={classes.contactIcon} aria-hidden="true" onClick={() => { this.nav('https://twitter.com/VenturesDao') }}>
-              <use xlinkHref="#icontwitter"></use>
-            </svg>
-          </Grid>
-          <Grid item>
-            {/* <img alt="" src={require('../../assets/linkedin.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('https://www.linkedin.com/company/daoventuresco/') } } /> */}
-            <svg className={classes.contactIcon} aria-hidden="true" onClick={() => { this.nav('https://www.linkedin.com/company/daoventuresco/') }} >
-              <use xlinkHref="#iconlinked"></use>
-            </svg>
-          </Grid>
-          <Grid item>
-            <svg className={classes.contactIcon} aria-hidden="true">
-              <use xlinkHref="#icondiscord"></use>
-            </svg>
-          </Grid>
-          <Grid item>
-            {/* <img alt="" src={require('../../assets/medium.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('https://daoventuresco.medium.com/ ') } } /> */}
-            <svg className={classes.contactIcon} aria-hidden="true" onClick={() => { this.nav('https://daoventuresco.medium.com/ ') }}>
-              <use xlinkHref="#iconmedium"></use>
-            </svg>
-          </Grid>
-        </Grid>
-
-        <Grid container spacing={2} className={classes.paddingGitter}>
-          <Grid item>
-            {/* <img alt="" src={require('../../assets/reddit.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('https://www.reddit.com/r/DAOVentures/') } } /> */}
-            <svg className={classes.contactIcon} aria-hidden="true" onClick={() => { this.nav('https://www.reddit.com/r/DAOVentures/') }}>
-              <use xlinkHref="#iconreddit"></use>
-            </svg>
-          </Grid>
-          <Grid item>
-            {/* <img alt="" src={require('../../assets/telegram.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('https://t.me/DAOventures') } } /> */}
-            <svg className={classes.contactIcon} aria-hidden="true" onClick={() => { this.nav('https://t.me/DAOventures') }}>
-              <use xlinkHref="#icontelegram"></use>
-            </svg>
-          </Grid>
-          <Grid item>
-            {/* <img alt="" src={require('../../assets/email.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('mailto:support@daoventures.co') } } /> */}
-            <svg className={classes.contactIcon} aria-hidden="true" onClick={() => { this.nav('mailto:support@daoventures.co') }}>
-              <use xlinkHref="#iconemail"></use>
-            </svg>
-          </Grid>
-          <Grid item>
-            {/* <img alt="" src={require('../../assets/slack.svg')} style={{ cursor: 'pointer' }} onClick={ () => { this.nav('https://join.slack.com/t/daoventures/shared_invite/zt-k4hmm44g-p5ME~5I~fm0pkfY2U8AUIw') } } /> */}
-            <svg className={classes.contactIcon} aria-hidden="true" onClick={() => { this.nav('https://join.slack.com/t/daoventures/shared_invite/zt-k4hmm44g-p5ME~5I~fm0pkfY2U8AUIw') }} >
-              <use xlinkHref="#iconslack"></use>
-            </svg>
-          </Grid>
-          <Grid item>
-            <svg className={classes.contactIcon} aria-hidden="true">
-              <use xlinkHref="#iconweibo"></use>
-            </svg>
-          </Grid>
-        </Grid>
-
-        <Grid container spacing={2} className={classes.paddingGitter}>
-          <Grid item>
-            <svg className={classes.contactIcon} aria-hidden="true">
-              <use xlinkHref="#iconweixin1"></use>
-            </svg>
-          </Grid>
-          <Grid item>
-            <svg className={classes.contactIcon} aria-hidden="true">
-              <use xlinkHref="#iconcoinMarketCap"></use>
-            </svg>
-          </Grid>
-          <Grid item>
-            <svg className={classes.contactIcon} aria-hidden="true">
-              <use xlinkHref="#iconcoingecko"></use>
-            </svg>
-          </Grid>
-        </Grid>
-      </div>
+      <Grid item>
+        <svg className={classes.contactIcon} 
+             aria-hidden="true"
+            onClick={() => { if(contact.link !== "") { this.nav(contact.link) }}}>
+          <use xlinkHref={contact.icon}></use>
+          </svg>
+      </Grid>
     )
-  }
-
-  renderIcon = (name, url) => {
-    if (this.linkSelected(url)) {
-      return (
-        <img
-          alt=""
-          src={require(`../../assets/${name}_blue.svg`)} />
-      );
-    } else {
-      return (
-        <img
-          alt=""
-          src={require(`../../assets/${name}.svg`)} />
-      );
-    }
   }
 
   linkSelected = (link) => {

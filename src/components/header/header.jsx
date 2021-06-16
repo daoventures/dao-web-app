@@ -11,11 +11,13 @@ import {
   TOGGLE_DRAWER,
   CURRENT_THEME_RETURNED,
   CHANGE_NETWORK,
+} from "../../constants";
+import {
   HEADER_TITLE_DAOMINE,
   HEADER_TITLE_INVEST,
   HEADER_TITLE_PORTFOLIO,
   HEADER_TITLE_SWAP,
-} from "../../constants";
+} from "../../constants/page-constant";
 
 import UnlockModal from "../unlock/unlockModal.jsx";
 import ToggleTheme from "../toggleTheme";
@@ -407,14 +409,14 @@ class Header extends Component {
           </div> */}
 
           <div className={classes.currentMenu}>
-            {/** Page Header Title */}
+            {/*** Page Header Title */}
             {!hideNav && (
               <span>
                 {this.state.menuObj[this.props.history.location.pathname]}
               </span>
             )}
 
-            {/** Network Type */}
+            {/*** Network Type */}
             {
               (
                 this.state.currentNetwork === 1 ||
@@ -424,7 +426,6 @@ class Header extends Component {
                 ? (
                   <div className={classes.netWork}>
                     {
-                      {/** Network Icons */ }
                         (
                           this.state.currentNetwork === 1 ||
                           this.state.currentNetwork === 42
