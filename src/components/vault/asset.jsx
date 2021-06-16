@@ -2075,7 +2075,6 @@ class Asset extends Component {
       amount <= 0 ||
       parseFloat(amount) > assetBalance
     ) {
-      console.log(parseFloat(amount) > assetBalance);
       this.setState({ amountError: true });
       return false;
     }
