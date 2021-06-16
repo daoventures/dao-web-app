@@ -727,12 +727,23 @@ class Asset extends Component {
                   <div className={classes.flexy}>
                     <Typography variant={"h4"} noWrap>
                       {/**Total Earnings */}
-                      {asset.addressStatistics
+                      { 
+                        (asset.strategyType === "citadel") && 
+                        (asset.addressStatistics
+                        ? (
+                            Number(asset.addressStatistics.earnings)
+                          ).toFixed(2)
+                        : "0.00")
+                      }
+                      { 
+                        (asset.strategyType !== "citadel") && 
+                        (asset.addressStatistics
                         ? (
                             asset.addressStatistics.earnings /
-                            10 ** 6
+                            asset.decimals
                           ).toFixed(2)
-                        : "0.00"}
+                        : "0.00")
+                      }
                       {asset.strategyType === "citadel" ? "USD" : asset.symbol}
                     </Typography>
                   </div>
