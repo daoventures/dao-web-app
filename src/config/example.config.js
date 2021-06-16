@@ -4,7 +4,7 @@ const config = {
   // statsProvider: 'https://api.yearn.tools/',
   // statsProvider: "http://localhost:8080/",
   // statsProvider: "https://beta.daoventures.co/api/",
-  statsProvider: "https://beta.daoventures.co/api/",
+  statsProvider: "https://app.daoventures.co/api/",
   iEarnContract: "0x9Dde7cdd09dbed542fC422d18d89A589fA9fD4C0",
   erc20ABI: [
     {
