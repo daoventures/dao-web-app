@@ -1,12 +1,12 @@
 import Onboard from 'bnc-onboard'
 
-const FORTMATIC_KEY = "Your Fortmatic key here"
-const PORTIS_KEY = "Your Portis key here"
-const INFURA_KEY = "Your Infura key here"
-const APP_URL = "Your app url here"
-const CONTACT_EMAIL = "Your contact email here"
-const RPC_URL = "https://<network>.infura.io/v3/<INFURA_KEY>"
-const APP_NAME = "Your app name here"
+const FORTMATIC_KEY = "pk_live_667D401F33A1C2AE"
+const PORTIS_KEY = "38343b3e-dc6a-45c2-b525-8a32f6101c72"
+const INFURA_KEY = "83833d00ec5c4c6a858c199e83a5b411"
+const APP_URL = "https://app.daoventures.co"
+const CONTACT_EMAIL = "support@daoventures.co"
+const RPC_URL = "https://main.infura.io/v3/83833d00ec5c4c6a858c199e83a5b411"
+const APP_NAME = "DAOVentures"
 
 const wallets = [
   { walletName: "coinbase", preferred: true },
