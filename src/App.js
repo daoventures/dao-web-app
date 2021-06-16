@@ -8,15 +8,9 @@ import {
 import IpfsRouter from 'ipfs-react-router'
 
 import './i18n';
-import interestTheme from './theme';
 import { getTheme } from './theme';
 
-import APR from './components/apr';
-import InvestSimple from './components/investSimple';
-import Manage from './components/manage';
 // import Performance from './components/performance';
-import Zap from './components/zap';
-import IDai from './components/idai';
 // import Footer from './components/footer';
 // import Home from './components/home';
 import Header from './components/header';
@@ -25,15 +19,12 @@ import Dashboard from './components/dashboard';
 import SideDrawer from './components/sideDrawer';
 import MainContainer from './components/mainContainer';
 
-import Stake from './components/stake/stakeComingSoon';
+import Stake from './components/stake/stake';
 import Swap from './components/swap';
 
-import { injected } from "./stores/connectors";
-import {initOnboard} from './walletsServices.js';
 
 import {
   CONNECTION_CONNECTED,
-  CURRENT_THEME_RETURNED,
   TOGGLE_THEME,
   GET_VAULT_INFO
 } from './constants';
@@ -133,9 +124,7 @@ class App extends Component {
   }
 
   currentThemeChanged = (theme) => {
-    console.log('currentThemeChanged###theme###', theme);
     const currentTheme = theme || store.getStore('currentTheme');
-    console.log('currentTheme####', currentTheme);
     this.setState({
       currentTheme: currentTheme,
       interestTheme: getTheme(currentTheme),
@@ -183,18 +172,19 @@ class App extends Component {
                 <Header />
                 <Vaults />
               </Route> */}
-              <Route path="/portfolio">
-                <Header />
-                <SideDrawer />
-                <MainContainer />
-                <Dashboard />
-              </Route>
-              {/* <Route path="/earn">
+                {/* <Route path="/earn">
                 <Header />
                 <SideDrawer />
                 <MainContainer />
                 <InvestSimple />
               </Route> */}
+              {/* <Route path="/portfolio">
+                <Header />
+                <SideDrawer />
+                <MainContainer />
+                <Dashboard />
+              </Route> */}
+            
               <Route path="/invest">
                 <Header />
                 <SideDrawer />
@@ -208,6 +198,7 @@ class App extends Component {
                 <MainContainer />
                 <Stake />
               </Route>
+              
               <Route path="/swap">
                 <Header />
                 <SideDrawer />
