@@ -2178,23 +2178,44 @@ class Asset extends Component {
       redeemVaultAmount = (
         Math.floor(redeemVaultAmount * 10000) / 10000
       ).toFixed(4);
+
+      const vaultShares = (
+        Math.floor(
+          asset.vaultBalance *
+            asset.vaultPricePerFullShare *
+            10000
+        ) / 10000
+      ).toFixed(4);
+      
       if (
         !redeemVaultAmount ||
         isNaN(redeemVaultAmount) ||
-        redeemVaultAmount < 0
+        redeemVaultAmount < parseFloat("0.0") ||
+        redeemVaultAmount > vaultShares
       ) {
         this.setState({ redeemAmountError: true });
         return false;
       }
 
       // let redeemEarnAmount = this.state.redeemEarnAmount.toString();
-      redeemEarnAmount = (Math.floor(redeemEarnAmount * 10000) / 10000).toFixed(
-        4
-      );
+      redeemEarnAmount = (
+        Math.floor(redeemEarnAmount * 10000) 
+        / 10000
+      ).toFixed(4);
+
+      const earnShares = (
+        Math.floor(
+          asset.earnBalance *
+            asset.earnPricePerFullShare *
+            10000
+        ) / 10000
+      ).toFixed(4);
+
       if (
         !redeemEarnAmount ||
         isNaN(redeemEarnAmount) ||
-        redeemEarnAmount < 0
+        redeemEarnAmount < parseFloat("0.0") ||
+        redeemEarnAmount > earnShares
       ) {
         this.setState({ redeemAmountError: true });
         return false;
@@ -2215,7 +2236,16 @@ class Asset extends Component {
     } else if (asset.strategyType === "compound") {
       // let redeemAmount = this.state.redeemAmount.toString();
       redeemAmount = (Math.floor(redeemAmount * 10000) / 10000).toFixed(4);
-      if (!redeemAmount || isNaN(redeemAmount) || redeemAmount < 0) {
+      
+      const depositedShares = (
+        Math.floor(
+          asset.strategyBalance *
+            asset.compoundExchangeRate *
+            10000
+        ) / 10000
+      ).toFixed(4);
+
+      if (!redeemAmount || isNaN(redeemAmount) || redeemAmount < parseFloat("0.0") || redeemAmount > depositedShares) {
         this.setState({ redeemAmountError: true });
         return false;
       }
@@ -2236,7 +2266,10 @@ class Asset extends Component {
       // let redeemAmount = this.state.redeemAmount.toString();
       // let tokenIndex = this.state
       redeemAmount = (Math.floor(redeemAmount * 10000) / 10000).toFixed(4);
-      if (!redeemAmount || isNaN(redeemAmount) || redeemAmount < 0) {
+
+      const depositedShares = (Math.floor((asset.strategyBalance / 10 ** asset.decimals) * 10000) / 10000).toFixed(4);
+
+      if (!redeemAmount || isNaN(redeemAmount) || redeemAmount < parseFloat("0.0") || redeemAmount > depositedShares ) {
         this.setState({ redeemAmountError: true });
         return false;
       }
