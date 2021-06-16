@@ -2025,10 +2025,10 @@ class Asset extends Component {
     const { earnRatio, vaultRatio } = this.state;
 
     const earnAPY = asset.earnApr ? parseFloat(asset.earnApr) * 100 : 0;
-    const vaultAPY = asset && asset.stats ? asset.stats.apyOneWeekSample : 0;
+    const vaultAPY = asset && asset.stats ? asset.stats.apyInceptionSample : 0;
     return (
       (earnAPY * earnRatio) / 100 +
-      (vaultAPY * vaultRatio) / 100 / 2
+      (vaultAPY * vaultRatio) / 100
     ).toFixed(2);
   };
 
@@ -2072,7 +2072,7 @@ class Asset extends Component {
     if (
       !amount ||
       isNaN(amount) ||
-      amount <= 0 ||
+      parseFloat(amount) <= parseFloat("0.0") ||
       parseFloat(amount) > assetBalance
     ) {
       this.setState({ amountError: true });

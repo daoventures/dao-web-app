@@ -451,6 +451,7 @@ class Store {
           symbol: "USDT",
           description: "Tether USD",
           vaultSymbol: "dvmUSDT",
+          vaultAddress: "0x2f08119c6f07c006695e079aafc638b8789faf18",
           erc20address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
           vaultContractAddress: "0x4F0C1c9bA6B9CCd0BEd6166e86b672ac8EE621F7",
           vaultContractABI: config.vaultUSDTContractABI,
@@ -484,6 +485,7 @@ class Store {
           symbol: "DAI",
           description: "DAI Stablecoin",
           vaultSymbol: "dvmDAI",
+          vaultAddress: "0xacd43e627e64355f1861cec6d3a6688b31a6f952",
           erc20address: "0x6b175474e89094c44da98b954eedeac495271d0f",
           vaultContractAddress: "0x2bFc2Da293C911e5FfeC4D2A2946A599Bc4Ae770",
           vaultContractABI: config.vaultDAIContractABI,
@@ -518,6 +520,7 @@ class Store {
           symbol: "TUSD",
           description: "TrueUSD",
           vaultSymbol: "dvmTUSD",
+          vaultAddress: "0x37d19d1c4e1fa9dc47bd1ea12f742a0887eda74a",
           erc20address: "0x0000000000085d4780b73119b644ae5ecd22b376",
           vaultContractAddress: "0x2C8de02aD4312069355B94Fb936EFE6CFE0C8FF6",
           vaultContractABI: config.vaultTUSDContractABI,
@@ -551,6 +554,7 @@ class Store {
           symbol: "USDC",
           description: "USDC Coin",
           vaultSymbol: "dvmUSDC",
+          vaultAddress: "0x597ad1e0c13bfe8025993d9e79c69e1c0233522e",
           erc20address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
           vaultContractAddress: "0x9f0230FbDC0379E5FefAcca89bE03A42Fec5fb6E",
           vaultContractABI: config.vaultUSDCContractABI,
@@ -731,6 +735,7 @@ class Store {
           symbol: "USDT",
           description: "Tether USD",
           vaultSymbol: "dvmUSDT",
+          vaultAddress: "0xa5c53c76729e92630a2a3c549215110a330c902d",
           erc20address: "0x07de306ff27a2b630b1141956844eb1552b956b5",
           vaultContractAddress: "0x6B150E9BD70E216775c8b73270E64e870a3110c1",
           vaultContractABI: config.vaultUSDTContractABI,
@@ -764,6 +769,7 @@ class Store {
           symbol: "DAI",
           description: "DAI Stablecoin",
           vaultSymbol: "dvmDAI",
+          vaultAddress: "0x5c2eea0a960cc1f604bf3c35a52ca2273f12e67e",
           erc20address: "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
           vaultContractAddress: "0x2428bFD238a3632552B343297c504F60283009eD",
           vaultContractABI: config.vaultDAIContractABI,
@@ -798,6 +804,7 @@ class Store {
           symbol: "TUSD",
           description: "TrueUSD",
           vaultSymbol: "dvmTUSD",
+          vaultAddress: "0xa8564f8d255c33175d4882e55f1a6d19e7a7d351",
           erc20address: "0xf0a112a9da3cae4668270729c3d5917b6cb79564",
           vaultContractAddress: "0xEcCb98c36bfc8c49c6065d1cD90bcf1c6F02D4AD",
           vaultContractABI: config.vaultTUSDContractABI,
@@ -831,6 +838,7 @@ class Store {
           symbol: "USDC",
           description: "USDC Coin",
           vaultSymbol: "dvmUSDC",
+          vaultAddress: "0xabdb489ded91b6646fadc8eeb0ca82ea1d526182",
           erc20address: "0xb7a4f3e9097c08da09517b5ab877f7a917224ede",
           vaultContractAddress: "0x6E15e283dc430eca010Ade8b11b5B377902d6e56",
           vaultContractABI: config.vaultUSDCContractABI,
@@ -3603,11 +3611,11 @@ class Store {
           if (typeof stats.tokenAddress == "string") {
             return (
               stats.tokenAddress.toLowerCase() ===
-              asset.erc20address.toLowerCase()
+              asset.erc20address.toLowerCase() && stats.address.toLowerCase() === asset.vaultAddress.toLowerCase()
             );
           } else if (Array.isArray(stats.tokenAddress)) {
             return stats.tokenAddress.find(
-              (t) => t.toLowerCase() === asset.erc20address.toLowerCase()
+              (t) => t.toLowerCase() === asset.erc20address.toLowerCase() && stats.address.toLowerCase() === asset.vaultAddress.toLowerCase()
             );
           }
         });
