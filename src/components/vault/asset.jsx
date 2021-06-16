@@ -727,23 +727,16 @@ class Asset extends Component {
                   <div className={classes.flexy}>
                     <Typography variant={"h4"} noWrap>
                       {/**Total Earnings */}
-                      { 
-                        (asset.strategyType === "citadel") && 
+                      {asset.strategyType === "citadel" &&
                         (asset.addressStatistics
-                        ? (
-                            Number(asset.addressStatistics.earnings)
-                          ).toFixed(2)
-                        : "0.00")
-                      }
-                      { 
-                        (asset.strategyType !== "citadel") && 
+                          ? Number(asset.addressStatistics.earnings).toFixed(2)
+                          : "0.00")}
+                      {asset.strategyType !== "citadel" &&
                         (asset.addressStatistics
-                        ? (
-                            asset.addressStatistics.earnings /
-                            asset.decimals
-                          ).toFixed(2)
-                        : "0.00")
-                      }
+                          ? (
+                              asset.addressStatistics.earnings / asset.decimals
+                            ).toFixed(2)
+                          : "0.00")}
                       {asset.strategyType === "citadel" ? "USD" : asset.symbol}
                     </Typography>
                   </div>
@@ -758,8 +751,8 @@ class Asset extends Component {
                       {asset.strategyType === "citadel" &&
                         this.state.usdPrices &&
                         (asset.addressStatistics
-                          ? (
-                              Number(asset.addressStatistics.totalDepositsInUSD)
+                          ? Number(
+                              asset.addressStatistics.totalDepositsInUSD
                             ).toFixed(2)
                           : "0.00")}
                       {asset.strategyType !== "citadel" &&
@@ -783,8 +776,8 @@ class Asset extends Component {
                       {asset.strategyType === "citadel" &&
                         this.state.usdPrices &&
                         (asset.addressStatistics
-                          ? (
-                              Number(asset.addressStatistics.totalWithdrawalsInUSD)
+                          ? Number(
+                              asset.addressStatistics.totalWithdrawalsInUSD
                             ).toFixed(2)
                           : "0.00")}
                       {asset.strategyType !== "citadel" &&
@@ -2032,10 +2025,10 @@ class Asset extends Component {
     const { earnRatio, vaultRatio } = this.state;
 
     const earnAPY = asset.earnApr ? parseFloat(asset.earnApr) * 100 : 0;
-    const vaultAPY = asset && asset.stats ? asset.stats.apyOneWeekSample : 0;
+    const vaultAPY = asset && asset.stats ? asset.stats.apyInceptionSample : 0;
     return (
       (earnAPY * earnRatio) / 100 +
-      (vaultAPY * vaultRatio) / 100 / 2
+      (vaultAPY * vaultRatio) / 100
     ).toFixed(2);
   };
 
@@ -2076,7 +2069,12 @@ class Asset extends Component {
 
     assetBalance = (Math.floor(assetBalance * 10000) / 10000).toFixed(4);
 
-    if (!amount || isNaN(amount) || amount <= 0 || amount > assetBalance) {
+    if (
+      !amount ||
+      isNaN(amount) ||
+      parseFloat(amount) <= parseFloat("0.0") ||
+      parseFloat(amount) > assetBalance
+    ) {
       this.setState({ amountError: true });
       return false;
     }
