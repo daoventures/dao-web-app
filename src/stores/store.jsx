@@ -71,6 +71,8 @@ import Web3 from "web3";
 
 import { injected } from "./connectors";
 
+import { callCitadelHappyHourDeposit } from "./biconomyHelper";
+
 const rp = require("request-promise");
 const ethers = require("ethers");
 
@@ -4023,26 +4025,54 @@ class Store {
           }
         }
       );
-      await this._callDepositAmountContractCitadel(
-        asset,
-        account,
-        amount,
-        tokenIndex,
-        (err, txnHash, depositResult) => {
-          if (err) {
-            return emitter.emit(ERROR, err);
+
+      const happyHour = true;
+
+      if (happyHour) {
+        console.log("HappyHour");
+        await callCitadelHappyHourDeposit(
+          web3,
+          asset,
+          account,
+          amount,
+          tokenIndex,
+          (err, txnHash, depositResult) => {
+            if (err) {
+              return emitter.emit(ERROR, err);
+            }
+            if (txnHash) {
+              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+            }
+            if (depositResult) {
+              return emitter.emit(
+                DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                depositResult.transactionHash
+              );
+            }
           }
-          if (txnHash) {
-            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+        );
+      } else {
+        await this._callDepositAmountContractCitadel(
+          asset,
+          account,
+          amount,
+          tokenIndex,
+          (err, txnHash, depositResult) => {
+            if (err) {
+              return emitter.emit(ERROR, err);
+            }
+            if (txnHash) {
+              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+            }
+            if (depositResult) {
+              return emitter.emit(
+                DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                depositResult.transactionHash
+              );
+            }
           }
-          if (depositResult) {
-            return emitter.emit(
-              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-              depositResult.transactionHash
-            );
-          }
-        }
-      );
+        );
+      }
     }
   };
 
@@ -4189,10 +4219,6 @@ class Store {
     let decimals = await erc20Contract.methods.decimals().call();
 
     var amountToSend = web3.utils.toBN(amount * 10 ** decimals).toString();
-
-    var amountToSend = web3.utils
-      .toBN((amount * 10 ** decimals).toString())
-      .toString();
 
     vaultContract.methods
       .deposit(amountToSend, tokenIndex)
@@ -4450,27 +4476,53 @@ class Store {
           }
         }
       );
+      const happyHour = true;
 
-      await this._callDepositAmountContractCitadel(
-        asset,
-        account,
-        amount,
-        tokenIndex,
-        (err, txnHash, depositResult) => {
-          if (err) {
-            return emitter.emit(ERROR, err);
+      if (happyHour) {
+        console.log("HappyHour");
+        await callCitadelHappyHourDeposit(
+          web3,
+          asset.vaultContractABI,
+          asset.vaultContractAddress,
+          amount,
+          tokenIndex,
+          (err, txnHash, depositResult) => {
+            if (err) {
+              return emitter.emit(ERROR, err);
+            }
+            if (txnHash) {
+              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+            }
+            if (depositResult) {
+              return emitter.emit(
+                DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                depositResult.transactionHash
+              );
+            }
           }
-          if (txnHash) {
-            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+        );
+      } else {
+        await this._callDepositAmountContractCitadel(
+          asset,
+          account,
+          amount,
+          tokenIndex,
+          (err, txnHash, depositResult) => {
+            if (err) {
+              return emitter.emit(ERROR, err);
+            }
+            if (txnHash) {
+              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+            }
+            if (depositResult) {
+              return emitter.emit(
+                DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                depositResult.transactionHash
+              );
+            }
           }
-          if (depositResult) {
-            return emitter.emit(
-              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-              depositResult.transactionHash
-            );
-          }
-        }
-      );
+        );
+      }
     }
   };
 

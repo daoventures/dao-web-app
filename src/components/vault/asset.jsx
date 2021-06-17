@@ -727,23 +727,16 @@ class Asset extends Component {
                   <div className={classes.flexy}>
                     <Typography variant={"h4"} noWrap>
                       {/**Total Earnings */}
-                      { 
-                        (asset.strategyType === "citadel") && 
+                      {asset.strategyType === "citadel" &&
                         (asset.addressStatistics
-                        ? (
-                            Number(asset.addressStatistics.earnings)
-                          ).toFixed(2)
-                        : "0.00")
-                      }
-                      { 
-                        (asset.strategyType !== "citadel") && 
+                          ? Number(asset.addressStatistics.earnings).toFixed(2)
+                          : "0.00")}
+                      {asset.strategyType !== "citadel" &&
                         (asset.addressStatistics
-                        ? (
-                            asset.addressStatistics.earnings /
-                            asset.decimals
-                          ).toFixed(2)
-                        : "0.00")
-                      }
+                          ? (
+                              asset.addressStatistics.earnings / asset.decimals
+                            ).toFixed(2)
+                          : "0.00")}
                       {asset.strategyType === "citadel" ? "USD" : asset.symbol}
                     </Typography>
                   </div>
@@ -758,8 +751,8 @@ class Asset extends Component {
                       {asset.strategyType === "citadel" &&
                         this.state.usdPrices &&
                         (asset.addressStatistics
-                          ? (
-                              Number(asset.addressStatistics.totalDepositsInUSD)
+                          ? Number(
+                              asset.addressStatistics.totalDepositsInUSD
                             ).toFixed(2)
                           : "0.00")}
                       {asset.strategyType !== "citadel" &&
@@ -783,8 +776,8 @@ class Asset extends Component {
                       {asset.strategyType === "citadel" &&
                         this.state.usdPrices &&
                         (asset.addressStatistics
-                          ? (
-                              Number(asset.addressStatistics.totalWithdrawalsInUSD)
+                          ? Number(
+                              asset.addressStatistics.totalWithdrawalsInUSD
                             ).toFixed(2)
                           : "0.00")}
                       {asset.strategyType !== "citadel" &&
