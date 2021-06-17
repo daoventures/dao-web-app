@@ -2,6 +2,9 @@ import React, { Component } from 'react'
 import { withStyles } from '@material-ui/core/styles';
 import { withRouter } from "react-router-dom";
 import { Drawer, Grid, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
+import StarBorder from '@material-ui/icons/StarBorder';
+import Collapse from '@material-ui/core/Collapse';
+
 import Store from "../../stores";
 import {
   DRAWER_RETURNED,
@@ -34,8 +37,9 @@ const styles = theme => ({
   drawerPaper: {
     width: drawerWidth,
     // padding: '26px',
-    boxShadow: '0px 4px 30px rgba(204, 204, 204, 0.25)',
-    background: theme.themeColors.sidbarBack,
+    boxShadow: theme.themeColors.silderBoxShadow,
+    // background: theme.themeColors.sidbarBack,
+    background: theme.themeColors.back,
     borderRightWidth: '1px',
     borderRightStyle: 'solid',
     borderColor: theme.themeColors.lineT,
@@ -44,6 +48,24 @@ const styles = theme => ({
     // minHeight: '1200px'
     display: 'flex',
     flexDirection: 'column',
+    '&::-webkit-scrollbar':{
+      width: '3px',/* 纵向滚动条*/
+      height: '5px',/* 横向滚动条 */
+      backgroundColor: 'rgba(21,2,59,0.7)'
+    },
+    
+    /*定义滚动条轨道 内阴影*/
+    '&::-webkit-scrollbar-track':{
+      '-webkit-box-shadow': 'inset 0 0 6px rgba(0,0,0,0)',
+      /* background-color: rgba(21,2,59,0.7); */
+      'background': theme.themeColors.sliderLight
+    },
+    
+    /*定义滑块 内阴影*/
+    '&::-webkit-scrollbar-thumb':{
+      '-webkit-box-shadow': 'inset 0 0 6px rgba(0,0,0,0)',
+      'background':'#7367F7'
+    }
   },
   drawerLeft: {
     borderRight: 0
@@ -174,11 +196,13 @@ const styles = theme => ({
     transform: 'rotate(180deg)'
   },
   walletList: {
-    width: '200px',
+    width: '201px',
     position: 'absolute',
     top: '90px',
     background: theme.themeColors.walletSelectBg,
-    border: '1px solid' + theme.themeColors.walletSelectBorder,
+    borderColor: theme.themeColors.walletSelectBorder,
+    borderStyle:'solid',
+    borderWidth:'1px',
     textAlign: 'center',
     left: '20px',
     zIndex: '5',
@@ -237,7 +261,7 @@ const styles = theme => ({
     fontSize: '14px',
     fontWeight: '500',
     color: theme.themeColors.textT,
-    whiteSpace:'nowrap'
+    whiteSpace: 'nowrap'
   },
   lockImg: {
     width: '36px',
@@ -267,7 +291,8 @@ class SideDrawer extends Component {
       snackbarType: '',
       snackbarMessage: '',
       balance: store.getStore('account') && store.getStore('account').balance || '',
-      totalValue: ''
+      totalValue: '',
+      open:false
     }
   }
 
@@ -388,6 +413,9 @@ class SideDrawer extends Component {
     } = this.state
     return <Snackbar type={snackbarType} message={snackbarMessage} open={true} />
   };
+  handleClick=()=>{
+
+  }
 
   renderDrawer = () => {
     const {
@@ -414,9 +442,9 @@ class SideDrawer extends Component {
           // paperAnchorLeft: classes.drawerLeft,
         }}
         style={{
-          WebkitScrollbarTrack: 
+          WebkitScrollbarTrack:
             "'background-color': 'red','-webkit-border-radius': '2em','-moz-border-radius': '2em','border-radius': '2em'"
-          
+
         }}
       >
         <div className={classes.logo}>
@@ -506,13 +534,30 @@ class SideDrawer extends Component {
 
           <ListItem button key={'GROW'} className={this.linkSelected('/stake') ? classes.selected : classes.menuItem} onClick={() => { this.navInApp('stake') }}>
             <ListItemIcon>
-              {/* {this.renderIcon('pie-chart', '/portfolio')} */}
+              
               <svg className={(this.linkSelected('/stake')) ? classes.selectedSvg : classes.menuSvg} aria-hidden="true">
                 <use xlinkHref="#iconmenu_stake_normal_night"></use>
               </svg>
             </ListItemIcon>
             <ListItemText primary={'GROW'} />
           </ListItem>
+          {/* <ListItem button onClick={handleClick}>
+            <ListItemIcon>
+              <InboxIcon />
+            </ListItemIcon>
+            <ListItemText primary="Inbox" />
+            {this.state.open ? <ExpandLess /> : <ExpandMore />}
+          </ListItem>
+          <Collapse in={open} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              <ListItem button className={classes.nested}>
+                <ListItemIcon>
+                  <StarBorder />
+                </ListItemIcon>
+                <ListItemText primary="Starred" />
+              </ListItem>
+            </List>
+          </Collapse> */}
 
           <ListItem button key={'SWAP'} className={this.linkSelected('/swap') ? classes.selected : classes.menuItem} onClick={() => { this.navInApp('swap') }}>
             <ListItemIcon>
@@ -634,7 +679,7 @@ class SideDrawer extends Component {
                 <use xlinkHref="#iconmenu_stake_normal_night"></use>
               </svg>
             </ListItemIcon>
-            <ListItemText primary={'GROW11'} />
+            <ListItemText primary={'GROW'} />
           </ListItem>
 
           <ListItem button key={'SWAP'} className={this.linkSelected('/swap') ? classes.selected : classes.menuItem} onClick={() => { this.navInApp('swap') }}>
