@@ -23,6 +23,7 @@ import { colors, drawerWidth } from "../../theme";
 import Snackbar from "../snackbar";
 import Asset from "./asset";
 import Loader from "../loader";
+import RiskLevelLabel from "../common/riskLevelLabel/riskLevelLabel";
 
 import RiskLevelTab from '../common/riskLevelTab/riskLevelTab';
 
@@ -988,7 +989,7 @@ class Vault extends Component {
                 </a>
                 {this.renderPopularIcon(asset)}
               </Grid>
-              {this.renderRiskLabel(asset)}
+              <RiskLevelLabel risk={asset.risk}></RiskLevelLabel>
             </Grid>
             <Accordion
               className={classes.expansionPanel}
@@ -1274,23 +1275,7 @@ class Vault extends Component {
   };
 
   renderRiskLabel = (asset) => {
-    const { classes } = this.props;
-    return (
-      <div
-        className={
-          asset.risk === BASIC
-            ? classes.riskLowLabel
-            : asset.risk === ADVANCE
-            ? classes.riskMediumLabel
-            : asset.risk === EXPERT
-            ? classes.riskExpertLabel
-            : asset.risk === DEGEN
-            ? classes.riskDegenLabel
-            : ""
-        }>
-        <Typography variant="caption">{asset.risk}</Typography>
-      </div>
-    );
+    return  <RiskLevelLabel risk={asset.risk}></RiskLevelLabel>
   };
 
   renderPopularIcon = (asset) => {
