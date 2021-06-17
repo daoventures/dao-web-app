@@ -509,7 +509,7 @@ class StakeDvgVip extends Component {
             dispatcher.dispatch({ type: GET_DVG_INFO })
             dispatcher.dispatch({ type: GET_XDVG_BALANCE })
         }
-        dispatcher.dispatch({ type: GET_VAULT_BALANCES_FULL })
+        // dispatcher.dispatch({ type: GET_VAULT_BALANCES_FULL })
         dispatcher.dispatch({ type: GET_DVG_APR })
     }
     componentWillMount() {
@@ -716,7 +716,10 @@ class StakeDvgVip extends Component {
                                 <div className={classes.max} onClick={() => this.maxAmount()}>Max</div>
                             </div>
                             <div className={amount?classes.approveStakingActive:classes.approveStaking} onClick={() => { this.submitStake() }}>
-                                Approve Staking
+                                
+                                {
+                                  type == 'stake'?  'Approve Staking':'Approve Unstaking'
+                                }
                         </div>
                         </div>
                     </div>
