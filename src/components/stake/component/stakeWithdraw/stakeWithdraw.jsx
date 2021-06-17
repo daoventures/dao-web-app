@@ -17,12 +17,12 @@ const styles = (theme) => ({
         },
     },
 
-    depositContainer: {
+    withdrawalContainer: {
         paddingBottom: "12px",
-        paddingLeft: "5px",
-        paddingRight: "5px",
         display: "flex",
         flex: "1",
+        paddingLeft: "5px",
+        paddingRight: "5px",
         // padding: '24px',
         flexDirection: "column",
         [theme.breakpoints.down("sm")]: {
@@ -57,12 +57,12 @@ const styles = (theme) => ({
         pointer: "cursor",
     },
 
-    depositInputContainer: {
+    withdrawalInputContainer: {
         width: "100%",
         position: "relative",
     },
 
-    depositInput: {
+    withdrawalInput: {
         fontSize: "0.5rem",
         marginTop: "1rem",
         height: "42px",
@@ -79,7 +79,7 @@ const styles = (theme) => ({
         },
     },
 
-    depositScaleContainer: {
+    withdrawalScaleContainer: {
         display: "flex",
         justifyContent: "space-between",
         padding: "0px 0px 12px 0px",
@@ -90,19 +90,19 @@ const styles = (theme) => ({
         top: "31px",
     },
 
-    depositScale: {
+    withdrawalScale: {
         color: theme.themeColors.textP,
         minWidth: "30px",
         padding: "0px 6px",
     },
 
-    depositScaleActive: {
+    withdrawalScaleActive: {
         minWidth: "30px",
         padding: "0px 6px",
         color: theme.themeColors.textT,
     },
 
-    depositActionButton: {
+    withdrawalActionButton: {
         height: "42px",
         margin: "auto",
         background: "none",
@@ -127,7 +127,7 @@ const styles = (theme) => ({
         },
     },
 
-    depositButtonBox: {
+    withdrawlButtonBox: {
         width: "100%",
         display: "flex",
         marginTop: "20px",
@@ -135,14 +135,18 @@ const styles = (theme) => ({
         justifyContent: "space-between",
     },
 
-    lpLink: {
-        textDecoration:"none",
-        color: theme.themeColors.textP
+    claimRewardsButtonBox: {
+        width: "100%",
+        display: "flex",
+        marginTop: "20px",
+        marginBottom: "15px",
+        justifyContent: "space-between",
+        alignItems: "flex-end"
     }
 });
 
 const store = Store.store;
-class StakeDeposit extends Component {
+class StakeWithdraw extends Component {
     constructor(props) {
         super();
 
@@ -150,9 +154,8 @@ class StakeDeposit extends Component {
 
         this.state = {
             pool: {
-                availableToken: "0.112100",
-                userDepositedToken: "0.12100",
-                totalDepositedToken: "0.12100",
+                userDepositedToken: "0.112100",
+                dvgReward: "0.12345",
                 underlyingToken: "DAI",
                 userPoolShare: "50",
             },
@@ -170,7 +173,7 @@ class StakeDeposit extends Component {
         const { classes } = this.props;
 
         return (
-            <div className={classes.depositContainer}>
+            <div className={classes.withdrawalContainer}>
                 <div className={classes.tradeContainer}>
                     {/** Wallet Balance */}
                     <div className={classes.displayInfoBox}>
@@ -186,17 +189,17 @@ class StakeDeposit extends Component {
                             className={classes.cursor}
                             noWrap
                         >
-                            {pool.availableToken + " " + pool.underlyingToken}
+                            {pool.userDepositedToken + " " + pool.underlyingToken}
                         </Typography>
                     </div>
 
                     {/** Deposit Amount Textbox */}
-                    <div className={classes.depositInputContainer}>
+                    <div className={classes.withdrawalInputContainer}>
                         <TextField
                             style={{
                                 width: "100%",
                             }}
-                            className={classes.depositInput}
+                            className={classes.withdrawalInput}
                             id="amount"
                             cursor={amount}
                             error={amountError}
@@ -207,12 +210,12 @@ class StakeDeposit extends Component {
                             onKeyDown={this.inputKeyDown}
                         />
 
-                        <div className={classes.depositScaleContainer}>
+                        <div className={classes.withdrawalScaleContainer}>
                             <Button
                                 className={
                                     percent === 100
-                                        ? classes.depositScaleActive
-                                        : classes.depositScale
+                                        ? classes.withdrawalScaleActive
+                                        : classes.withdrawalScale
                                 }
                                 variant="text"
                                 disabled={loading}
@@ -225,20 +228,20 @@ class StakeDeposit extends Component {
                         </div>
                     </div>
 
-                    {/** Deposit Button */}
-                    <div className={classes.depositButtonBox}>
+                    {/** Withdrawal Button */}
+                    <div className={classes.withdrawlButtonBox}>
                         <Button
-                            className={classes.depositActionButton}
+                            className={classes.withdrawalActionButton}
                             onClick={this.onDeposit}
                         >
-                            <span>Confirm Deposit</span>
+                            <span>Confirm Withdraw & Claim Rewards</span>
                         </Button>
                     </div>
 
-                    {/** My Deposits */}
+                    {/** DVG Rewards */}
                     <div className={classes.displayInfoBox}>
                         <Typography variant="body1" className={classes.cursor} noWrap>
-                            My Deposits:
+                           DVG Rewards:
                         </Typography>
 
                         <Typography
@@ -246,45 +249,18 @@ class StakeDeposit extends Component {
                             className={classes.cursor}
                             noWrap
                         >
-                            {pool.userDepositedToken + " " + pool.underlyingToken}
+                            {pool.dvgReward + " DVG"}
                         </Typography>
                     </div>
 
-                    {/** Total Deposited */}
-                    <div className={classes.displayInfoBox}>
-                        <Typography variant="body1" className={classes.cursor} noWrap>
-                            Total Deposited:
-                        </Typography>
-
-                        <Typography
-                            variant="body2"
-                            className={classes.cursor}
-                            noWrap
+                   {/** Claim Rewards Button */}
+                   <div className={classes.claimRewardsButtonBox}>
+                        <Button
+                            className={classes.withdrawalActionButton}
+                            onClick={this.onDeposit}
                         >
-                            {pool.totalDepositedToken + " " + pool.underlyingToken}
-                        </Typography>
-                    </div>
-
-                    {/** My Pool Share */}
-                    <div className={classes.displayInfoBox}>
-                        <Typography variant="body1" className={classes.cursor} noWrap>
-                            My Pool Share
-                        </Typography>
-
-                        <Typography
-                            variant="body2"
-                            className={classes.cursor}
-                            noWrap
-                        >
-                            {pool.totalDepositedToken + "%"}
-                        </Typography>
-                    </div>
-
-                    {/** Get LP Link*/}
-                    <div className={classes.displayInfoBox}>
-                        <a href="http://www.google.com" className={classes.lpLink}>
-                            Get DVG-ETH LP <OpenInNewIcon></OpenInNewIcon>
-                        </a>
+                            <span>Claim Rewards</span>
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -292,4 +268,4 @@ class StakeDeposit extends Component {
     }
 }
 
-export default withNamespaces()(withRouter(withStyles(styles)(StakeDeposit)));
+export default withNamespaces()(withRouter(withStyles(styles)(StakeWithdraw)));

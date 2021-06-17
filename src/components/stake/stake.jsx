@@ -3,7 +3,7 @@ import { withRouter } from "react-router-dom";
 import { withStyles } from "@material-ui/core/styles";
 import { withNamespaces } from "react-i18next";
 import Store from "../../stores";
-import { Typography } from "@material-ui/core";
+import { Typography, Divider } from "@material-ui/core";
 import {
   CONNECTION_CONNECTED,
   CHANGE_NETWORK,
@@ -12,6 +12,8 @@ import {
 import RiskLevelTab from "../common/riskLevelTab/riskLevelTab";
 import ConnectWallet from "../common/connectWallet/connectWallet";
 import Snackbar from "../snackbar/snackbar";
+import StakeDeposit from "./component/stakeDeposit/stakeDeposit";
+import StakeWithdrawal from "./component/stakeWithdraw/stakeWithdraw";
 
 const store = Store.store;
 const emitter = Store.emitter;
@@ -389,6 +391,28 @@ const styles = (theme) => ({
       marginTop: "40px",
     },
   },
+  yearnEarnAndVaultBlock: {
+    display: "flex",
+    width: "100%",
+    [theme.breakpoints.down("sm")]: {
+      flexDirection: "column",
+    },
+  },
+  yearnEarnAndVaultItem: {
+    flex: 1,
+    marginLeft: "20px",
+    marginRight: "20px",
+    "&:first-child": {
+      marginLeft: "0px",
+    },
+    [theme.breakpoints.down("sm")]: {
+      marginLeft: "0px",
+    },
+  },
+  divider: {
+    // flexGrow : "1",
+    // borderColor: "green"
+  }
 });
 
 class Stake extends Component {
@@ -529,6 +553,18 @@ class Stake extends Component {
           <div className={classes.investedContainer}>
             {/** Risk Type Tabs */}
             {this.renderRiskTypeTab()}
+
+            <div className={classes.yearnEarnAndVaultBlock}>
+                <div className={classes.yearnEarnAndVaultItem}>
+                    <StakeDeposit></StakeDeposit>
+                </div>
+                {/* <hr className={classes.divider}></hr> */}
+                <div className={classes.yearnEarnAndVaultItem}>
+                    <StakeWithdrawal></StakeWithdrawal>
+                </div>
+            </div>
+
+            
           </div>
         </div>
 
