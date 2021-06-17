@@ -3,7 +3,7 @@ import { withRouter } from "react-router-dom";
 import { withStyles } from "@material-ui/core/styles";
 import { withNamespaces } from "react-i18next";
 import Store from "../../stores";
-import { Typography, Grid } from "@material-ui/core";
+import { Typography, Grid, Accordion, AccordionSummary, AccordionDetails } from "@material-ui/core";
 import {
   CONNECTION_CONNECTED,
   FIND_DAOMINE_POOL,
@@ -170,6 +170,77 @@ const styles = (theme) => ({
       fontSize: "14px",
     },
   },
+  expansionPanel: {
+    maxWidth: "calc(100vw - 24px)",
+    width: "100%",
+    border: "none",
+    // background: theme.themeColors.modelBack,
+    background: theme.themeColors.itemBack,
+    borderRadius: "0px",
+  },
+  dropDownIcon: {
+    width: "30px",
+    height: "30px",
+    fill: theme.themeColors.textP,
+  },
+  accordionsummary: {
+    height: "100px",
+    padding: "0px 24px",
+  },
+  assetSummary: {
+    display: "flex",
+    alignItems: "center",
+    flex: 1,
+    flexWrap: "wrap",
+    [theme.breakpoints.up("sm")]: {
+      flexWrap: "nowrap",
+    },
+  },
+  gridItemColumn: {
+    // display: 'flex',
+    alignItems: "center",
+    [theme.breakpoints.down("sm")]: {
+      marginBottom: "5px",
+      alignItems: "stretch",
+    },
+  },
+  assetIcon: {
+    display: "flex",
+    alignItems: "center",
+    verticalAlign: "middle",
+    borderRadius: "20px",
+    height: "30px",
+    width: "30px",
+    textAlign: "center",
+    cursor: "pointer",
+    marginRight: "20px",
+    [theme.breakpoints.up("sm")]: {
+      height: "32px",
+      width: "32px",
+      marginRight: "12px",
+    },
+  },
+  assetIconImg: {
+    height: "50px",
+    [theme.breakpoints.down("md")]: {
+      height: "30px",
+    },
+  },
+  assetLabel1: {
+    display: "block",
+    fontSize: "18px",
+    color: theme.themeColors.textT,
+  },
+  assetLabel2: {
+    display: "block",
+    fontSize: "14px",
+    color: theme.themeColors.textP,
+  },
+  removePadding: {
+    padding: "0px",
+    width: "100%",
+    // maxWidth: '900px'
+  },
   yearnEarnAndVaultBlock: {
     display: "flex",
     width: "100%",
@@ -212,6 +283,7 @@ class Stake extends Component {
         : null,
       pools: store.getStore("stakePools"),
       currentTab: "All",
+      expanded: "",
     };
 
     dispatcher.dispatch({
@@ -347,20 +419,6 @@ class Stake extends Component {
             {this.renderRiskTypeTab()}
 
             {this.renderPools()}
-
-            {/* <hr className={classes.divider}></hr> */}
-
-            {/* <div className={classes.yearnEarnAndVaultBlock}>
-                <div className={classes.yearnEarnAndVaultItem}>
-                    <StakeDeposit></StakeDeposit>
-                </div>
-               
-                <div className={classes.yearnEarnAndVaultItem}>
-                    <StakeWithdrawal></StakeWithdrawal>
-                </div>
-            </div> */}
-
-
           </div>
         </div>
 
@@ -370,31 +428,129 @@ class Stake extends Component {
     );
   }
 
+  handleChange = (name) => {
+    this.setState({ expanded: this.state.expanded === name ? null : name })
+  }
+
   renderPools = () => {
-    const { pools, currentTab } = this.state;
+    const { pools, currentTab, expanded } = this.state;
     const { classes } = this.props;
     const width = window.innerWidth;
 
     console.log('Pools in renderPools()', pools);
 
-    return (pools && pools.length > 0) ?
-      (pools.filter((pool) => {
-        return currentTab === "All" || pool.category === currentTab ? true : false;
-      })
-        .map((pool, index) => {
-          return (
-            <div key={index}
-              className={classes.poolContainer}>
-              <Grid container className={classes.itemTop}>
-                <Grid item sm={12} xs={8} className={classes.itemTitle}>
-                  <Typography className={classes.itemTitleText} variant="h4">
-                    {pool.name}
-                  </Typography>
-                </Grid>
-              </Grid>
-            </div>
-          )
-        })) : null;
+    return (pools && pools.length > 0)
+      ?
+      (
+        pools
+          .filter((pool) => {
+            return currentTab === "All" || pool.category === currentTab ? true : false;
+          })
+          .map((pool, index) => {
+            return (
+              <div key={index}
+                className={classes.poolContainer}>
+                <Accordion
+                  className={classes.expansionPanel}
+                  square
+                  key={pool.name + "_expand"}
+                  expanded={expanded === pool.name}
+                  onChange={() => {
+                    this.handleChange(pool.name);
+                  }}>
+                  <AccordionSummary
+                    expandIcon={
+                      <svg aria-hidden="true" className={classes.dropDownIcon}>
+                        <use xlinkHref="#iconicon_list_dropDown"></use>
+                      </svg>
+                    }
+                    aria-controls="panel1bh-content"
+                    id="panel1bh-header"
+                    className={classes.accordionsummary}>
+                    <div className={classes.assetSummary}>
+                      <Grid container>
+                        <Grid item sm={1} xs={2} className={classes.gridItemColumn}>
+                          {/** Pool Icon */}
+                          <div className={classes.assetIcon}>
+                            <img
+                              alt=""
+                              src=""
+                              className={classes.assetIconImg}
+                            />
+                          </div>
+                        </Grid>
+
+                        {/** Pool Title */}
+                        <Grid item sm={2} xs={4} className={classes.gridItemColumn}>
+                          <Typography
+                            variant={"h5"}
+                            style={{
+                              wordWrap: "break-word",
+                            }}
+                            className={classes.assetLabel1}>
+                            {pool.name}
+                          </Typography>
+                          {/* <Typography
+                                variant={"body1"}
+                                className={classes.assetLabel2}>
+                                {asset.description}
+                              </Typography> */}
+                        </Grid>
+
+                        {/** APR */}
+                        <Grid item sm={3} xs={6} className={classes.gridItemColumn}>
+                          <Typography
+                            variant={"h5"}
+                            style={{
+                              wordWrap: "break-word",
+                            }}
+                            className={classes.assetLabel1}>
+                            {pool.apr}
+                          </Typography>
+                          <Typography
+                            variant={"body1"}
+                            className={classes.assetLabel2}>
+                            APR
+                          </Typography>
+                        </Grid>
+
+                        {/** TVL */}
+                        <Grid item sm={3} xs={6} className={classes.gridItemColumn}>
+                          <Typography
+                            variant={"h5"}
+                            style={{
+                              wordWrap: "break-word",
+                            }}
+                            className={classes.assetLabel1}>
+                            {pool.tvl}
+                          </Typography>
+                          <Typography
+                            variant={"body1"}
+                            className={classes.assetLabel2}>
+                            Total Value Locked
+                          </Typography>
+                        </Grid>
+                      </Grid>
+                    </div>
+                  </AccordionSummary>
+                  <AccordionDetails className={classes.removePadding}>
+                    <div className={classes.yearnEarnAndVaultBlock}>
+                      <div className={classes.yearnEarnAndVaultItem}>
+                        <StakeDeposit></StakeDeposit>
+                      </div>
+                      <hr className={classes.divider}></hr>
+                      <div className={classes.yearnEarnAndVaultItem}>
+                        <StakeWithdrawal></StakeWithdrawal>
+                      </div>
+                    </div>
+                  </AccordionDetails>
+
+                </Accordion>
+              </div>
+            )
+          })
+      )
+      : null;
   }
 }
 
