@@ -3,10 +3,11 @@ import { withRouter } from "react-router-dom";
 import { withStyles } from "@material-ui/core/styles";
 import { withNamespaces } from "react-i18next";
 import Store from "../../stores";
-import { Typography, Divider } from "@material-ui/core";
+import { Typography, Grid } from "@material-ui/core";
 import {
   CONNECTION_CONNECTED,
-  CHANGE_NETWORK,
+  FIND_DAOMINE_POOL,
+  DAOMINE_POOL_RETURNED
 } from "../../constants/constants";
 
 import RiskLevelTab from "../common/riskLevelTab/riskLevelTab";
@@ -17,7 +18,7 @@ import StakeWithdrawal from "./component/stakeWithdraw/stakeWithdraw";
 
 const store = Store.store;
 const emitter = Store.emitter;
-// const dispatcher = Store.dispatcher;
+const dispatcher = Store.dispatcher;
 
 const styles = (theme) => ({
   root: {
@@ -100,265 +101,6 @@ const styles = (theme) => ({
       width: "160px",
     },
   },
-  infoBlock: {
-    display: "flex",
-    alignItems: "center",
-    marginTop: "32px",
-    flexWrap: "wrap",
-    [theme.breakpoints.down("sm")]: {
-      marginTop: "12px",
-    },
-  },
-  infoItem: {
-    flex: 1,
-    height: "90px",
-    marginLeft: "26px",
-    padding: "0px 12px",
-    display: "flex",
-    alignItems: "center",
-    marginTop: "14px",
-    // minWidth: '230px',
-    "&:first-child": {
-      marginLeft: "0px",
-    },
-    "& img": {
-      width: "40px",
-      height: "40px",
-      marginRight: "12px",
-    },
-    [theme.breakpoints.down("sm")]: {
-      // minWidth: 'auto',
-      height: "70px",
-      marginTop: "20px",
-      "&:nth-of-type(2n-1)": {
-        marginLeft: "0px",
-      },
-      "& img": {
-        width: "28px",
-        height: "28px",
-        marginRight: "6px",
-      },
-    },
-  },
-  infoTit: {
-    // fontSize: '16px',
-    fontSize: "12px",
-    color: "#ffffff",
-    [theme.breakpoints.down("sm")]: {
-      fontSize: "12px",
-    },
-  },
-  infoCon: {
-    // fontSize: '20px',
-    fontSize: "18px",
-    color: "#ffffff",
-    fontWeight: "bold",
-    [theme.breakpoints.down("sm")]: {
-      fontSize: "14px",
-    },
-  },
-  poolAndEarnBox: {
-    marginTop: "32px",
-    width: "100%",
-  },
-  poolBox: {
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: theme.themeColors.lineT,
-    height: "318px",
-    background: theme.themeColors.modelBack,
-    // padding: '10px 0px',
-    [theme.breakpoints.down("sm")]: {
-      height: "auto",
-      paddingBottom: "40px",
-    },
-  },
-  poolAndEarnTop: {
-    height: "48px",
-    lineHeight: "48px",
-    padding: "0px 24px",
-    fontSize: "18px",
-    color: theme.themeColors.textT,
-    background: theme.themeColors.menuSel,
-  },
-  poolLeft: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "column",
-    marginTop: "30px",
-    "& .coinIcon": {
-      width: "90px",
-    },
-    borderRightStyle: "solid",
-    borderRightWidth: "1px",
-    borderRightColor: theme.themeColors.lineT,
-    [theme.breakpoints.down("sm")]: {
-      borderRightWidth: "0px",
-    },
-  },
-  locked: {
-    fontSize: "14px",
-    // color: theme.themeColors.textP,
-    color: theme.themeColors.textT,
-    // '& span': {
-    //     color: theme.themeColors.textT
-    // }
-  },
-  available: {
-    fontSize: "14px",
-    // color: theme.themeColors.textP,
-    color: theme.themeColors.textT,
-    // '& span': {
-    //     color: theme.themeColors.textT
-    // }
-  },
-  approveBtn: {
-    width: "177px",
-    height: "44px",
-    lineHeight: "44px",
-    textAlign: "center",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: theme.themeColors.border,
-    cursor: "pointer",
-    marginTop: "20px",
-    color: theme.themeColors.textT,
-    "&:hover": {
-      background: theme.themeColors.btnBack,
-    },
-    "&.Mui-disabled": {
-      borderColor: theme.themeColors.btnDisabled,
-      cursor: "not-allowed",
-      color: theme.themeColors.textD,
-    },
-  },
-  poolRight: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "column",
-    padding: "0px 45px",
-    [theme.breakpoints.down("sm")]: {
-      padding: "0px 30px",
-      marginTop: "50px",
-    },
-  },
-  balance: {
-    width: "100%",
-    fontSize: "14px",
-    color: theme.themeColors.textT,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  inputBox: {
-    marginTop: "10px",
-    position: "relative",
-    width: "100%",
-    "& input": {
-      width: "100%",
-      height: "56px",
-      background: theme.themeColors.inputBack,
-      color: theme.themeColors.textT,
-      border: "none",
-      padding: "0px 20px",
-    },
-    "& a": {
-      position: "absolute",
-      right: "20px",
-      top: "18px",
-      fontSize: "14px",
-      color: theme.themeColors.textT,
-    },
-  },
-  stakeBtnBox: {
-    width: "100%",
-    display: "flex",
-    alignItems: "center",
-    marginTop: "20px",
-    "& button": {
-      flex: "1",
-      height: "44px",
-      lineHeight: "44px",
-      borderWidth: "1px",
-      borderStyle: "solid",
-      borderColor: theme.themeColors.border,
-      fontSize: "14px",
-      color: theme.themeColors.textT,
-      marginLeft: "16px",
-      textAlign: "center",
-      cursor: "pointer",
-      background: "none",
-      "&:first-child": {
-        marginLeft: "0px",
-      },
-      "&:hover": {
-        background: theme.themeColors.btnBack,
-      },
-      "&:disabled": {
-        borderColor: theme.themeColors.btnDisabled,
-        cursor: "not-allowed",
-        color: theme.themeColors.textD,
-      },
-    },
-  },
-  earnBox: {
-    width: "100%",
-    // marginLeft: '20px',
-    paddingLeft: "20px",
-    [theme.breakpoints.down("sm")]: {
-      paddingLeft: "0px",
-      marginTop: "20px",
-    },
-  },
-  earnConBox: {
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: theme.themeColors.lineT,
-    background: theme.themeColors.modelBack,
-    width: "100%",
-    height: "318px",
-  },
-  earnBody: {
-    width: "100%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "column",
-    paddingTop: "30px",
-    "& img": {
-      width: "90px",
-    },
-  },
-  earnNum: {
-    marginTop: "10px",
-    fontSize: "14px",
-    color: theme.themeColors.textT,
-    // '& span': {
-    //     color: theme.themeColors.textP
-    // }
-  },
-  claimBtn: {
-    width: "177px",
-    height: "44px",
-    lineHeight: "44px",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    textAlign: "center",
-    borderColor: theme.themeColors.border,
-    marginTop: "40px",
-    color: theme.themeColors.textT,
-    cursor: "pointer",
-    "&:hover": {
-      background: theme.themeColors.btnBack,
-    },
-    "&.Mui-disabled": {
-      borderColor: theme.themeColors.btnDisabled,
-      cursor: "not-allowed",
-      color: theme.themeColors.textD,
-    },
-  },
   // Content Container
   contentContainer: {
     minWidth: "100%",
@@ -389,6 +131,43 @@ const styles = (theme) => ({
       minWidth: "90%",
       margin: "auto",
       marginTop: "40px",
+    },
+  },
+  poolContainer: {
+    width: "100%",
+    position: "relative",
+    borderColor: theme.themeColors.blockBorder,
+    borderWidth: "1px",
+    borderStyle: "solid",
+    boxShadow: "-2px 2px 40px 0px rgba(0, 0, 0, 0.05)",
+    // borderRadius: '10px',
+    // padding: '1rem',
+    marginBottom: "20px",
+    background: theme.themeColors.itemBack,
+    [theme.breakpoints.down("sm")]: {
+      width: "95%",
+      margin: "auto",
+      marginBottom: "20px",
+    },
+  },
+  itemTop: {
+    height: "48px",
+    background: theme.themeColors.menuSel,
+  },
+  itemTitle: {
+    display: "flex",
+    alignItems: "center",
+    fontSize: "18px",
+    color: theme.themeColors.textT,
+    padding: "0px 24px",
+    [theme.breakpoints.down("md")]: {
+      padding: "0px 10px",
+    },
+  },
+  itemTitleText: {
+    fontSize: "18px",
+    [theme.breakpoints.down("md")]: {
+      fontSize: "14px",
     },
   },
   yearnEarnAndVaultBlock: {
@@ -425,23 +204,31 @@ class Stake extends Component {
       account: account,
       address: account.address
         ? account.address.substring(0, 6) +
-          "..." +
-          account.address.substring(
-            account.address.length - 4,
-            account.address.length
-          )
+        "..." +
+        account.address.substring(
+          account.address.length - 4,
+          account.address.length
+        )
         : null,
+      pools: store.getStore("stakePools"),
+      currentTab: "All",
     };
+
+    dispatcher.dispatch({
+      type: FIND_DAOMINE_POOL
+    });
   }
 
   componentWillMount() {
     emitter.on(CONNECTION_CONNECTED, this.connectionConnected);
-    emitter.on(CHANGE_NETWORK, this.networkChanged);
+    // emitter.on(CHANGE_NETWORK, this.networkChanged);
+    emitter.on(DAOMINE_POOL_RETURNED, this.onDAOminePoolReturned)
   }
 
   componentWillUnmount() {
     emitter.removeListener(CONNECTION_CONNECTED, this.connectionConnected);
-    emitter.removeListener(CHANGE_NETWORK, this.networkChanged);
+    // emitter.removeListener(CHANGE_NETWORK, this.networkChanged);
+    emitter.removeListener(DAOMINE_POOL_RETURNED, this.onDAOminePoolReturned);
   }
 
   /** Handler function when wallet successfully connected */
@@ -454,11 +241,11 @@ class Stake extends Component {
       account: account,
       address: account.address
         ? account.address.substring(0, 6) +
-          "..." +
-          account.address.substring(
-            account.address.length - 4,
-            account.address.length
-          )
+        "..." +
+        account.address.substring(
+          account.address.length - 4,
+          account.address.length
+        )
         : null,
     });
 
@@ -480,16 +267,20 @@ class Stake extends Component {
     });
   };
 
-  networkChanged = (obj) => {
-    const account = store.getStore("account");
-    const basedOn = localStorage.getItem("yearn.finance-dashboard-basedon");
+  // networkChanged = (obj) => {
+  //   const account = store.getStore("account");
+  //   const basedOn = localStorage.getItem("yearn.finance-dashboard-basedon");
 
-    const networkId = obj.network;
+  //   const networkId = obj.network;
 
-    this.setState({
-      networkId: networkId,
-    });
-  };
+  //   this.setState({
+  //     networkId: networkId,
+  //   });
+  // };
+
+  onDAOminePoolReturned = (pools) => {
+    this.setState({ pools: pools.pools });
+  }
 
   renderSnackbar = () => {
     var { snackbarType, snackbarMessage, networkId } = this.state;
@@ -511,8 +302,9 @@ class Stake extends Component {
     );
   };
 
-  handleSelectedRisk = (event) => {};
-
+  handleSelectedRisk = (risk) => {
+    this.setState({ currentTab: risk });
+  };
 
   render() {
     const { classes } = this.props;
@@ -554,96 +346,55 @@ class Stake extends Component {
             {/** Risk Type Tabs */}
             {this.renderRiskTypeTab()}
 
-            <div className={classes.yearnEarnAndVaultBlock}>
+            {this.renderPools()}
+
+            {/* <hr className={classes.divider}></hr> */}
+
+            {/* <div className={classes.yearnEarnAndVaultBlock}>
                 <div className={classes.yearnEarnAndVaultItem}>
                     <StakeDeposit></StakeDeposit>
                 </div>
-                {/* <hr className={classes.divider}></hr> */}
+               
                 <div className={classes.yearnEarnAndVaultItem}>
                     <StakeWithdrawal></StakeWithdrawal>
                 </div>
-            </div>
+            </div> */}
 
-            
+
           </div>
         </div>
 
-        {/* <div className={classes.infoBlock}>
-                <div className={classes.infoItem} style={{background: 'linear-gradient(180deg, #0EA571 0%, #0B4F38 100%)'}}>
-                    <img src={ require("../../assets/img_new/stake/lock-icon@2x.png") }/>
-                    <div>
-                        <p className={classes.infoTit}>Total Value Locked</p>
-                        <Typography variant={'h3'} className={classes.infoCon}>1,0002.00 LP</Typography>
-                    </div>
-                </div>
-                <div className={classes.infoItem} style={{background: 'linear-gradient(180deg, #6E16C6 0%, #3B0995 100%)'}}>
-                    <img src={ require("../../assets/img_new/stake/apy-icon@2x.png") }/>
-                    <div>
-                        <p className={classes.infoTit}>APY</p>
-                        <Typography variant={'h3'} className={classes.infoCon}>12.09%</Typography>
-                    </div>
-                </div>
-                <div className={classes.infoItem} style={{background: 'linear-gradient(180deg, #D3A416 0%, #83650A 100%)'}}>
-                    <img src={ require("../../assets/img_new/stake/liquidity-icon@2x.png") }/>
-                    <div>
-                        <p className={classes.infoTit}>Total Liquidity</p>
-                        <Typography variant={'h3'} className={classes.infoCon}>$ 100008.66</Typography>
-                    </div>
-                </div>
-                <div className={classes.infoItem} style={{background: 'linear-gradient(180deg, #0D49C8 0%, #093083 100%)'}}>
-                    <img src={ require("../../assets/img_new/stake/dvg-icon@2x.png") }/>
-                    <div>
-                        <p className={classes.infoTit}>DVG price</p>
-                        <Typography variant={'h3'} className={classes.infoCon}>$ 0.23</Typography>
-                    </div>
-                </div>
-            </div>
-            
-            <Grid container className={classes.poolAndEarnBox}>
-                <Grid item sm={8} xs={12}  className={classes.poolBox}>
-                    <div className={classes.poolAndEarnTop}>Stake Pool</div>
-                    <Grid container>
-                        <Grid item sm={5} xs={12} className={classes.poolLeft}>
-                            <div>
-                                <img className="coinIcon" src={require("../../assets/img_new/stake/uni@2x.png")}/>
-                            </div>
-                            <p className={classes.locked}>DVG-ETH UNI-V2 Locked <span>0</span></p>
-                            <p className={classes.available}>Available: <span>0 LP</span></p>
-                            <a className={classes.approveBtn}>Approve</a>
-                        </Grid>
-                        <Grid item sm={7} xs={12} className={classes.poolRight}>
-                            <div className={classes.balance}>
-                                <p>Available: </p>
-                                <p>0.112100 LP</p>
-                            </div>
-                            <div className={classes.inputBox}>
-                                <input />
-                                <a>Max</a>
-                            </div>
-                            <div className={classes.stakeBtnBox}>
-                                <button>Stake</button>
-                                <button>Unstake</button>
-                            </div>
-                        </Grid>
-                    </Grid>
-                </Grid>
-                <Grid item sm={4} xs={12}  className={classes.earnBox}>
-                    <div className={classes.earnConBox}>
-                        <div className={classes.poolAndEarnTop}>DVG Earnings</div>
-                        <div className={classes.earnBody}>
-                            <div>
-                                <img src={require("../../assets/img_new/stake/dvg_token_icon@2x.png")}/>
-                            </div>
-                            <p className={classes.earnNum}>0.0012 <span>DVG Earned</span></p>
-                            <a className={classes.claimBtn}>Claim Rewards</a>
-                        </div>
-                    </div>
-                    
-                </Grid>
-            </Grid> */}
+        {/** Snackbar */}
         {this.state.snackbarMessage && this.renderSnackbar()}
       </div>
     );
+  }
+
+  renderPools = () => {
+    const { pools, currentTab } = this.state;
+    const { classes } = this.props;
+    const width = window.innerWidth;
+
+    console.log('Pools in renderPools()', pools);
+
+    return (pools && pools.length > 0) ?
+      (pools.filter((pool) => {
+        return currentTab === "All" || pool.category === currentTab ? true : false;
+      })
+        .map((pool, index) => {
+          return (
+            <div key={index}
+              className={classes.poolContainer}>
+              <Grid container className={classes.itemTop}>
+                <Grid item sm={12} xs={8} className={classes.itemTitle}>
+                  <Typography className={classes.itemTitleText} variant="h4">
+                    {pool.name}
+                  </Typography>
+                </Grid>
+              </Grid>
+            </div>
+          )
+        })) : null;
   }
 }
 

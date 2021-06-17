@@ -66,6 +66,9 @@ import {
   ADVANCE,
   EXPERT,
   DEGEN,
+  FIND_DAOMINE_POOL,
+  DAOMINE_POOL_RETURNED
+
 } from "../constants";
 import Web3 from "web3";
 
@@ -279,6 +282,7 @@ class Store {
       ethBalance: 0,
       sCrvBalance: 0,
       openDrawer: false,
+      stakePools: []
     };
 
     dispatcher.register(
@@ -365,6 +369,9 @@ class Store {
             break;
           case GET_VAULT_INFO:
             this.getVaultInfo(payload);
+            break;
+          case FIND_DAOMINE_POOL: 
+            this.findDAOminePool(payload);
             break;
           default: {
           }
@@ -5793,6 +5800,30 @@ class Store {
       }
     );
   };
+
+  findDAOminePool = async (payload) => {
+    const {account} = store.getStore("account");
+
+    try {
+      const pools = await this._findDAOminePool();
+      store.setStore({stakePools: pools});
+      return emitter.emit(DAOMINE_POOL_RETURNED, pools);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  _findDAOminePool = async() => {
+    try {
+      const url = config.statsProvider + "staking/get-pools";
+      const poolsString = await rp(url);
+      const pools = JSON.parse(poolsString);
+      return pools.body;
+    } catch(e) {
+      console.log(e);
+      return store.getStore("universalGasPrice");
+    }
+  }
 }
 
 var store = new Store();

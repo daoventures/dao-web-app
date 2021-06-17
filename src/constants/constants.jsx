@@ -127,4 +127,8 @@ export const BLOCK_EXPLORERS = {
   97: "https://testnet.bscscan.com/tx/",
 };
 
+// Pools
+export const FIND_DAOMINE_POOL = "FIND_DAOMINE_POOL";
+export const DAOMINE_POOL_RETURNED = "DAOMINE_POOL_RETURNED";
+
 

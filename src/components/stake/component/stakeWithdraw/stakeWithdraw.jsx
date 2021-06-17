@@ -3,7 +3,6 @@ import { withNamespaces } from "react-i18next";
 import { withRouter } from "react-router";
 import { withStyles } from "@material-ui/core/styles";
 import { Typography, TextField, Button } from "@material-ui/core";
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import Store from "../../../../stores/store";
 
 const styles = (theme) => ({
