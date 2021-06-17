@@ -3742,7 +3742,6 @@ class Store {
       strategyAddress
     );
     let balance = '';
-    // if(typeof await strategyContract.methods.pool()=='function'){
 
     let pool = await strategyContract.methods.pool().call({ from: account.address });
     let decimals = await strategyContract.methods
