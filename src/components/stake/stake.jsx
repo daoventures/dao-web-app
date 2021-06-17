@@ -6,6 +6,7 @@ import {
   Typography,
   Grid,
 } from '@material-ui/core';
+import RiskLevelTab from '../common/riskLevelTab/riskLevelTab'
 
 const styles = theme => ({
     root: {
@@ -345,8 +346,39 @@ const styles = theme => ({
             cursor: 'not-allowed',
             color: theme.themeColors.textD
         },
-    }
-
+    },
+    // Content Container
+    contentContainer: {
+        minWidth: "100%",
+        display: "flex",
+        flex: 1,
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        position: "relative",
+        // [theme.breakpoints.up('md')]: {
+        //   minWidth: 'calc(100% - '+ drawerWidth + 'px)',
+        // }
+    },
+    investedContainer: {
+        display: "flex",
+        flex: 1,
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        minWidth: "100%",
+        marginTop: "20px",
+        marginBottom: "40px",
+        [theme.breakpoints.up("md")]: {
+          width: "100%",
+          minWidth: "900px",
+        },
+        [theme.breakpoints.down("sm")]: {
+          minWidth: "90%",
+          margin: "auto",
+          marginTop: "40px",
+        },
+    },  
 });
 
 class Stake extends Component {
@@ -354,22 +386,39 @@ class Stake extends Component {
         super()
     }
 
+    handleSelectedRisk = (event) => {
+        console.log('Event from selected risk', event);
+    }
+
+    renderTypeTab = () => {
+        return <RiskLevelTab selectedRiskCallback={this.handleSelectedRisk}></RiskLevelTab>
+    }
+
     render() {
         const { classes } = this.props;
         return <div className={ classes.root }>
+            {/** Banner */}
             <div className={classes.banner}>
                 <div>
                     <Typography variant={'h3'} className={classes.bannerTit}>Create DVG-ETH UNI-V2 LP tokens</Typography>
                     <p className={classes.bannerCon}>Provide liquidity in Uniswap to get LP tokens.</p>
                 </div>
                 <div>
-                    <img className={classes.bannerImg} src={require("../../assets/img_new/active_banner@2x.png")}/>
+                    <img alt="banner" className={classes.bannerImg} src={require("../../assets/img_new/active_banner@2x.png")}/>
                 </div>
                 <div>
-                    <a className={ classes.addLiquidity }>Add Liquidity</a>
+                    <a href="http://www.google.com"  className={classes.addLiquidity}>Add Liquidity</a>
                 </div>
             </div>
-            <div className={classes.infoBlock}>
+
+            <div className={classes.contentContainer}>
+                <div className = {classes.investedContainer}>
+                    {this.renderTypeTab()}
+                </div>
+            </div>
+
+
+            {/* <div className={classes.infoBlock}>
                 <div className={classes.infoItem} style={{background: 'linear-gradient(180deg, #0EA571 0%, #0B4F38 100%)'}}>
                     <img src={ require("../../assets/img_new/stake/lock-icon@2x.png") }/>
                     <div>
@@ -399,6 +448,7 @@ class Stake extends Component {
                     </div>
                 </div>
             </div>
+            
             <Grid container className={classes.poolAndEarnBox}>
                 <Grid item sm={8} xs={12}  className={classes.poolBox}>
                     <div className={classes.poolAndEarnTop}>Stake Pool</div>
@@ -440,7 +490,7 @@ class Stake extends Component {
                     </div>
                     
                 </Grid>
-            </Grid>
+            </Grid> */}
         </div>
     }
 }

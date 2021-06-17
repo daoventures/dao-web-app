@@ -24,6 +24,8 @@ import Snackbar from "../snackbar";
 import Asset from "./asset";
 import Loader from "../loader";
 
+import RiskLevelTab from '../common/riskLevelTab/riskLevelTab';
+
 import {
   ERROR,
   DEPOSIT_CONTRACT_RETURNED,
@@ -577,69 +579,6 @@ const styles = (theme) => ({
     },
   },
 
-  // tab切换
-  typeTab: {
-    width: "100%",
-    display: "flex",
-    justifyContent: "flex-start",
-    paddingLeft: "0px",
-    paddingBottom: "10px",
-    [theme.breakpoints.down("md")]: {
-      paddingLeft: "10px",
-      paddingRight: "10px",
-    },
-  },
-  typeTabItem: {
-    "width": "148px",
-    "height": "48px",
-    "display": "flex",
-    "alignItems": "center",
-    "justifyContent": "center",
-    "fontSize": "16px",
-    "marginRight": "20px",
-    "background": theme.themeColors.blockBack,
-    "borderWidth": "1px",
-    "borderStyle": "solid",
-    "borderColor": theme.themeColors.blockBorder,
-    "cursor": "pointer",
-    "color": theme.themeColors.blockTextColor,
-    "&.active": {
-      background: "linear-gradient(135deg, #0B2663 0%, #1152DF 100%)",
-      border: "none",
-      color: "#ffffff",
-    },
-    [theme.breakpoints.up("md")]: {},
-    [theme.breakpoints.down("md")]: {
-      "height": "34px",
-      "width": "32px",
-      "marginRight": "10px",
-      "&.active": {
-        width: "90px",
-      },
-    },
-  },
-  typeTabSvg: {
-    width: "20px",
-    height: "20px",
-    marginRight: "6px",
-    [theme.breakpoints.down("md")]: {
-      width: "16px",
-      height: "16px",
-      marginRight: "0px",
-    },
-  },
-  typeTabText: {
-    [theme.breakpoints.up("md")]: {
-      display: "inline-block",
-    },
-    [theme.breakpoints.down("md")]: {
-      "display": "none",
-      "&.active": {
-        display: "inline-block",
-      },
-    },
-  },
-
   // 主题块儿样式调整
   warnIcon: {
     width: "16px",
@@ -997,7 +936,7 @@ class Vault extends Component {
             { this.renderFilters() }
             { this.renderBasedOn() } */}
             {/* { this.renderChart() } */}
-            {this.renderTypeTab()}
+            <RiskLevelTab selectedRiskCallback={this.selectTab}></RiskLevelTab>
 
             {this.renderAssetBlocks()}
           </div>
@@ -1007,57 +946,7 @@ class Vault extends Component {
       </div>
     );
   }
-
-  renderTypeTab = () => {
-    const { classes } = this.props;
-
-    const { tabList, currentTab } = this.state;
-
-    const svgColorObj = {
-      ALL: "#6D61EA",
-      Basic: "#15C73E",
-      Advance: "#C77815",
-      Expert: "#C715A7",
-      Degen: "#DC0B0C",
-    };
-
-    const svgHrefObj = {
-      ALL: "#iconmeau-sel",
-      Basic: "#iconbasic",
-      Advance: "#iconAdvance",
-      Expert: "#iconExpert",
-      Degen: "#iconDegen",
-    };
-
-    const tabListLi = tabList.map((item, index) => {
-      return (
-        <li
-          key={index}
-          className={`${classes.typeTabItem} ${
-            currentTab === item ? "active" : ""
-          }`}
-          onClick={() => this.selectTab(item)}>
-          <svg
-            aria-hidden="true"
-            className={classes.typeTabSvg}
-            style={{
-              fill: currentTab === item ? "#ffffff" : svgColorObj[item],
-            }}>
-            <use xlinkHref={svgHrefObj[item]}></use>
-          </svg>
-          <span
-            className={`${classes.typeTabText} ${
-              currentTab === item ? "active" : ""
-            }`}>
-            {item}
-          </span>
-        </li>
-      );
-    });
-
-    return <ul className={classes.typeTab}>{tabListLi}</ul>;
-  };
-
+  
   selectTab = (current) => {
     this.setState({ currentTab: current });
   };
