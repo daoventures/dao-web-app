@@ -13,10 +13,8 @@ import {
 } from '../../constants/constants';
 import {
   INVEST_PATH,
-  PORTFOLIO_PATH,
   STAKE_PATH,
   INVEST,
-  PORTFOLIO,
   SWAP_PATH,
   SWAP
 } from '../../constants/page-constant';
@@ -667,7 +665,8 @@ class SideDrawer extends Component {
             (subMenus && subMenus.length > 0) 
               ? subMenus.map(menu => {
                   return (
-                    <ListItem button key={menu.title} 
+                    <ListItem button 
+                              key={menu.title} 
                               className={`${(this.linkSelected(menu.link)) 
                                 ? classes.selected 
                                 : classes.menuItem2} ${classes.bottomLink}`} 

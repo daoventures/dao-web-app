@@ -31,7 +31,7 @@ import UnlockModal from "../unlock/unlockModal";
 import Highcharts from 'highcharts';
 import HighchartsReact from "highcharts-react-official";
 
-import ConnectWallet from "../connectWallet";
+import ConnectWallet from "../common/connectWallet/connectWallet";
 
 const emitter = Store.emitter
 const dispatcher = Store.dispatcher

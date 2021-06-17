@@ -52,7 +52,7 @@ import {
 
 import Store from "../../stores";
 import UnlockModal from "../unlock/unlockModal";
-import ConnectWallet from "../connectWallet";
+import ConnectWallet from "../common/connectWallet/connectWallet";
 
 const emitter = Store.emitter;
 const dispatcher = Store.dispatcher;
