@@ -5857,8 +5857,6 @@ class Store {
         return null;
       }
 
-      console.log("Account", account);
-
       const poolsResponse = await this._findDAOminePool();
       const pools = poolsResponse.pools;
 
