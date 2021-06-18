@@ -5424,6 +5424,7 @@ class Store {
 
   _getWeb3Provider = async () => {
     const web3context = store.getStore("web3context");
+
     if (!web3context) {
       return null;
     }
@@ -5801,13 +5802,134 @@ class Store {
     );
   };
 
+  _getUserDepositForDAOmine = async (daoMineContract, dvgDecimal, account, poolIndex, callback) => {
+      try { 
+        let userDepositInfo = await daoMineContract.methods
+          .user(poolIndex, account.address)
+          .call({ from: account.address });
+
+        let userPendingDVG = await daoMineContract.methods
+          .pendingDVG(poolIndex, account.address)
+          .call({from: account.address});
+          
+        const result = { userDepositInfo, userPendingDVG };
+        callback(null, result);
+      } catch (err) {
+        console.log("Error _getUserDepositForDAOmine", err);
+        callback(null, err);
+      }
+  }
+
+  _getUserBalanceForLpToken = async (poolContract, account, callback ) => {
+    try {
+      var balance = await poolContract.methods
+        .balanceOf(account.address)
+        .call({from: account.address});
+
+      callback(null, parseFloat(balance));
+    } catch (err) {
+      console.log("Error in _getUserBalanceForLpToken(), ", err);
+      callback(null, null);
+    }
+  }
+  
+  _getContractDecimal = async(contract, callback) => {
+    try {
+      const decimals = await contract.methods
+        .decimals()
+        .call();
+      callback(null, parseInt(decimals));
+    } catch (err) {
+      console.log("Error in _getContractDecimal()", err);
+      callback(null, null);
+    }
+  }
+
   findDAOminePool = async (payload) => {
-    const {account} = store.getStore("account");
+    const account = store.getStore("account");
 
     try {
-      const pools = await this._findDAOminePool();
-      store.setStore({stakePools: pools});
-      return emitter.emit(DAOMINE_POOL_RETURNED, pools);
+      const network = store.getStore("network");
+
+      const web3 = await this._getWeb3Provider();
+
+      if (!web3) {
+        return null;
+      }
+
+      console.log("Account", account);
+
+      const poolsResponse = await this._findDAOminePool();
+      const pools = poolsResponse.pools;
+
+      let daoMineContract;
+      let dvgContract;
+      let dvgDecimal = 0;
+
+      if(network === 42) {
+        daoMineContract =  new web3.eth.Contract(
+          config.daoStakeContractABI,
+          config.daoStakeTestContract
+        );
+
+        dvgContract = new web3.eth.Contract(
+          config.dvgTokenContractABI,
+          config.dvgTokenTestContract
+        );
+
+        dvgDecimal = await dvgContract.methods.decimals().call();
+            
+      } else if(network === 1) { }
+     
+      async.map(
+        pools,
+        (pool, callback) => {
+          const poolContract = new web3.eth.Contract(
+           JSON.parse(pool.abi),
+           pool.contract_address
+          );
+         
+          async.parallel(
+            [
+              (callbackInner) => {
+                this._getUserBalanceForLpToken(poolContract, account, callbackInner);
+              },
+              (callbackInner) => {
+                this._getUserDepositForDAOmine(daoMineContract, dvgDecimal, account, pool.pid, callbackInner);
+              },
+              (callbackInner) => {
+                // Get pool decimal
+                this._getContractDecimal(poolContract, callbackInner);
+              }
+            ],
+            (err, data) => {
+              if (err) {
+                return callback(err);
+              }
+
+              const userInfo = {};
+
+              userInfo.tokenBalance = data[0];
+              userInfo.finishedDVG = data[1] ? data[1].userDepositInfo.finishedDVG: null;
+              userInfo.depositedLPAmount = data[1] ? data[1].userDepositInfo.lpAmount : null;
+              userInfo.pendingDVG = data[1] ? data[1].userPendingDVG : null;
+             
+              pool.userInfo = userInfo;
+              pool.decimal = data[2];
+
+              callback(null, pool);
+            }
+          );
+        },
+        (err, pools) => {
+          if (err) {
+            console.log(err);
+            return emitter.emit(ERROR, err);
+          }
+          store.setStore({stakePools: pools});
+          return emitter.emit(DAOMINE_POOL_RETURNED, pools);
+        }
+      )
     } catch (err) {
       console.log(err);
     }
