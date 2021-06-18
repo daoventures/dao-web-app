@@ -1174,14 +1174,14 @@ class Vault extends Component {
                             <Typography
                               variant={"body1"}
                               className={classes.assetLabel2}>
-                              Yearly Growth
+                              { asset.strategyType === 'citadel' ? "YTD Performance" : "Yearly Growth" }
                             </Typography>
                           </div>
                           <div className={classes.showMobile}>
                             <Typography
                               variant={"h5"}
                               className={classes.assetLabel2}>
-                              Yearly Growth:{" "}
+                              { asset.strategyType === 'citadel' ? "YTD Performance" : "Yearly Growth" }
                             </Typography>
                             <Typography
                               variant={"h3"}
@@ -1216,7 +1216,7 @@ class Vault extends Component {
                               <Typography
                                 variant={"body1"}
                                 className={classes.assetLabel2}>
-                                Yearly Growth
+                                { asset.strategyType === 'citadel' ? "YTD Performance" : "Yearly Growth" }
                               </Typography>
                             </div>
                             <div className={classes.showMobile}>
@@ -1235,7 +1235,7 @@ class Vault extends Component {
                               <Typography
                                 variant={"h5"}
                                 className={classes.assetLabel2}>
-                                Yearly Growth:{" "}
+                                { asset.strategyType === 'citadel' ? "YTD Performance" : "Yearly Growth" }
                               </Typography>
                             </div>
                           </div>
