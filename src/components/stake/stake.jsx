@@ -192,7 +192,6 @@ const styles = (theme) => ({
   accordionsummary: {
     height: "100px",
     padding: "0px 24px",
-    borderBottom: "1px solid " + theme.themeColors.textP,
   },
   assetSummary: {
     display: "flex",
@@ -246,6 +245,7 @@ const styles = (theme) => ({
   removePadding: {
     padding: "0px",
     width: "100%",
+    borderTop: "1px solid " + theme.themeColors.textP,
     // maxWidth: '900px'
   },
   yearnEarnAndVaultBlock: {
@@ -292,10 +292,6 @@ class Stake extends Component {
       currentTab: "All",
       expanded: "",
     };
-
-    dispatcher.dispatch({
-      type: FIND_DAOMINE_POOL,
-    });
   }
 
   componentWillMount() {
@@ -328,6 +324,12 @@ class Stake extends Component {
         : null,
     });
 
+    if(account && account.address) {
+      dispatcher.dispatch({
+        type: FIND_DAOMINE_POOL,
+      });
+    }
+
     const that = this;
     setTimeout(() => {
       const snackbarObj = {
@@ -358,7 +360,7 @@ class Stake extends Component {
   // };
 
   onDAOminePoolReturned = (pools) => {
-    this.setState({ pools: pools.pools });
+    this.setState({ pools });
   };
 
   renderSnackbar = () => {
@@ -444,8 +446,6 @@ class Stake extends Component {
     const { classes } = this.props;
     const width = window.innerWidth;
 
-    console.log("Pools in renderPools()", pools);
-
     return pools && pools.length > 0
       ? pools
         .filter((pool) => {
@@ -508,7 +508,7 @@ class Stake extends Component {
                           }}
                           className={classes.assetLabel1}
                         >
-                          {pool.name}
+                          {pool.label}
                         </Typography>
                         {/* <Typography
                                 variant={"body1"}
