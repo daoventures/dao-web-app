@@ -37,6 +37,7 @@ const styles = (theme) => ({
         alignItems: "center",
         width: "100%",
         margin: "auto",
+        padding: "15px",
         marginBottom: "1.5rem",
         [theme.breakpoints.down("sm")]: {
             width: "100%",
@@ -233,51 +234,6 @@ class StakeDeposit extends Component {
                         >
                             <span>Confirm Deposit</span>
                         </Button>
-                    </div>
-
-                    {/** My Deposits */}
-                    <div className={classes.displayInfoBox}>
-                        <Typography variant="body1" className={classes.cursor} noWrap>
-                            My Deposits:
-                        </Typography>
-
-                        <Typography
-                            variant="body2"
-                            className={classes.cursor}
-                            noWrap
-                        >
-                            {pool.userDepositedToken + " " + pool.underlyingToken}
-                        </Typography>
-                    </div>
-
-                    {/** Total Deposited */}
-                    <div className={classes.displayInfoBox}>
-                        <Typography variant="body1" className={classes.cursor} noWrap>
-                            Total Deposited:
-                        </Typography>
-
-                        <Typography
-                            variant="body2"
-                            className={classes.cursor}
-                            noWrap
-                        >
-                            {pool.totalDepositedToken + " " + pool.underlyingToken}
-                        </Typography>
-                    </div>
-
-                    {/** My Pool Share */}
-                    <div className={classes.displayInfoBox}>
-                        <Typography variant="body1" className={classes.cursor} noWrap>
-                            My Pool Share
-                        </Typography>
-
-                        <Typography
-                            variant="body2"
-                            className={classes.cursor}
-                            noWrap
-                        >
-                            {pool.totalDepositedToken + "%"}
-                        </Typography>
                     </div>
 
                     {/** Get LP Link*/}

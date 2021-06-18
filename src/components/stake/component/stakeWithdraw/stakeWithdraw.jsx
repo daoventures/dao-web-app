@@ -35,6 +35,7 @@ const styles = (theme) => ({
         flexDirection: "column",
         alignItems: "center",
         width: "100%",
+        padding: "15px",
         margin: "auto",
         marginBottom: "1.5rem",
         [theme.breakpoints.down("sm")]: {
@@ -177,7 +178,7 @@ class StakeWithdraw extends Component {
                     {/** Wallet Balance */}
                     <div className={classes.displayInfoBox}>
                         <Typography variant="body1" className={classes.cursor} noWrap>
-                            Available:
+                            Staked:
                         </Typography>
 
                         <Typography
@@ -240,7 +241,7 @@ class StakeWithdraw extends Component {
                     {/** DVG Rewards */}
                     <div className={classes.displayInfoBox}>
                         <Typography variant="body1" className={classes.cursor} noWrap>
-                           DVG Rewards:
+                           Pending Rewards:
                         </Typography>
 
                         <Typography
