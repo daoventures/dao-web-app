@@ -3611,11 +3611,14 @@ class Store {
           if (typeof stats.tokenAddress == "string") {
             return (
               stats.tokenAddress.toLowerCase() ===
-              asset.erc20address.toLowerCase() && stats.address.toLowerCase() === asset.vaultAddress.toLowerCase()
+                asset.erc20address.toLowerCase() &&
+              stats.address.toLowerCase() === asset.vaultAddress.toLowerCase()
             );
           } else if (Array.isArray(stats.tokenAddress)) {
             return stats.tokenAddress.find(
-              (t) => t.toLowerCase() === asset.erc20address.toLowerCase() && stats.address.toLowerCase() === asset.vaultAddress.toLowerCase()
+              (t) =>
+                t.toLowerCase() === asset.erc20address.toLowerCase() &&
+                stats.address.toLowerCase() === asset.vaultAddress.toLowerCase()
             );
           }
         });
@@ -5511,11 +5514,11 @@ class Store {
 
     if (withdawAmountInToken > balance) {
       alert(
-        "The vault currently does not have sufficient token for your withdrawal. Please try a smaller amount or a different token."
+        "Due to insufficient liquidity of the desired token in vault for withdrawal, gas fees may be very high. Are you sure to proceed?"
       );
-      return false;
+      // return false;
     }
-    return true;
+    // return true;
   };
 
   // TODO: REFACTOR: Currently all 3 types of vaults use this
@@ -5642,54 +5645,54 @@ class Store {
       );
 
       // Soft Check for sufficient liquidity
-      if (
-        await this._isSufficientLiquidityCitadel(
-          asset,
-          citadelContract,
-          amount,
-          tokenIndex
-        )
-      ) {
-        await vaultContract.methods
-          .withdraw(amount, tokenIndex)
-          .send({
-            from: account.address,
-            gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-          })
-          .on("transactionHash", function (txnHash) {
-            console.log(txnHash);
-            return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
-            // callback(null, txnHash, null);
-          })
-          .on("receipt", function (receipt) {
-            console.log("Reciept", receipt);
-            emitter.emit(
-              WITHDRAW_VAULT_RETURNED_COMPLETED,
-              receipt.transactionHash
-            );
-            // callback(null, null, receipt);
-          })
-          .on("error", function (error) {
-            if (!error.toString().includes("-32601")) {
-              if (error.message) {
-                emitter.emit(ERROR, error);
-                // return callback(error.message);
-              }
-              // callback(error, null, null);
+      // if (
+      await this._isSufficientLiquidityCitadel(
+        asset,
+        citadelContract,
+        amount,
+        tokenIndex
+      );
+      // ) {
+      await vaultContract.methods
+        .withdraw(amount, tokenIndex)
+        .send({
+          from: account.address,
+          gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+        })
+        .on("transactionHash", function (txnHash) {
+          console.log(txnHash);
+          return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
+          // callback(null, txnHash, null);
+        })
+        .on("receipt", function (receipt) {
+          console.log("Reciept", receipt);
+          emitter.emit(
+            WITHDRAW_VAULT_RETURNED_COMPLETED,
+            receipt.transactionHash
+          );
+          // callback(null, null, receipt);
+        })
+        .on("error", function (error) {
+          if (!error.toString().includes("-32601")) {
+            if (error.message) {
+              emitter.emit(ERROR, error);
+              // return callback(error.message);
             }
-          })
-          .catch((error) => {
-            if (!error.toString().includes("-32601")) {
-              if (error.message) {
-                // return callback(error.message);
-                emitter.emit(ERROR, error);
-              }
-              // callback(error, null, null);
+            // callback(error, null, null);
+          }
+        })
+        .catch((error) => {
+          if (!error.toString().includes("-32601")) {
+            if (error.message) {
+              // return callback(error.message);
+              emitter.emit(ERROR, error);
             }
-          });
-      } else {
-        return emitter.emit(WITHDRAW_BOTH_VAULT_FAIL_RETURNED);
-      }
+            // callback(error, null, null);
+          }
+        });
+      // } else {
+      //   return emitter.emit(WITHDRAW_BOTH_VAULT_FAIL_RETURNED);
+      // }
     }
   };
 
