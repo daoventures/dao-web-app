@@ -119,6 +119,9 @@ export const ADVANCE = "Advance";
 export const EXPERT = "Expert";
 export const DEGEN = "Degen";
 
+// Biconomy
+export const BICONOMY_CONNECTED = "BICONOMY_CONNECTED";
+
 // Block Explorers
 export const BLOCK_EXPLORERS = {
   1: "https://etherscan.io/tx/",

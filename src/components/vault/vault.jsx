@@ -51,6 +51,7 @@ import {
 import Store from "../../stores";
 import UnlockModal from "../unlock/unlockModal";
 import ConnectWallet from "../connectWallet";
+import ConnectBiconomy from "../connectBiconomy";
 
 const emitter = Store.emitter;
 const dispatcher = Store.dispatcher;
@@ -997,6 +998,7 @@ class Vault extends Component {
             { this.renderFilters() }
             { this.renderBasedOn() } */}
             {/* { this.renderChart() } */}
+            <ConnectBiconomy></ConnectBiconomy>
             {this.renderTypeTab()}
 
             {this.renderAssetBlocks()}
@@ -1163,10 +1165,9 @@ class Vault extends Component {
                             <Typography
                               variant={"h5"}
                               className={classes.assetLabel1}>
-                              {asset.strategyType === 'citadel' && (
-                                <Typography
-                                  variant={"caption"}>
-                                    est.&nbsp;
+                              {asset.strategyType === "citadel" && (
+                                <Typography variant={"caption"}>
+                                  est.&nbsp;
                                 </Typography>
                               )}
                               {this._getAPY(asset)}
@@ -1187,10 +1188,9 @@ class Vault extends Component {
                               variant={"h3"}
                               noWrap
                               className={classes.assetLabel1}>
-                                {asset.strategyType === 'citadel' && (
-                                <Typography
-                                  variant={"caption"}>
-                                    est.&nbsp;
+                              {asset.strategyType === "citadel" && (
+                                <Typography variant={"caption"}>
+                                  est.&nbsp;
                                 </Typography>
                               )}
                               {this._getAPY(asset)}
@@ -1205,10 +1205,9 @@ class Vault extends Component {
                               <Typography
                                 variant={"h5"}
                                 className={classes.assetLabel1}>
-                                {asset.strategyType === 'citadel' && (
-                                  <Typography
-                                    variant={"caption"}>
-                                      est.&nbsp;
+                                {asset.strategyType === "citadel" && (
+                                  <Typography variant={"caption"}>
+                                    est.&nbsp;
                                   </Typography>
                                 )}
                                 {this._getAPY(asset)}
@@ -1224,10 +1223,9 @@ class Vault extends Component {
                                 variant={"h3"}
                                 noWrap
                                 className={classes.assetLabel1}>
-                                {asset.strategyType === 'citadel' && (
-                                  <Typography
-                                    variant={"caption"}>
-                                      est.&nbsp;
+                                {asset.strategyType === "citadel" && (
+                                  <Typography variant={"caption"}>
+                                    est.&nbsp;
                                   </Typography>
                                 )}
                                 {this._getAPY(asset)}
@@ -1471,7 +1469,7 @@ class Vault extends Component {
     if (asset && asset.stats) {
       if (asset.strategyType === "compound") {
         if (asset.stats.compoundApy) {
-          return (asset.stats.compoundApy / 1).toFixed(2) + '%';
+          return (asset.stats.compoundApy / 1).toFixed(2) + "%";
         } else {
           return "0.00%";
         }
@@ -1481,11 +1479,20 @@ class Vault extends Component {
       ) {
         switch (basedOn) {
           case 1:
-            return this.calculateYearnAPY(parseFloat(asset.earnApr), asset.stats.apyOneWeekSample);
+            return this.calculateYearnAPY(
+              parseFloat(asset.earnApr),
+              asset.stats.apyOneWeekSample
+            );
           case 2:
-            return this.calculateYearnAPY(parseFloat(asset.earnApr), asset.stats.apyOneMonthSample);
+            return this.calculateYearnAPY(
+              parseFloat(asset.earnApr),
+              asset.stats.apyOneMonthSample
+            );
           case 3:
-            return this.calculateYearnAPY(parseFloat(asset.earnApr), asset.stats.apyInceptionSample);
+            return this.calculateYearnAPY(
+              parseFloat(asset.earnApr),
+              asset.stats.apyInceptionSample
+            );
           default:
             return this.calculateYearnAPY(parseFloat(asset.earnApr), asset.apy);
         }
@@ -1495,7 +1502,7 @@ class Vault extends Component {
         // } else {
         //   return "0.00%";
         // }
-        return '55% - 75%';
+        return "55% - 75%";
       }
     } else {
       return "0.00%";
@@ -1504,11 +1511,21 @@ class Vault extends Component {
 
   calculateYearnAPY = (earnAPR, vaultAPY) => {
     if (earnAPR * 100 > vaultAPY) {
-      return (vaultAPY / 1).toFixed(2) + "% - " + (earnAPR * 100 / 1).toFixed(2) + '%';
+      return (
+        (vaultAPY / 1).toFixed(2) +
+        "% - " +
+        ((earnAPR * 100) / 1).toFixed(2) +
+        "%"
+      );
     } else {
-      return (earnAPR * 100 / 1).toFixed(2) + "% - " + (vaultAPY / 1).toFixed(2) + '%';
+      return (
+        ((earnAPR * 100) / 1).toFixed(2) +
+        "% - " +
+        (vaultAPY / 1).toFixed(2) +
+        "%"
+      );
     }
-  }
+  };
 
   renderBasedOn = () => {
     const { classes } = this.props;

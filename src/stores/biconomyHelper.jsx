@@ -32,14 +32,7 @@ const getBiconomyERC20PaymentAPIKey = (networkId) => {
 // Returns Biconomy Happy Hour Provider
 const getBiconomyHappyHourProvider = async (web3Provider) => {
   const networkId = await web3Provider.eth.net.getId();
-  console.log("🚀 | getBiconomyHappyHourProvider | networkId", networkId);
   const apiKey = await getBiconomyHappyHourAPIKey(networkId);
-  console.log("🚀 | getBiconomyHappyHourProvider | apiKey", apiKey);
-  console.log(
-    "🚀 | getBiconomyHappyHourProvider | web3Provider",
-    web3Provider.eth.currentProvider
-  );
-
   const biconomy = new Biconomy(web3Provider.eth.currentProvider, {
     apiKey: apiKey,
     debug: true,
@@ -135,17 +128,18 @@ export const callCitadelHappyHourDeposit = async (
         .toString();
 
       console.log("🚀 | tx | amount", amount);
-      let tx = await contract.methods.deposit(amountToSend, tokenIndex).send({
-        from: account.address,
-        signatureType: biconomyWeb3.EIP712_SIGN,
-        //optionally you can add other options like gasLimit
-      });
-
-      tx.on("transactionHash", function (txnHash) {
-        console.log(txnHash);
-        callback(null, txnHash, null);
-      })
-        .once("confirmation", function (receipt) {
+      let tx = await contract.methods
+        .deposit(amountToSend, tokenIndex)
+        .send({
+          from: account.address,
+          signatureType: "EIP712_SIGN",
+          //optionally you can add other options like gasLimit
+        })
+        .on("transactionHash", function (txnHash) {
+          console.log(txnHash);
+          callback(null, txnHash, null);
+        })
+        .on("receipt", function (receipt) {
           console.log(receipt);
           callback(null, null, receipt);
         })
