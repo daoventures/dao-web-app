@@ -143,6 +143,7 @@ const styles = (theme) => ({
   lpLink: {
     textDecoration: "none",
     color: theme.themeColors.textP,
+    cursor: "pointer"
   },
 });
 
@@ -240,6 +241,15 @@ class StakeDeposit extends Component {
     
   };
 
+  navigate = (vaultName) => {
+    if(vaultName === 'ETH<->DVG') {
+      window.open("https://info.uniswap.org/#/pools/0xa58262270521d7732fccbbdcdf9fcd1fc70d47e5", "_blank");
+      return;
+    }
+    const path = "/invest#id="+ vaultName;
+    this.props.history.push(path);
+  }
+
   render() {
     const { amount, loading, amountError, percent } = this.state;
     const { classes, pool } = this.props;
@@ -321,8 +331,8 @@ class StakeDeposit extends Component {
 
           {/** Get LP Link*/}
           <div className={classes.displayInfoBox}>
-            <a href="http://www.google.com" className={classes.lpLink}>
-              Get DVG-ETH LP <OpenInNewIcon></OpenInNewIcon>
+            <a onClick={()=> this.navigate(pool.name)} className={classes.lpLink}>
+              Get {pool.label}<OpenInNewIcon></OpenInNewIcon>
             </a>
           </div>
         </div>

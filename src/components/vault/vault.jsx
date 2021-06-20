@@ -26,6 +26,7 @@ import Loader from "../loader";
 import RiskLevelLabel from "../common/riskLevelLabel/riskLevelLabel";
 
 import RiskLevelTab from '../common/riskLevelTab/riskLevelTab';
+import queryString from 'query-string';
 
 import {
   ERROR,
@@ -666,6 +667,7 @@ class Vault extends Component {
       modalOpen: false,
       currentTab: "ALL",
       tabList: ["ALL", BASIC, ADVANCE, EXPERT, DEGEN],
+      disableSetVaultFromURL: false
     };
 
     if (account && account.address) {
@@ -965,11 +967,23 @@ class Vault extends Component {
   };
 
   renderAssetBlocks = () => {
-    const { assets, expanded, search, hideZero, basedOn, currentTab } =
+    const { assets, expanded, search, hideZero, basedOn, currentTab, disableSetVaultFromURL } =
       this.state;
-    const { classes } = this.props;
+    const { classes, location } = this.props;
     const width = window.innerWidth;
 
+  
+    if(!disableSetVaultFromURL && location && location.hash ) {
+      const param  = queryString.parse(this.props.location.hash);
+      
+      if(expanded !== param.id) {
+        this.setState({ 
+          expanded : param.id,
+          disableSetVaultFromURL: true
+        })
+      }
+   
+    }
     return assets
       .filter((asset) => {
         return currentTab == "ALL" || asset.group === currentTab ? true : false;
@@ -995,9 +1009,9 @@ class Vault extends Component {
               className={classes.expansionPanel}
               square
               key={asset.id + "_expand"}
-              expanded={expanded === asset.id}
+              expanded={expanded === asset.vaultSymbol}
               onChange={() => {
-                this.handleChange(asset.id, asset);
+                this.handleChange(asset.vaultSymbol, asset);
               }}>
               <AccordionSummary
                 // expandIcon={<ExpandMoreIcon className={classes.roundIconClass} />}
