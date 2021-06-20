@@ -14,6 +14,10 @@ import {
   CONNECTION_CONNECTED,
   FIND_DAOMINE_POOL,
   DAOMINE_POOL_RETURNED,
+  APPROVE_TRANSACTING,
+  DEPOSIT_DAOMINE_RETURNED,
+  DEPOSIT_DAOMINE_RETURNED_COMPLETED,
+  ERROR
 } from "../../constants/constants";
 
 import RiskLevelTab from "../common/riskLevelTab/riskLevelTab";
@@ -21,6 +25,7 @@ import ConnectWallet from "../common/connectWallet/connectWallet";
 import Snackbar from "../snackbar/snackbar";
 import StakeDeposit from "./component/stakeDeposit/stakeDeposit";
 import StakeWithdrawal from "./component/stakeWithdraw/stakeWithdraw";
+import Loader from "../loader/loader";
 
 const store = Store.store;
 const emitter = Store.emitter;
@@ -291,20 +296,32 @@ class Stake extends Component {
       pools: store.getStore("stakePools"),
       currentTab: "All",
       expanded: "",
+      loading: false
     };
+
+    if(account && account.address) {
+      dispatcher.dispatch({
+        type: FIND_DAOMINE_POOL,
+      });
+    }
   }
 
   componentWillMount() {
     emitter.on(CONNECTION_CONNECTED, this.connectionConnected);
     // emitter.on(CHANGE_NETWORK, this.networkChanged);
     emitter.on(DAOMINE_POOL_RETURNED, this.onDAOminePoolReturned);
+    emitter.on(APPROVE_TRANSACTING, this.showHashApproval);
+    emitter.on(ERROR, this.errorReturned);
+    emitter.on(DEPOSIT_DAOMINE_RETURNED, this.showHash);
+    emitter.on(DEPOSIT_DAOMINE_RETURNED_COMPLETED, this.onDepositCompleted);
   }
 
   componentWillUnmount() {
     emitter.removeListener(CONNECTION_CONNECTED, this.connectionConnected);
     // emitter.removeListener(CHANGE_NETWORK, this.networkChanged);
     emitter.removeListener(DAOMINE_POOL_RETURNED, this.onDAOminePoolReturned);
-  }
+    emitter.removeListener(ERROR, this.errorReturned);
+ }
 
   /** Handler function when wallet successfully connected */
   connectionConnected = () => {
@@ -359,8 +376,73 @@ class Stake extends Component {
   //   });
   // };
 
+  startLoading = () => {
+    this.setState({ loading: true });
+  };
+
   onDAOminePoolReturned = (pools) => {
     this.setState({ pools });
+  };
+
+  // Handler once deposit completed
+   onDepositCompleted = (txHash) => {
+     dispatcher.dispatch({
+        type: FIND_DAOMINE_POOL,
+      });
+
+    const snackbarObj = { snackbarMessage: null, snackbarType: null };
+    this.setState(snackbarObj);
+    this.setState({ loading: false });
+    const that = this;
+    setTimeout(() => {
+      const snackbarObj = {
+        snackbarMessage: txHash,
+        snackbarType: "Transaction Success",
+      };
+      that.setState(snackbarObj);
+    });
+  };
+
+  // Show error message
+  errorReturned = (error) => {
+    const snackbarObj = { snackbarMessage: null, snackbarType: null };
+    this.setState(snackbarObj);
+    this.setState({ loading: false });
+    const that = this;
+    setTimeout(() => {
+      const snackbarObj = {
+        snackbarMessage: error.toString(),
+        snackbarType: "Error",
+      };
+      that.setState(snackbarObj);
+    });
+  }
+
+  // Show Hash
+  showHash = (txHash) => {
+    const snackbarObj = { snackbarMessage: null, snackbarType: null };
+    this.setState(snackbarObj);
+    this.setState({ loading: false });
+    const that = this;
+    setTimeout(() => {
+      const snackbarObj = { snackbarMessage: txHash, snackbarType: "Hash" };
+      that.setState(snackbarObj);
+    });
+  }
+
+  // Show Wallet Approval Hash
+  showHashApproval = (txHash) => {
+    const snackbarObj = { snackbarMessage: null, snackbarType: null };
+    this.setState(snackbarObj);
+    this.setState({ loading: false });
+    const that = this;
+    setTimeout(() => {
+      const snackbarObj = {
+        snackbarMessage: "Approving...",
+        snackbarType: "Hash",
+      };
+      that.setState(snackbarObj);
+    });
   };
 
   renderSnackbar = () => {
@@ -389,7 +471,7 @@ class Stake extends Component {
 
   render() {
     const { classes } = this.props;
-    const { account } = this.state;
+    const { account, loading } = this.state;
 
     if (!account || !account.address) {
       return <ConnectWallet></ConnectWallet>;
@@ -430,6 +512,9 @@ class Stake extends Component {
             {this.renderPools()}
           </div>
         </div>
+
+        {/** Loading */}
+        {loading && <Loader />}
 
         {/** Snackbar */}
         {this.state.snackbarMessage && this.renderSnackbar()}
@@ -570,7 +655,7 @@ class Stake extends Component {
                 <AccordionDetails className={classes.removePadding}>
                   <div className={classes.yearnEarnAndVaultBlock}>
                     <div className={classes.yearnEarnAndVaultItem}>
-                      <StakeDeposit></StakeDeposit>
+                      <StakeDeposit pool={pool} startLoading={this.startLoading}></StakeDeposit>
                     </div>
                     <hr className={classes.divider}></hr>
                     <div className={classes.yearnEarnAndVaultItem}>
@@ -583,6 +668,20 @@ class Stake extends Component {
           );
         })
       : null;
+  };
+
+  showHashApproval = (txHash) => {
+    const snackbarObj = { snackbarMessage: null, snackbarType: null };
+    this.setState(snackbarObj);
+    this.setState({ loading: false });
+    const that = this;
+    setTimeout(() => {
+      const snackbarObj = {
+        snackbarMessage: "Approving...",
+        snackbarType: "Hash",
+      };
+      that.setState(snackbarObj);
+    });
   };
 }
 
