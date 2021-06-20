@@ -66,12 +66,21 @@ import {
   ADVANCE,
   EXPERT,
   DEGEN,
+  BICONOMY_CONNECTED,
 } from "../constants";
 import Web3 from "web3";
+import {
+  Biconomy,
+  PermitClient,
+  HTTP_CODES,
+  RESPONSE_CODES,
+} from "@biconomy/mexa";
 
 import { injected } from "./connectors";
 
-import { callCitadelHappyHourDeposit } from "./biconomyHelper";
+import citadelABI from "./citadelABI.json";
+
+// import { callCitadelHappyHourDeposit } from "./biconomyHelper";
 
 const rp = require("request-promise");
 const ethers = require("ethers");
@@ -367,6 +376,9 @@ class Store {
             break;
           case GET_VAULT_INFO:
             this.getVaultInfo(payload);
+            break;
+          case BICONOMY_CONNECTED:
+            this.saveBiconomyProvider(payload);
             break;
           default: {
           }
@@ -4030,8 +4042,7 @@ class Store {
 
       if (happyHour) {
         console.log("HappyHour");
-        await callCitadelHappyHourDeposit(
-          web3,
+        await this._callDepositAmountContractCitadelHappyHour(
           asset,
           account,
           amount,
@@ -4248,6 +4259,76 @@ class Store {
             return callback(error.message);
           }
           callback(error);
+        }
+      });
+  };
+
+  _callDepositAmountContractCitadelHappyHour = async (
+    asset,
+    account,
+    amount,
+    tokenIndex = null,
+    callback
+  ) => {
+    // Handle vaults with multi tokens
+    try {
+      if (
+        tokenIndex !== null &&
+        tokenIndex > 0 &&
+        tokenIndex < asset.erc20addresses.length
+      ) {
+        asset.erc20address = asset.erc20addresses[tokenIndex];
+      }
+    } catch (error) {
+      if (error.message) {
+        return callback(error.message);
+      }
+      callback(error);
+    }
+
+    const vaultContract = store.getStore("happyHourContract");
+    console.log("🚀 | Store | vaultContract", vaultContract);
+    const web3 = new Web3(store.getStore("web3context").library.provider);
+
+    let erc20Contract = new web3.eth.Contract(
+      config.erc20ABI,
+      asset.erc20addresses[tokenIndex]
+    );
+
+    let decimals = await erc20Contract.methods.decimals().call();
+
+    var amountToSend = web3.utils.toBN(amount * 10 ** decimals).toString();
+
+    console.log("🚀 | tx | amount", amount);
+    let tx = await vaultContract.methods
+      .deposit(amountToSend, tokenIndex)
+      .send({
+        from: account.address,
+        signatureType: "EIP712_SIGN",
+        //optionally you can add other options like gasLimit
+      })
+      .on("transactionHash", function (txnHash) {
+        console.log(txnHash);
+        callback(null, txnHash, null);
+      })
+      .on("receipt", function (receipt) {
+        console.log(receipt);
+        callback(null, null, receipt);
+      })
+      .on("error", function (error) {
+        if (!error.toString().includes("-32601")) {
+          if (error.message) {
+            return callback(error.message);
+          }
+          callback(error, null, null);
+        }
+      })
+      .catch((error) => {
+        if (!error.toString().includes("-32601")) {
+          if (error.message) {
+            return callback(error.message);
+          }
+          callback(error, null, null);
         }
       });
   };
@@ -4477,13 +4558,12 @@ class Store {
         }
       );
       const happyHour = true;
-
+      // TODO: Call backend api for happy hour condition
       if (happyHour) {
         console.log("HappyHour");
-        await callCitadelHappyHourDeposit(
-          web3,
-          asset.vaultContractABI,
-          asset.vaultContractAddress,
+        await this._callDepositAmountContractCitadelHappyHour(
+          asset,
+          account,
           amount,
           tokenIndex,
           (err, txnHash, depositResult) => {
@@ -5476,6 +5556,42 @@ class Store {
     // })
   };
 
+  saveBiconomyProvider = async (payload) => {
+    const { happyHourWeb3, erc20PaymentWeb3 } = payload.content;
+    const network = store.getStore("network");
+    const assets = this._getDefaultValues(network).vaultAssets;
+
+    const allowed = ["daoCDV"];
+
+    const citadelAsset = assets.filter((el) => el.id == "daoCDV");
+
+    console.log(
+      "🚀 | Store | saveBiconomyProvider= | citadelAsset",
+      citadelAsset
+    );
+    if (happyHourWeb3) {
+      // Initialize Contract
+      const happyHourContract = new happyHourWeb3.eth.Contract(
+        citadelABI,
+        citadelAsset[0].vaultContractAddress
+      );
+
+      console.log(
+        "🚀 | Store | saveBiconomyProvider= | citadelAsset.vaultContractAddress",
+        citadelAsset[0].vaultContractAddress
+      );
+      store.setStore({ happyHourContract: happyHourContract });
+    }
+
+    if (erc20PaymentWeb3) {
+      const erc20PaymentsContract = new erc20PaymentWeb3.eth.Contract(
+        citadelABI,
+        citadelAsset.vaultContractAddress
+      );
+      store.setStore({ erc20PaymentsContract: erc20PaymentsContract });
+    }
+  };
+
   _getGasPrice = async () => {
     try {
       const url = "https://gasprice.poa.network/";
@@ -5555,11 +5671,9 @@ class Store {
 
     if (withdawAmountInToken > balance) {
       alert(
-        "The vault currently does not have sufficient token for your withdrawal. Please try a smaller amount or a different token."
+        "Due to insufficient liquidity of the desired token in vault for withdrawal, gas fees may be very high. Are you sure to proceed?"
       );
-      return false;
     }
-    return true;
   };
 
   // TODO: REFACTOR: Currently all 3 types of vaults use this
@@ -5686,54 +5800,54 @@ class Store {
       );
 
       // Soft Check for sufficient liquidity
-      if (
-        await this._isSufficientLiquidityCitadel(
-          asset,
-          citadelContract,
-          amount,
-          tokenIndex
-        )
-      ) {
-        await vaultContract.methods
-          .withdraw(amount, tokenIndex)
-          .send({
-            from: account.address,
-            gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-          })
-          .on("transactionHash", function (txnHash) {
-            console.log(txnHash);
-            return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
-            // callback(null, txnHash, null);
-          })
-          .on("receipt", function (receipt) {
-            console.log("Reciept", receipt);
-            emitter.emit(
-              WITHDRAW_VAULT_RETURNED_COMPLETED,
-              receipt.transactionHash
-            );
-            // callback(null, null, receipt);
-          })
-          .on("error", function (error) {
-            if (!error.toString().includes("-32601")) {
-              if (error.message) {
-                emitter.emit(ERROR, error);
-                // return callback(error.message);
-              }
-              // callback(error, null, null);
+      // if (
+      await this._isSufficientLiquidityCitadel(
+        asset,
+        citadelContract,
+        amount,
+        tokenIndex
+      );
+      // ) {
+      await vaultContract.methods
+        .withdraw(amount, tokenIndex)
+        .send({
+          from: account.address,
+          gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+        })
+        .on("transactionHash", function (txnHash) {
+          console.log(txnHash);
+          return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
+          // callback(null, txnHash, null);
+        })
+        .on("receipt", function (receipt) {
+          console.log("Reciept", receipt);
+          emitter.emit(
+            WITHDRAW_VAULT_RETURNED_COMPLETED,
+            receipt.transactionHash
+          );
+          // callback(null, null, receipt);
+        })
+        .on("error", function (error) {
+          if (!error.toString().includes("-32601")) {
+            if (error.message) {
+              emitter.emit(ERROR, error);
+              // return callback(error.message);
             }
-          })
-          .catch((error) => {
-            if (!error.toString().includes("-32601")) {
-              if (error.message) {
-                // return callback(error.message);
-                emitter.emit(ERROR, error);
-              }
-              // callback(error, null, null);
+            // callback(error, null, null);
+          }
+        })
+        .catch((error) => {
+          if (!error.toString().includes("-32601")) {
+            if (error.message) {
+              // return callback(error.message);
+              emitter.emit(ERROR, error);
             }
-          });
-      } else {
-        return emitter.emit(WITHDRAW_BOTH_VAULT_FAIL_RETURNED);
-      }
+            // callback(error, null, null);
+          }
+        });
+      // } else {
+      //   return emitter.emit(WITHDRAW_BOTH_VAULT_FAIL_RETURNED);
+      // }
     }
   };
 
