@@ -23,6 +23,7 @@ import {
 } from "../../constants/constants";
 
 import RiskLevelTab from "../common/riskLevelTab/riskLevelTab";
+import RiskLevelLabel from "../common/riskLevelLabel/riskLevelLabel";
 import ConnectWallet from "../common/connectWallet/connectWallet";
 import Snackbar from "../snackbar/snackbar";
 import StakeDeposit from "./component/stakeDeposit/stakeDeposit";
@@ -164,8 +165,7 @@ const styles = (theme) => ({
     },
   },
   itemTop: {
-    height: "48px",
-    background: theme.themeColors.menuSel,
+    height: "25px",
   },
   itemTitle: {
     display: "flex",
@@ -545,6 +545,10 @@ class Stake extends Component {
         .map((pool, index) => {
           return (
             <div key={index} className={classes.poolContainer}>
+              <Grid container className={classes.itemTop}>
+                <RiskLevelLabel risk={pool.category}></RiskLevelLabel>
+              </Grid>
+            
               <Accordion
                 className={classes.expansionPanel}
                 square
@@ -617,6 +621,7 @@ class Stake extends Component {
                           className={classes.assetLabel1}
                         >
                           {pool.apr ? Number(pool.apr).toFixed(2) : "0.00"}
+                          { " %"}
                         </Typography>
                         <Typography
                           variant={"body1"}
@@ -640,6 +645,7 @@ class Stake extends Component {
                           }}
                           className={classes.assetLabel1}
                         >
+                          {"$ "}
                           {pool.tvl ? Number(pool.tvl).toFixed(2) : "0.00"}
                         </Typography>
                         <Typography
