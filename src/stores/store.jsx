@@ -70,7 +70,10 @@ import {
   DAOMINE_POOL_RETURNED,
   DEPOSIT_DAOMINE,
   DEPOSIT_DAOMINE_RETURNED,
-  DEPOSIT_DAOMINE_RETURNED_COMPLETED
+  DEPOSIT_DAOMINE_RETURNED_COMPLETED,
+  WITHDRAW_DAOMINE,
+  WITHDRAW_DAOMINE_RETURNED,
+  WITHDRAW_DAOMINE_RETURNED_COMPLETED
 } from "../constants";
 import Web3 from "web3";
 
@@ -377,6 +380,9 @@ class Store {
             break;
           case DEPOSIT_DAOMINE:
             this.depositDAOmine(payload);
+            break;
+          case WITHDRAW_DAOMINE:
+            this.withdrawDAOmine(payload);
             break;
           default: {
           }
@@ -6158,6 +6164,76 @@ class Store {
           callback(error);
         }
       });
+  }
+
+  withdrawDAOmine = async (payload) => {
+    const account = store.getStore("account");
+    const network = store.getStore("network");
+   
+    const { pool, amount } = payload.content;
+    const poolDecimal = pool.decimal;
+    const poolIndex = pool.pid;
+
+    // Get web3
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      return null;
+    }
+
+    // DAOMmine contract address by network
+    let daoMineContractAddress = "";
+    if (network === 42) {
+      daoMineContractAddress = config.daoStakeTestContract;
+    } else if (network === 1) {
+      // TODO: Remember to update this to mainnet address
+      // daoMineContractAddress = config.daoStakeTestContract; 
+    }
+
+    try {
+      const daoMineContract = new web3.eth.Contract(
+        config.daoStakeContractABI,
+        daoMineContractAddress
+      );
+     
+      const amountInDecimal = parseFloat(amount) * 10 ** poolDecimal;
+      var amountToWithdraw = web3.utils.toBN(amountInDecimal).toString();
+
+      await daoMineContract.methods
+        .withdraw(poolIndex, amountToWithdraw)
+        .send({
+          from: account.address,
+          gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+        })
+        .on("transactionHash", function (txnHash) {
+          return emitter.emit(WITHDRAW_DAOMINE_RETURNED, txnHash);
+        })
+        .on("receipt", function (receipt) {
+          console.log("withdrawDAOmine() Receipt: ", receipt);
+          emitter.emit(
+            WITHDRAW_DAOMINE_RETURNED_COMPLETED,
+            receipt.transactionHash
+          );
+        })
+        .on("error", function (error) {
+          console.log("withdrawDAOmine() Error: ", error);
+          if (!error.toString().includes("-32601")) {
+            if (error.message) {
+              emitter.emit(ERROR, error);
+            }
+          }
+        })
+        .catch((error) => {
+          console.log("withdrawDAOmine() Error: ", error);
+          if (!error.toString().includes("-32601")) {
+            if (error.message) {
+              emitter.emit(ERROR, error);
+            }
+          }
+        });
+    } catch (err) {
+      console.log("withdrawDAOmine() Error: ", err);
+      emitter.emit(ERROR, err);
+    }  
   }
 }
 

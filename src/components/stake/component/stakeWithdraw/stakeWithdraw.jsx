@@ -4,6 +4,10 @@ import { withRouter } from "react-router";
 import { withStyles } from "@material-ui/core/styles";
 import { Typography, TextField, Button } from "@material-ui/core";
 import Store from "../../../../stores/store";
+import {
+    WITHDRAW_DAOMINE,
+    WITHDRAW_DAOMINE_RETURNED_COMPLETED
+} from '../../../../constants/constants';
 
 const styles = (theme) => ({
     contentHeader: {
@@ -146,19 +150,14 @@ const styles = (theme) => ({
 });
 
 const store = Store.store;
+const emitter = Store.emitter;
+const dispatcher = Store.dispatcher;
+
 class StakeWithdraw extends Component {
     constructor(props) {
         super();
 
-        const account = store.getStore("account");
-
         this.state = {
-            pool: {
-                userDepositedToken: "0.112100",
-                dvgReward: "0.12345",
-                underlyingToken: "DAI",
-                userPoolShare: "50",
-            },
             amountError: false,
             loading: false,
             amount: 0,
@@ -166,11 +165,106 @@ class StakeWithdraw extends Component {
         };
     }
 
-    onDeposit = () => { };
+    componentWillMount() {
+        emitter.on(WITHDRAW_DAOMINE_RETURNED_COMPLETED, this.onWithdrawCompleted);
+    }
+
+    componentWillUnmount() {
+        emitter.on(WITHDRAW_DAOMINE_RETURNED_COMPLETED, this.onWithdrawCompleted);
+    }
+
+    // Staked amount input on change handler
+    onChange = (event) => {
+        this.setState({amountError: false});
+        let val = [];
+        val[event.target.id] = event.target.value;
+        this.setState(val);
+    };
+
+    // Handler when withdrawal process completed
+    onWithdrawCompleted = (txnHash) => {
+        this.setState({
+            amount: 0,
+            amountError: false,
+            percent: 0,
+            loading: false
+        })
+    } 
+
+    // Handler to set amount to staked amount input field
+    setAmount = (percent) => {
+        const { pool } = this.props;
+        const { userInfo } = pool;
+        this.setState({
+          amount:
+            Math.floor((userInfo.depositedLPAmount / 10 ** pool.decimal) * 10000) /
+            10000,
+          percent,
+        });
+    };
+
+    onWithdrawal = () => {
+        this.setState({ amountError: false });
+
+        const { startLoading, pool } = this.props;
+        const { amount } = this.state;
+        const { userInfo } = pool;
+
+        const digitRegex = /^[0-9]\d*(\.\d+)?$/;
+
+        let finalAmount = 0;
+
+        if (!digitRegex.test(amount)) {
+            alert("Please provide an amount in numeric.");
+            this.setState({ amountError: true });
+            return;
+        }
+
+        if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+            alert("Please provide an amount to withdraw.");
+            this.setState({ amountError: true });
+            return;
+        }
+
+        const displayStakedAmount = Math.floor((userInfo.depositedLPAmount / 10 ** pool.decimal) * 10000) / 10000;
+        const exactStakedAmount = userInfo.depositedLPAmount / 10 ** pool.decimal;
+
+        if (parseFloat(displayStakedAmount) === parseFloat(amount)) {
+            // Example remaining = 0.45219, display on UI as 0.4521 (4 d.p.)
+            // User input to withdraw 0.4521, which is max on UI
+            // Then we append final withdrawal amount as all of staked amount.i.e. 0.45219
+            finalAmount = exactStakedAmount;
+        } else if (parseFloat(amount) > parseFloat(exactStakedAmount)) {
+            // Example remaining = 0.45219, display on UI as 0.4521 (4 d.p.)
+            // User input to withdraw 0.452198
+            // 0.452198 > 0.45219, prompt alert.
+            alert("Please provide an amount which less than staked amount.");
+            return;
+        } else if (parseFloat(amount) < parseFloat(displayStakedAmount) ||
+            parseFloat(amount) <= exactStakedAmount) {
+            // Example remaining = 0.45219, display on UI as 0.4521 (4 d.p.)
+            // Case 1 : User input to withdraw 0.2, 0.2 < 0.45219, final amount = 0.2
+            // Case 2 : User input to withdraw 0.45215, still <= 0.45219, final amount = 0.45215
+            finalAmount = parseFloat(amount);
+        } 
+
+        this.setState({ loading: true });
+        startLoading();
+
+        dispatcher.dispatch({
+            type: WITHDRAW_DAOMINE,
+            content: {
+                pool,
+                amount: finalAmount.toString()
+            }
+        })
+    };
 
     render() {
-        const { pool, amount, loading, amountError, percent } = this.state;
-        const { classes } = this.props;
+        const { amount, loading, amountError, percent } = this.state;
+        const { classes, pool } = this.props;
+
+        const { userInfo } = pool;
 
         return (
             <div className={classes.withdrawalContainer}>
@@ -189,7 +283,14 @@ class StakeWithdraw extends Component {
                             className={classes.cursor}
                             noWrap
                         >
-                            {pool.userDepositedToken + " " + pool.underlyingToken}
+                            {userInfo.depositedLPAmount
+                                ? (
+                                    Math.floor(
+                                        (userInfo.depositedLPAmount / 10 ** pool.decimal) * 10000
+                                    ) / 10000
+                                ).toFixed(4)
+                                : "0.0000"}
+                            {" " + pool.name}
                         </Typography>
                     </div>
 
@@ -202,6 +303,7 @@ class StakeWithdraw extends Component {
                             className={classes.withdrawalInput}
                             id="amount"
                             cursor={amount}
+                            value={amount}
                             error={amountError}
                             onChange={this.onChange}
                             disabled={loading}
@@ -232,7 +334,7 @@ class StakeWithdraw extends Component {
                     <div className={classes.withdrawlButtonBox}>
                         <Button
                             className={classes.withdrawalActionButton}
-                            onClick={this.onDeposit}
+                            onClick={this.onWithdrawal}
                         >
                             <span>Confirm Withdraw & Claim Rewards</span>
                         </Button>
@@ -241,7 +343,7 @@ class StakeWithdraw extends Component {
                     {/** DVG Rewards */}
                     <div className={classes.displayInfoBox}>
                         <Typography variant="body1" className={classes.cursor} noWrap>
-                           Pending Rewards:
+                            Pending Rewards:
                         </Typography>
 
                         <Typography
@@ -249,15 +351,24 @@ class StakeWithdraw extends Component {
                             className={classes.cursor}
                             noWrap
                         >
-                            {pool.dvgReward + " DVG"}
+                            {
+                                userInfo.pendingDVG
+                                    ? (
+                                        Math.floor(
+                                            (userInfo.pendingDVG / 10 ** 18) * 10000
+                                        ) / 10000
+                                    ).toFixed(4)
+                                    : "0.0000"
+                            }
+                            {" DVG"}
                         </Typography>
                     </div>
 
-                   {/** Claim Rewards Button */}
-                   <div className={classes.claimRewardsButtonBox}>
+                    {/** Claim Rewards Button */}
+                    <div className={classes.claimRewardsButtonBox}>
                         <Button
                             className={classes.withdrawalActionButton}
-                            onClick={this.onDeposit}
+                            onClick={this.onWithdrawal}
                         >
                             <span>Claim Rewards</span>
                         </Button>

@@ -10,8 +10,6 @@ import {
 } from "../../../../constants/constants";
 import Store from "../../../../stores/store";
 
-const emitter = Store.emitter;
-
 const styles = (theme) => ({
   contentHeader: {
     display: "flex",
@@ -149,6 +147,7 @@ const styles = (theme) => ({
 });
 
 const store = Store.store;
+const emitter = Store.emitter;
 const dispatcher = Store.dispatcher;
 class StakeDeposit extends Component {
   constructor(props) {
@@ -166,6 +165,10 @@ class StakeDeposit extends Component {
 
   componentWillMount() {
     emitter.on(DEPOSIT_DAOMINE_RETURNED_COMPLETED, this.onDepositCompleted);
+  }
+
+  componentWillUnmount() {
+    emitter.removeListener(DEPOSIT_DAOMINE_RETURNED_COMPLETED, this.onDepositCompleted);
   }
 
   onDepositCompleted = (txnHash) => {

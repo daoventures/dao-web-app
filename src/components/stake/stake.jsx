@@ -17,6 +17,8 @@ import {
   APPROVE_TRANSACTING,
   DEPOSIT_DAOMINE_RETURNED,
   DEPOSIT_DAOMINE_RETURNED_COMPLETED,
+  WITHDRAW_DAOMINE_RETURNED,
+  WITHDRAW_DAOMINE_RETURNED_COMPLETED,
   ERROR
 } from "../../constants/constants";
 
@@ -313,7 +315,9 @@ class Stake extends Component {
     emitter.on(APPROVE_TRANSACTING, this.showHashApproval);
     emitter.on(ERROR, this.errorReturned);
     emitter.on(DEPOSIT_DAOMINE_RETURNED, this.showHash);
-    emitter.on(DEPOSIT_DAOMINE_RETURNED_COMPLETED, this.onDepositCompleted);
+    emitter.on(DEPOSIT_DAOMINE_RETURNED_COMPLETED, this.onDepositWithdrawalCompleted);
+    emitter.on(WITHDRAW_DAOMINE_RETURNED, this.showHash);
+    emitter.on(WITHDRAW_DAOMINE_RETURNED_COMPLETED, this.onDepositWithdrawalCompleted);
   }
 
   componentWillUnmount() {
@@ -384,8 +388,8 @@ class Stake extends Component {
     this.setState({ pools });
   };
 
-  // Handler once deposit completed
-   onDepositCompleted = (txHash) => {
+  // Handler once deposit or withdrawal completed
+  onDepositWithdrawalCompleted = (txHash) => {
      dispatcher.dispatch({
         type: FIND_DAOMINE_POOL,
       });
@@ -659,7 +663,7 @@ class Stake extends Component {
                     </div>
                     <hr className={classes.divider}></hr>
                     <div className={classes.yearnEarnAndVaultItem}>
-                      <StakeWithdrawal></StakeWithdrawal>
+                      <StakeWithdrawal pool={pool} startLoading={this.startLoading}></StakeWithdrawal>
                     </div>
                   </div>
                 </AccordionDetails>
