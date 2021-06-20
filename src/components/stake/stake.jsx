@@ -301,7 +301,7 @@ class Stake extends Component {
       loading: false
     };
 
-    if(account && account.address) {
+    if (account && account.address) {
       dispatcher.dispatch({
         type: FIND_DAOMINE_POOL,
       });
@@ -325,7 +325,7 @@ class Stake extends Component {
     // emitter.removeListener(CHANGE_NETWORK, this.networkChanged);
     emitter.removeListener(DAOMINE_POOL_RETURNED, this.onDAOminePoolReturned);
     emitter.removeListener(ERROR, this.errorReturned);
- }
+  }
 
   /** Handler function when wallet successfully connected */
   connectionConnected = () => {
@@ -345,7 +345,7 @@ class Stake extends Component {
         : null,
     });
 
-    if(account && account.address) {
+    if (account && account.address) {
       dispatcher.dispatch({
         type: FIND_DAOMINE_POOL,
       });
@@ -390,9 +390,9 @@ class Stake extends Component {
 
   // Handler once deposit or withdrawal completed
   onDepositWithdrawalCompleted = (txHash) => {
-     dispatcher.dispatch({
-        type: FIND_DAOMINE_POOL,
-      });
+    dispatcher.dispatch({
+      type: FIND_DAOMINE_POOL,
+    });
 
     const snackbarObj = { snackbarMessage: null, snackbarType: null };
     this.setState(snackbarObj);
@@ -574,11 +574,7 @@ class Stake extends Component {
                       >
                         {/** Pool Icon */}
                         <div className={classes.assetIcon}>
-                          <img
-                            alt=""
-                            src=""
-                            className={classes.assetIconImg}
-                          />
+                          {this.renderLogo(pool)}
                         </div>
                       </Grid>
 
@@ -673,6 +669,39 @@ class Stake extends Component {
         })
       : null;
   };
+
+  renderLogo = (pool) => {
+    const { classes } = this.props;
+
+    const images = {
+      dvmUSDT : { filename: 'USDT', format: 'png'},
+      dvmUSDC : { filename: 'USDC', format: 'png'},
+      dvmDAI : { filename: 'DAI', format: 'png'},
+      dvmTUSD: { filename: 'TUSD', format: 'png'},
+      dvlUSDT: { filename: 'USDT', format: 'png'},
+      dvlUSDC : { filename: 'USDC', format: 'png'},
+      dvlDAI : { filename: 'DAI', format: 'png'},
+      vipDVG: { filename: 'vipDVG', format: 'png'},
+      "ETH<->DVG": {filename: 'vipDVG', format: 'png'}, // TODO: Update this once available
+      daoCDV: {filename: 'citadel', format: 'svg'}
+    }
+
+    const poolImage = images[pool.name];
+
+    return poolImage 
+            ? (
+                <img
+                  alt="pool"
+                  src={require("../../assets/img_new/" +
+                    poolImage.filename +
+                    "-logo." +
+                    poolImage.format)}
+                  // height={ '50px' }
+                  className={classes.assetIconImg}
+                />
+              )
+            : null;
+  }
 
   showHashApproval = (txHash) => {
     const snackbarObj = { snackbarMessage: null, snackbarType: null };

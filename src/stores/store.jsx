@@ -6208,7 +6208,6 @@ class Store {
           return emitter.emit(WITHDRAW_DAOMINE_RETURNED, txnHash);
         })
         .on("receipt", function (receipt) {
-          console.log("withdrawDAOmine() Receipt: ", receipt);
           emitter.emit(
             WITHDRAW_DAOMINE_RETURNED_COMPLETED,
             receipt.transactionHash
