@@ -74,6 +74,8 @@ import {
   WIDTHDRAW_XDVG,//提现xdvg
   GET_DVG_APR,//获取dvgApr
   GET_XDVG_APR_SUCCESS,
+  WITHDRAW_DVG_RETURNED,
+  DEPOSIT_DVG_RETURNED
 } from "../constants";
 import Web3 from "web3";
 
@@ -5916,7 +5918,8 @@ class Store {
       if (err) {
         return emitter.emit(ERROR, err);
       }
-      dispatcher.dispatch({ type: GET_DVG_INFO })
+      return emitter.emit(DEPOSIT_DVG_RETURNED, withdrawResult);
+      // dispatcher.dispatch({ type: GET_DVG_INFO })
       // return emitter.emit(WITHDRAW_VAULT_RETURNED, withdrawResult);
     })
 
@@ -5965,6 +5968,7 @@ class Store {
             console.log(confirmationNumber, receipt);
           })
           .on("receipt", function (receipt) {
+            dispatcher.dispatch({ type: GET_DVG_INFO })
             console.log(receipt);
           })
           .on("error", function (error) {
@@ -6001,6 +6005,7 @@ class Store {
         })
         .on("receipt", function (receipt) {
           console.log(receipt);
+          dispatcher.dispatch({ type: GET_DVG_INFO })
         })
         .on("error", function (error) {
           if (!error.toString().includes("-32601")) {
@@ -6058,8 +6063,8 @@ class Store {
       if (err) {
         return emitter.emit(ERROR, err);
       }
-      dispatcher.dispatch({ type: GET_DVG_INFO })
-      // return emitter.emit(WITHDRAW_VAULT_RETURNED, withdrawResult);
+      // dispatcher.dispatch({ type: GET_DVG_INFO })
+      return emitter.emit(WITHDRAW_DVG_RETURNED, withdrawResult);
     })
   }
 
@@ -6091,6 +6096,7 @@ class Store {
       })
       .on("receipt", function (receipt) {
         console.log(receipt);
+        dispatcher.dispatch({ type: GET_DVG_INFO })
       })
       .on("error", function (error) {
         if (!error.toString().includes("-32601")) {
