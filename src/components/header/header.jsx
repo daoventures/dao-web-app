@@ -17,6 +17,7 @@ import {
   HEADER_TITLE_INVEST,
   HEADER_TITLE_PORTFOLIO,
   HEADER_TITLE_SWAP,
+  HEADER_TITLE_DAOVIP
 } from "../../constants/page-constant";
 
 import UnlockModal from "../unlock/unlockModal.jsx";
@@ -40,7 +41,7 @@ const styles = (theme) => ({
     width: 'calc(100% - 240px)',
     display: 'flex',
     padding: '40px 80px 0px 80px',
-    // background: theme.themeColors.back,
+    background: theme.themeColors.back,
     zIndex: theme.zIndex.drawer - 1,
     position: "fixed",
     // left: '319px',
@@ -228,7 +229,8 @@ class Header extends Component {
       menuObj: {
         "/portfolio": HEADER_TITLE_PORTFOLIO,
         "/invest": HEADER_TITLE_INVEST,
-        "/stake/dao-mine": HEADER_TITLE_DAOMINE,
+        "/stake": HEADER_TITLE_DAOVIP,
+        "/daomine": HEADER_TITLE_DAOMINE,
         "/swap": HEADER_TITLE_SWAP,
       },
       currentTheme: store.getStore("currentTheme"),

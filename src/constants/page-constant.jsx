@@ -1,5 +1,6 @@
 // Header title on top of page
 export const HEADER_TITLE_DAOMINE = 'DAOmine';
+export const HEADER_TITLE_DAOVIP = 'DAOvip';
 export const HEADER_TITLE_INVEST = 'Invest';
 export const HEADER_TITLE_PORTFOLIO = 'Portfolio';
 export const HEADER_TITLE_SWAP = 'Swap'
