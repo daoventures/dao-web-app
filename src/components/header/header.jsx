@@ -36,9 +36,9 @@ const styles = theme => ({
   root: {
     verticalAlign: 'top',
     width: 'calc(100% - 240px)',
-    display: 'flex',
+    // display: 'flex',
     padding: '40px 80px 0px 80px',
-    // background: theme.themeColors.back,
+    background: theme.themeColors.itemBack,
     zIndex: theme.zIndex.drawer - 1,
     position: 'fixed',
     // left: '319px',
@@ -214,6 +214,13 @@ const styles = theme => ({
     height: '14px',
     transform:'rotate(180deg)'
   },
+  pathname:{
+    fontSize:'22px',
+    padding:'16px 0px 16px 11px',
+    color:theme.themeColors.contactUsText,
+    background:theme.themeColors.back,
+    borderBottom:'1px solid '+theme.themeColors.lineT
+  }
 });
 
 class Header extends Component {
@@ -436,6 +443,12 @@ class Header extends Component {
           </div>
           {!hideNav && <ToggleTheme></ToggleTheme>}
         </div>
+        {
+          hideNav?<div className={classes.pathname}>
+          {this.state.menuObj[this.props.history.location.pathname]}
+        </div>:null
+        }
+        
         { modalOpen && this.renderModal()}
       </div>
     )

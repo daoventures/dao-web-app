@@ -56,10 +56,12 @@ const styles = theme => ({
     alignItems: 'flex-end',
     paddingLeft: '320px',
     paddingRight: '80px',
+    paddingTop:'32px',
     minHeight: '800px',
     [theme.breakpoints.down('sm')]: {
       paddingLeft: '0px',
-      paddingRight: '0px'
+      paddingRight: '0px',
+      paddingTop:'40px',
     },
   },
   contentContainer: {
@@ -91,7 +93,7 @@ const styles = theme => ({
       minWidth: '900px',
     },
     [theme.breakpoints.down('sm')]: {
-      minWidth: '90%',
+      // minWidth: '90%',
       margin: 'auto',
       marginTop: '40px',
     }
@@ -457,14 +459,14 @@ const styles = theme => ({
     marginBottom: '20px',
     background: theme.themeColors.itemBack,
     [theme.breakpoints.down('sm')]: {
-      width: '95%',
-      margin: 'auto',
+      width: '96%',
+      margin: '0 auto',
       marginBottom: '20px',
     },
   },
   riskLowLabel: {
-    background: '#72C6AE',
-    borderRadius: '5px',
+    background: '#15c73e',
+    borderBottomLeftRadius: '14px',
     color: '#ffffff',
     padding: '5px 10px',
     textAlign: 'center',
@@ -475,7 +477,7 @@ const styles = theme => ({
     top: '0px'
   },
   riskMediumLabel: {
-    background: '#EC9956',
+    background: '#C77815',
     // borderRadius: '5px',
     color: '#ffffff',
     padding: '5px 10px',
@@ -485,7 +487,7 @@ const styles = theme => ({
     position: 'absolute',
     right: '0px',
     top: '0px',
-    borderBottomLeftRadius: '15px'
+    borderBottomLeftRadius: '14px'
   },
   riskExpertLabel: {
     background: '#C715A7',
@@ -518,7 +520,7 @@ const styles = theme => ({
     // display: 'flex',
     alignItems: 'center',
     [theme.breakpoints.down('sm')]: {
-      marginBottom: '5px',
+      marginBottom: '16px',
       alignItems: 'stretch',
     }
   },
@@ -584,7 +586,8 @@ const styles = theme => ({
     '&.active': {
       background: 'linear-gradient(135deg, #0B2663 0%, #1152DF 100%)',
       border: 'none',
-      color: '#ffffff'
+      color: '#ffffff',
+      padding:'0'
     },
     [theme.breakpoints.up('md')]: {
 
@@ -594,7 +597,9 @@ const styles = theme => ({
       width: '32px',
       marginRight: '10px',
       '&.active': {
-        width: '90px'
+        width:'auto',
+        minWidth: '90px',
+        padding:'0 10px'
       }
     }
   },
@@ -610,20 +615,22 @@ const styles = theme => ({
   },
   typeTabText: {
     [theme.breakpoints.up('md')]: {
+      
       display: 'inline-block'
     },
     [theme.breakpoints.down('md')]: {
       display: 'none',
       '&.active': {
-        display: 'inline-block'
+        display: 'inline-block',
+        fontSize:'12px',
       }
     }
   },
 
   // 主题块儿样式调整
   warnIcon: {
-    width: '16px',
-    height: '16px',
+    width: '20px',
+    height: '20px',
     fill: theme.themeColors.iconGray,
     marginLeft: '8px',
   },
@@ -649,17 +656,26 @@ const styles = theme => ({
   },
   accordionsummary: {
     height: '100px',
-    padding: '0px 24px'
+    padding: '0px 26px',
+    [theme.breakpoints.down('md')]: {
+      padding: '0px 10px',
+    }
   },
   assetLabel1: {
     display: 'block',
     fontSize: '18px',
-    color: theme.themeColors.textT
+    color: theme.themeColors.textT,
+    [theme.breakpoints.down('md')]: {
+      fontSize: '14px',
+    }
   },
   assetLabel2: {
     display: 'block',
     fontSize: '14px',
-    color: theme.themeColors.textP
+    color: theme.themeColors.textP,
+    [theme.breakpoints.down('md')]: {
+      fontSize: '12px',
+    }
   },
   assetIconImg: {
     height: '50px',
@@ -671,7 +687,26 @@ const styles = theme => ({
     width: '30px',
     height: '30px',
     fill: theme.themeColors.textP
-  }
+  },
+  assetLabelTextRight:{
+    display: 'block',
+    fontSize: '18px',
+    paddingLeft:'30px',
+    color: theme.themeColors.textT,
+    [theme.breakpoints.down('md')]: {
+      fontSize: '14px',
+    }
+  },
+  assetLabelTextRight1:{
+    display: 'block',
+    fontSize: '14px',
+    paddingLeft:'30px',
+    color: theme.themeColors.textP,
+    [theme.breakpoints.down('md')]: {
+      fontSize: '12px',
+    }
+  },
+ 
 });
 
 class Vault extends Component {
@@ -1007,7 +1042,7 @@ class Vault extends Component {
 
                   <Grid item sm={2} xs={4} className={classes.gridItemColumn}>
                     <Typography variant={'h5'} className={classes.assetLabel1}>{asset.name}</Typography>
-                    <Typography variant={ 'body1' } className={ classes.assetLabel2 }>{ asset.description }</Typography>
+                    <Typography variant={ 'h5' } className={ classes.assetLabel2 }>{ asset.description }</Typography>
                   </Grid>
 
                   <Grid item sm={3} xs={6} className={classes.gridItemColumn}>
@@ -1020,7 +1055,7 @@ class Vault extends Component {
                         <Typography variant={ 'body1' } className={ classes.assetLabel2 }>Yearly Growth</Typography>
                       </div>  
                       <div className={classes.showMobile}>
-                        <Typography variant={ 'h5' } className={ classes.assetLabel2 }>Yearly Growth: </Typography>
+                        <Typography variant={ 'h5' } className={classes.assetLabel2}>Yearly Growth: </Typography>
                         <Typography variant={ 'h3' } noWrap className={classes.assetLabel1}>{ (this._getAPY(asset)/1).toFixed(2) }%</Typography>
                       </div>
                     </div>   
@@ -1039,8 +1074,8 @@ class Vault extends Component {
                           <Typography variant={ 'body1' } className={ classes.assetLabel2 }>Yearly Growth</Typography>
                         </div>  
                         <div className={classes.showMobile}>
-                          <Typography variant={ 'h3' } noWrap className={classes.assetLabel1}>{ (this._getAPY(asset)/1).toFixed(2) }%</Typography>
-                          <Typography variant={ 'h5' } className={ classes.assetLabel2 }>Yearly Growth: </Typography>
+                          <Typography variant={ 'h3' } noWrap className={classes.assetLabel1,classes.assetLabelTextRight}>{ (this._getAPY(asset)/1).toFixed(2) }%</Typography>
+                          <Typography variant={ 'h5' } className={ classes.assetLabel2,classes.assetLabelTextRight1 }>Yearly Growth: </Typography>
                         </div>
                       </div>   
                   }
@@ -1065,7 +1100,7 @@ class Vault extends Component {
                           </div>
                         }
                       </Typography>
-                      <Typography variant={ 'body1' } className={ classes.assetLabel2 }>Available to deposit</Typography>
+                      <Typography variant={ 'h5' } className={ classes.assetLabel2 }>Available to deposit</Typography>
                     </div>
 
                     <div className={classes.showMobile}>
@@ -1091,8 +1126,8 @@ class Vault extends Component {
                   
                   <Grid item sm={3} xs={6} className={classes.gridItemColumn}>
                       {/* 暂时不知道取什么 */}
-                      <Typography variant={'h5'} className={classes.assetLabel1}>$ {asset.tvl}</Typography>
-                      <Typography variant={ 'body1' } className={ classes.assetLabel2 }>Total Value Locked</Typography>
+                      <Typography variant={'h5'} className={classes.assetLabel1,classes.assetLabelTextRight}>$ {asset.tvl?Number(asset.tvl).toFixed(4):'0.00'}</Typography>
+                      <Typography variant={ 'h5' } className={ classes.assetLabel2,classes.assetLabelTextRight1 }>Total Value Locked</Typography>
                   </Grid>
                 </Grid>
               </div>

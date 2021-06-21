@@ -43,16 +43,18 @@ const styles = theme => ({
     display: 'flex',
     flexDirection: 'column',
     width: '100%',
+    paddingTop:'10px',
     justifyContent: 'center',
     alignItems: 'flex-end',
     paddingLeft: '320px',
     paddingRight: '80px',
-    paddingTop: '30px',
+    paddingTop: '32px',
     paddingBottom: '30px',
     minHeight: '800px',
     [theme.breakpoints.down('sm')]: {
       paddingLeft: '0px',
-      paddingRight: '0px'
+      paddingRight: '0px',
+      paddingTop: '50px',
     }
   },
   contentContainer: {
@@ -533,9 +535,12 @@ const styles = theme => ({
     height: '62px'
   },
   noDataText: {
+    
     fontSize: '14px',
     fontWeight: '400',
-    color: '#7367F7'
+    background:'#7367F7',
+    color:'#FFFFFF',
+    
   },
   chartTopNoData: {
     height: '340px',
@@ -557,9 +562,6 @@ const styles = theme => ({
     left: '50%',
     transform: 'translate(-50%)',
     color: theme.themeColors.textP
-  },
-  noDataText: {
-    color: theme.themeColors.textT,
   },
   // refreshIcon:{
   //   width:'14px',
@@ -1072,14 +1074,14 @@ class Dashboard extends Component {
 
         </Grid>
         {flag || !this.state.loading ?
-         <HighchartsReact highcharts={Highcharts} options={options} /> : <div className={classes.chartTopNoData}>
+         <HighchartsReact highcharts={Highcharts} options={options} /> : 
+          <div className={classes.chartTopNoData}>
           <div className={classes.solidLine}></div>
           <div className={classes.solidLine}></div>
           <div className={classes.solidLine}></div>
           <div className={classes.solidLine}></div>
           <div className={classes.refresh}>
-            <span className={classes.noDataText}>No Data
-            </span>
+            <div className={classes.noDataText}>No Data</div>
           </div>
         </div>
         } 

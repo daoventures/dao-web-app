@@ -24,7 +24,7 @@ import Vaults from './components/vault';
 import Dashboard from './components/dashboard';
 import SideDrawer from './components/sideDrawer';
 import MainContainer from './components/mainContainer';
-
+import PageTitle from './components/pageTitle';
 import Stake from './components/stake/stakeComingSoon';
 import StakeDvgVip from './components/stake/stakeDvgVip';
 

@@ -37,7 +37,8 @@ export const colors = {
   lightBlue: "#2F80ED",
   topaz: "#0b8f92",
   darkGray: "rgba(43,57,84,.5)",
-  borderBlue: 'rgba(25, 101, 233, 0.5)'
+  borderBlue: 'rgba(25, 101, 233, 0.5)',
+  
 };
 
 const colorObj = {
@@ -107,7 +108,10 @@ const colorObj = {
     sliderLight:'#201D47',
     stakeTextBg:'rgba(110,103,247,1)',
     stakeTextText:'#FFFFFF',
-    myAssetsRateText:'rgba(255,255,255,.6)'
+    myAssetsRateText:'rgba(255,255,255,.6)',
+    contactUsText:'#7367F7',
+    buttonDeauflt:'#180C4B',
+    buttonActive:'#7367F7',
     // stake
 
   },
@@ -179,7 +183,10 @@ const colorObj = {
     sliderLight:'#F1F3F9',
     stakeTextBg:'rgba(110,103,247,1)',
     stakeTextText:'#FFFFFF',
-    myAssetsRateText:'rgba(0,0,0,.6)'
+    myAssetsRateText:'rgba(0,0,0,.6)',
+    contactUsText:'#000000',
+    buttonDeauflt:'#180C4B',
+    buttonActive:'rgba(115,103,247,.2)',
   }
 };
 
@@ -372,7 +379,7 @@ const iswapTheme =  {
       root: {
         border: '1px solid #d9d9d9',
         borderRadius: '10px',
-        margin: '8px 0px',
+        margin: '16px 0px 8px',
         '&:before': { //underline color when textfield is inactive
           backgroundColor: 'none',
           height: '0px'
@@ -643,7 +650,7 @@ export function getTheme (currentTheme = 'light') {
         root: {
           border: '1px solid #d9d9d9',
           borderRadius: '10px',
-          margin: '8px 0px',
+          margin: '16px 0px 8px',
           '&:before': { //underline color when textfield is inactive
             backgroundColor: 'none',
             height: '0px'
