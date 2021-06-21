@@ -339,40 +339,6 @@ class StakeWithdraw extends Component {
                             <span>Confirm Withdraw & Claim Rewards</span>
                         </Button>
                     </div>
-
-                    {/** DVG Rewards */}
-                    <div className={classes.displayInfoBox}>
-                        <Typography variant="body1" className={classes.cursor} noWrap>
-                            Pending Rewards:
-                        </Typography>
-
-                        <Typography
-                            variant="body2"
-                            className={classes.cursor}
-                            noWrap
-                        >
-                            {
-                                userInfo.pendingDVG
-                                    ? (
-                                        Math.floor(
-                                            (userInfo.pendingDVG / 10 ** 18) * 10000
-                                        ) / 10000
-                                    ).toFixed(4)
-                                    : "0.0000"
-                            }
-                            {" DVG"}
-                        </Typography>
-                    </div>
-
-                    {/** Claim Rewards Button */}
-                    <div className={classes.claimRewardsButtonBox}>
-                        <Button
-                            className={classes.withdrawalActionButton}
-                            onClick={this.onWithdrawal}
-                        >
-                            <span>Claim Rewards</span>
-                        </Button>
-                    </div>
                 </div>
             </div>
         );

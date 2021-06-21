@@ -212,6 +212,7 @@ const styles = (theme) => ({
   gridItemColumn: {
     // display: 'flex',
     alignItems: "center",
+    paddingLeft: "2px",
     [theme.breakpoints.down("sm")]: {
       marginBottom: "5px",
       alignItems: "stretch",
@@ -552,7 +553,7 @@ class Stake extends Component {
               <Grid container className={classes.itemTop}>
                 <RiskLevelLabel risk={pool.category}></RiskLevelLabel>
               </Grid>
-            
+
               <Accordion
                 className={classes.expansionPanel}
                 square
@@ -589,7 +590,7 @@ class Stake extends Component {
                       {/** Pool Title */}
                       <Grid
                         item
-                        md={4}
+                        md={3}
                         sm={2}
                         xs={4}
                         className={classes.gridItemColumn}
@@ -610,10 +611,58 @@ class Stake extends Component {
                               </Typography> */}
                       </Grid>
 
+                      {/** Pending DVG */}
+                      <Grid
+                        item
+                        sm={2}
+                        xs={6}
+                        className={classes.gridItemColumn}
+                      >
+                        <Typography
+                          variant={"h5"}
+                          style={{
+                            wordWrap: "break-word",
+                          }}
+                          className={classes.assetLabel1}
+                        >
+                          {pool.userInfo.pendingDVG ? (Number(pool.userInfo.pendingDVG) / 10 ** 18).toFixed(2) : "0.00"}
+                        </Typography>
+                        <Typography
+                          variant={"body1"}
+                          className={classes.assetLabel2}
+                        >
+                          Pending DVG
+                        </Typography>
+                      </Grid>
+
+                      {/** Staked */}
+                      <Grid
+                        item
+                        sm={1}
+                        xs={6}
+                        className={classes.gridItemColumn}
+                      >
+                        <Typography
+                          variant={"h5"}
+                          style={{
+                            wordWrap: "break-word",
+                          }}
+                          className={classes.assetLabel1}
+                        >
+                          {pool.userInfo.lpAmount ? Number(pool.userInfo.lpAmount).toFixed(2) : "0.00"}
+                        </Typography>
+                        <Typography
+                          variant={"body1"}
+                          className={classes.assetLabel2}
+                        >
+                          Staked
+                        </Typography>
+                      </Grid>
+
                       {/** APR */}
                       <Grid
                         item
-                        sm={3}
+                        sm={2}
                         xs={6}
                         className={classes.gridItemColumn}
                       >
@@ -625,7 +674,7 @@ class Stake extends Component {
                           className={classes.assetLabel1}
                         >
                           {pool.apr ? Number(pool.apr).toFixed(2) : "0.00"}
-                          { " %"}
+                          {" %"}
                         </Typography>
                         <Typography
                           variant={"body1"}
@@ -638,7 +687,7 @@ class Stake extends Component {
                       {/** TVL */}
                       <Grid
                         item
-                        sm={3}
+                        sm={2}
                         xs={6}
                         className={classes.gridItemColumn}
                       >
@@ -684,33 +733,33 @@ class Stake extends Component {
     const { classes } = this.props;
 
     const images = {
-      dvmUSDT : { filename: 'USDT', format: 'png'},
-      dvmUSDC : { filename: 'USDC', format: 'png'},
-      dvmDAI : { filename: 'DAI', format: 'png'},
-      dvmTUSD: { filename: 'TUSD', format: 'png'},
-      dvlUSDT: { filename: 'USDT', format: 'png'},
-      dvlUSDC : { filename: 'USDC', format: 'png'},
-      dvlDAI : { filename: 'DAI', format: 'png'},
-      vipDVG: { filename: 'vipDVG', format: 'png'},
-      "ETH<->DVG": {filename: 'vipDVG', format: 'png'}, // TODO: Update this once available
-      daoCDV: {filename: 'citadel', format: 'svg'}
+      dvmUSDT: { filename: 'USDT', format: 'png' },
+      dvmUSDC: { filename: 'USDC', format: 'png' },
+      dvmDAI: { filename: 'DAI', format: 'png' },
+      dvmTUSD: { filename: 'TUSD', format: 'png' },
+      dvlUSDT: { filename: 'USDT', format: 'png' },
+      dvlUSDC: { filename: 'USDC', format: 'png' },
+      dvlDAI: { filename: 'DAI', format: 'png' },
+      vipDVG: { filename: 'vipDVG', format: 'png' },
+      "ETH<->DVG": { filename: 'vipDVG', format: 'png' }, // TODO: Update this once available
+      daoCDV: { filename: 'citadel', format: 'svg' }
     }
 
     const poolImage = images[pool.name];
 
-    return poolImage 
-            ? (
-                <img
-                  alt="pool"
-                  src={require("../../assets/img_new/" +
-                    poolImage.filename +
-                    "-logo." +
-                    poolImage.format)}
-                  // height={ '50px' }
-                  className={classes.assetIconImg}
-                />
-              )
-            : null;
+    return poolImage
+      ? (
+        <img
+          alt="pool"
+          src={require("../../assets/img_new/" +
+            poolImage.filename +
+            "-logo." +
+            poolImage.format)}
+          // height={ '50px' }
+          className={classes.assetIconImg}
+        />
+      )
+      : null;
   }
 
   showHashApproval = (txHash) => {
