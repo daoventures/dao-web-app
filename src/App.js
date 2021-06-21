@@ -209,14 +209,14 @@ class App extends Component {
                 </MobileView>
               </Route>
 
-              <Route path="/stake/vip-dvg">
+              <Route path="/stake">
                 <Header />
                 <SideDrawer />
                 <MainContainer />
                 <StakeDvgVip />
               </Route>
 
-              <Route path="/stake/dao-mine">
+              <Route path="/daomine">
                 <Header />
                 <SideDrawer />
                 <MainContainer />

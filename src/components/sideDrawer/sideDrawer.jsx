@@ -302,6 +302,7 @@ class SideDrawer extends Component {
         // { key: PORTFOLIO, name:"portfolio", path: PORTFOLIO_PATH, icon: "#iconmenu_porftfolio_nor_day" },
         { key: INVEST, name: "invest", path: INVEST_PATH, icon: "#iconmenu_porftfolio_normal_nightbeifen1" },
         { key: "GROW", name: "stake", path: STAKE_PATH, icon: "#iconmenu_stake_normal_night" },
+        { key: "DAOmine", name: "daomine", path: "/daomine", icon: "#iconmenu_stake_normal_night" },
         { key: SWAP, name: "swap", path: SWAP_PATH, icon: "#iconmenu_features_nor_night" },
       ],
       open:false
@@ -565,7 +566,7 @@ class SideDrawer extends Component {
 
         {/** Side Navigation Bar */}
         <List>
-          {/* {
+          {
             (listItem && listItem.length > 0)
               ?
               listItem.map(item => {
@@ -586,75 +587,8 @@ class SideDrawer extends Component {
                 );
               })
               : null
-          } */}
+          }
 
-          {/**
-             * <ListItem button key={'PORTFOLIO'} className={this.linkSelected('/portfolio') ? classes.selected : classes.menuItem} onClick={() => { this.navInApp('portfolio') }}>
-                <ListItemIcon>
-                  <svg className={(this.linkSelected('/portfolio')) ? classes.selectedSvg : classes.menuSvg} aria-hidden="true">
-                    <use xlinkHref="#iconmenu_porftfolio_nor_day"></use>
-                  </svg>
-                </ListItemIcon>
-                <ListItemText primary={'PORTFOLIO'} />
-              </ListItem>
-           */}
-          
-
-          <ListItem button key={'INVEST'} className={this.linkSelected('/invest') ? classes.selected : classes.menuItem} onClick={() => { this.navInApp('invest') }}>
-            <ListItemIcon>
-              {/* {this.renderIcon('line-chart', '/invest')} */}
-              <svg className={(this.linkSelected('/invest')) ? classes.selectedSvg : classes.menuSvg} aria-hidden="true">
-                <use xlinkHref="#iconmenu_porftfolio_normal_nightbeifen1"></use>
-              </svg>
-            </ListItemIcon>
-            <ListItemText primary={'INVEST'} />
-          </ListItem>
-
-          <ListItem button key={'GROW'} className={this.linkSelected('/stake') ? classes.selected : classes.menuItem} onClick={() => { this.navInApp('stake') }}>
-            <ListItemIcon>
-              
-              <svg className={(this.linkSelected('/stake')) ? classes.selectedSvg : classes.menuSvg} aria-hidden="true">
-                <use xlinkHref="#iconmenu_stake_normal_night"></use>
-              </svg>
-            </ListItemIcon>
-            <ListItemText primary={'GROW'} />
-          </ListItem>
-          {/* <ListItem button onClick={handleClick}>
-            <ListItemIcon>
-              <InboxIcon />
-            </ListItemIcon>
-            <ListItemText primary="Inbox" />
-            {this.state.open ? <ExpandLess /> : <ExpandMore />}
-          </ListItem>
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding>
-              <ListItem button className={classes.nested}>
-                <ListItemIcon>
-                  <StarBorder />
-                </ListItemIcon>
-                <ListItemText primary="Starred" />
-              </ListItem>
-            </List>
-          </Collapse> */}
-
-          <ListItem button key={'SWAP'} className={this.linkSelected('/swap') ? classes.selected : classes.menuItem} onClick={() => { this.navInApp('swap') }}>
-            <ListItemIcon>
-              {/* {this.renderIcon('pie-chart', '/portfolio')} */}
-              <svg className={(this.linkSelected('/swap')) ? classes.selectedSvg : classes.menuSvg} aria-hidden="true">
-                <use xlinkHref="#iconmenu_features_nor_night"></use>
-              </svg>
-            </ListItemIcon>
-            <ListItemText primary={'SWAP'} />
-          </ListItem>
-
-
-          {/* <div className={classes.selectNetwork}>
-          <div className={classes.selectNetworkTitle}>Select network</div>
-          <div className={classes.netWork}>
-                <div className={classes.changeWallet} onClick={() => { this.changeWallet() }}>ETH Mainnet</div>
-                <div className={classes.changeWallet} onClick={() => { this.disConnect() }}>BSC Mainnet</div>
-          </div>
-        </div> */}
         </List>
 
         {/** Footer */}
@@ -690,7 +624,7 @@ class SideDrawer extends Component {
        
          {/** Side Navigation Bar */}
          <List>
-          {/* {
+          {
             (listItem && listItem.length > 0)
               ?
               listItem.map(item => {
@@ -710,54 +644,7 @@ class SideDrawer extends Component {
                 );
               })
               : null
-          } */}
-           <ListItem button key={'INVEST'} className={this.linkSelected('/invest') ? classes.selected : classes.menuItem} onClick={() => { this.navInApp('invest') }}>
-            <ListItemIcon>
-              {/* {this.renderIcon('line-chart', '/invest')} */}
-              <svg className={(this.linkSelected('/invest')) ? classes.selectedSvg : classes.menuSvg} aria-hidden="true">
-                <use xlinkHref="#iconmenu_porftfolio_normal_nightbeifen1"></use>
-              </svg>
-            </ListItemIcon>
-            <ListItemText primary={'INVEST'} />
-          </ListItem>
-
-          <ListItem button key={'GROW'} className={this.linkSelected('/stake') ? classes.selected : classes.menuItem} onClick={() => { this.navInApp('stake') }}>
-            <ListItemIcon>
-              
-              <svg className={(this.linkSelected('/stake')) ? classes.selectedSvg : classes.menuSvg} aria-hidden="true">
-                <use xlinkHref="#iconmenu_stake_normal_night"></use>
-              </svg>
-            </ListItemIcon>
-            <ListItemText primary={'GROW'} />
-          </ListItem>
-          {/* <ListItem button onClick={handleClick}>
-            <ListItemIcon>
-              <InboxIcon />
-            </ListItemIcon>
-            <ListItemText primary="Inbox" />
-            {this.state.open ? <ExpandLess /> : <ExpandMore />}
-          </ListItem>
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding>
-              <ListItem button className={classes.nested}>
-                <ListItemIcon>
-                  <StarBorder />
-                </ListItemIcon>
-                <ListItemText primary="Starred" />
-              </ListItem>
-            </List>
-          </Collapse> */}
-
-          <ListItem button key={'SWAP'} className={this.linkSelected('/swap') ? classes.selected : classes.menuItem} onClick={() => { this.navInApp('swap') }}>
-            <ListItemIcon>
-              {/* {this.renderIcon('pie-chart', '/portfolio')} */}
-              <svg className={(this.linkSelected('/swap')) ? classes.selectedSvg : classes.menuSvg} aria-hidden="true">
-                <use xlinkHref="#iconmenu_features_nor_night"></use>
-              </svg>
-            </ListItemIcon>
-            <ListItemText primary={'SWAP'} />
-          </ListItem>
-
+          }
         </List>
 
         {/* *Footer */}
