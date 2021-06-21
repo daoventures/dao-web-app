@@ -36,11 +36,11 @@ const networkObj = {
 
 const styles = (theme) => ({
   root: {
-    verticalAlign: "top",
-    width: "calc(100% - 240px)",
-    display: "flex",
-    padding: "40px 80px 0px 80px",
-    background: theme.themeColors.back,
+    verticalAlign: 'top',
+    width: 'calc(100% - 240px)',
+    display: 'flex',
+    padding: '40px 80px 0px 80px',
+    // background: theme.themeColors.back,
     zIndex: theme.zIndex.drawer - 1,
     position: "fixed",
     // left: '319px',
@@ -57,15 +57,16 @@ const styles = (theme) => ({
     borderBottomWidth: "1px",
     borderBottomStyle: "solid",
     borderColor: theme.themeColors.lineT,
-    borderTop: "none",
-    width: "100%",
-    display: "flex",
-    padding: "15px 0px",
-    alignItems: "center",
-    justifyContent: "center",
-    [theme.breakpoints.down("sm")]: {
-      justifyContent: "space-between",
-      padding: "15px",
+    borderTop: 'none',
+    width: '100%',
+    display: 'flex',
+    padding: '15px 0px',
+    alignItems: 'center',
+    justifyContent: 'center',
+    [theme.breakpoints.down('sm')]: {
+      justifyContent: 'space-between',
+      padding: '15px',
+      background:theme.themeColors.itemBack
     },
   },
   icon: {
@@ -227,7 +228,7 @@ class Header extends Component {
       menuObj: {
         "/portfolio": HEADER_TITLE_PORTFOLIO,
         "/invest": HEADER_TITLE_INVEST,
-        "/stake": HEADER_TITLE_DAOMINE,
+        "/stake/dao-mine": HEADER_TITLE_DAOMINE,
         "/swap": HEADER_TITLE_SWAP,
       },
       currentTheme: store.getStore("currentTheme"),
@@ -412,6 +413,7 @@ class Header extends Component {
             {/*** Page Header Title */}
             {!hideNav && (
               <span>
+                {console.log(this.props.history.location)}
                 {this.state.menuObj[this.props.history.location.pathname]}
               </span>
             )}

@@ -76,6 +76,7 @@
     "react-app-polyfill": "^1.0.6",
     "react-custom-scrollbars": "^4.2.1",
     "react-dev-utils": "^10.2.1",
+    "react-device-detect": "^1.17.0",
     "react-dom": "^16.13.1",
     "react-i18next": "^9.0.10",
     "react-router-dom": "^5.2.0",
@@ -97,7 +98,7 @@
   },
   "scripts": {
     "start": "node scripts/start.js",
-    "build": "NODE_OPTIONS=--max_old_space_size=4096 node scripts/build.js",
+    "build": "NODE_OPTIONS=--max_old_space_size=8192 node scripts/build.js",
     "test": "node scripts/test.js"
   },
   "eslintConfig": {

@@ -73,7 +73,15 @@ import {
   DEPOSIT_DAOMINE_RETURNED_COMPLETED,
   WITHDRAW_DAOMINE,
   WITHDRAW_DAOMINE_RETURNED,
-  WITHDRAW_DAOMINE_RETURNED_COMPLETED
+  WITHDRAW_DAOMINE_RETURNED_COMPLETED,
+  GET_DVG_INFO,//获取DVG信息
+  GET_DVG_BALANCE_SUCCESS,//获取DVG成功
+  DEPOSIT_XDVG,//充值xdvg
+  GET_XDVG_BALANCE_SUCCESS,//获取xdvg余额
+  GET_XDVG_BALANCE,//获取xdvg余额
+  WIDTHDRAW_XDVG,//提现xdvg
+  GET_DVG_APR,//获取dvgApr
+  GET_XDVG_APR_SUCCESS,
 } from "../constants";
 import Web3 from "web3";
 
@@ -100,6 +108,7 @@ class Store {
       aprs: this._getDefaultValues().aprs,
       assets: this._getDefaultValues().assets,
       vaultAssets: this._getDefaultValues().vaultAssets,
+      dvg: this._getDefaultValues().dvg,
       vaultApiInfo: {},
       totalValue: "",
       usdPrices: null,
@@ -287,7 +296,8 @@ class Store {
       ethBalance: 0,
       sCrvBalance: 0,
       openDrawer: false,
-      stakePools: []
+      stakePools: [],
+      dvgApr:''
     };
 
     dispatcher.register(
@@ -383,6 +393,17 @@ class Store {
             break;
           case WITHDRAW_DAOMINE:
             this.withdrawDAOmine(payload);
+          case GET_DVG_INFO:
+            this.getDvgbalance(payload);
+            break;
+          case DEPOSIT_XDVG:
+            this.depositXdvg(payload);
+            break;
+          case WIDTHDRAW_XDVG:
+            this.withdrawXdvg(payload);
+            break;
+          case GET_DVG_APR:
+          this.getDvgApr(payload);
             break;
           default: {
           }
@@ -443,13 +464,13 @@ class Store {
           depositAll: true,
           withdraw: true,
           withdrawAll: true,
-          lastMeasurement: 25098423,
+          lastMeasurement: 12586420,
           measurement: 1e18,
           price_id: ["tether", "usd-coin", "dai"],
           priceInUSD: [0, 0, 0],
           strategyName: "DAO Citadel: USDT USDC DAI",
           strategy: "DAO Citadel",
-          strategyAddress: "0x4996b12560b9a4a85dd437a3e8ff489335dcffa7",
+          strategyAddress: "0x8a00046ab28051a952e64a886cd8961ca90a59bd",
           strategyContractABI: config.strategyDAOCDVContractABI,
           historicalPriceId: "daoCDV_price",
           logoFormat: "svg",
@@ -469,6 +490,7 @@ class Store {
           symbol: "USDT",
           description: "Tether USD",
           vaultSymbol: "dvmUSDT",
+          vaultAddress: "0x2f08119c6f07c006695e079aafc638b8789faf18",
           erc20address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
           vaultContractAddress: "0x4F0C1c9bA6B9CCd0BEd6166e86b672ac8EE621F7",
           vaultContractABI: config.vaultUSDTContractABI,
@@ -502,6 +524,7 @@ class Store {
           symbol: "DAI",
           description: "DAI Stablecoin",
           vaultSymbol: "dvmDAI",
+          vaultAddress: "0xacd43e627e64355f1861cec6d3a6688b31a6f952",
           erc20address: "0x6b175474e89094c44da98b954eedeac495271d0f",
           vaultContractAddress: "0x2bFc2Da293C911e5FfeC4D2A2946A599Bc4Ae770",
           vaultContractABI: config.vaultDAIContractABI,
@@ -536,6 +559,7 @@ class Store {
           symbol: "TUSD",
           description: "TrueUSD",
           vaultSymbol: "dvmTUSD",
+          vaultAddress: "0x37d19d1c4e1fa9dc47bd1ea12f742a0887eda74a",
           erc20address: "0x0000000000085d4780b73119b644ae5ecd22b376",
           vaultContractAddress: "0x2C8de02aD4312069355B94Fb936EFE6CFE0C8FF6",
           vaultContractABI: config.vaultTUSDContractABI,
@@ -569,6 +593,7 @@ class Store {
           symbol: "USDC",
           description: "USDC Coin",
           vaultSymbol: "dvmUSDC",
+          vaultAddress: "0x597ad1e0c13bfe8025993d9e79c69e1c0233522e",
           erc20address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
           vaultContractAddress: "0x9f0230FbDC0379E5FefAcca89bE03A42Fec5fb6E",
           vaultContractABI: config.vaultUSDCContractABI,
@@ -723,7 +748,7 @@ class Store {
           depositAll: true,
           withdraw: true,
           withdrawAll: true,
-          lastMeasurement: 25098423,
+          lastMeasurement: 25336169,
           measurement: 1e18,
           price_id: ["tether", "usd-coin", "dai"],
           priceInUSD: [0, 0, 0],
@@ -749,6 +774,7 @@ class Store {
           symbol: "USDT",
           description: "Tether USD",
           vaultSymbol: "dvmUSDT",
+          vaultAddress: "0xa5c53c76729e92630a2a3c549215110a330c902d",
           erc20address: "0x07de306ff27a2b630b1141956844eb1552b956b5",
           vaultContractAddress: "0x6B150E9BD70E216775c8b73270E64e870a3110c1",
           vaultContractABI: config.vaultUSDTContractABI,
@@ -782,6 +808,7 @@ class Store {
           symbol: "DAI",
           description: "DAI Stablecoin",
           vaultSymbol: "dvmDAI",
+          vaultAddress: "0x5c2eea0a960cc1f604bf3c35a52ca2273f12e67e",
           erc20address: "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
           vaultContractAddress: "0x2428bFD238a3632552B343297c504F60283009eD",
           vaultContractABI: config.vaultDAIContractABI,
@@ -816,6 +843,7 @@ class Store {
           symbol: "TUSD",
           description: "TrueUSD",
           vaultSymbol: "dvmTUSD",
+          vaultAddress: "0xa8564f8d255c33175d4882e55f1a6d19e7a7d351",
           erc20address: "0xf0a112a9da3cae4668270729c3d5917b6cb79564",
           vaultContractAddress: "0xEcCb98c36bfc8c49c6065d1cD90bcf1c6F02D4AD",
           vaultContractABI: config.vaultTUSDContractABI,
@@ -849,6 +877,7 @@ class Store {
           symbol: "USDC",
           description: "USDC Coin",
           vaultSymbol: "dvmUSDC",
+          vaultAddress: "0xabdb489ded91b6646fadc8eeb0ca82ea1d526182",
           erc20address: "0xb7a4f3e9097c08da09517b5ab877f7a917224ede",
           vaultContractAddress: "0x6E15e283dc430eca010Ade8b11b5B377902d6e56",
           vaultContractABI: config.vaultUSDCContractABI,
@@ -1587,6 +1616,26 @@ class Store {
         portfolio_growth_eth_weekly_perc: 0,
         portfolio_growth_eth_yearly_perc: 0,
       },
+      dvg: [
+        {
+          id: 'xDVG',
+          name: 'VIPDVG',
+          symbol: 'xDVG',
+          decimals: 18,
+          erc20address: '0x3aa8e8B6D3562a1E7aCB0dddD02b27896C00c424',
+          abi: config.xDvgAbi,
+          balance: 1
+        },
+        {
+          id: 'DVG',
+          name: 'DVGToken',
+          symbol: 'DVG',
+          decimals: 18,
+          erc20address: '0xea9726eFc9831EF0499fD4Db4Ab143F15a797673',
+          abi: config.DvgAbi,
+          balance: 0
+        }
+      ]
     };
   };
 
@@ -1794,6 +1843,8 @@ class Store {
         .call({ from: account.address });
 
       const ethAllowance = web3.utils.fromWei(allowance, "ether");
+
+      console.log(allowance, amount);
       if (parseFloat(ethAllowance) < parseFloat(amount)) {
         /*
           code to accomodate for "assert _value == 0 or self.allowances[msg.sender][_spender] == 0" in contract
@@ -2384,7 +2435,7 @@ class Store {
         callback(null, parseFloat(balance));
       } catch (ex) {
         console.log(ex);
-        return callback(ex);
+        // return callback(ex);
       }
     }
   };
@@ -3619,11 +3670,14 @@ class Store {
           if (typeof stats.tokenAddress == "string") {
             return (
               stats.tokenAddress.toLowerCase() ===
-              asset.erc20address.toLowerCase()
+                asset.erc20address.toLowerCase() &&
+              stats.address.toLowerCase() === asset.vaultAddress.toLowerCase()
             );
           } else if (Array.isArray(stats.tokenAddress)) {
             return stats.tokenAddress.find(
-              (t) => t.toLowerCase() === asset.erc20address.toLowerCase()
+              (t) =>
+                t.toLowerCase() === asset.erc20address.toLowerCase() &&
+                stats.address.toLowerCase() === asset.vaultAddress.toLowerCase()
             );
           }
         });
@@ -3707,13 +3761,14 @@ class Store {
       asset.strategyContractABI,
       strategyAddress
     );
-    let pool = await strategyContract.methods
-      .pool()
-      .call({ from: account.address });
+    let balance = '';
+
+    let pool = await strategyContract.methods.pool().call({ from: account.address });
     let decimals = await strategyContract.methods
       .decimals()
       .call({ from: account.address });
-    let balance = parseFloat(pool) / 10 ** parseInt(decimals);
+    balance = parseFloat(pool) / 10 ** parseInt(decimals);
+    // }
     callback(null, parseFloat(balance));
   };
 
@@ -3946,7 +4001,7 @@ class Store {
       .call({ from: account.address });
 
     if (asset.strategyType === "yearn") {
-      this._checkApproval(
+      await this._checkApproval(
         asset,
         account,
         earnAmount + vaultAmount,
@@ -3960,31 +4015,31 @@ class Store {
           }
           if (approvalResult) {
             emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
-            this._callDepositContract(
-              asset,
-              account,
-              earnAmount,
-              vaultAmount,
-              (err, txnHash, depositResult) => {
-                if (err) {
-                  return emitter.emit(ERROR, err);
-                }
-                if (txnHash) {
-                  return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-                }
-                if (depositResult) {
-                  return emitter.emit(
-                    DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                    depositResult.transactionHash
-                  );
-                }
-              }
+          }
+        }
+      );
+      await this._callDepositContract(
+        asset,
+        account,
+        earnAmount,
+        vaultAmount,
+        (err, txnHash, depositResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+          }
+          if (depositResult) {
+            return emitter.emit(
+              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+              depositResult.transactionHash
             );
           }
         }
       );
     } else if (asset.strategyType === "compound") {
-      this._checkApproval(
+      await this._checkApproval(
         asset,
         account,
         amount,
@@ -3998,30 +4053,30 @@ class Store {
           }
           if (approvalResult) {
             emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
-            this._callDepositAmountContract(
-              asset,
-              account,
-              amount,
-              (err, txnHash, depositResult) => {
-                if (err) {
-                  return emitter.emit(ERROR, err);
-                }
-                if (txnHash) {
-                  return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-                }
-                if (depositResult) {
-                  return emitter.emit(
-                    DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                    depositResult.transactionHash
-                  );
-                }
-              }
+          }
+        }
+      );
+      await this._callDepositAmountContract(
+        asset,
+        account,
+        amount,
+        (err, txnHash, depositResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+          }
+          if (depositResult) {
+            return emitter.emit(
+              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+              depositResult.transactionHash
             );
           }
         }
       );
     } else if (asset.strategyType === "citadel") {
-      this._checkApprovalCitadel(
+      await this._checkApprovalCitadel(
         asset,
         account,
         amount,
@@ -4036,25 +4091,25 @@ class Store {
           }
           if (approvalResult) {
             emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
-            this._callDepositAmountContractCitadel(
-              asset,
-              account,
-              amount,
-              tokenIndex,
-              (err, txnHash, depositResult) => {
-                if (err) {
-                  return emitter.emit(ERROR, err);
-                }
-                if (txnHash) {
-                  return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-                }
-                if (depositResult) {
-                  return emitter.emit(
-                    DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                    depositResult.transactionHash
-                  );
-                }
-              }
+          }
+        }
+      );
+      await this._callDepositAmountContractCitadel(
+        asset,
+        account,
+        amount,
+        tokenIndex,
+        (err, txnHash, depositResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+          }
+          if (depositResult) {
+            return emitter.emit(
+              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+              depositResult.transactionHash
             );
           }
         }
@@ -4205,6 +4260,10 @@ class Store {
     let decimals = await erc20Contract.methods.decimals().call();
 
     var amountToSend = web3.utils.toBN(amount * 10 ** decimals).toString();
+
+    var amountToSend = web3.utils
+      .toBN((amount * 10 ** decimals).toString())
+      .toString();
 
     vaultContract.methods
       .deposit(amountToSend, tokenIndex)
@@ -4367,102 +4426,120 @@ class Store {
     );
 
     if (asset.strategyType === "yearn") {
-      this._checkApproval(
+      await this._checkApproval(
         asset,
         account,
-        asset.balance,
+        amount,
         asset.vaultContractAddress,
-        (err) => {
+        (err, txnHash, approvalResult) => {
           if (err) {
             return emitter.emit(ERROR, err);
           }
+          if (txnHash) {
+            return emitter.emit(APPROVE_TRANSACTING, txnHash);
+          }
+          if (approvalResult) {
+            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
+          }
+        }
+      );
 
-          this._callDepositContract(
-            asset,
-            account,
-            earnAmount,
-            vaultAmount,
-            (err, txnHash, depositResult) => {
-              if (err) {
-                return emitter.emit(ERROR, err);
-              }
-              if (txnHash) {
-                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-              }
-              if (depositResult) {
-                return emitter.emit(
-                  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                  depositResult.transactionHash
-                );
-              }
-            }
-          );
+      await this._callDepositContract(
+        asset,
+        account,
+        earnAmount,
+        vaultAmount,
+        (err, txnHash, depositResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+          }
+          if (depositResult) {
+            return emitter.emit(
+              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+              depositResult.transactionHash
+            );
+          }
         }
       );
     } else if (asset.strategyType === "compound") {
-      this._checkApproval(
+      await this._checkApproval(
         asset,
         account,
-        asset.balance.toString(),
+        amount,
         asset.vaultContractAddress,
-        (err) => {
+        (err, txnHash, approvalResult) => {
           if (err) {
             return emitter.emit(ERROR, err);
           }
+          if (txnHash) {
+            return emitter.emit(APPROVE_TRANSACTING, txnHash);
+          }
+          if (approvalResult) {
+            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
+          }
+        }
+      );
 
-          this._callDepositAmountContract(
-            asset,
-            account,
-            asset.balance.toString(),
-            (err, txnHash, depositResult) => {
-              if (err) {
-                return emitter.emit(ERROR, err);
-              }
-              if (txnHash) {
-                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-              }
-              if (depositResult) {
-                return emitter.emit(
-                  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                  depositResult.transactionHash
-                );
-              }
-            }
-          );
+      await this._callDepositAmountContract(
+        asset,
+        account,
+        amount,
+        (err, txnHash, depositResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+          }
+          if (depositResult) {
+            return emitter.emit(
+              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+              depositResult.transactionHash
+            );
+          }
         }
       );
     } else if (asset.strategyType === "citadel") {
-      this._checkApprovalCitadel(
+      await this._checkApprovalCitadel(
         asset,
         account,
-        asset.balance.toString(),
+        amount,
         asset.vaultContractAddress,
         tokenIndex,
-        (err) => {
+        (err, txnHash, approvalResult) => {
           if (err) {
             return emitter.emit(ERROR, err);
           }
+          if (txnHash) {
+            return emitter.emit(APPROVE_TRANSACTING, txnHash);
+          }
+          if (approvalResult) {
+            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
+          }
+        }
+      );
 
-          this._callDepositAmountContractCitadel(
-            asset,
-            account,
-            asset.balance.toString(),
-            tokenIndex,
-            (err, txnHash, depositResult) => {
-              if (err) {
-                return emitter.emit(ERROR, err);
-              }
-              if (txnHash) {
-                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-              }
-              if (depositResult) {
-                return emitter.emit(
-                  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                  depositResult.transactionHash
-                );
-              }
-            }
-          );
+      await this._callDepositAmountContractCitadel(
+        asset,
+        account,
+        amount,
+        tokenIndex,
+        (err, txnHash, depositResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+          }
+          if (depositResult) {
+            return emitter.emit(
+              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+              depositResult.transactionHash
+            );
+          }
         }
       );
     }
@@ -5498,11 +5575,11 @@ class Store {
 
     if (withdawAmountInToken > balance) {
       alert(
-        "The vault currently does not have sufficient token for your withdrawal. Please try a smaller amount or a different token."
+        "Due to insufficient liquidity of the desired token in vault for withdrawal, gas fees may be very high. Are you sure to proceed?"
       );
-      return false;
+      // return false;
     }
-    return true;
+    // return true;
   };
 
   // TODO: REFACTOR: Currently all 3 types of vaults use this
@@ -5629,54 +5706,54 @@ class Store {
       );
 
       // Soft Check for sufficient liquidity
-      if (
-        await this._isSufficientLiquidityCitadel(
-          asset,
-          citadelContract,
-          amount,
-          tokenIndex
-        )
-      ) {
-        await vaultContract.methods
-          .withdraw(amount, tokenIndex)
-          .send({
-            from: account.address,
-            gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-          })
-          .on("transactionHash", function (txnHash) {
-            console.log(txnHash);
-            return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
-            // callback(null, txnHash, null);
-          })
-          .on("receipt", function (receipt) {
-            console.log("Reciept", receipt);
-            emitter.emit(
-              WITHDRAW_VAULT_RETURNED_COMPLETED,
-              receipt.transactionHash
-            );
-            // callback(null, null, receipt);
-          })
-          .on("error", function (error) {
-            if (!error.toString().includes("-32601")) {
-              if (error.message) {
-                emitter.emit(ERROR, error);
-                // return callback(error.message);
-              }
-              // callback(error, null, null);
+      // if (
+      await this._isSufficientLiquidityCitadel(
+        asset,
+        citadelContract,
+        amount,
+        tokenIndex
+      );
+      // ) {
+      await vaultContract.methods
+        .withdraw(amount, tokenIndex)
+        .send({
+          from: account.address,
+          gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+        })
+        .on("transactionHash", function (txnHash) {
+          console.log(txnHash);
+          return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
+          // callback(null, txnHash, null);
+        })
+        .on("receipt", function (receipt) {
+          console.log("Reciept", receipt);
+          emitter.emit(
+            WITHDRAW_VAULT_RETURNED_COMPLETED,
+            receipt.transactionHash
+          );
+          // callback(null, null, receipt);
+        })
+        .on("error", function (error) {
+          if (!error.toString().includes("-32601")) {
+            if (error.message) {
+              emitter.emit(ERROR, error);
+              // return callback(error.message);
             }
-          })
-          .catch((error) => {
-            if (!error.toString().includes("-32601")) {
-              if (error.message) {
-                // return callback(error.message);
-                emitter.emit(ERROR, error);
-              }
-              // callback(error, null, null);
+            // callback(error, null, null);
+          }
+        })
+        .catch((error) => {
+          if (!error.toString().includes("-32601")) {
+            if (error.message) {
+              // return callback(error.message);
+              emitter.emit(ERROR, error);
             }
-          });
-      } else {
-        return emitter.emit(WITHDRAW_BOTH_VAULT_FAIL_RETURNED);
-      }
+            // callback(error, null, null);
+          }
+        });
+      // } else {
+      //   return emitter.emit(WITHDRAW_BOTH_VAULT_FAIL_RETURNED);
+      // }
     }
   };
 
@@ -6234,7 +6311,270 @@ class Store {
       emitter.emit(ERROR, err);
     }  
   }
+
+  //stake开始
+  //获取vipdvg
+  getDvgbalance = async () => {
+    const network = store.getStore('network')
+    const account = store.getStore('account')
+    const assets = this._getDefaultValues(network).dvg
+    if (!account || !account.address) {
+      return false
+    }
+    const web3 = await this._getWeb3Provider()
+    if (!web3) {
+      return null
+    }
+    async.map(assets, (asset, callback) => {
+      async.parallel([
+        (callbackInner) => { this._getERC20Balance(web3, asset, account, callbackInner) },
+      ], (err, data) => {
+        if (err) {
+          return callback(err)
+        }
+        asset.balance = data[0];
+        callback(null, asset)
+      })
+    }, (err, assets) => {
+      if (err) {
+        console.log(err)
+        return emitter.emit(ERROR, err)
+      }
+      console.log(assets,'assets##');
+      store.setStore({ dvg: assets })
+      return emitter.emit(GET_DVG_BALANCE_SUCCESS, assets)
+    })
+  }
+  //stake 充值dvg
+  depositXdvg = async (payload) => {
+    const account = store.getStore("account");
+
+    const { asset, amount } =
+      payload.content;
+    //asset 是dvg
+    this._callDepositDvg(asset, amount, (err, withdrawResult) => {
+      if (err) {
+        return emitter.emit(ERROR, err);
+      }
+      dispatcher.dispatch({ type: GET_DVG_INFO })
+      // return emitter.emit(WITHDRAW_VAULT_RETURNED, withdrawResult);
+    })
+
+  }
+  _callDepositDvg = async (asset, amount, callback) => {
+    const account = this.getStore('account');
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      return null;
+    }
+    //创建dvg合约对象
+    const dvgContract = new web3.eth.Contract(
+      asset.abi,
+      asset.erc20address
+    );
+    //判断dvg质押金额是否大于dvg授权数量
+    let xdvg = this.getStore('dvg')[0];
+    //创建xdvg合约对象
+    const xDVGCOntract = new web3.eth.Contract(
+      xdvg.abi,
+      xdvg.erc20address
+    );
+    //查询xdvg授权数量
+    const allowance = await dvgContract.methods
+      .allowance(account.address, xdvg.erc20address)
+      .call({ from: account.address });
+    console.log(allowance, 'allowance###5552');
+    //xdvg授权数量小于金额的话 需要重新授权
+    if (parseFloat(amount) > parseFloat(allowance)) {
+      let _amount = web3.utils.toWei(amount, "ether");
+
+      this._callDvgApproval(account, amount, (err) => {
+        if (err) {
+          return emitter.emit(ERROR, err);
+        }
+        xDVGCOntract.methods
+          .deposit(_amount)
+          .send({
+            from: account.address,
+          })
+          .on("transactionHash", function (hash) {
+            console.log(hash, 'hash###');
+            callback(null, hash);
+          })
+          .on("confirmation", function (confirmationNumber, receipt) {
+            console.log(confirmationNumber, receipt);
+          })
+          .on("receipt", function (receipt) {
+            console.log(receipt);
+          })
+          .on("error", function (error) {
+            if (!error.toString().includes("-32601")) {
+              if (error.message) {
+                return callback(error.message);
+              }
+              callback(error);
+            }
+          })
+          .catch((error) => {
+            if (!error.toString().includes("-32601")) {
+              if (error.message) {
+                return callback(error.message);
+              }
+              callback(error);
+            }
+          })
+      })
+    } else {
+      let _amount = web3.utils.toWei(amount, "ether");
+      console.log(_amount,'_amount5612');
+      xDVGCOntract.methods
+        .deposit(_amount)
+        .send({
+          from: account.address,
+        })
+        .on("transactionHash", function (hash) {
+          console.log(hash, 'hash###');
+          callback(null, hash);
+        })
+        .on("confirmation", function (confirmationNumber, receipt) {
+          console.log(confirmationNumber, receipt);
+        })
+        .on("receipt", function (receipt) {
+          console.log(receipt);
+        })
+        .on("error", function (error) {
+          if (!error.toString().includes("-32601")) {
+            if (error.message) {
+              return callback(error.message);
+            }
+            callback(error);
+          }
+        })
+        .catch((error) => {
+          if (!error.toString().includes("-32601")) {
+            if (error.message) {
+              return callback(error.message);
+            }
+            callback(error);
+          }
+        })
+    }
+  }
+
+  _callDvgApproval = async (account, amount, callback) => {
+    const web3 = new Web3(store.getStore("web3context").library.provider);
+    let asset = store.getStore('dvg')[1];//dvg
+    let xdvg = store.getStore('dvg')[0];//xdvg
+    let dvgContract = new web3.eth.Contract(
+      asset.abi,
+      asset.erc20address
+    );
+    dvgContract.methods
+      .approve(xdvg.erc20address, web3.utils.toWei("999999999999", "ether"))
+      .send({
+        from: account.address,
+      })
+      .on("transactionHash", function (hash) {
+        //success...
+        callback();
+      })
+      .on("error", function (error) {
+        console.log('5682');
+        if (!error.toString().includes("-32601")) {
+          if (error.message) {
+            return callback(error.message);
+          }
+          callback(error);
+        }
+      });
+  };
+
+  //unstake 提现dvg
+  withdrawXdvg = async (payload) => {
+    const account = store.getStore("account");
+    const { asset, amount } =
+      payload.content;
+    //asset 是dvg
+    this._callWithdrawXdvg(asset, amount, (err, withdrawResult) => {
+      if (err) {
+        return emitter.emit(ERROR, err);
+      }
+      dispatcher.dispatch({ type: GET_DVG_INFO })
+      // return emitter.emit(WITHDRAW_VAULT_RETURNED, withdrawResult);
+    })
+  }
+
+  _callWithdrawXdvg = async (asset, amount, callback) => {
+    const account = this.getStore('account');
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      return null;
+    }
+    let xdvg = this.getStore('dvg')[0];
+    //创建xdvg合约对象
+    const xDVGCOntract = new web3.eth.Contract(
+      xdvg.abi,
+      xdvg.erc20address
+    );
+    let _amount = web3.utils.toWei(amount, "ether");
+    console.log(_amount,'_amount5702');
+    xDVGCOntract.methods
+      .withdraw(_amount)
+      .send({
+        from: account.address,
+      })
+      .on("transactionHash", function (hash) {
+        console.log(hash, 'hash###');
+        callback(null, hash);
+      })
+      .on("confirmation", function (confirmationNumber, receipt) {
+        console.log(confirmationNumber, receipt);
+      })
+      .on("receipt", function (receipt) {
+        console.log(receipt);
+      })
+      .on("error", function (error) {
+        if (!error.toString().includes("-32601")) {
+          if (error.message) {
+            return callback(error.message);
+          }
+          callback(error);
+        }
+      })
+      .catch((error) => {
+        if (!error.toString().includes("-32601")) {
+          if (error.message) {
+            return callback(error.message);
+          }
+          callback(error);
+        }
+      })
+
+  }
+
+  getDvgApr=async()=>{
+    const apr= await this._getDvgApr();
+    const aprInfo = apr.xdvg;
+    store.setStore({
+      dvgApr:apr.xdvg
+    });
+    return emitter.emit(GET_XDVG_APR_SUCCESS, aprInfo);
+
+  }
+  _getDvgApr = async () => {
+    try {
+      const url = config.statsProvider + "staking/get-xdvg-stake";
+      const statisticsString = await rp(url);
+      const statistics = JSON.parse(statisticsString);
+      return statistics.body;
+    } catch (e) {
+      console.log(e);
+      // return store.getStore('universalGasPrice')
+    }
+  };
 }
+
+
 
 var store = new Store();
 

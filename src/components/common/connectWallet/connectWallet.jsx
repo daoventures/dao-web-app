@@ -215,18 +215,18 @@ class ConnectWallet extends Component {
     emitter.on(ERROR, this.errorReturned);
     const onboard = initOnboard({
       address: (address) => {
-        console.log('onboard#####address####', address);
+        // console.log('onboard#####address####', address);
         store.setStore({account: {address: address}});
         emitter.emit(CONNECTION_CONNECTED);
       },
       network: (network) => {
-        console.log('onboard###network#####', network);
+        // console.log('onboard###network#####', network);
         store.setStore({network: network});
         emitter.emit('CHANGE_NETWORK', {network: network});
       },
       balance: (balance) => {
         let account = store.getStore('account');
-        console.log('onboard#####balance#####', balance);
+        // console.log('onboard#####balance#####', balance);
         store.setStore({account: {...account,balance: balance}});
         emitter.emit(CONNECTION_CONNECTED);
       },

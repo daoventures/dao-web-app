@@ -1,48 +1,57 @@
-import React, { Component } from 'react';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
-import {
-  Switch,
-  Route, Redirect
-} from "react-router-dom";
-import IpfsRouter from 'ipfs-react-router'
+import React, { Component } from "react";
+import CssBaseline from "@material-ui/core/CssBaseline";
+import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
+import { Switch, Route, Redirect } from "react-router-dom";
+import IpfsRouter from "ipfs-react-router";
 
-import './i18n';
-import { getTheme } from './theme';
+import { BrowserView, MobileView } from "react-device-detect";
 
+import "./i18n";
+import interestTheme from "./theme";
+import { getTheme } from "./theme";
+
+import APR from "./components/apr";
+import InvestSimple from "./components/investSimple";
+import Manage from "./components/manage";
 // import Performance from './components/performance';
+import Zap from "./components/zap";
+import IDai from "./components/idai";
 // import Footer from './components/footer';
 // import Home from './components/home';
-import Header from './components/header';
-import Vaults from './components/vault';
-import Dashboard from './components/dashboard';
-import SideDrawer from './components/sideDrawer';
-import MainContainer from './components/mainContainer';
+import Header from "./components/header";
+import Vaults from "./components/vault";
+import MobileViewWarning from "./components/mobileViewWarning";
+import Dashboard from "./components/dashboard";
+import SideDrawer from "./components/sideDrawer";
+import MainContainer from "./components/mainContainer";
 
-import Stake from './components/stake/stake';
+import StakeDvgVip from './components/stake/stakeDvgVip';
+import Stake from './components/stake';
+
 import Swap from './components/swap';
 
+import { injected } from "./stores/connectors";
+import { initOnboard } from "./walletsServices.js";
 
 import {
   CONNECTION_CONNECTED,
   TOGGLE_THEME,
-  GET_VAULT_INFO
-} from './constants';
+  GET_VAULT_INFO,
+} from "./constants";
 
 import Store from "./stores";
-const emitter = Store.emitter
-const store = Store.store
-const dispatcher = Store.dispatcher
-
+const emitter = Store.emitter;
+const store = Store.store;
+const dispatcher = Store.dispatcher;
 
 class App extends Component {
   state = {
-    currentTheme: store.getStore('currentTheme'),
+    currentTheme: store.getStore("currentTheme"),
     interestTheme: {},
   };
 
   componentWillMount() {
-    dispatcher.dispatch({ type: GET_VAULT_INFO })
+    dispatcher.dispatch({ type: GET_VAULT_INFO });
 
     // console.log('没到这里吗####');
     // const onboard = initOnboard({
@@ -70,7 +79,6 @@ class App extends Component {
     //   onboard.walletSelect(previouslySelectedWallet);
     // }
 
-
     // 暂时注释
     // injected.isAuthorized().then((isAuthorized) => {
     //   if (isAuthorized) {
@@ -95,36 +103,41 @@ class App extends Component {
     // });
 
     if (window.ethereum) {
-      window.ethereum.on('accountsChanged', function (accounts) {
-        console.log('App.js#####accounts######', accounts);
+      window.ethereum.on("accountsChanged", function (accounts) {
+        console.log("App.js#####accounts######", accounts);
 
-        store.setStore({account: {address: accounts[0]}});
+        store.setStore({ account: { address: accounts[0] } });
 
-        const web3context = store.getStore('web3context');
+        const web3context = store.getStore("web3context");
         if (web3context) {
           emitter.emit(CONNECTION_CONNECTED);
         }
       });
     }
 
-    emitter.on('CURRENT_THEME_RETURNED', this.currentThemeChanged);
+    emitter.on("CURRENT_THEME_RETURNED", this.currentThemeChanged);
 
-    const localTheme = localStorage.getItem('daobenturesTheme');
+    const localTheme = localStorage.getItem("daobenturesTheme");
     // console.log('testlocalTheme######', localTheme);
     // this.currentThemeChanged(localTheme);
-    if (!localTheme || (localTheme !== 'dark' && localTheme !== 'light')) {
+    if (!localTheme || (localTheme !== "dark" && localTheme !== "light")) {
       this.currentThemeChanged(localTheme);
     } else {
-      dispatcher.dispatch({ type: TOGGLE_THEME, content: { currentTheme: localTheme} });
+      dispatcher.dispatch({
+        type: TOGGLE_THEME,
+        content: { currentTheme: localTheme },
+      });
     }
   }
 
   componentWillUnmount() {
-    emitter.removeListener('CURRENT_THEME_RETURNED', this.currentThemeChanged);
+    emitter.removeListener("CURRENT_THEME_RETURNED", this.currentThemeChanged);
   }
 
   currentThemeChanged = (theme) => {
-    const currentTheme = theme || store.getStore('currentTheme');
+    console.log("currentThemeChanged###theme###", theme);
+    const currentTheme = theme || store.getStore("currentTheme");
+    console.log("currentTheme####", currentTheme);
     this.setState({
       currentTheme: currentTheme,
       interestTheme: getTheme(currentTheme),
@@ -140,14 +153,13 @@ class App extends Component {
           <div
             className="app-container"
             style={{
-              display: 'flex',
-              flexDirection: 'column',
-              minHeight: '100vh',
-              alignItems: 'center',
+              display: "flex",
+              flexDirection: "column",
+              minHeight: "100vh",
+              alignItems: "center",
               // background: '#f9fafb',
               background: this.state.interestTheme.themeColors.back,
-            }}
-          >
+            }}>
             <Switch>
               {/* <Route path="/stats">
                 <Header />
@@ -189,10 +201,22 @@ class App extends Component {
                 <Header />
                 <SideDrawer />
                 <MainContainer />
-                <Vaults />
+                <BrowserView>
+                  <Vaults />
+                </BrowserView>
+                <MobileView>
+                  <MobileViewWarning />
+                </MobileView>
               </Route>
 
-              <Route path="/stake">
+              <Route path="/stake/vip-dvg">
+                <Header />
+                <SideDrawer />
+                <MainContainer />
+                <StakeDvgVip />
+              </Route>
+
+              <Route path="/stake/dao-mine">
                 <Header />
                 <SideDrawer />
                 <MainContainer />

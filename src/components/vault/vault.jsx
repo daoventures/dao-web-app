@@ -1064,29 +1064,40 @@ class Vault extends Component {
                       {!["LINK"].includes(asset.id) && asset.vaultBalance > 0 && (
                         <div>
                           <div className={classes.showDesktop}>
-                            {/* <Typography variant={ 'h5' } className={ classes.assetLabel }>Yearly Growth: <span style={{color: '#222222'}}>{ (this._getAPY(asset)/1).toFixed(2) }%</span></Typography> */}
                             <Typography
                               variant={"h5"}
                               className={classes.assetLabel1}>
-                              {(this._getAPY(asset) / 1).toFixed(2)}%
+                              {asset.strategyType === 'citadel' && (
+                                <Typography
+                                  variant={"caption"}>
+                                    est.&nbsp;
+                                </Typography>
+                              )}
+                              {this._getAPY(asset)}
                             </Typography>
                             <Typography
                               variant={"body1"}
                               className={classes.assetLabel2}>
-                              Yearly Growth
+                              { asset.strategyType === 'citadel' ? "YTD Performance" : "Yearly Growth" }
                             </Typography>
                           </div>
                           <div className={classes.showMobile}>
                             <Typography
                               variant={"h5"}
                               className={classes.assetLabel2}>
-                              Yearly Growth:{" "}
+                              { asset.strategyType === 'citadel' ? "YTD Performance" : "Yearly Growth" }
                             </Typography>
                             <Typography
                               variant={"h3"}
                               noWrap
                               className={classes.assetLabel1}>
-                              {(this._getAPY(asset) / 1).toFixed(2)}%
+                                {asset.strategyType === 'citadel' && (
+                                <Typography
+                                  variant={"caption"}>
+                                    est.&nbsp;
+                                </Typography>
+                              )}
+                              {this._getAPY(asset)}
                             </Typography>
                           </div>
                         </div>
@@ -1095,21 +1106,21 @@ class Vault extends Component {
                         asset.vaultBalance === 0 && (
                           <div>
                             <div className={classes.showDesktop}>
-                              {/* <Typography variant={ 'h5' } className={ classes.assetLabel }>
-                            Yearly Growth: 
-                            <span style={{color: '#222222'}}>
-                              { (this._getAPY(asset)/1).toFixed(2) }%
-                            </span>
-                          </Typography> */}
                               <Typography
                                 variant={"h5"}
                                 className={classes.assetLabel1}>
-                                {(this._getAPY(asset) / 1).toFixed(2)}%
+                                {asset.strategyType === 'citadel' && (
+                                  <Typography
+                                    variant={"caption"}>
+                                      est.&nbsp;
+                                  </Typography>
+                                )}
+                                {this._getAPY(asset)}
                               </Typography>
                               <Typography
                                 variant={"body1"}
                                 className={classes.assetLabel2}>
-                                Yearly Growth
+                                { asset.strategyType === 'citadel' ? "YTD Performance" : "Yearly Growth" }
                               </Typography>
                             </div>
                             <div className={classes.showMobile}>
@@ -1117,12 +1128,18 @@ class Vault extends Component {
                                 variant={"h3"}
                                 noWrap
                                 className={classes.assetLabel1}>
-                                {(this._getAPY(asset) / 1).toFixed(2)}%
+                                {asset.strategyType === 'citadel' && (
+                                  <Typography
+                                    variant={"caption"}>
+                                      est.&nbsp;
+                                  </Typography>
+                                )}
+                                {this._getAPY(asset)}
                               </Typography>
                               <Typography
                                 variant={"h5"}
                                 className={classes.assetLabel2}>
-                                Yearly Growth:{" "}
+                                { asset.strategyType === 'citadel' ? "YTD Performance" : "Yearly Growth" }
                               </Typography>
                             </div>
                           </div>
@@ -1342,9 +1359,9 @@ class Vault extends Component {
     if (asset && asset.stats) {
       if (asset.strategyType === "compound") {
         if (asset.stats.compoundApy) {
-          return asset.stats.compoundApy;
+          return (asset.stats.compoundApy / 1).toFixed(2) + '%';
         } else {
-          return "0.00";
+          return "0.00%";
         }
       } else if (
         asset.strategyType === "yearn" &&
@@ -1352,36 +1369,34 @@ class Vault extends Component {
       ) {
         switch (basedOn) {
           case 1:
-            return (
-              (asset.stats.apyOneWeekSample + parseFloat(asset.earnApr) * 100) /
-              2
-            );
+            return this.calculateYearnAPY(parseFloat(asset.earnApr), asset.stats.apyOneWeekSample);
           case 2:
-            return (
-              (asset.stats.apyOneMonthSample +
-                parseFloat(asset.earnApr) * 100) /
-              2
-            );
+            return this.calculateYearnAPY(parseFloat(asset.earnApr), asset.stats.apyOneMonthSample);
           case 3:
-            return (
-              (asset.stats.apyInceptionSample +
-                parseFloat(asset.earnApr) * 100) /
-              2
-            );
+            return this.calculateYearnAPY(parseFloat(asset.earnApr), asset.stats.apyInceptionSample);
           default:
-            return (asset.apy + parseFloat(asset.earnApr) * 100) / 2;
+            return this.calculateYearnAPY(parseFloat(asset.earnApr), asset.apy);
         }
       } else if (asset.strategyType === "citadel") {
-        if (asset.stats.citadelApy) {
-          return asset.stats.citadelApy;
-        } else {
-          return "0.00";
-        }
+        // if (asset.stats.citadelApy) {
+        //   return (asset.stats.citadelApy / 1).toFixed(2) + '%';
+        // } else {
+        //   return "0.00%";
+        // }
+        return '55% - 75%';
       }
     } else {
-      return "0.00";
+      return "0.00%";
     }
   };
+
+  calculateYearnAPY = (earnAPR, vaultAPY) => {
+    if (earnAPR * 100 > vaultAPY) {
+      return (vaultAPY / 1).toFixed(2) + "% - " + (earnAPR * 100 / 1).toFixed(2) + '%';
+    } else {
+      return (earnAPR * 100 / 1).toFixed(2) + "% - " + (vaultAPY / 1).toFixed(2) + '%';
+    }
+  }
 
   renderBasedOn = () => {
     const { classes } = this.props;
