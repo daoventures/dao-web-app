@@ -64,7 +64,7 @@ const styles = theme => ({
     /*定义滑块 内阴影*/
     '&::-webkit-scrollbar-thumb':{
       '-webkit-box-shadow': 'inset 0 0 6px rgba(0,0,0,0)',
-      'background':'#7367F7'
+      'background': theme.themeColors.back
     }
   },
   drawerLeft: {
@@ -104,7 +104,7 @@ const styles = theme => ({
     padding: '0px 20px',
     display: 'flex',
     alignItems: 'center',
-    color: theme.themeColors.textP,
+    color: theme.themeColors.contactUsText,
     borderColor: 'rgba(255, 255, 255, 0)',
     borderLeftWidth: '6px',
     borderStyle: 'solid'
@@ -145,7 +145,7 @@ const styles = theme => ({
   },
   accountInfoBlock: {
     // padding: '46px 20px 20px 20px'
-    padding: '36px 20px 20px 20px',
+    padding: '10px 20px 20px 20px',
     position: 'relative'
   },
   accountInfo: {
@@ -198,7 +198,7 @@ const styles = theme => ({
   walletList: {
     width: '201px',
     position: 'absolute',
-    top: '90px',
+    top: '70px',
     background: theme.themeColors.walletSelectBg,
     borderColor: theme.themeColors.walletSelectBorder,
     borderStyle:'solid',
@@ -275,6 +275,12 @@ const styles = theme => ({
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between'
+  },
+  menuList:{
+    height:'100%',
+    display:'flex',
+    justifyContent: 'space-between',
+    flexDirection: 'column'
   }
 })
 
@@ -509,6 +515,9 @@ class SideDrawer extends Component {
             </div>
           </div>
         </div>}
+        <div className={classes.menuList}>
+
+        
         <List>
           {/**
              * <ListItem button key={'PORTFOLIO'} className={this.linkSelected('/portfolio') ? classes.selected : classes.menuItem} onClick={() => { this.navInApp('portfolio') }}>
@@ -568,6 +577,7 @@ class SideDrawer extends Component {
             </ListItemIcon>
             <ListItemText primary={'SWAP'} />
           </ListItem>
+          
 
 
           {/* <div className={classes.selectNetwork}>
@@ -579,6 +589,7 @@ class SideDrawer extends Component {
         </div> */}
         </List>
         { this.renderFooterMenu()}
+        </div>
         { snackbarMessage && this.renderSnackbar()}
       </Drawer >
     );

@@ -425,7 +425,7 @@ const styles = (theme) => ({
     color: theme.themeColors.textT,
   },
   changeCurrencyContainer: {
-    padding: "36px 20px 20px 20px",
+    padding: "10px 20px 20px 20px",
     position: "relative",
   },
   accountInfoBlock: {
@@ -464,13 +464,14 @@ const styles = (theme) => ({
     border: "1px solid " + theme.themeColors.border,
     marginTop: "10px",
     color: theme.themeColors.textT,
+    '&:active':{
+        background:theme.themeColors.buttonActive
+    }
   },
   assetIconImg: {
-    height: "25px",
-    padding: "5px",
-    [theme.breakpoints.down("md")]: {
-      height: "25px",
-    },
+    width:'20px',
+    height: "20px",
+    marginRight:'5px',
   },
   dialogRoot: {
     border: "1px solid " + theme.themeColors.border,
@@ -1921,6 +1922,7 @@ class Asset extends Component {
       y: 20,
       style: {
         fontSize: "14px",
+        
         color: this.state.interestTheme.themeColors.textT,
       },
     };

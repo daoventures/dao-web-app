@@ -35,11 +35,12 @@ const styles = theme => ({
         width: '100%',
         paddingLeft: '320px',
         paddingRight: '80px',
-        paddingTop: '30px',
+        paddingTop: '32px',
         paddingBottom: '20px',
         [theme.breakpoints.down('sm')]: {
             paddingLeft: '10px',
-            paddingRight: '10px'
+            paddingRight: '10px',
+            paddingTop: '100px',
         },
         '& p': {
             padding: '0px',
@@ -52,14 +53,19 @@ const styles = theme => ({
         padding: '12px 50px',
         display: 'flex',
         justifyContent: 'space-between',
-        backgroundImage: 'url(' + require('../../assets/stakeImg/Daovip_banner@2x.png') + ')',
+        backgroundImage: 'url(' + require('../../assets/stakeImg/Daovip_banner@1x.png') + ')',
         [theme.breakpoints.down('sm')]: {
             height: '170px',
             padding: '12px 10px',
             position: 'relative',
             flexWrap: 'wrap',
             justifyContent: 'flex-start',
+            backgroundImage: 'url(' + require('../../assets/stakeImg/h5-Dvg_banenr@2x.png') + ')',
+            backgroundSize:'100% 100%'
         }
+    },
+    bannerLeft:{
+        width:'100%'
     },
     text: {
         fontSize: '30px',
@@ -67,7 +73,7 @@ const styles = theme => ({
         color: '#FFFFFF',
         lineHeight: '96px',
         [theme.breakpoints.down('sm')]: {
-            widht:'100%',
+            width:'100%',
             lineHeight: 1,
             textAlign:'center',
             fontSize: '20px',
@@ -88,7 +94,7 @@ const styles = theme => ({
             width: '100%',
             display: 'flex',
             marginTop: '30px',
-            justifyContent: 'space-between',
+            justifyContent: 'center',
         }
     },
     toTradeUniswap: {
@@ -103,9 +109,10 @@ const styles = theme => ({
         textAlign: 'center',
         color:'#FFFFFF',
         marginBottom: '8px',
+        marginRight:'20px',
         cursor: 'pointer',
         [theme.breakpoints.down('sm')]: {
-            width: '148px',
+            width: '160px',
             fontSize: '14px'
         },
         '&:hover':{
@@ -124,7 +131,7 @@ const styles = theme => ({
         textAlign: 'center',
         cursor: 'pointer',
         [theme.breakpoints.down('sm')]: {
-            width: '148px',
+            width: '160px',
             fontSize: '14px'
         },
         '&:hover':{
@@ -281,8 +288,10 @@ const styles = theme => ({
     },
     contentRight: {
         // width: '460px',
+        width:'50%',
         marginLeft: '20px',
         [theme.breakpoints.down('sm')]: {
+            width:'100%',
             margin: '19px 0px 0px 0px'
         }
         // background:'red'
@@ -294,13 +303,15 @@ const styles = theme => ({
     total: {
         display: 'flex',
         background: theme.themeColors.modelBack,
+        width:'50%',
+        minWidth:'167px',
         // padding:'0 19px',
         // boxShadow: '0px 2px 10px 0px rgba(23, 18, 43, 0.85)',
-        border: ' 1px solid #7367F7',
+        border: '1px solid #7367F7',
         padding: '23px 16px',
         alignItems: 'center',
         [theme.breakpoints.down('sm')]: {
-            width:'167px',
+            minWidth:'167px',
             padding: '23px 9px',
         }
 
@@ -310,8 +321,10 @@ const styles = theme => ({
     },
     apr: {
         display: 'flex',
-        width: '220px',
         background: theme.themeColors.modelBack,
+        width:'50%',
+        minWidth:'167px',
+
         // padding:'0 19px',
         // boxShadow: '0px 2px 10px 0px rgba(23, 18, 43, 0.85)',
         border: '1px solid #7367F7',
@@ -319,13 +332,16 @@ const styles = theme => ({
         alignItems: 'center',
         marginLeft: '20px',
         [theme.breakpoints.down('sm')]: {
-            width:'167px',
+            minWidth:'167px',
             padding: '23px 9px',
         }
     },
     totalApr: {
         display: 'flex',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        [theme.breakpoints.down('sm')]: {
+            justifyContent: 'center',
+        }
     },
     aprText: {
 
@@ -342,10 +358,10 @@ const styles = theme => ({
         }
     },
     totalTextTile: {
-        fontSize: '16px',
         fontWeight: '400',
         display:'flex',
         alignItems:'center',
+        fontSize: '14px',
         color: theme.themeColors.textT,
         [theme.breakpoints.down('sm')]: {
             fontSize: '12px',
@@ -380,7 +396,7 @@ const styles = theme => ({
         color: theme.themeColors.textT
     },
     myAssetsRate: {
-        fontSize: '20px',
+        fontSize: '16px',
         fontWeight: '500',
         color:theme.themeColors.myAssetsRateText,
     },
@@ -720,8 +736,8 @@ class StakeDvgVip extends Component {
                                     <div className={type == 'stake' ? classes.unStake : classes.stake} onClick={() => this.stakeTab('unStake')}>Unstake</div>
                                 </div>
                                 {type == 'stake' ?
-                                    <div className={classes.available}>Available：{dvgBalance && Number(dvgBalance).toFixed(2)}DVG</div>
-                                    : <div className={classes.available}>Available：{xdvgBalance && Number(xdvgBalance).toFixed(2)}vipDVG</div>
+                                    <div className={classes.available}>Available：{dvgBalance && dvgBalance.toString().match(/^\d+(?:\.\d{0,8})?/)}DVG</div>
+                                    : <div className={classes.available}>Available：{xdvgBalance && xdvgBalance.toString().match(/^\d+(?:\.\d{0,8})?/)}vipDVG</div>
 
                                 }
                             </div>
@@ -765,7 +781,7 @@ class StakeDvgVip extends Component {
                             <div className={classes.myAssetstext}>
                                 <p className={classes.myAssetsTitle}>My vipDVG</p>
                                 <p className={classes.myAssetsNum}>{xdvgBalance && Number(xdvgBalance).toFixed(2)}</p>
-                                <p className={classes.myAssetsRate}>≈ $ {xdvgBalance && aprInfo.xDVGPrice && aprInfo.dvgPrice && Number(xdvgBalance * aprInfo.xDVGPrice * aprInfo.dvgPrice).toFixed(2)}</p>
+                                <p className={classes.myAssetsRate}>≈ ${xdvgBalance && aprInfo.xDVGPrice && aprInfo.dvgPrice && Number(xdvgBalance * aprInfo.xDVGPrice * aprInfo.dvgPrice).toFixed(2)}</p>
                             </div>
                         </div>
                     </div>
