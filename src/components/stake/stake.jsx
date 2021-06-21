@@ -540,6 +540,7 @@ class Stake extends Component {
     const { classes } = this.props;
     const width = window.innerWidth;
 
+
     return pools && pools.length > 0
       ? pools
         .filter((pool) => {
@@ -611,6 +612,7 @@ class Stake extends Component {
                               </Typography> */}
                       </Grid>
 
+                      {console.log(pool)}
                       {/** Pending DVG */}
                       <Grid
                         item
@@ -649,7 +651,7 @@ class Stake extends Component {
                           }}
                           className={classes.assetLabel1}
                         >
-                          {pool.userInfo.lpAmount ? Number(pool.userInfo.lpAmount).toFixed(2) : "0.00"}
+                          {pool.userInfo.depositedLPAmount ? (Number(pool.userInfo.depositedLPAmount) / 10 ** pool.decimal).toFixed(2) : "0.00"}
                         </Typography>
                         <Typography
                           variant={"body1"}
