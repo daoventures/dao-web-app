@@ -222,7 +222,14 @@ class App extends Component {
                 <MainContainer />
                 <Stake />
               </Route>
-              
+
+              {/* <Route path="/stake">
+                <Header />
+                <SideDrawer />
+                <MainContainer />
+                <StakeDvgVip />
+              </Route> */}
+
               <Route path="/swap">
                 <Header />
                 <SideDrawer />

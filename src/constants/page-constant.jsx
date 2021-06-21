@@ -12,5 +12,6 @@ export const PORTFOLIO_PATH = '/portfolio';
 export const PORTFOLIO = 'PORTFOLIO';
 export const STAKE_PATH = '/stake';
 export const STAKE = 'STAKE';
+export const DAOMINE_PATH = '/daomine';
 export const SWAP_PATH = '/swap';
 export const SWAP = 'SWAP';
