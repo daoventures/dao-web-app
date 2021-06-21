@@ -102,12 +102,12 @@ class ConnectBiconomy extends Component {
     const happyHourbiconomy = new Biconomy(provider, {
       walletProvider: window.ethereum,
       apiKey: happyHourapiKey,
-      debug: true,
+      // debug: true,
     });
     const erc20Paymentbiconomy = new Biconomy(provider, {
       walletProvider: window.ethereum,
       apiKey: erc20PaymentapiKey,
-      debug: true,
+      // debug: true,
     });
 
     // This web3 instance is used to read normally and write to contract via meta transactions.

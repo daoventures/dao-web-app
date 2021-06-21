@@ -4038,10 +4038,9 @@ class Store {
         }
       );
 
-      const happyHour = true;
+      const happyHour = this._eventVerify();
 
-      if (happyHour) {
-        console.log("HappyHour");
+      if (happyHour === true) {
         await this._callDepositAmountContractCitadelHappyHour(
           asset,
           account,
@@ -4557,9 +4556,11 @@ class Store {
           }
         }
       );
-      const happyHour = true;
+      const happyHour = this._eventVerify();
+      console.log("🚀 | Store | depositAllContract= | happyHour", happyHour);
+
       // TODO: Call backend api for happy hour condition
-      if (happyHour) {
+      if (happyHour === true) {
         console.log("HappyHour");
         await this._callDepositAmountContractCitadelHappyHour(
           asset,
@@ -5483,6 +5484,18 @@ class Store {
     }
   };
 
+  _eventVerify = async (amount) => {
+    const url = `${config.statsProvider}event/verify/${amount}`;
+    const resultString = await rp(url);
+    const result = JSON.parse(resultString);
+    console.log("🚀 | Store | _eventVerify= | result", result);
+    if (result.body === "Valid") {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
   _getAddressStatistics = async (address) => {
     try {
       const url =
@@ -5586,7 +5599,7 @@ class Store {
     if (erc20PaymentWeb3) {
       const erc20PaymentsContract = new erc20PaymentWeb3.eth.Contract(
         citadelABI,
-        citadelAsset.vaultContractAddress
+        citadelAsset[0].vaultContractAddress
       );
       store.setStore({ erc20PaymentsContract: erc20PaymentsContract });
     }
