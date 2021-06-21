@@ -612,7 +612,6 @@ class Stake extends Component {
                               </Typography> */}
                       </Grid>
 
-                      {console.log(pool)}
                       {/** Pending DVG */}
                       <Grid
                         item
