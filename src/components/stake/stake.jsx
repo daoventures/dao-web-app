@@ -276,6 +276,9 @@ const styles = (theme) => ({
   divider: {
     // flexGrow : "1",
     borderColor: theme.themeColors.textP,
+    [theme.breakpoints.down("md")]: {
+      display: "none"
+    },
   },
 });
 
@@ -501,7 +504,7 @@ class Stake extends Component {
             />
           </div>
           <div>
-            <a href="http://www.google.com" className={classes.addLiquidity}>
+            <a href="https://info.uniswap.org/#/pools/0xa58262270521d7732fccbbdcdf9fcd1fc70d47e5" target="_blank" className={classes.addLiquidity}>
               Add Liquidity
             </a>
           </div>
@@ -513,6 +516,7 @@ class Stake extends Component {
             {/** Risk Type Tabs */}
             {this.renderRiskTypeTab()}
 
+            {/** Display Pool List */}
             {this.renderPools()}
           </div>
         </div>
