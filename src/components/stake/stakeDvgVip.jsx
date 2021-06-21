@@ -18,7 +18,9 @@ import {
     GET_XDVG_BALANCE_SUCCESS,
     WIDTHDRAW_XDVG,
     GET_DVG_APR,
-    GET_XDVG_APR_SUCCESS
+    GET_XDVG_APR_SUCCESS,
+    WITHDRAW_DVG_RETURNED,
+    DEPOSIT_DVG_RETURNED
 } from '../../constants'
 import Store from "../../stores";
 import ConnectWallet from "../common/connectWallet/connectWallet";
@@ -502,7 +504,9 @@ class StakeDvgVip extends Component {
             amount: '',
             type: 'stake',
             isShowApr:false,
-            aprInfo: {}
+            aprInfo: {
+                tvl:0
+            }
         }
         if (account && account.address) {
             dispatcher.dispatch({ type: GET_DVG_INFO })
@@ -547,6 +551,8 @@ class StakeDvgVip extends Component {
         emitter.on(GET_DVG_BALANCE_SUCCESS, this.dvgBalance)
         emitter.on(GET_XDVG_BALANCE_SUCCESS, this.xdvgBalance)
         emitter.on(GET_XDVG_APR_SUCCESS, this.getAprInfo)
+        emitter.on(WITHDRAW_DVG_RETURNED, this.withdrawReturned)
+        emitter.on(DEPOSIT_DVG_RETURNED, this.depositReturned)
     }
 
     componentWillUnmount() {
@@ -556,6 +562,8 @@ class StakeDvgVip extends Component {
         emitter.removeListener(GET_DVG_BALANCE_SUCCESS, this.dvgBalance)
         emitter.removeListener(GET_XDVG_BALANCE_SUCCESS, this.xdvgBalance)
         emitter.removeListener(GET_XDVG_APR_SUCCESS, this.getAprInfo)
+        emitter.removeListener(WITHDRAW_DVG_RETURNED, this.withdrawReturned)
+        emitter.removeListener(DEPOSIT_DVG_RETURNED, this.depositReturned)
     }
 
 
@@ -618,6 +626,14 @@ class StakeDvgVip extends Component {
         }
     }
 
+    depositReturned = () => {
+        this.setState({ loading: false, amount: "" });
+      };
+    
+      withdrawReturned = (txHash) => {
+        this.setState({ loading: false, amount: "" });
+      };
+    
     maxAmount() {
         const { type, dvgInfoObj } = this.state;
         if (type == 'stake') {
@@ -714,6 +730,7 @@ class StakeDvgVip extends Component {
                                 <input className={classes.input} value={amount} onChange={this.onChange} type="text" />
                                 <div className={classes.max} onClick={() => this.maxAmount()}>Max</div>
                             </div>
+                            
                             <div className={amount?classes.approveStakingActive:classes.approveStaking} onClick={() => { this.submitStake() }}>
                                 
                                 {
