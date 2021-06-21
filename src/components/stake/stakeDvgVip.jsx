@@ -504,7 +504,6 @@ class StakeDvgVip extends Component {
             isShowApr:false,
             aprInfo: {}
         }
-        console.log(account, 'account####');
         if (account && account.address) {
             dispatcher.dispatch({ type: GET_DVG_INFO })
             dispatcher.dispatch({ type: GET_XDVG_BALANCE })
@@ -515,23 +514,23 @@ class StakeDvgVip extends Component {
     componentWillMount() {
         const onboard = initOnboard({
             address: (address) => {
-                console.log('onboard#####address####', address);
+                // console.log('onboard#####address####', address);
                 store.setStore({ account: { address: address } });
                 emitter.emit(CONNECTION_CONNECTED);
             },
             network: (network) => {
-                console.log('onboard###network#####', network);
+                // console.log('onboard###network#####', network);
                 store.setStore({ network: network });
                 emitter.emit('CHANGE_NETWORK', { network: network });
             },
             balance: (balance) => {
                 let account = store.getStore('account');
-                console.log('onboard#####balance#####', balance);
+                // console.log('onboard#####balance#####', balance);
                 store.setStore({ account: { ...account, balance: balance } });
                 emitter.emit(CONNECTION_CONNECTED);
             },
             wallet: (wallet) => {
-                console.log('onboard#####wallet#####', wallet);
+                // console.log('onboard#####wallet#####', wallet);
                 store.setStore({
                     web3context: { library: { provider: wallet.provider } },
                 })
@@ -576,7 +575,6 @@ class StakeDvgVip extends Component {
     connectionConnected = () => {
         const { period } = this.state;
         const account = store.getStore('account')
-        console.log(account, 'account428##3');
         this.setState({ loading: true, account: account })
         if (account && account.address) {
             dispatcher.dispatch({ type: GET_DVG_INFO })
@@ -624,18 +622,19 @@ class StakeDvgVip extends Component {
         const { type, dvgInfoObj } = this.state;
         if (type == 'stake') {
             this.setState({
-                amount: dvgInfoObj && dvgInfoObj[1].balance
+                // amount: Number(dvgInfoObj && dvgInfoObj[1].balance).toFixed(4)
+                amount:dvgInfoObj && dvgInfoObj[1].balance.toString()
             })
         } else {
             this.setState({
-                amount: dvgInfoObj && dvgInfoObj[0].balance
+                // amount: Number(dvgInfoObj && dvgInfoObj[0].balance).toFixed(4)
+                amount:dvgInfoObj && dvgInfoObj[0].balance.toString()
             })
         }
     }
 
     getAprInfo = () => {
         const aprInfo = store.getStore('dvgApr');
-        console.log(aprInfo, 'aprInfo##');
         this.setState({
             aprInfo: aprInfo
         })
