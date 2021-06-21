@@ -5523,7 +5523,7 @@ class Store {
         console.log(err)
         return emitter.emit(ERROR, err)
       }
-      console.log(assets,'assets55221###');
+      console.log(assets,'assets##');
       store.setStore({ dvg: assets })
       return emitter.emit(GET_DVG_BALANCE_SUCCESS, assets)
     })
@@ -5539,7 +5539,7 @@ class Store {
       if (err) {
         return emitter.emit(ERROR, err);
       }
-
+      dispatcher.dispatch({ type: GET_DVG_INFO })
       // return emitter.emit(WITHDRAW_VAULT_RETURNED, withdrawResult);
     })
 
@@ -5562,7 +5562,6 @@ class Store {
       xdvg.abi,
       xdvg.erc20address
     );
-    console.log(xdvg, 'xdvg##5555');
     //查询xdvg授权数量
     const allowance = await dvgContract.methods
       .allowance(account.address, xdvg.erc20address)
@@ -5610,6 +5609,7 @@ class Store {
       })
     } else {
       let _amount = web3.utils.toWei(amount, "ether");
+      console.log(_amount,'_amount5612');
       xDVGCOntract.methods
         .deposit(_amount)
         .send({
@@ -5699,6 +5699,7 @@ class Store {
       xdvg.erc20address
     );
     let _amount = web3.utils.toWei(amount, "ether");
+    console.log(_amount,'_amount5702');
     xDVGCOntract.methods
       .withdraw(_amount)
       .send({
