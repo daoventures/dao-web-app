@@ -19,7 +19,7 @@ import {
   DEPOSIT_DAOMINE_RETURNED_COMPLETED,
   WITHDRAW_DAOMINE_RETURNED,
   WITHDRAW_DAOMINE_RETURNED_COMPLETED,
-  ERROR
+  ERROR,
 } from "../../constants/constants";
 
 import RiskLevelTab from "../common/riskLevelTab/riskLevelTab";
@@ -278,7 +278,7 @@ const styles = (theme) => ({
     // flexGrow : "1",
     borderColor: theme.themeColors.textP,
     [theme.breakpoints.down("md")]: {
-      display: "none"
+      display: "none",
     },
   },
 });
@@ -293,16 +293,16 @@ class Stake extends Component {
       account: account,
       address: account.address
         ? account.address.substring(0, 6) +
-        "..." +
-        account.address.substring(
-          account.address.length - 4,
-          account.address.length
-        )
+          "..." +
+          account.address.substring(
+            account.address.length - 4,
+            account.address.length
+          )
         : null,
       pools: store.getStore("stakePools"),
       currentTab: "All",
       expanded: "",
-      loading: false
+      loading: false,
     };
 
     if (account && account.address) {
@@ -319,9 +319,15 @@ class Stake extends Component {
     emitter.on(APPROVE_TRANSACTING, this.showHashApproval);
     emitter.on(ERROR, this.errorReturned);
     emitter.on(DEPOSIT_DAOMINE_RETURNED, this.showHash);
-    emitter.on(DEPOSIT_DAOMINE_RETURNED_COMPLETED, this.onDepositWithdrawalCompleted);
+    emitter.on(
+      DEPOSIT_DAOMINE_RETURNED_COMPLETED,
+      this.onDepositWithdrawalCompleted
+    );
     emitter.on(WITHDRAW_DAOMINE_RETURNED, this.showHash);
-    emitter.on(WITHDRAW_DAOMINE_RETURNED_COMPLETED, this.onDepositWithdrawalCompleted);
+    emitter.on(
+      WITHDRAW_DAOMINE_RETURNED_COMPLETED,
+      this.onDepositWithdrawalCompleted
+    );
   }
 
   componentWillUnmount() {
@@ -341,11 +347,11 @@ class Stake extends Component {
       account: account,
       address: account.address
         ? account.address.substring(0, 6) +
-        "..." +
-        account.address.substring(
-          account.address.length - 4,
-          account.address.length
-        )
+          "..." +
+          account.address.substring(
+            account.address.length - 4,
+            account.address.length
+          )
         : null,
     });
 
@@ -424,7 +430,7 @@ class Stake extends Component {
       };
       that.setState(snackbarObj);
     });
-  }
+  };
 
   // Show Hash
   showHash = (txHash) => {
@@ -436,7 +442,7 @@ class Stake extends Component {
       const snackbarObj = { snackbarMessage: txHash, snackbarType: "Hash" };
       that.setState(snackbarObj);
     });
-  }
+  };
 
   // Show Wallet Approval Hash
   showHashApproval = (txHash) => {
@@ -505,7 +511,11 @@ class Stake extends Component {
             />
           </div>
           <div>
-            <a href="https://info.uniswap.org/#/pools/0xa58262270521d7732fccbbdcdf9fcd1fc70d47e5" target="_blank" className={classes.addLiquidity}>
+            <a
+              href="https://info.uniswap.org/#/pools/0xa58262270521d7732fccbbdcdf9fcd1fc70d47e5"
+              target="_blank"
+              className={classes.addLiquidity}
+            >
               Add Liquidity
             </a>
           </div>
@@ -540,193 +550,236 @@ class Stake extends Component {
     const { classes } = this.props;
     const width = window.innerWidth;
 
-
     return pools && pools.length > 0
       ? pools
-        .filter((pool) => {
-          return currentTab === "All" || pool.category === currentTab
-            ? true
-            : false;
-        })
-        .map((pool, index) => {
-          return (
-            <div key={index} className={classes.poolContainer}>
-              <Grid container className={classes.itemTop}>
-                <RiskLevelLabel risk={pool.category}></RiskLevelLabel>
-              </Grid>
+          .filter((pool) => {
+            return currentTab === "All" || pool.category === currentTab
+              ? true
+              : false;
+          })
+          .map((pool, index) => {
+            return (
+              <div key={index} className={classes.poolContainer}>
+                <Grid container className={classes.itemTop}>
+                  <RiskLevelLabel risk={pool.category}></RiskLevelLabel>
+                </Grid>
 
-              <Accordion
-                className={classes.expansionPanel}
-                square
-                key={pool.name + "_expand"}
-                expanded={expanded === pool.name}
-                onChange={() => {
-                  this.handleChange(pool.name);
-                }}
-              >
-                <AccordionSummary
-                  expandIcon={
-                    <svg aria-hidden="true" className={classes.dropDownIcon}>
-                      <use xlinkHref="#iconicon_list_dropDown"></use>
-                    </svg>
-                  }
-                  aria-controls="panel1bh-content"
-                  id="panel1bh-header"
-                  className={classes.accordionsummary}
+                <Accordion
+                  className={classes.expansionPanel}
+                  square
+                  key={pool.name + "_expand"}
+                  expanded={expanded === pool.name}
+                  onChange={() => {
+                    this.handleChange(pool.name);
+                  }}
                 >
-                  <div className={classes.assetSummary}>
-                    <Grid container>
-                      <Grid
-                        item
-                        sm={1}
-                        xs={2}
-                        className={classes.gridItemColumn}
-                      >
-                        {/** Pool Icon */}
-                        <div className={classes.assetIcon}>
-                          {this.renderLogo(pool)}
-                        </div>
-                      </Grid>
-
-                      {/** Pool Title */}
-                      <Grid
-                        item
-                        md={3}
-                        sm={2}
-                        xs={4}
-                        className={classes.gridItemColumn}
-                      >
-                        <Typography
-                          variant={"h5"}
-                          style={{
-                            wordWrap: "break-word",
-                          }}
-                          className={classes.assetLabel1}
+                  <AccordionSummary
+                    expandIcon={
+                      <svg aria-hidden="true" className={classes.dropDownIcon}>
+                        <use xlinkHref="#iconicon_list_dropDown"></use>
+                      </svg>
+                    }
+                    aria-controls="panel1bh-content"
+                    id="panel1bh-header"
+                    className={classes.accordionsummary}
+                  >
+                    <div className={classes.assetSummary}>
+                      <Grid container>
+                        <Grid
+                          item
+                          sm={1}
+                          xs={2}
+                          className={classes.gridItemColumn}
                         >
-                          {pool.label}
-                        </Typography>
-                        {/* <Typography
+                          {/** Pool Icon */}
+                          <div className={classes.assetIcon}>
+                            {this.renderLogo(pool)}
+                          </div>
+                        </Grid>
+
+                        {/** Pool Title */}
+                        <Grid
+                          item
+                          sm={2}
+                          xs={4}
+                          className={classes.gridItemColumn}
+                        >
+                          <Typography
+                            variant={"h5"}
+                            style={{
+                              wordWrap: "break-word",
+                            }}
+                            className={classes.assetLabel1}
+                          >
+                            {pool.label}
+                          </Typography>
+                          {/* <Typography
                                 variant={"body1"}
                                 className={classes.assetLabel2}>
                                 {asset.description}
                               </Typography> */}
-                      </Grid>
+                        </Grid>
 
-                      {/** Pending DVG */}
-                      <Grid
-                        item
-                        sm={2}
-                        xs={6}
-                        className={classes.gridItemColumn}
-                      >
-                        <Typography
-                          variant={"h5"}
-                          style={{
-                            wordWrap: "break-word",
-                          }}
-                          className={classes.assetLabel1}
+                        {/** Pending DVG */}
+                        <Grid
+                          item
+                          sm={2}
+                          xs={6}
+                          className={classes.gridItemColumn}
                         >
-                          {pool.userInfo.pendingDVG ? (Number(pool.userInfo.pendingDVG) / 10 ** 18).toFixed(2) : "0.00"}
-                        </Typography>
-                        <Typography
-                          variant={"body1"}
-                          className={classes.assetLabel2}
-                        >
-                          Pending DVG
-                        </Typography>
-                      </Grid>
+                          <Typography
+                            variant={"h5"}
+                            style={{
+                              wordWrap: "break-word",
+                            }}
+                            className={classes.assetLabel1}
+                          >
+                            {pool.userInfo.pendingDVG
+                              ? (Number(pool.userInfo.pendingDVG) / 10 ** 18)
+                                  .toFixed(2)
+                                  .toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  })
+                              : "0.00"}
+                            {" DVG"}
+                          </Typography>
+                          <Typography
+                            variant={"body1"}
+                            className={classes.assetLabel2}
+                          >
+                            Pending
+                          </Typography>
+                        </Grid>
 
-                      {/** Staked */}
-                      <Grid
-                        item
-                        sm={1}
-                        xs={6}
-                        className={classes.gridItemColumn}
-                      >
-                        <Typography
-                          variant={"h5"}
-                          style={{
-                            wordWrap: "break-word",
-                          }}
-                          className={classes.assetLabel1}
+                        {/** Staked */}
+                        <Grid
+                          item
+                          sm={1}
+                          xs={6}
+                          className={classes.gridItemColumn}
                         >
-                          {pool.userInfo.depositedLPAmount ? (Number(pool.userInfo.depositedLPAmount) / 10 ** pool.decimal).toFixed(2) : "0.00"}
-                        </Typography>
-                        <Typography
-                          variant={"body1"}
-                          className={classes.assetLabel2}
-                        >
-                          Staked
-                        </Typography>
-                      </Grid>
+                          <Typography
+                            variant={"h5"}
+                            style={{
+                              wordWrap: "break-word",
+                            }}
+                            className={classes.assetLabel1}
+                          >
+                            {pool.userInfo.depositedLPAmount
+                              ? (
+                                  Number(pool.userInfo.depositedLPAmount) /
+                                  10 ** pool.decimal
+                                ).toFixed(2)
+                              : "0.00"}
+                          </Typography>
+                          <Typography
+                            variant={"body1"}
+                            className={classes.assetLabel2}
+                          >
+                            Staked
+                          </Typography>
+                        </Grid>
 
-                      {/** APR */}
-                      <Grid
-                        item
-                        sm={2}
-                        xs={6}
-                        className={classes.gridItemColumn}
-                      >
-                        <Typography
-                          variant={"h5"}
-                          style={{
-                            wordWrap: "break-word",
-                          }}
-                          className={classes.assetLabel1}
+                        {/** APR */}
+                        <Grid
+                          item
+                          sm={2}
+                          xs={6}
+                          className={classes.gridItemColumn}
                         >
-                          {pool.apr ? Number(pool.apr).toFixed(2) : "0.00"}
-                          {" %"}
-                        </Typography>
-                        <Typography
-                          variant={"body1"}
-                          className={classes.assetLabel2}
-                        >
-                          APR
-                        </Typography>
-                      </Grid>
+                          <Typography
+                            variant={"h5"}
+                            style={{
+                              wordWrap: "break-word",
+                            }}
+                            className={classes.assetLabel1}
+                          >
+                            {pool.apr ? Number(pool.apr).toFixed(2) : "0.00"}
+                            {" %"}
+                          </Typography>
+                          <Typography
+                            variant={"body1"}
+                            className={classes.assetLabel2}
+                          >
+                            APR
+                          </Typography>
+                        </Grid>
 
-                      {/** TVL */}
-                      <Grid
-                        item
-                        sm={2}
-                        xs={6}
-                        className={classes.gridItemColumn}
-                      >
-                        <Typography
-                          variant={"h5"}
-                          style={{
-                            wordWrap: "break-word",
-                          }}
-                          className={classes.assetLabel1}
+                        {/** Multiplier */}
+                        <Grid
+                          item
+                          sm={2}
+                          xs={6}
+                          className={classes.gridItemColumn}
                         >
-                          {"$ "}
-                          {pool.tvl ? Number(pool.tvl).toFixed(2) : "0.00"}
-                        </Typography>
-                        <Typography
-                          variant={"body1"}
-                          className={classes.assetLabel2}
+                          <Typography
+                            variant={"h5"}
+                            style={{
+                              wordWrap: "break-word",
+                            }}
+                            className={classes.assetLabel1}
+                          >
+                            {pool.multiplier
+                              ? Number(pool.multiplier).toFixed(2)
+                              : "0.00"}
+                          </Typography>
+                          <Typography
+                            variant={"body1"}
+                            className={classes.assetLabel2}
+                          >
+                            Multiplier
+                          </Typography>
+                        </Grid>
+
+                        {/** TVL */}
+                        <Grid
+                          item
+                          sm={2}
+                          xs={6}
+                          className={classes.gridItemColumn}
                         >
-                          Total Value Locked
-                        </Typography>
+                          <Typography
+                            variant={"h5"}
+                            style={{
+                              wordWrap: "break-word",
+                            }}
+                            className={classes.assetLabel1}
+                          >
+                            {"$ "}
+                            {pool.tvl ? Number(pool.tvl).toFixed(2) : "0.00"}
+                          </Typography>
+                          <Typography
+                            variant={"body1"}
+                            className={classes.assetLabel2}
+                          >
+                            Liquidity
+                          </Typography>
+                        </Grid>
                       </Grid>
-                    </Grid>
-                  </div>
-                </AccordionSummary>
-                <AccordionDetails className={classes.removePadding}>
-                  <div className={classes.yearnEarnAndVaultBlock}>
-                    <div className={classes.yearnEarnAndVaultItem}>
-                      <StakeDeposit pool={pool} startLoading={this.startLoading}></StakeDeposit>
                     </div>
-                    <hr className={classes.divider}></hr>
-                    <div className={classes.yearnEarnAndVaultItem}>
-                      <StakeWithdrawal pool={pool} startLoading={this.startLoading}></StakeWithdrawal>
+                  </AccordionSummary>
+                  <AccordionDetails className={classes.removePadding}>
+                    <div className={classes.yearnEarnAndVaultBlock}>
+                      <div className={classes.yearnEarnAndVaultItem}>
+                        <StakeDeposit
+                          pool={pool}
+                          startLoading={this.startLoading}
+                        ></StakeDeposit>
+                      </div>
+                      <hr className={classes.divider}></hr>
+                      <div className={classes.yearnEarnAndVaultItem}>
+                        <StakeWithdrawal
+                          pool={pool}
+                          startLoading={this.startLoading}
+                        ></StakeWithdrawal>
+                      </div>
                     </div>
-                  </div>
-                </AccordionDetails>
-              </Accordion>
-            </div>
-          );
-        })
+                  </AccordionDetails>
+                </Accordion>
+              </div>
+            );
+          })
       : null;
   };
 
@@ -734,34 +787,32 @@ class Stake extends Component {
     const { classes } = this.props;
 
     const images = {
-      dvmUSDT: { filename: 'USDT', format: 'png' },
-      dvmUSDC: { filename: 'USDC', format: 'png' },
-      dvmDAI: { filename: 'DAI', format: 'png' },
-      dvmTUSD: { filename: 'TUSD', format: 'png' },
-      dvlUSDT: { filename: 'USDT', format: 'png' },
-      dvlUSDC: { filename: 'USDC', format: 'png' },
-      dvlDAI: { filename: 'DAI', format: 'png' },
-      vipDVG: { filename: 'vipDVG', format: 'png' },
-      "ETH<->DVG": { filename: 'vipDVG', format: 'png' }, // TODO: Update this once available
-      daoCDV: { filename: 'citadel', format: 'svg' }
-    }
+      dvmUSDT: { filename: "USDT", format: "png" },
+      dvmUSDC: { filename: "USDC", format: "png" },
+      dvmDAI: { filename: "DAI", format: "png" },
+      dvmTUSD: { filename: "TUSD", format: "png" },
+      dvlUSDT: { filename: "USDT", format: "png" },
+      dvlUSDC: { filename: "USDC", format: "png" },
+      dvlDAI: { filename: "DAI", format: "png" },
+      vipDVG: { filename: "vipDVG", format: "png" },
+      "ETH<->DVG": { filename: "vipDVG", format: "png" }, // TODO: Update this once available
+      daoCDV: { filename: "citadel", format: "svg" },
+    };
 
     const poolImage = images[pool.name];
 
-    return poolImage
-      ? (
-        <img
-          alt="pool"
-          src={require("../../assets/img_new/" +
-            poolImage.filename +
-            "-logo." +
-            poolImage.format)}
-          // height={ '50px' }
-          className={classes.assetIconImg}
-        />
-      )
-      : null;
-  }
+    return poolImage ? (
+      <img
+        alt="pool"
+        src={require("../../assets/img_new/" +
+          poolImage.filename +
+          "-logo." +
+          poolImage.format)}
+        // height={ '50px' }
+        className={classes.assetIconImg}
+      />
+    ) : null;
+  };
 
   showHashApproval = (txHash) => {
     const snackbarObj = { snackbarMessage: null, snackbarType: null };
