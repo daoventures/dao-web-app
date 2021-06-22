@@ -5518,6 +5518,7 @@ class Store {
           return callback(err)
         }
         asset.balance = data[0];
+        console.log(data,'5898##');
         callback(null, asset)
       })
     }, (err, assets) => {
@@ -5533,10 +5534,10 @@ class Store {
   depositXdvg = async (payload) => {
     const account = store.getStore("account");
 
-    const { asset, amount } =
+    const { asset, amount,max } =
       payload.content;
     //asset 是dvg
-    this._callDepositDvg(asset, amount, (err, withdrawResult) => {
+    this._callDepositDvg(asset, amount,max, (err, withdrawResult) => {
       if (err) {
         return emitter.emit(ERROR, err);
       }
@@ -5546,7 +5547,7 @@ class Store {
     })
 
   }
-  _callDepositDvg = async (asset, amount, callback) => {
+  _callDepositDvg = async (asset, amount,max, callback) => {
     const account = this.getStore('account');
     const web3 = await this._getWeb3Provider();
     if (!web3) {
@@ -5569,10 +5570,18 @@ class Store {
       .allowance(account.address, xdvg.erc20address)
       .call({ from: account.address });
     console.log(allowance, 'allowance###5552');
+    let _amount='';
+    if(max){
+      //查询dvg可用
+      _amount = await dvgContract.methods
+    .balanceOf(account.address)
+    .call({ from: account.address });
+    }else{
+      _amount = web3.utils.toWei(amount, "ether")
+    }
     //xdvg授权数量小于金额的话 需要重新授权
     if (parseFloat(amount) > parseFloat(allowance)) {
-      let _amount = web3.utils.toWei(amount, "ether");
-
+      
       this._callDvgApproval(account, amount, (err) => {
         if (err) {
           return emitter.emit(ERROR, err);
@@ -5611,7 +5620,6 @@ class Store {
           })
       })
     } else {
-      let _amount = web3.utils.toWei(amount, "ether");
       console.log(_amount,'_amount5612');
       xDVGCOntract.methods
         .deposit(_amount)
@@ -5678,10 +5686,10 @@ class Store {
   //unstake 提现dvg
   withdrawXdvg = async (payload) => {
     const account = store.getStore("account");
-    const { asset, amount } =
+    const { asset, amount,max } =
       payload.content;
     //asset 是dvg
-    this._callWithdrawXdvg(asset, amount, (err, withdrawResult) => {
+    this._callWithdrawXdvg(asset, amount,max, (err, withdrawResult) => {
       if (err) {
         return emitter.emit(ERROR, err);
       }
@@ -5690,7 +5698,7 @@ class Store {
     })
   }
 
-  _callWithdrawXdvg = async (asset, amount, callback) => {
+  _callWithdrawXdvg = async (asset, amount,max,callback) => {
     const account = this.getStore('account');
     const web3 = await this._getWeb3Provider();
     if (!web3) {
@@ -5702,7 +5710,15 @@ class Store {
       xdvg.abi,
       xdvg.erc20address
     );
-    let _amount = web3.utils.toWei(amount, "ether");
+    let _amount = '';
+    if(max){
+      _amount = await xDVGCOntract.methods
+    .balanceOf(account.address)
+    .call({ from: account.address });
+    }else{
+
+      _amount = web3.utils.toWei(amount, "ether");
+    }
     console.log(_amount,'_amount5702');
     xDVGCOntract.methods
       .withdraw(_amount)
