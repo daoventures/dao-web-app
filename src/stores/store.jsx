@@ -5525,7 +5525,6 @@ class Store {
         console.log(err)
         return emitter.emit(ERROR, err)
       }
-      console.log(assets,'assets##');
       store.setStore({ dvg: assets })
       return emitter.emit(GET_DVG_BALANCE_SUCCESS, assets)
     })

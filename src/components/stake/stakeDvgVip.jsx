@@ -621,8 +621,10 @@ class StakeDvgVip extends Component {
 
     submitStake = () => {
         if (this.state.type == 'stake') {
-            dispatcher.dispatch({ type: DEPOSIT_XDVG, content: { amount: this.state.amount, asset: this.state.dvgInfoObj[0] } })
+            console.log(this.state.dvgInfoObj[0],'this.state.dvgInfoObj[0]##');
+            dispatcher.dispatch({ type: DEPOSIT_XDVG, content: { amount: this.state.amount, asset: this.state.dvgInfoObj[1] } })
         } else {
+            console.log(this.state.dvgInfoObj[1],'this.state.dvgInfoObj[0]##');
             dispatcher.dispatch({ type: WIDTHDRAW_XDVG, content: { amount: this.state.amount, asset: this.state.dvgInfoObj[1] } })
         }
     }
