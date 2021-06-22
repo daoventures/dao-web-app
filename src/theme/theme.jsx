@@ -37,7 +37,8 @@ export const colors = {
   lightBlue: "#2F80ED",
   topaz: "#0b8f92",
   darkGray: "rgba(43,57,84,.5)",
-  borderBlue: 'rgba(25, 101, 233, 0.5)'
+  borderBlue: 'rgba(25, 101, 233, 0.5)',
+  
 };
 
 const colorObj = {
@@ -102,7 +103,17 @@ const colorObj = {
     btnDisabled: 'rgba(115, 103, 247, 0.4)',
     walletSelectBg:'#23204f',
     walletSelectBorder:'#7367f7',
-    totalValue:'rgba(21,2,59,0.7)'
+    totalValue:'rgba(21,2,59,0.7)',
+    silderBoxShadow:'0px 0px 30px #15023B',
+    sliderLight:'#201D47',
+    stakeTextBg:'rgba(110,103,247,1)',
+    stakeTextText:'#FFFFFF',
+    myAssetsRateText:'rgba(255,255,255,.6)',
+    contactUsText:'#7367F7',
+    buttonDeauflt:'#180C4B',
+    buttonActive:'#7367F7',
+    // stake
+
   },
   light: {
     // 以前的部分(为了兼容)
@@ -167,7 +178,15 @@ const colorObj = {
     btnDisabled: 'rgba(115, 103, 247, 0.4)',
     walletSelectBg:'#ffffff',
     walletSelectBorder:'rgba(0, 0, 0, 0.1)',
-    totalValue:'#ffffff'
+    totalValue:'#ffffff',
+    silderBoxShadow:'0px 0px 30px rgba(0,0,0,.2)',
+    sliderLight:'#F1F3F9',
+    stakeTextBg:'rgba(110,103,247,1)',
+    stakeTextText:'#FFFFFF',
+    myAssetsRateText:'rgba(0,0,0,.6)',
+    contactUsText:'#000000',
+    buttonDeauflt:'#180C4B',
+    buttonActive:'rgba(115,103,247,.2)',
   }
 };
 
@@ -184,7 +203,7 @@ const breakpoints = createBreakpoints({
   }
 })
 
-export const drawerWidth = 240;
+export const drawerWidth = 245;
 
 const iswapTheme =  {
   typography: {
@@ -360,7 +379,7 @@ const iswapTheme =  {
       root: {
         border: '1px solid #d9d9d9',
         borderRadius: '10px',
-        margin: '8px 0px',
+        margin: '16px 0px 8px',
         '&:before': { //underline color when textfield is inactive
           backgroundColor: 'none',
           height: '0px'
@@ -631,7 +650,7 @@ export function getTheme (currentTheme = 'light') {
         root: {
           border: '1px solid #d9d9d9',
           borderRadius: '10px',
-          margin: '8px 0px',
+          margin: '16px 0px 8px',
           '&:before': { //underline color when textfield is inactive
             backgroundColor: 'none',
             height: '0px'

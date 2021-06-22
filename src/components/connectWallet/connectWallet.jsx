@@ -75,7 +75,7 @@ const styles = theme => ({
     fontSize: '1rem',
     lineHeight: '19px',
     textAlign: 'center',
-    color: '#18A0FB',
+    color: theme.themeColors.textT,
     // position: 'absolute',
     // bottom: '5%',
     // left: '0',
@@ -87,7 +87,8 @@ const styles = theme => ({
     }
   },
   buttonGroup: {
-    background: '#18A0FB',
+    // background: '#18A0FB',
+    background: 'linear-gradient(135deg, #0B2663 0%, #1152DF 100%)',
     borderRadius: '48px',
     color: '#ffffff',
     display: 'flex',
@@ -128,7 +129,7 @@ const styles = theme => ({
     }
   },
   descriptionContainer: {
-    borderColor: theme.themeColors.lineT,
+    borderColor: theme.themeColors.border,
     borderWidth: '1px',
     borderStyle: 'solid',
     // marginTop: '8rem',
@@ -215,18 +216,18 @@ class ConnectWallet extends Component {
     emitter.on(ERROR, this.errorReturned);
     const onboard = initOnboard({
       address: (address) => {
-        console.log('onboard#####address####', address);
+        // console.log('onboard#####address####', address);
         store.setStore({account: {address: address}});
         emitter.emit(CONNECTION_CONNECTED);
       },
       network: (network) => {
-        console.log('onboard###network#####', network);
+        // console.log('onboard###network#####', network);
         store.setStore({network: network});
         emitter.emit('CHANGE_NETWORK', {network: network});
       },
       balance: (balance) => {
         let account = store.getStore('account');
-        console.log('onboard#####balance#####', balance);
+        // console.log('onboard#####balance#####', balance);
         store.setStore({account: {...account,balance: balance}});
         emitter.emit(CONNECTION_CONNECTED);
       },
