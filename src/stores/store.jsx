@@ -67,6 +67,8 @@ import {
   EXPERT,
   DEGEN,
   BICONOMY_CONNECTED,
+  GET_HAPPY_HOUR_STATUS,
+  HAPPY_HOUR_RETURN,
 } from "../constants";
 import Web3 from "web3";
 import {
@@ -380,6 +382,9 @@ class Store {
           case BICONOMY_CONNECTED:
             this.saveBiconomyProvider(payload);
             break;
+          case GET_HAPPY_HOUR_STATUS:
+            this.eventVerify(payload);
+            break;
           default: {
           }
         }
@@ -458,6 +463,7 @@ class Store {
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-citadel-vault",
           isPopularItem: true, // use to render popular item icon
+          // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
         },
         {
           id: "USDT",
@@ -738,6 +744,7 @@ class Store {
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-citadel-vault",
           isPopularItem: true,
+          // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
         },
         {
           id: "USDT",
@@ -4038,7 +4045,7 @@ class Store {
         }
       );
 
-      const happyHour = this._eventVerify();
+      const happyHour = this._eventVerifyAmount();
 
       if (happyHour === true) {
         await this._callDepositAmountContractCitadelHappyHour(
@@ -4556,7 +4563,7 @@ class Store {
           }
         }
       );
-      const happyHour = this._eventVerify();
+      const happyHour = this._eventVerifyAmount();
       console.log("🚀 | Store | depositAllContract= | happyHour", happyHour);
 
       // TODO: Call backend api for happy hour condition
@@ -5484,16 +5491,48 @@ class Store {
     }
   };
 
-  _eventVerify = async (amount) => {
+  _eventVerifyAmount = async (amount) => {
     const url = `${config.statsProvider}event/verify/${amount}`;
     const resultString = await rp(url);
     const result = JSON.parse(resultString);
-    console.log("🚀 | Store | _eventVerify= | result", result);
-    if (result.body === "Valid") {
+    console.log("🚀 | Store | _eventVerifyAmount= | result", result);
+    if (
+      result.body.happyHour === true &&
+      result.body.amountAboveThreshold === true
+    ) {
+      alert(result.body.message);
+      store.setStore({ happyHour: true }); // Might be redundant
       return true;
     } else {
+      alert(result.body.message);
+      store.setStore({ happyHour: false });
       return false;
     }
+  };
+
+  eventVerify = async (payload) => {
+    const url = `${config.statsProvider}event/verify/`;
+    const resultString = await rp(url);
+    const result = JSON.parse(resultString);
+    let _result = {};
+    console.log("🚀 | Store | _eventVerify= | result", result);
+    if (result.body.happyHour === true) {
+      _result = {
+        happyHour: result.body.happyHour,
+        happyHourStartTime: result.body.startTime,
+        happyHourEndTime: result.body.endTime,
+      };
+    } else {
+      _result = { happyHour: result.body.happyHour };
+    }
+    // For testing
+    _result = {
+      happyHour: true,
+      happyHourStartTime: Date.now(),
+      happyHourEndTime: Date.now() + 6000000,
+    };
+    store.setStore(_result);
+    emitter.emit(HAPPY_HOUR_RETURN, _result);
   };
 
   _getAddressStatistics = async (address) => {
@@ -5577,6 +5616,10 @@ class Store {
     const allowed = ["daoCDV"];
 
     const citadelAsset = assets.filter((el) => el.id == "daoCDV");
+    console.log(
+      "🚀 | Store | saveBiconomyProvider= | citadelAsset",
+      citadelAsset
+    );
 
     console.log(
       "🚀 | Store | saveBiconomyProvider= | citadelAsset",

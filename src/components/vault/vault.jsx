@@ -46,6 +46,7 @@ import {
   DEGEN,
   APPROVE_TRANSACTING,
   APPROVE_COMPLETED,
+  HAPPY_HOUR_RETURN,
 } from "../../constants";
 
 import Store from "../../stores";
@@ -706,6 +707,7 @@ class Vault extends Component {
       assets: store.getStore("vaultAssets"),
       usdPrices: store.getStore("usdPrices"),
       networkId: store.getStore("networkId"),
+      happyHour: store.getStore("happyHour"),
       account: account,
       address: account.address
         ? account.address.substring(0, 6) +
@@ -735,6 +737,13 @@ class Vault extends Component {
         content: { interval: "30d" },
       });
     }
+
+    // if (!this.state.happyHour) {
+    //   dispatcher.dispatch({
+    //     type: GET_STRATEGY_BALANCES_FULL,
+    //     content: { interval: "30d" },
+    //   });
+    // }
   }
 
   componentWillMount() {
@@ -760,6 +769,7 @@ class Vault extends Component {
     emitter.on(CONNECTION_DISCONNECTED, this.connectionDisconnected);
     emitter.on(CHANGE_NETWORK, this.networkChanged);
     emitter.on(VAULT_BALANCES_FULL_RETURNED, this.networkChanged);
+    emitter.on(HAPPY_HOUR_RETURN, this.handleHappyHour);
   }
 
   componentWillUnmount() {
@@ -790,6 +800,10 @@ class Vault extends Component {
     emitter.removeListener(CHANGE_NETWORK, this.networkChanged);
     emitter.removeListener(VAULT_BALANCES_FULL_RETURNED, this.networkChanged);
   }
+
+  handleHappyHour = (payload) => {
+    this.setState({ happyHour: payload.happyHour });
+  };
 
   networkChanged = (obj) => {
     const account = store.getStore("account");
@@ -1099,7 +1113,11 @@ class Vault extends Component {
                     <use xlinkHref="#iconinformation-day"></use>
                   </svg>
                 </a>
-                {this.renderPopularIcon(asset)}
+                {asset.isPopularItem || this.state.happyHour
+                  ? this.state.happyHour && asset.strategyType === "citadel"
+                    ? this.renderHappyHourIcon(asset)
+                    : this.renderPopularIcon(asset)
+                  : null}
               </Grid>
               {this.renderRiskLabel(asset)}
             </Grid>
@@ -1430,6 +1448,18 @@ class Vault extends Component {
           />
         </div>
       )
+    );
+  };
+
+  renderHappyHourIcon = (asset) => {
+    return (
+      <div>
+        <img
+          alt="icon-popular"
+          src={require("../../assets/img_new/icon_happyhour.svg")}
+          style={{ marginLeft: "10px", marginTop: "8px" }}
+        />
+      </div>
     );
   };
 
