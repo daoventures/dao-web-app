@@ -122,6 +122,9 @@ export const DEGEN = "Degen";
 // Biconomy
 export const BICONOMY_CONNECTED = "BICONOMY_CONNECTED";
 
+export const GET_HAPPY_HOUR_STATUS = "GET_HAPPY_HOUR_STATUS";
+export const HAPPY_HOUR_RETURN = "HAPPY_HOUR_RETURN";
+
 // Block Explorers
 export const BLOCK_EXPLORERS = {
   1: "https://etherscan.io/tx/",
