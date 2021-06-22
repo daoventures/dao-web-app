@@ -520,6 +520,7 @@ class StakeDvgVip extends Component {
             amount: '',
             type: 'stake',
             isShowApr:false,
+            max:false,
             aprInfo: {
                 tvl:0
             }
@@ -621,15 +622,16 @@ class StakeDvgVip extends Component {
 
     submitStake = () => {
         if (this.state.type == 'stake') {
-            dispatcher.dispatch({ type: DEPOSIT_XDVG, content: { amount: this.state.amount, asset: this.state.dvgInfoObj[0] } })
+            dispatcher.dispatch({ type: DEPOSIT_XDVG, content: { amount: this.state.amount, asset: this.state.dvgInfoObj[1],max:this.state.max } })
         } else {
-            dispatcher.dispatch({ type: WIDTHDRAW_XDVG, content: { amount: this.state.amount, asset: this.state.dvgInfoObj[1] } })
+            dispatcher.dispatch({ type: WIDTHDRAW_XDVG, content: { amount: this.state.amount, asset: this.state.dvgInfoObj[1],max:this.state.max } })
         }
     }
 
     onChange = (event) => {
         this.setState({
-            amount: event.target.value
+            amount: event.target.value,
+            max:false
         })
     }
 
@@ -637,7 +639,8 @@ class StakeDvgVip extends Component {
         if (type !== this.state.type) {
             this.setState({
                 type: type,
-                amount: ''
+                amount: '',
+                max:false
             })
         }
     }
@@ -655,12 +658,14 @@ class StakeDvgVip extends Component {
         if (type == 'stake') {
             this.setState({
                 // amount: Number(dvgInfoObj && dvgInfoObj[1].balance).toFixed(4)
-                amount:dvgInfoObj && dvgInfoObj[1].balance.toString()
+                amount:dvgInfoObj && dvgInfoObj[1].balance.toString(),
+                max:true
             })
         } else {
             this.setState({
                 // amount: Number(dvgInfoObj && dvgInfoObj[0].balance).toFixed(4)
-                amount:dvgInfoObj && dvgInfoObj[0].balance.toString()
+                amount:dvgInfoObj && dvgInfoObj[0].balance.toString(),
+                max:true
             })
         }
     }
