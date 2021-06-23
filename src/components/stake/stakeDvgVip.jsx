@@ -23,7 +23,7 @@ import {
     DEPOSIT_DVG_RETURNED
 } from '../../constants'
 import Store from "../../stores";
-import ConnectWallet from "../connectWallet";
+import ConnectWallet from "../common/connectWallet/connectWallet";
 import { initOnboard } from '../../walletsServices.js';
 
 const emitter = Store.emitter

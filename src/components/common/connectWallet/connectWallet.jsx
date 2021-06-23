@@ -8,9 +8,9 @@ import {
   Grid,
   Button
 } from '@material-ui/core';
-import { colors, drawerWidth } from '../../theme'
+import { colors, drawerWidth } from '../../../theme'
 
-import Loader from '../loader'
+import Loader from '../../loader'
 
 import {
   ERROR,
@@ -20,15 +20,15 @@ import {
   DASHBOARD_SNAPSHOT_RETURNED,
   CHANGE_NETWORK,
   GET_VAULT_BALANCES_FULL
-} from '../../constants'
+} from '../../../constants'
 import * as moment from 'moment';
 import _ from 'lodash';
 
 // blocknative测试
-import {initOnboard} from '../../walletsServices.js';
+import {initOnboard} from '../../../walletsServices.js';
 
-import Store from "../../stores";
-import UnlockModal from "../unlock/unlockModal";
+import Store from "../../../stores";
+import UnlockModal from "../../unlock/unlockModal";
 import Highcharts from 'highcharts';
 import HighchartsReact from "highcharts-react-official";
 const emitter = Store.emitter
@@ -295,7 +295,7 @@ class ConnectWallet extends Component {
                 <div className={classes.shieldContainer}>
                   <img 
                     alt=""
-                    src={require('../../assets/shield.svg')}
+                    src={require('../../../assets/shield.svg')}
                   />
                 </div>
                 <Typography variant='h3' className={classes.subtitle}>Non-custodial & Secure</Typography>

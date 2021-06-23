@@ -5,10 +5,10 @@ import { withNamespaces } from 'react-i18next';
 import {
   CURRENT_THEME_RETURNED
 } from '../../constants'
+import ComingSoon from '../common/comingSoon/comingSoon';
 
 import Store from "../../stores";
 const emitter = Store.emitter
-const dispatcher = Store.dispatcher
 const store = Store.store
 
 
@@ -25,24 +25,6 @@ const styles = theme => ({
         [theme.breakpoints.down('sm')]: {
             paddingLeft: '0px',
             paddingRight: '0px'
-        }
-    },
-    comingSoon: {
-        textAlign: 'center',
-        '& img': {
-            width: '100px'
-        },
-        '& p': {
-            fontSize: '30px',
-            color: theme.themeColors.textT
-        },
-        [theme.breakpoints.down('sm')]: {
-            '& img': {
-                width: '60px'
-            },
-            '& p': {
-                fontSize: '20px',
-            },
         }
     }
 });
@@ -69,13 +51,7 @@ class Swap extends Component {
     }
 
     render() {
-        const { classes } = this.props;
-        return <div className={ classes.root }>
-            <div className={ classes.comingSoon }>
-                <img src={this.state.currentTheme === 'light' ? require("../../assets/img_new/comingsoon_light@2x.png") : require("../../assets/img_new/comingsoon_dark@2x.png")}/>
-                <p>Coming Soon</p>
-            </div>
-        </div>
+        return <ComingSoon></ComingSoon>
     }
 }
 
