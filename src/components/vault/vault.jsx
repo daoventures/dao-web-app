@@ -669,7 +669,6 @@ const styles = (theme) => ({
       fontSize: '12px',
     }
   },
-
 });
 
 class Vault extends Component {
