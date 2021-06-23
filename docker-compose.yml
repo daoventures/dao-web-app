@@ -15,7 +15,6 @@ services:
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
     networks: 
       - yearn-api_backend
-      - dao-swap-frontend_dao_swap
   certbot:
     image: certbot/certbot
     volumes: 
@@ -24,6 +23,4 @@ services:
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 networks: 
   yearn-api_backend:
-    external: true
-  dao-swap-frontend_dao_swap:
     external: true
