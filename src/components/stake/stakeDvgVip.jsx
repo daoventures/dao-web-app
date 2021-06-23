@@ -866,7 +866,7 @@ class StakeDvgVip extends Component {
                                     </h3>
 
                                     <h4>
-                                        <a href="#" target="_blank" className={classes.seeMore}>See more here.</a>
+                                        <a href="https://daoventuresco.medium.com/" target="_blank" className={classes.seeMore}>See more here.</a>
                                     </h4>
                                    
                                     <ul>
