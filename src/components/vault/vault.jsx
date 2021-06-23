@@ -63,17 +63,19 @@ const store = Store.store;
 const styles = (theme) => ({
   root: {
     flex: 1,
-    display: "flex",
-    flexDirection: "column",
-    width: "100%",
-    justifyContent: "center",
-    alignItems: "flex-end",
-    paddingLeft: "320px",
-    paddingRight: "80px",
-    minHeight: "800px",
-    [theme.breakpoints.down("sm")]: {
-      paddingLeft: "0px",
-      paddingRight: "0px",
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+    paddingLeft: '320px',
+    paddingRight: '80px',
+    paddingTop: '32px',
+    minHeight: '800px',
+    [theme.breakpoints.down('sm')]: {
+      paddingLeft: '0px',
+      paddingRight: '0px',
+      paddingTop: '40px',
     },
   },
   contentContainer: {
@@ -109,6 +111,11 @@ const styles = (theme) => ({
       margin: "auto",
       marginTop: "40px",
     },
+    [theme.breakpoints.down('sm')]: {
+      // minWidth: '90%',
+      margin: 'auto',
+      marginTop: '40px',
+    }
   },
   balancesContainer: {
     display: "flex",
@@ -470,36 +477,36 @@ const styles = (theme) => ({
     // padding: '1rem',
     marginBottom: "20px",
     background: theme.themeColors.itemBack,
-    [theme.breakpoints.down("sm")]: {
-      width: "95%",
-      margin: "auto",
-      marginBottom: "20px",
+    [theme.breakpoints.down('sm')]: {
+      width: '96%',
+      margin: '0 auto',
+      marginBottom: '20px',
     },
   },
   riskLowLabel: {
-    background: "#72C6AE",
-    borderRadius: "5px",
-    color: "#ffffff",
-    padding: "5px 10px",
-    textAlign: "center",
-    width: "5rem",
-    marginLeft: "auto",
-    position: "absolute",
-    right: "0px",
-    top: "0px",
+    background: '#15c73e',
+    borderBottomLeftRadius: '14px',
+    color: '#ffffff',
+    padding: '5px 10px',
+    textAlign: 'center',
+    width: '5rem',
+    marginLeft: 'auto',
+    position: 'absolute',
+    right: '0px',
+    top: '0px'
   },
   riskMediumLabel: {
-    background: "#EC9956",
+    background: '#C77815',
     // borderRadius: '5px',
-    color: "#ffffff",
-    padding: "5px 10px",
-    textAlign: "center",
-    width: "7rem",
-    marginLeft: "auto",
-    position: "absolute",
-    right: "0px",
-    top: "0px",
-    borderBottomLeftRadius: "15px",
+    color: '#ffffff',
+    padding: '5px 10px',
+    textAlign: 'center',
+    width: '7rem',
+    marginLeft: 'auto',
+    position: 'absolute',
+    right: '0px',
+    top: '0px',
+    borderBottomLeftRadius: '14px'
   },
   riskExpertLabel: {
     background: "#C715A7",
@@ -543,11 +550,11 @@ const styles = (theme) => ({
   },
   gridItemColumn: {
     // display: 'flex',
-    alignItems: "center",
-    [theme.breakpoints.down("sm")]: {
-      marginBottom: "5px",
-      alignItems: "stretch",
-    },
+    alignItems: 'center',
+    [theme.breakpoints.down('sm')]: {
+      marginBottom: '16px',
+      alignItems: 'stretch',
+    }
   },
   roundIconClass: {
     background: "rgba(24, 160, 251, 0.1)",
@@ -583,8 +590,8 @@ const styles = (theme) => ({
 
   // 主题块儿样式调整
   warnIcon: {
-    width: "16px",
-    height: "16px",
+    width: '20px',
+    height: '20px',
     fill: theme.themeColors.iconGray,
     marginLeft: "8px",
   },
@@ -609,18 +616,27 @@ const styles = (theme) => ({
     },
   },
   accordionsummary: {
-    height: "100px",
-    padding: "0px 24px",
+    height: '100px',
+    padding: '0px 26px',
+    [theme.breakpoints.down('md')]: {
+      padding: '0px 10px',
+    }
   },
   assetLabel1: {
-    display: "block",
-    fontSize: "18px",
+    display: 'block',
+    fontSize: '18px',
     color: theme.themeColors.textT,
+    [theme.breakpoints.down('md')]: {
+      fontSize: '14px',
+    }
   },
   assetLabel2: {
-    display: "block",
-    fontSize: "14px",
+    display: 'block',
+    fontSize: '14px',
     color: theme.themeColors.textP,
+    [theme.breakpoints.down('md')]: {
+      fontSize: '12px',
+    }
   },
   assetIconImg: {
     height: "50px",
@@ -629,10 +645,29 @@ const styles = (theme) => ({
     },
   },
   dropDownIcon: {
-    width: "30px",
-    height: "30px",
-    fill: theme.themeColors.textP,
+    width: '30px',
+    height: '30px',
+    fill: theme.themeColors.textP
   },
+  assetLabelTextRight: {
+    display: 'block',
+    fontSize: '18px',
+    paddingLeft: '30px',
+    color: theme.themeColors.textT,
+    [theme.breakpoints.down('md')]: {
+      fontSize: '14px',
+    }
+  },
+  assetLabelTextRight1: {
+    display: 'block',
+    fontSize: '14px',
+    paddingLeft: '30px',
+    color: theme.themeColors.textP,
+    [theme.breakpoints.down('md')]: {
+      fontSize: '12px',
+    }
+  },
+
 });
 
 class Vault extends Component {
@@ -649,11 +684,11 @@ class Vault extends Component {
       account: account,
       address: account.address
         ? account.address.substring(0, 6) +
-          "..." +
-          account.address.substring(
-            account.address.length - 4,
-            account.address.length
-          )
+        "..." +
+        account.address.substring(
+          account.address.length - 4,
+          account.address.length
+        )
         : null,
       snackbarType: null,
       snackbarMessage: null,
@@ -765,11 +800,11 @@ class Vault extends Component {
       account: account,
       address: account.address
         ? account.address.substring(0, 6) +
-          "..." +
-          account.address.substring(
-            account.address.length - 4,
-            account.address.length
-          )
+        "..." +
+        account.address.substring(
+          account.address.length - 4,
+          account.address.length
+        )
         : null,
     });
 
@@ -1043,24 +1078,14 @@ class Vault extends Component {
                         />
                       </div>
                     </Grid>
+                      {/* <Typography variant={ 'body1' } noWrap className={classes.assetName}>{ asset.name }</Typography> */}
 
-                    <Grid item sm={2} xs={4} className={classes.gridItemColumn}>
-                      <Typography
-                        variant={"h5"}
-                        style={{
-                          wordWrap: "break-word",
-                        }}
-                        className={classes.assetLabel1}>
-                        {asset.name}
-                      </Typography>
-                      <Typography
-                        variant={"body1"}
-                        className={classes.assetLabel2}>
-                        {asset.description}
-                      </Typography>
-                    </Grid>
+                      <Grid item sm={2} xs={4} className={classes.gridItemColumn}>
+                        <Typography variant={'h5'} className={classes.assetLabel1}>{asset.name}</Typography>
+                        <Typography variant={'h5'} className={classes.assetLabel2}>{asset.description}</Typography>
+                      </Grid>
 
-                    <Grid item sm={3} xs={6} className={classes.gridItemColumn}>
+                      <Grid item sm={3} xs={6} className={classes.gridItemColumn}>
                       {!["LINK"].includes(asset.id) && asset.vaultBalance > 0 && (
                         <div>
                           <div className={classes.showDesktop}>
@@ -1146,93 +1171,80 @@ class Vault extends Component {
                         )}
                     </Grid>
 
-                    <Grid item sm={3} xs={6} className={classes.gridItemColumn}>
-                      {/** Available to deposit */}
-                      {/** Desktop */}
-                      <div className={classes.showDesktop}>
-                        <Typography
-                          variant={"h5"}
-                          className={classes.assetLabel1}>
-                          <div>
-                            {(asset.strategyType === "citadel"
-                              ? asset.sumBalances
-                                ? asset.sumBalances.toLocaleString(undefined, {
+                      <Grid item sm={3} xs={6} className={classes.gridItemColumn}>
+                        {/** Available to deposit */}
+                        {/** Desktop */}
+                        <div className={classes.showDesktop}>
+                          <Typography
+                            variant={"h5"}
+                            className={classes.assetLabel1}>
+                            <div>
+                              {(asset.strategyType === "citadel"
+                                ? asset.sumBalances
+                                  ? asset.sumBalances.toLocaleString(undefined, {
                                     minimumFractionDigits: 2,
                                     maximumFractionDigits: 2,
                                   })
-                                : "0.00"
-                              : asset.balance
-                              ? asset.balance.toLocaleString(undefined, {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2,
-                                })
-                              : "0.00") +
-                              " " +
-                              (asset.strategyType === "citadel"
-                                ? "USD"
-                                : asset.symbol)}
-                          </div>
-                        </Typography>
-                        <Typography
-                          variant={"body1"}
-                          className={classes.assetLabel2}>
-                          Available to deposit
-                        </Typography>
-                      </div>
-
-                      {/** Mobile */}
-                      <div className={classes.showMobile}>
-                        <Typography
-                          variant={"h3"}
-                          noWrap
-                          className={classes.assetLabel1}>
-                          <div>
-                            {(asset.strategyType === "citadel"
-                              ? asset.sumBalances
-                                ? asset.sumBalances.toLocaleString(undefined, {
+                                  : "0.00"
+                                : asset.balance
+                                  ? asset.balance.toLocaleString(undefined, {
                                     minimumFractionDigits: 2,
                                     maximumFractionDigits: 2,
                                   })
-                                : "0.00"
-                              : asset.balance
-                              ? asset.balance.toLocaleString(undefined, {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2,
-                                })
-                              : "0.00") +
-                              " " +
-                              (asset.strategyType === "citadel"
-                                ? "USD"
-                                : asset.symbol)}
-                          </div>
+                                  : "0.00") +
+                                " " +
+                                (asset.strategyType === "citadel"
+                                  ? "USD"
+                                  : asset.symbol)}
+                            </div>
+                          </Typography>
+                          <Typography
+                            variant={"body1"}
+                            className={classes.assetLabel2}>
+                            Available to deposit
                         </Typography>
-                        <Typography
-                          variant={"h5"}
-                          className={classes.assetLabel2}>
-                          Available to deposit
-                        </Typography>
-                      </div>
-                    </Grid>
+                        </div>
 
-                    <Grid item sm={3} xs={6} className={classes.gridItemColumn}>
-                      {/* 暂时不知道取什么 */}
-                      <Typography
-                        variant={"h5"}
-                        className={classes.assetLabel1}>
-                        ${" "}
-                        {asset.tvl
-                          ? asset.tvl.toLocaleString(undefined, {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })
-                          : "0.00"}
-                      </Typography>
-                      <Typography
-                        variant={"body1"}
-                        className={classes.assetLabel2}>
-                        Total Value Locked
-                      </Typography>
-                    </Grid>
+                        {/** Mobile */}
+                        <div className={classes.showMobile}>
+                          <Typography
+                            variant={"h3"}
+                            noWrap
+                            className={classes.assetLabel1}>
+                            <div>
+                              {(asset.strategyType === "citadel"
+                                ? asset.sumBalances
+                                  ? asset.sumBalances.toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  })
+                                  : "0.00"
+                                : asset.balance
+                                  ? asset.balance.toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  })
+                                  : "0.00") +
+                                " " +
+                                (asset.strategyType === "citadel"
+                                  ? "USD"
+                                  : asset.symbol)}
+                            </div>
+                          </Typography>
+                          <Typography
+                            variant={"h5"}
+                            className={classes.assetLabel2}>
+                            Available to deposit
+                        </Typography>
+                        </div>
+                      </Grid>
+
+                      
+                      <Grid item sm={3} xs={6} className={classes.gridItemColumn}>
+                        {/* 暂时不知道取什么 */}
+                        <Typography variant={'h5'} className={classes.assetLabel1, classes.assetLabelTextRight}>$ {asset.tvl ? Number(asset.tvl).toFixed(4) : '0.00'}</Typography>
+                        <Typography variant={'h5'} className={classes.assetLabel2, classes.assetLabelTextRight1}>Total Value Locked</Typography>
+                      </Grid>
                   </Grid>
                 </div>
               </AccordionSummary>
@@ -1241,7 +1253,7 @@ class Vault extends Component {
                   asset={asset}
                   startLoading={this.startLoading}
                   basedOn={basedOn}
-                  // refreshVault={this.refreshVault}
+                // refreshVault={this.refreshVault}
                 />
               </AccordionDetails>
             </Accordion>

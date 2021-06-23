@@ -38,6 +38,7 @@ const styles = (theme) => ({
       background: "linear-gradient(135deg, #0B2663 0%, #1152DF 100%)",
       border: "none",
       color: "#ffffff",
+      padding: '0'
     },
     [theme.breakpoints.up("md")]: {},
     [theme.breakpoints.down("md")]: {
@@ -46,6 +47,8 @@ const styles = (theme) => ({
       "marginRight": "10px",
       "&.active": {
         width: "90px",
+        minWidth: '90px',
+        padding: '0 10px'
       },
     },
   },
@@ -67,6 +70,7 @@ const styles = (theme) => ({
       "display": "none",
       "&.active": {
         display: "inline-block",
+        fontSize: '12px',
       },
     },
   },
@@ -97,9 +101,8 @@ class RiskLevelTab extends Component {
         return (
           <li
             key={index}
-            className={`${classes.typeTabItem} ${
-              currentTab === index ? "active" : ""
-            }`}
+            className={`${classes.typeTabItem} ${currentTab === index ? "active" : ""
+              }`}
             onClick={() => this.selectTab(index)}>
             <svg
               aria-hidden="true"
@@ -110,9 +113,8 @@ class RiskLevelTab extends Component {
               <use xlinkHref={item.icon}></use>
             </svg>
             <span
-              className={`${classes.typeTabText} ${
-                currentTab === index ? "active" : ""
-              }`}>
+              className={`${classes.typeTabText} ${currentTab === index ? "active" : ""
+                }`}>
               {item.label}
             </span>
           </li>

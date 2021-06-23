@@ -26,7 +26,7 @@ import {
   INVEST,
   SWAP_PATH,
   SWAP,
-  DAOMINE_PATH
+  DAOMINE_PATH,
 } from "../../constants/page-constant";
 import { drawerWidth } from "../../theme/theme";
 import ToggleTheme from "../toggleTheme";
@@ -80,7 +80,7 @@ const styles = (theme) => ({
     /*定义滑块 内阴影*/
     "&::-webkit-scrollbar-thumb": {
       "-webkit-box-shadow": "inset 0 0 6px rgba(0,0,0,0)",
-      background: "#7367F7",
+      background: theme.themeColors.back,
     },
   },
   drawerLeft: {
@@ -120,7 +120,7 @@ const styles = (theme) => ({
     padding: "0px 20px",
     display: "flex",
     alignItems: "center",
-    color: theme.themeColors.textP,
+    color: theme.themeColors.contactUsText,
     borderColor: "rgba(255, 255, 255, 0)",
     borderLeftWidth: "6px",
     borderStyle: "solid",
@@ -161,7 +161,7 @@ const styles = (theme) => ({
   },
   accountInfoBlock: {
     // padding: '46px 20px 20px 20px'
-    padding: "36px 20px 20px 20px",
+    padding: "10px 20px 20px 20px",
     position: "relative",
   },
   accountInfo: {
@@ -214,7 +214,7 @@ const styles = (theme) => ({
   walletList: {
     width: "201px",
     position: "absolute",
-    top: "90px",
+    top: "70px",
     background: theme.themeColors.walletSelectBg,
     borderColor: theme.themeColors.walletSelectBorder,
     borderStyle: "solid",
@@ -290,6 +290,12 @@ const styles = (theme) => ({
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
+  },
+  menuList: {
+    height: "100%",
+    display: "flex",
+    justifyContent: "space-between",
+    flexDirection: "column",
   },
 });
 
@@ -638,15 +644,17 @@ class SideDrawer extends Component {
         {this.renderTotalValueLocked()}
 
         {/** Side Navigation Bar */}
-        <List>
-          {listItem && listItem.length > 0
-            ? listItem.map((item) => {
-                return item.childrens
-                  ? this.renderChildrenListItem(item)
-                  : this.renderNormalListItem(item);
-              })
-            : null}
-        </List>
+        <div className={classes.menuList}>
+          <List>
+            {listItem && listItem.length > 0
+              ? listItem.map((item) => {
+                  return item.childrens
+                    ? this.renderChildrenListItem(item)
+                    : this.renderNormalListItem(item);
+                })
+              : null}
+          </List>
+        </div>
 
         {/** Footer */}
         {this.renderFooterMenu(false)}
@@ -702,7 +710,9 @@ class SideDrawer extends Component {
                   button
                   key={c.key}
                   className={
-                    window.location.pathname === item.path ? classes.selected : classes.menuItem
+                    window.location.pathname === item.path
+                      ? classes.selected
+                      : classes.menuItem
                   }
                   onClick={() => {
                     this.navInApp(c.name);
@@ -775,7 +785,6 @@ class SideDrawer extends Component {
         {/** Total Value Locked */}
         {this.renderTotalValueLocked()}
 
-      
         {/** Side Navigation Bar */}
         <List>
           {listItem && listItem.length > 0
