@@ -4,6 +4,8 @@ import { withStyles } from '@material-ui/core/styles';
 import { withNamespaces } from 'react-i18next';
 import {
     Grid,
+    Popover,
+    Typography
 } from '@material-ui/core';
 import {
     GET_DVG_INFO,
@@ -61,11 +63,11 @@ const styles = theme => ({
             flexWrap: 'wrap',
             justifyContent: 'flex-start',
             backgroundImage: 'url(' + require('../../assets/stakeImg/h5-Dvg_banenr@2x.png') + ')',
-            backgroundSize:'100% 100%'
+            backgroundSize: '100% 100%'
         }
     },
-    bannerLeft:{
-        width:'100%'
+    bannerLeft: {
+        width: '100%'
     },
     text: {
         fontSize: '30px',
@@ -73,9 +75,9 @@ const styles = theme => ({
         color: '#FFFFFF',
         lineHeight: '96px',
         [theme.breakpoints.down('sm')]: {
-            width:'100%',
+            width: '100%',
             lineHeight: 1,
-            textAlign:'center',
+            textAlign: 'center',
             fontSize: '20px',
             marginTop: '20px'
         }
@@ -107,15 +109,15 @@ const styles = theme => ({
         color: theme.themeColors.textT,
         backgroundSize: '100% 100%',
         textAlign: 'center',
-        color:'#FFFFFF',
+        color: '#FFFFFF',
         marginBottom: '8px',
-        marginRight:'20px',
+        marginRight: '20px',
         cursor: 'pointer',
         [theme.breakpoints.down('sm')]: {
             width: '160px',
             fontSize: '14px'
         },
-        '&:hover':{
+        '&:hover': {
             backgroundImage: 'url(' + require('../../assets/stakeImg/button_Uniswap_hover.png') + ')',
         }
     },
@@ -134,7 +136,7 @@ const styles = theme => ({
             width: '160px',
             fontSize: '14px'
         },
-        '&:hover':{
+        '&:hover': {
             backgroundImage: 'url(' + require('../../assets/stakeImg/button_pancakeswap_hover.png') + ')',
         }
     },
@@ -188,7 +190,7 @@ const styles = theme => ({
         alignItems: 'center',
         marginTop: '25px',
         [theme.breakpoints.down('sm')]: {
-            display:'block'            
+            display: 'block'
         },
     },
     stakeTab: {
@@ -220,15 +222,15 @@ const styles = theme => ({
         lineHeight: '16px',
         color: theme.themeColors.textT,
         [theme.breakpoints.down('sm')]: {
-            marginTop:'23px',
-            textAlign:'right'       
+            marginTop: '23px',
+            textAlign: 'right'
         },
     },
     stakeInput: {
         marginTop: '30px',
         position: 'relative',
         [theme.breakpoints.down('sm')]: {
-            marginTop: '10px',     
+            marginTop: '10px',
         },
     },
     input: {
@@ -259,7 +261,7 @@ const styles = theme => ({
         color: 'rgba(115, 103, 247, 0.4)',
         cursor: 'pointer'
     },
-    approveStakingActive:{
+    approveStakingActive: {
         height: '44px',
         marginTop: '31px',
         lineHeight: '44px',
@@ -288,10 +290,10 @@ const styles = theme => ({
     },
     contentRight: {
         // width: '460px',
-        width:'50%',
+        width: '50%',
         marginLeft: '20px',
         [theme.breakpoints.down('sm')]: {
-            width:'100%',
+            width: '100%',
             margin: '19px 0px 0px 0px'
         }
         // background:'red'
@@ -303,15 +305,15 @@ const styles = theme => ({
     total: {
         display: 'flex',
         background: theme.themeColors.modelBack,
-        width:'50%',
-        minWidth:'167px',
+        width: '50%',
+        minWidth: '167px',
         // padding:'0 19px',
         // boxShadow: '0px 2px 10px 0px rgba(23, 18, 43, 0.85)',
         border: '1px solid #7367F7',
         padding: '23px 16px',
         alignItems: 'center',
         [theme.breakpoints.down('sm')]: {
-            minWidth:'167px',
+            minWidth: '167px',
             padding: '23px 9px',
         }
 
@@ -322,8 +324,8 @@ const styles = theme => ({
     apr: {
         display: 'flex',
         background: theme.themeColors.modelBack,
-        width:'50%',
-        minWidth:'167px',
+        width: '50%',
+        minWidth: '167px',
 
         // padding:'0 19px',
         // boxShadow: '0px 2px 10px 0px rgba(23, 18, 43, 0.85)',
@@ -332,7 +334,7 @@ const styles = theme => ({
         alignItems: 'center',
         marginLeft: '20px',
         [theme.breakpoints.down('sm')]: {
-            minWidth:'167px',
+            minWidth: '167px',
             padding: '23px 9px',
         }
     },
@@ -352,15 +354,15 @@ const styles = theme => ({
         marginRight: '12px',
         [theme.breakpoints.down('sm')]: {
             marginRight: '5px',
-            width:'28px',
-            height:'28px',
+            width: '28px',
+            height: '28px',
             marginRight: '8px',
         }
     },
     totalTextTile: {
         fontWeight: '400',
-        display:'flex',
-        alignItems:'center',
+        display: 'flex',
+        alignItems: 'center',
         fontSize: '14px',
         color: theme.themeColors.textT,
         [theme.breakpoints.down('sm')]: {
@@ -398,7 +400,7 @@ const styles = theme => ({
     myAssetsRate: {
         fontSize: '16px',
         fontWeight: '500',
-        color:theme.themeColors.myAssetsRateText,
+        color: theme.themeColors.myAssetsRateText,
     },
     bigImg: {
         width: '80px',
@@ -408,9 +410,9 @@ const styles = theme => ({
     share: {
         width: '100%',
         height: '100%',
-        position: 'fixed',
-        background:'rgba(0,0,0,.6)',
-        zIndex:'999999',
+        //position: 'fixed',
+        background: 'rgba(0,0,0,.6)',
+        zIndex: '999999',
         top: 0,
         left: 0,
     },
@@ -419,14 +421,15 @@ const styles = theme => ({
         position: 'absolute',
         left: '40%',
         top: '30%',
-        trantransform: 'translate(-50%)',
-        background: theme.themeColors.modelBack,
+        //trantransform: 'translate(-50%)',
+        //background: theme.themeColors.modelBack,
+        background: theme.themeColors.itemBack,
         border: '1px solid #7367F7',
         [theme.breakpoints.down('sm')]: {
-            width:'335px',
-            position:'absolute',
-            left:'50%',
-            top:'15%',
+            width: '335px',
+            position: 'absolute',
+            left: '50%',
+            top: '15%',
             transform: 'translate(-50%)',
             // transform: 'translateX(-50%)',
         }
@@ -471,7 +474,9 @@ const styles = theme => ({
     },
     aprIntroduction: {
         padding: '0 23px',
-        marginTop: '49px',
+        // marginTop: '49px',
+        marginTop: '15px',
+        marginBottom: '15px',
         fontSize: '12px',
         color: theme.themeColors.textT
     },
@@ -492,14 +497,18 @@ const styles = theme => ({
         height: '12px',
         fill: theme.themeColors.textT
     },
-    calculator:{
-        width:'14px',
-        height:'14px',
-        fill:theme.themeColors.textT,
-        marginLeft:'5px'
+    calculator: {
+        width: '14px',
+        height: '14px',
+        fill: theme.themeColors.textT,
+        marginLeft: '5px'
+    },
+
+    seeMore: {
+        textDecoration: "underline",
+        cursor: "pointer",
+        color: theme.themeColors.textT,
     }
-
-
 
 
 
@@ -519,11 +528,11 @@ class StakeDvgVip extends Component {
             dvgInfoObj: '',
             amount: '',
             type: 'stake',
-            isShowApr:false,
-            max:false,
+            isShowApr: false,
+            max: false,
             aprInfo: {
-                tvl:0
-            }
+                tvl: 0
+            },
         }
         if (account && account.address) {
             dispatcher.dispatch({ type: GET_DVG_INFO })
@@ -622,16 +631,16 @@ class StakeDvgVip extends Component {
 
     submitStake = () => {
         if (this.state.type == 'stake') {
-            dispatcher.dispatch({ type: DEPOSIT_XDVG, content: { amount: this.state.amount, asset: this.state.dvgInfoObj[1],max:this.state.max } })
+            dispatcher.dispatch({ type: DEPOSIT_XDVG, content: { amount: this.state.amount, asset: this.state.dvgInfoObj[1], max: this.state.max } })
         } else {
-            dispatcher.dispatch({ type: WIDTHDRAW_XDVG, content: { amount: this.state.amount, asset: this.state.dvgInfoObj[1],max:this.state.max } })
+            dispatcher.dispatch({ type: WIDTHDRAW_XDVG, content: { amount: this.state.amount, asset: this.state.dvgInfoObj[1], max: this.state.max } })
         }
     }
 
     onChange = (event) => {
         this.setState({
             amount: event.target.value,
-            max:false
+            max: false
         })
     }
 
@@ -640,32 +649,32 @@ class StakeDvgVip extends Component {
             this.setState({
                 type: type,
                 amount: '',
-                max:false
+                max: false
             })
         }
     }
 
     depositReturned = () => {
         this.setState({ loading: false, amount: "" });
-      };
-    
-      withdrawReturned = (txHash) => {
+    };
+
+    withdrawReturned = (txHash) => {
         this.setState({ loading: false, amount: "" });
-      };
-    
+    };
+
     maxAmount() {
         const { type, dvgInfoObj } = this.state;
         if (type == 'stake') {
             this.setState({
                 // amount: Number(dvgInfoObj && dvgInfoObj[1].balance).toFixed(4)
-                amount:dvgInfoObj && dvgInfoObj[1].balance.toString(),
-                max:true
+                amount: dvgInfoObj && dvgInfoObj[1].balance.toString(),
+                max: true
             })
         } else {
             this.setState({
                 // amount: Number(dvgInfoObj && dvgInfoObj[0].balance).toFixed(4)
-                amount:dvgInfoObj && dvgInfoObj[0].balance.toString(),
-                max:true
+                amount: dvgInfoObj && dvgInfoObj[0].balance.toString(),
+                max: true
             })
         }
     }
@@ -682,9 +691,9 @@ class StakeDvgVip extends Component {
         tempwindow.location = url;
     }
 
-    showAprDetail=()=>{
+    showAprDetail = () => {
         this.setState({
-            isShowApr:!this.state.isShowApr
+            isShowApr: !this.state.isShowApr
         })
     }
 
@@ -699,8 +708,9 @@ class StakeDvgVip extends Component {
             type,
             dvgInfoObj,
             isShowApr,
-            aprInfo
+            aprInfo,
         } = this.state
+
         const dvgBalance = dvgInfoObj && dvgInfoObj[1].balance;
         const xdvgBalance = dvgInfoObj && dvgInfoObj[0].balance;
         if (!account || !account.address) {
@@ -710,7 +720,6 @@ class StakeDvgVip extends Component {
             return <div className={classes.root}>
 
                 <Grid>
-
                     <div className={classes.banner}>
                         <div className={classes.bannerLeft}>
                             <div className={classes.text}>Buy DVG on DEX Liquidity Pools</div>
@@ -732,7 +741,7 @@ class StakeDvgVip extends Component {
                             <div className={classes.titleRate}>
                                 1 vipDVG = {aprInfo.xDVGPrice && aprInfo.xDVGPrice.toFixed(2)}DVG
 
-                        </div>
+                            </div>
                         </div>
                         <div className={classes.contentCenter}>
                             <div className={classes.contentHeader}>
@@ -751,13 +760,13 @@ class StakeDvgVip extends Component {
                                 <input className={classes.input} value={amount} onChange={this.onChange} type="text" />
                                 <div className={classes.max} onClick={() => this.maxAmount()}>Max</div>
                             </div>
-                            
-                            <div className={amount?classes.approveStakingActive:classes.approveStaking} onClick={() => { this.submitStake() }}>
-                                
+
+                            <div className={amount ? classes.approveStakingActive : classes.approveStaking} onClick={() => { this.submitStake() }}>
+
                                 {
-                                  type == 'stake'?  'Approve Staking':'Approve Unstaking'
+                                    type == 'stake' ? 'Approve Staking' : 'Approve Unstaking'
                                 }
-                        </div>
+                            </div>
                         </div>
                     </div>
                     <div className={classes.contentRight}>
@@ -773,11 +782,19 @@ class StakeDvgVip extends Component {
                                 <img className={classes.smallImg} src={require("../../assets/stakeImg/apy-icon@2x.png")} alt="" />
                                 <div className={classes.aprText}>
                                     <p className={classes.totalTextTile}>APR
-                                    <svg className={classes.calculator} aria-hidden="true" onClick={()=>{this.showAprDetail()}}>
-                                        <use xlinkHref="#iconcalculator-line"></use>
-                                    </svg>
+                                        {/** TODO: Undo comment after DAOmine launched */}
+                                        {/* <svg className={classes.calculator} aria-hidden="true" onClick={()=>{this.showAprDetail()}}>
+                                            <use xlinkHref="#iconcalculator-line"></use>
+                                        </svg> */}
+                                        <svg aria-hidden="true" className={classes.calculator} aria-hidden="true" onClick={this.showAprDetail}>
+                                            <use xlinkHref="#iconinformation-day"></use>
+                                        </svg>
                                     </p>
-                                    <p className={classes.totalTextNum}>{aprInfo.apr && Number(aprInfo.apr).toFixed(2)} %</p>
+                                    <p className={classes.totalTextNum}>
+                                        {/* {aprInfo.apr && Number(aprInfo.apr).toFixed(2)} % */}
+                                        {/** TODO: Remove this after DAOmine launched */}
+                                        40% - 80%
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -791,7 +808,7 @@ class StakeDvgVip extends Component {
                         </div>
                     </div>
                 </div>
-                {isShowApr ?
+                {/* {isShowApr ?
                     <div className={classes.share}>
                         <div className={classes.shareBox}>
                             <div className={classes.shareTitle}>
@@ -829,6 +846,46 @@ class StakeDvgVip extends Component {
                                     <svg className={classes.shareIcon} aria-hidden="true">
                                         <use xlinkHref="#iconshare"></use>
                                     </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div> : null} */}
+                {isShowApr ?
+                    <div className={classes.share}>
+                        <div className={classes.shareBox}>
+                            <div className={classes.shareTitle}>
+                                <p className={classes.shareTitleText}></p>
+                                <svg className={classes.closeIcon} aria-hidden="true" onClick={() => { this.showAprDetail() }}>
+                                    <use xlinkHref="#iconclose"></use>
+                                </svg>
+                            </div>
+                            <div className={classes.shareContent}>
+                                <div className={classes.aprIntroduction}>
+                                    <h3>
+                                        Stake before 5th July 2021 14.00 UTC to receive early bird reward. 
+                                    </h3>
+
+                                    <h4>
+                                        <a href="http://www.google.com" target="_blank" className={classes.seeMore}>See more here.</a>
+                                    </h4>
+                                   
+                                    <ul>
+                                        <li>
+                                            <h3>
+                                                Stake 1000 DVG for 30 days to receive 33 DVG (40% APR)
+                                            </h3>
+                                        </li>
+                                        <li>
+                                            <h3>
+                                                Stake 10000 DVG for 45 days to receive 740 DVG (60% APR)
+                                            </h3>
+                                        </li>
+                                        <li>
+                                            <h3>
+                                                Stake 100000 DVG for 60 days to receive 13151 DVG (80% APR)
+                                            </h3>
+                                        </li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
