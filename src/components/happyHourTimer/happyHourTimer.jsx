@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
+
+import { Typography } from "@material-ui/core";
+import { colors } from "../../theme";
+import useCountDown from "react-countdown-hook";
 import { withRouter } from "react-router-dom";
 import { withStyles } from "@material-ui/core/styles";
-import useCountDown from "react-countdown-hook";
-import { colors } from "../../theme";
-import { Typography } from "@material-ui/core";
 
 const styles = (theme) => ({
   root: {
@@ -96,11 +97,7 @@ const HappyHourHelpBox = ({ classes, enabled }) => {
       <div className={classes.dialogRoot}>
         {/* <div className={classes.dialogContent}> */}
         <ul>
-          <li>Enjoy gasless......</li>
-          <li>
-            Deposit more than 500 USD stablecoins to selected strategies and
-            enjoy gas free up to X.XX ETH deposit. See more here
-          </li>
+          <li>Enjoy <b>gas-free deposits</b> on during Daily Happy Hours! Just enter the deposit amount and sign the transaction, we take care of the rest!</li>
         </ul>
         {/* </div>{" "} */}
       </div>
@@ -156,7 +153,8 @@ const HappyHourTimer = ({ classes, happyHourStartTime, happyHourEndTime }) => {
     <div>
       <div
         className={classes.happyHourOuterBox}
-        onClick={() => _handleHappyHourHelpBox()}>
+        onMouseEnter={() => _handleHappyHourHelpBox(true)}
+        onMouseLeave={() => _handleHappyHourHelpBox(false)}>
         <HappyHourHelpBox
           classes={classes}
           enabled={helpBox}></HappyHourHelpBox>
