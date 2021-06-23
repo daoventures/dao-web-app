@@ -1,104 +1,103 @@
-import config from "../config";
-import async from "async";
 import {
-  ERROR,
-  GET_BALANCES,
-  BALANCES_RETURNED,
-  GET_BALANCES_LIGHT,
+  ADVANCE,
+  APPROVE_COMPLETED,
+  APPROVE_TRANSACTING,
   BALANCES_LIGHT_RETURNED,
-  GET_VAULT_BALANCES_FULL,
-  VAULT_BALANCES_FULL_RETURNED,
-  INVEST,
-  INVEST_RETURNED,
-  REDEEM,
-  REDEEM_RETURNED,
-  REBALANCE,
-  REBALANCE_RETURNED,
-  DONATE,
-  DONATE_RETURNED,
-  GET_AGGREGATED_YIELD,
-  GET_AGGREGATED_YIELD_RETURNED,
-  GET_CONTRACT_EVENTS,
-  GET_CONTRACT_EVENTS_RETURNED,
-  ZAP,
-  ZAP_RETURNED,
-  IDAI,
-  IDAI_RETURNED,
-  SWAP,
-  SWAP_RETURNED,
-  TRADE,
-  TRADE_RETURNED,
-  GET_CURV_BALANCE,
-  GET_CURV_BALANCE_RETURNED,
-  GET_BEST_PRICE,
-  GET_BEST_PRICE_RETURNED,
-  GET_VAULT_BALANCES,
-  VAULT_BALANCES_RETURNED,
-  DEPOSIT_CONTRACT,
-  DEPOSIT_CONTRACT_RETURNED,
-  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+  BALANCES_RETURNED,
+  BASIC,
+  BICONOMY_CONNECTED,
+  CURRENT_THEME_RETURNED,
+  DAOMINE_POOL_RETURNED,
+  DASHBOARD_SNAPSHOT_RETURNED,
+  DEGEN,
   DEPOSIT_ALL_CONTRACT,
   DEPOSIT_ALL_CONTRACT_RETURNED,
   DEPOSIT_ALL_CONTRACT_RETURNED_COMPLETED,
-  WITHDRAW_VAULT,
-  WITHDRAW_VAULT_RETURNED,
-  WITHDRAW_BOTH_VAULT_FAIL_RETURNED,
-  WITHDRAW_VAULT_RETURNED_COMPLETED,
-  WITHDRAW_BOTH_VAULT,
-  WITHDRAW_BOTH_VAULT_RETURNED,
-  WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
-  APPROVE_TRANSACTING,
-  APPROVE_COMPLETED,
-  GET_DASHBOARD_SNAPSHOT,
-  DASHBOARD_SNAPSHOT_RETURNED,
-  USD_PRICE_RETURNED,
-  GET_STATISTICS,
-  STATISTICS_RETURNED,
-  TOGGLE_DRAWER,
-  DRAWER_RETURNED,
-  WITHDRAW_BOTH,
-  GET_STRATEGY_BALANCES_FULL,
-  STRATEGY_BALANCES_FULL_RETURNED,
-  TOGGLE_THEME, // 切换主题
-  CURRENT_THEME_RETURNED, // 返回当前主题
-  GET_VAULT_INFO, //获取接口信息
-  BASIC,
-  ADVANCE,
-  EXPERT,
-  DEGEN,
-  FIND_DAOMINE_POOL,
-  DAOMINE_POOL_RETURNED,
+  DEPOSIT_CONTRACT,
+  DEPOSIT_CONTRACT_RETURNED,
+  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
   DEPOSIT_DAOMINE,
   DEPOSIT_DAOMINE_RETURNED,
   DEPOSIT_DAOMINE_RETURNED_COMPLETED,
+  DEPOSIT_DVG_RETURNED,
+  DEPOSIT_XDVG,
+  DONATE,
+  DONATE_RETURNED,
+  DRAWER_RETURNED,
+  ERROR,
+  EXPERT,
+  FIND_DAOMINE_POOL,
+  GET_AGGREGATED_YIELD,
+  GET_AGGREGATED_YIELD_RETURNED,
+  GET_BALANCES,
+  GET_BALANCES_LIGHT,
+  GET_BEST_PRICE,
+  GET_BEST_PRICE_RETURNED,
+  GET_CONTRACT_EVENTS,
+  GET_CONTRACT_EVENTS_RETURNED,
+  GET_CURV_BALANCE,
+  GET_CURV_BALANCE_RETURNED,
+  GET_DASHBOARD_SNAPSHOT,
+  GET_DVG_APR,
+  GET_DVG_BALANCE_SUCCESS,
+  GET_DVG_INFO,
+  GET_HAPPY_HOUR_STATUS,
+  GET_STATISTICS,
+  GET_STRATEGY_BALANCES_FULL,
+  GET_VAULT_BALANCES,
+  GET_VAULT_BALANCES_FULL,
+  GET_VAULT_INFO,
+  GET_XDVG_APR_SUCCESS,
+  GET_XDVG_BALANCE,
+  GET_XDVG_BALANCE_SUCCESS,
+  HAPPY_HOUR_RETURN,
+  IDAI,
+  IDAI_RETURNED,
+  INVEST,
+  INVEST_RETURNED,
+  REBALANCE,
+  REBALANCE_RETURNED,
+  REDEEM,
+  REDEEM_RETURNED,
+  STATISTICS_RETURNED,
+  STRATEGY_BALANCES_FULL_RETURNED,
+  SWAP,
+  SWAP_RETURNED,
+  TOGGLE_DRAWER,
+  TOGGLE_THEME,
+  TRADE,
+  TRADE_RETURNED,
+  USD_PRICE_RETURNED,
+  VAULT_BALANCES_FULL_RETURNED,
+  VAULT_BALANCES_RETURNED,
+  WIDTHDRAW_XDVG,
+  WITHDRAW_BOTH,
+  WITHDRAW_BOTH_VAULT,
+  WITHDRAW_BOTH_VAULT_FAIL_RETURNED,
+  WITHDRAW_BOTH_VAULT_RETURNED,
+  WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
   WITHDRAW_DAOMINE,
   WITHDRAW_DAOMINE_RETURNED,
   WITHDRAW_DAOMINE_RETURNED_COMPLETED,
-  GET_DVG_INFO,//获取DVG信息
-  GET_DVG_BALANCE_SUCCESS,//获取DVG成功
-  DEPOSIT_XDVG,//充值xdvg
-  GET_XDVG_BALANCE_SUCCESS,//获取xdvg余额
-  GET_XDVG_BALANCE,//获取xdvg余额
-  WIDTHDRAW_XDVG,//提现xdvg
-  GET_DVG_APR,//获取dvgApr
-  GET_XDVG_APR_SUCCESS,
   WITHDRAW_DVG_RETURNED,
-  DEPOSIT_DVG_RETURNED,
-  BICONOMY_CONNECTED,
-  GET_HAPPY_HOUR_STATUS,
-  HAPPY_HOUR_RETURN,
+  WITHDRAW_VAULT,
+  WITHDRAW_VAULT_RETURNED,
+  WITHDRAW_VAULT_RETURNED_COMPLETED,
+  ZAP,
+  ZAP_RETURNED,
 } from "../constants";
-import Web3 from "web3";
 import {
   Biconomy,
-  PermitClient,
   HTTP_CODES,
+  PermitClient,
   RESPONSE_CODES,
 } from "@biconomy/mexa";
 
-import { injected } from "./connectors";
-
+import Web3 from "web3";
+import async from "async";
 import citadelABI from "./citadelABI.json";
+import config from "../config";
+import { injected } from "./connectors";
 
 // import { callCitadelHappyHourDeposit } from "./biconomyHelper";
 
@@ -4118,7 +4117,8 @@ class Store {
         }
       );
 
-      const happyHour = this._eventVerifyAmount();
+      const happyHour = await this._eventVerifyAmount(amount);
+      console.log("🚀 | depositContract= | happyHour", happyHour)
 
       if (happyHour === true) {
         await this._callDepositAmountContractCitadelHappyHour(
@@ -4636,7 +4636,7 @@ class Store {
           }
         }
       );
-      const happyHour = this._eventVerifyAmount();
+      const happyHour = await this._eventVerifyAmount(amount);
       console.log("🚀 | Store | depositAllContract= | happyHour", happyHour);
 
       // TODO: Call backend api for happy hour condition
@@ -5565,6 +5565,8 @@ class Store {
   };
 
   _eventVerifyAmount = async (amount) => {
+  console.log("🚀 | _eventVerifyAmount= | amount", amount)
+    
     const url = `${config.statsProvider}event/verify/${amount}`;
     const resultString = await rp(url);
     const result = JSON.parse(resultString);
@@ -5573,7 +5575,7 @@ class Store {
       result.body.happyHour === true &&
       result.body.amountAboveThreshold === true
     ) {
-      alert(result.body.message);
+      alert("Gasless Transaction!");
       store.setStore({ happyHour: true }); // Might be redundant
       return true;
     } else {
