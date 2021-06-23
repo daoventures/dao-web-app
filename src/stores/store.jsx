@@ -83,11 +83,24 @@ import {
   GET_DVG_APR,//获取dvgApr
   GET_XDVG_APR_SUCCESS,
   WITHDRAW_DVG_RETURNED,
-  DEPOSIT_DVG_RETURNED
+  DEPOSIT_DVG_RETURNED,
+  BICONOMY_CONNECTED,
+  GET_HAPPY_HOUR_STATUS,
+  HAPPY_HOUR_RETURN,
 } from "../constants";
 import Web3 from "web3";
+import {
+  Biconomy,
+  PermitClient,
+  HTTP_CODES,
+  RESPONSE_CODES,
+} from "@biconomy/mexa";
 
 import { injected } from "./connectors";
+
+import citadelABI from "./citadelABI.json";
+
+// import { callCitadelHappyHourDeposit } from "./biconomyHelper";
 
 const rp = require("request-promise");
 const ethers = require("ethers");
@@ -405,7 +418,13 @@ class Store {
             this.withdrawXdvg(payload);
             break;
           case GET_DVG_APR:
-          this.getDvgApr(payload);
+            this.getDvgApr(payload);
+            break;
+          case BICONOMY_CONNECTED:
+            this.saveBiconomyProvider(payload);
+            break;
+          case GET_HAPPY_HOUR_STATUS:
+            this.eventVerify(payload);
             break;
           default: {
           }
@@ -485,6 +504,7 @@ class Store {
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-citadel-vault",
           isPopularItem: true, // use to render popular item icon
+          // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
         },
         {
           id: "USDT",
@@ -769,6 +789,7 @@ class Store {
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-citadel-vault",
           isPopularItem: true,
+          // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
         },
         {
           id: "USDT",
@@ -4096,26 +4117,52 @@ class Store {
           }
         }
       );
-      await this._callDepositAmountContractCitadel(
-        asset,
-        account,
-        amount,
-        tokenIndex,
-        (err, txnHash, depositResult) => {
-          if (err) {
-            return emitter.emit(ERROR, err);
+
+      const happyHour = this._eventVerifyAmount();
+
+      if (happyHour === true) {
+        await this._callDepositAmountContractCitadelHappyHour(
+          asset,
+          account,
+          amount,
+          tokenIndex,
+          (err, txnHash, depositResult) => {
+            if (err) {
+              return emitter.emit(ERROR, err);
+            }
+            if (txnHash) {
+              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+            }
+            if (depositResult) {
+              return emitter.emit(
+                DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                depositResult.transactionHash
+              );
+            }
           }
-          if (txnHash) {
-            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+        );
+      } else {
+        await this._callDepositAmountContractCitadel(
+          asset,
+          account,
+          amount,
+          tokenIndex,
+          (err, txnHash, depositResult) => {
+            if (err) {
+              return emitter.emit(ERROR, err);
+            }
+            if (txnHash) {
+              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+            }
+            if (depositResult) {
+              return emitter.emit(
+                DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                depositResult.transactionHash
+              );
+            }
           }
-          if (depositResult) {
-            return emitter.emit(
-              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-              depositResult.transactionHash
-            );
-          }
-        }
-      );
+        );
+      }
     }
   };
 
@@ -4263,10 +4310,6 @@ class Store {
 
     var amountToSend = web3.utils.toBN(amount * 10 ** decimals).toString();
 
-    var amountToSend = web3.utils
-      .toBN((amount * 10 ** decimals).toString())
-      .toString();
-
     vaultContract.methods
       .deposit(amountToSend, tokenIndex)
       .send({
@@ -4295,6 +4338,76 @@ class Store {
             return callback(error.message);
           }
           callback(error);
+        }
+      });
+  };
+
+  _callDepositAmountContractCitadelHappyHour = async (
+    asset,
+    account,
+    amount,
+    tokenIndex = null,
+    callback
+  ) => {
+    // Handle vaults with multi tokens
+    try {
+      if (
+        tokenIndex !== null &&
+        tokenIndex > 0 &&
+        tokenIndex < asset.erc20addresses.length
+      ) {
+        asset.erc20address = asset.erc20addresses[tokenIndex];
+      }
+    } catch (error) {
+      if (error.message) {
+        return callback(error.message);
+      }
+      callback(error);
+    }
+
+    const vaultContract = store.getStore("happyHourContract");
+    console.log("🚀 | Store | vaultContract", vaultContract);
+    const web3 = new Web3(store.getStore("web3context").library.provider);
+
+    let erc20Contract = new web3.eth.Contract(
+      config.erc20ABI,
+      asset.erc20addresses[tokenIndex]
+    );
+
+    let decimals = await erc20Contract.methods.decimals().call();
+
+    var amountToSend = web3.utils.toBN(amount * 10 ** decimals).toString();
+
+    console.log("🚀 | tx | amount", amount);
+    let tx = await vaultContract.methods
+      .deposit(amountToSend, tokenIndex)
+      .send({
+        from: account.address,
+        signatureType: "EIP712_SIGN",
+        //optionally you can add other options like gasLimit
+      })
+      .on("transactionHash", function (txnHash) {
+        console.log(txnHash);
+        callback(null, txnHash, null);
+      })
+      .on("receipt", function (receipt) {
+        console.log(receipt);
+        callback(null, null, receipt);
+      })
+      .on("error", function (error) {
+        if (!error.toString().includes("-32601")) {
+          if (error.message) {
+            return callback(error.message);
+          }
+          callback(error, null, null);
+        }
+      })
+      .catch((error) => {
+        if (!error.toString().includes("-32601")) {
+          if (error.message) {
+            return callback(error.message);
+          }
+          callback(error, null, null);
         }
       });
   };
@@ -4523,27 +4636,54 @@ class Store {
           }
         }
       );
+      const happyHour = this._eventVerifyAmount();
+      console.log("🚀 | Store | depositAllContract= | happyHour", happyHour);
 
-      await this._callDepositAmountContractCitadel(
-        asset,
-        account,
-        amount,
-        tokenIndex,
-        (err, txnHash, depositResult) => {
-          if (err) {
-            return emitter.emit(ERROR, err);
+      // TODO: Call backend api for happy hour condition
+      if (happyHour === true) {
+        console.log("HappyHour");
+        await this._callDepositAmountContractCitadelHappyHour(
+          asset,
+          account,
+          amount,
+          tokenIndex,
+          (err, txnHash, depositResult) => {
+            if (err) {
+              return emitter.emit(ERROR, err);
+            }
+            if (txnHash) {
+              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+            }
+            if (depositResult) {
+              return emitter.emit(
+                DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                depositResult.transactionHash
+              );
+            }
           }
-          if (txnHash) {
-            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+        );
+      } else {
+        await this._callDepositAmountContractCitadel(
+          asset,
+          account,
+          amount,
+          tokenIndex,
+          (err, txnHash, depositResult) => {
+            if (err) {
+              return emitter.emit(ERROR, err);
+            }
+            if (txnHash) {
+              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+            }
+            if (depositResult) {
+              return emitter.emit(
+                DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                depositResult.transactionHash
+              );
+            }
           }
-          if (depositResult) {
-            return emitter.emit(
-              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-              depositResult.transactionHash
-            );
-          }
-        }
-      );
+        );
+      }
     }
   };
 
@@ -5424,6 +5564,50 @@ class Store {
     }
   };
 
+  _eventVerifyAmount = async (amount) => {
+    const url = `${config.statsProvider}event/verify/${amount}`;
+    const resultString = await rp(url);
+    const result = JSON.parse(resultString);
+    console.log("🚀 | Store | _eventVerifyAmount= | result", result);
+    if (
+      result.body.happyHour === true &&
+      result.body.amountAboveThreshold === true
+    ) {
+      alert(result.body.message);
+      store.setStore({ happyHour: true }); // Might be redundant
+      return true;
+    } else {
+      alert(result.body.message);
+      store.setStore({ happyHour: false });
+      return false;
+    }
+  };
+
+  eventVerify = async (payload) => {
+    const url = `${config.statsProvider}event/verify/`;
+    const resultString = await rp(url);
+    const result = JSON.parse(resultString);
+    let _result = {};
+    console.log("🚀 | Store | _eventVerify= | result", result);
+    if (result.body.happyHour === true) {
+      _result = {
+        happyHour: result.body.happyHour,
+        happyHourStartTime: result.body.startTime,
+        happyHourEndTime: result.body.endTime,
+      };
+    } else {
+      _result = { happyHour: result.body.happyHour };
+    }
+    // For testing
+    // _result = {
+    //   happyHour: true,
+    //   happyHourStartTime: Date.now(),
+    //   happyHourEndTime: Date.now() + 6000000,
+    // };
+    store.setStore(_result);
+    emitter.emit(HAPPY_HOUR_RETURN, _result);
+  };
+
   _getAddressStatistics = async (address) => {
     try {
       const url =
@@ -5495,6 +5679,46 @@ class Store {
     store.setStore({ totalValue: val });
     return emitter.emit(GET_VAULT_INFO, val);
     // })
+  };
+
+  saveBiconomyProvider = async (payload) => {
+    const { happyHourWeb3, erc20PaymentWeb3 } = payload.content;
+    const network = store.getStore("network");
+    const assets = this._getDefaultValues(network).vaultAssets;
+
+    const allowed = ["daoCDV"];
+
+    const citadelAsset = assets.filter((el) => el.id == "daoCDV");
+    console.log(
+      "🚀 | Store | saveBiconomyProvider= | citadelAsset",
+      citadelAsset
+    );
+
+    console.log(
+      "🚀 | Store | saveBiconomyProvider= | citadelAsset",
+      citadelAsset
+    );
+    if (happyHourWeb3) {
+      // Initialize Contract
+      const happyHourContract = new happyHourWeb3.eth.Contract(
+        citadelABI,
+        citadelAsset[0].vaultContractAddress
+      );
+
+      console.log(
+        "🚀 | Store | saveBiconomyProvider= | citadelAsset.vaultContractAddress",
+        citadelAsset[0].vaultContractAddress
+      );
+      store.setStore({ happyHourContract: happyHourContract });
+    }
+
+    if (erc20PaymentWeb3) {
+      const erc20PaymentsContract = new erc20PaymentWeb3.eth.Contract(
+        citadelABI,
+        citadelAsset[0].vaultContractAddress
+      );
+      store.setStore({ erc20PaymentsContract: erc20PaymentsContract });
+    }
   };
 
   _getGasPrice = async () => {
@@ -5579,9 +5803,7 @@ class Store {
       alert(
         "Due to insufficient liquidity of the desired token in vault for withdrawal, gas fees may be very high. Are you sure to proceed?"
       );
-      // return false;
     }
-    // return true;
   };
 
   // TODO: REFACTOR: Currently all 3 types of vaults use this

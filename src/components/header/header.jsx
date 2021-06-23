@@ -11,6 +11,8 @@ import {
   TOGGLE_DRAWER,
   CURRENT_THEME_RETURNED,
   CHANGE_NETWORK,
+  GET_HAPPY_HOUR_STATUS,
+  HAPPY_HOUR_RETURN,
 } from "../../constants";
 import {
   HEADER_TITLE_DAOMINE,
@@ -22,6 +24,7 @@ import {
 
 import UnlockModal from "../unlock/unlockModal.jsx";
 import ToggleTheme from "../toggleTheme";
+import HappyHourTimer from "../happyHourTimer";
 
 import Store from "../../stores";
 const emitter = Store.emitter;
@@ -37,18 +40,19 @@ const networkObj = {
 
 const styles = (theme) => ({
   root: {
-    verticalAlign: 'top',
-    width: 'calc(100% - 240px)',
-    // display: 'flex',
-    padding: '40px 80px 0px 80px',
-    background: theme.themeColors.itemBack,
+    verticalAlign: "top",
+    width: "calc(100% - 240px)",
+    height: "120px",
+    display: "flex",
+    padding: "40px 80px 0px 80px",
+    background: theme.themeColors.back,
     zIndex: theme.zIndex.drawer - 1,
     position: "fixed",
     // left: '319px',
     left: "240px",
     [theme.breakpoints.down("sm")]: {
       width: "100%",
-      marginBottom: "40px",
+      marginBottom: "20px",
       left: "0px",
       padding: "0px",
     },
@@ -83,9 +87,9 @@ const styles = (theme) => ({
     },
   },
   link: {
-    padding: "12px 0px",
-    margin: "0px 12px",
-    cursor: "pointer",
+    "padding": "12px 0px",
+    "margin": "0px 12px",
+    "cursor": "pointer",
     "&:hover": {
       paddingBottom: "9px",
       borderBottom: "3px solid " + colors.darkGray,
@@ -111,12 +115,12 @@ const styles = (theme) => ({
     },
   },
   walletAddress: {
-    padding: "12px",
-    borderRadius: "41px",
-    display: "flex",
-    alignItems: "center",
-    cursor: "pointer",
-    background: "rgba(24,160,251,0.1)",
+    "padding": "12px",
+    "borderRadius": "41px",
+    "display": "flex",
+    "alignItems": "center",
+    "cursor": "pointer",
+    "background": "rgba(24,160,251,0.1)",
     "&:hover": {
       background: "rgba(47, 128, 237, 0.1)",
     },
@@ -233,6 +237,7 @@ class Header extends Component {
       account: store.getStore("account"),
       modalOpen: false,
       hideNav: true,
+      happyHour: store.getStore("happyHour"),
       menuObj: {
         "/portfolio": HEADER_TITLE_PORTFOLIO,
         "/invest": HEADER_TITLE_INVEST,
@@ -249,18 +254,22 @@ class Header extends Component {
           value: 1,
           imgUrl: require("../../assets/ETH-logo.png"),
         },
-        {
-          label: "Binance",
-          value: 56,
-          imgUrl: require("../../assets/img_new/bnb-icon.png"),
-        },
         // {
         //   label:'Rinkeby',
         //   value:4,
         //   imgUrl:require('../../assets/ETH-logo.png')
         // },
+        {
+          label: "Binance",
+          value: 56,
+          imgUrl: require("../../assets/img_new/bnb-icon.png"),
+        },
       ],
     };
+
+    dispatcher.dispatch({
+      type: GET_HAPPY_HOUR_STATUS,
+    });
   }
 
   componentWillMount() {
@@ -268,6 +277,7 @@ class Header extends Component {
     emitter.on(CONNECTION_DISCONNECTED, this.connectionDisconnected);
     emitter.on(CURRENT_THEME_RETURNED, this.currentThemeChanged);
     emitter.on(CHANGE_NETWORK, this.networkChanged);
+    emitter.on(HAPPY_HOUR_RETURN, this.handleHappyHour);
   }
 
   componentDidMount() {
@@ -291,7 +301,12 @@ class Header extends Component {
     window.removeEventListener("resize", this.resize.bind(this));
     emitter.removeListener(CURRENT_THEME_RETURNED, this.currentThemeChanged);
     emitter.removeListener(CHANGE_NETWORK, this.networkChanged);
+    emitter.removeListener(HAPPY_HOUR_RETURN, this.handleHappyHour);
   }
+
+  handleHappyHour = (payload) => {
+    this.setState({ happyHour: payload.happyHour });
+  };
 
   currentThemeChanged = () => {
     this.setState({ currentTheme: store.getStore("currentTheme") });
@@ -321,7 +336,7 @@ class Header extends Component {
       const { address } = account;
       const network = provider.networkVersion;
       const ens = new ENS({ provider, network });
-      const addressEnsName = await ens.reverse(address).catch(() => { });
+      const addressEnsName = await ens.reverse(address).catch(() => {});
       if (addressEnsName) {
         this.setState({ addressEnsName });
       }
@@ -394,7 +409,6 @@ class Header extends Component {
               />
             </div>
           )}
-
           {/* <div className={ classes.links }>
             { this.renderLink('dashboard') }
             { this.renderLink('vaults') }
@@ -403,7 +417,6 @@ class Header extends Component {
             { this.renderLink('cover') }
             { this.renderLink('stats') }
           </div> */}
-
           {/* 钱包地址 (不放这里了)*/}
           {/* <div className={ classes.account }>
             { address &&
@@ -514,6 +527,7 @@ class Header extends Component {
             </div>
           </div>
           {!hideNav && <ToggleTheme></ToggleTheme>}
+          {this.renderHappyHourTimer()}
         </div>
         {
           hideNav?<div className={classes.pathname}>
@@ -526,6 +540,29 @@ class Header extends Component {
     );
   }
 
+  renderHappyHourTimer = () => {
+    const { classes } = this.props;
+
+    let happyHour = store.getStore("happyHour");
+    let happyHourStartTime = store.getStore("happyHourStartTime");
+    let happyHourEndTime = store.getStore("happyHourEndTime");
+    // let happyHour = true;
+    // let happyHourStartTime = "1624368201289";
+    // let happyHourEndTime = Date.now() + 600000;
+
+    if (happyHour) {
+      return (
+        <HappyHourTimer
+          happyHourStartTime={happyHourStartTime}
+          happyHourEndTime={happyHourEndTime}
+          color="inherit"
+          aria-label="Open drawer"></HappyHourTimer>
+      );
+    } else {
+      return null;
+    }
+  };
+
   renderToggleButton = () => {
     const { classes } = this.props;
 
@@ -534,8 +571,7 @@ class Header extends Component {
         color="inherit"
         aria-label="Open drawer"
         onClick={this.handleDrawerOpen}
-        className={classes.menuButton}
-      >
+        className={classes.menuButton}>
         {/* <MenuIcon /> */}
         <svg aria-hidden="true" className={classes.menuIcon}>
           <use xlinkHref="#iconmenu-fold-line"></use>
@@ -556,8 +592,7 @@ class Header extends Component {
         }
         onClick={() => {
           this.nav(screen);
-        }}
-      >
+        }}>
         <Typography variant={"h4"} className={`title`}>
           {this.captializeFirstLetter(screen)}
         </Typography>

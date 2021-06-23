@@ -50,11 +50,13 @@ import {
   DEGEN,
   APPROVE_TRANSACTING,
   APPROVE_COMPLETED,
+  HAPPY_HOUR_RETURN,
 } from "../../constants";
 
 import Store from "../../stores";
 import UnlockModal from "../unlock/unlockModal";
 import ConnectWallet from "../common/connectWallet/connectWallet";
+import ConnectBiconomy from "../connectBiconomy";
 
 const emitter = Store.emitter;
 const dispatcher = Store.dispatcher;
@@ -681,6 +683,7 @@ class Vault extends Component {
       assets: store.getStore("vaultAssets"),
       usdPrices: store.getStore("usdPrices"),
       networkId: store.getStore("networkId"),
+      happyHour: store.getStore("happyHour"),
       account: account,
       address: account.address
         ? account.address.substring(0, 6) +
@@ -711,6 +714,13 @@ class Vault extends Component {
         content: { interval: "30d" },
       });
     }
+
+    // if (!this.state.happyHour) {
+    //   dispatcher.dispatch({
+    //     type: GET_STRATEGY_BALANCES_FULL,
+    //     content: { interval: "30d" },
+    //   });
+    // }
   }
 
   componentWillMount() {
@@ -736,6 +746,7 @@ class Vault extends Component {
     emitter.on(CONNECTION_DISCONNECTED, this.connectionDisconnected);
     emitter.on(CHANGE_NETWORK, this.networkChanged);
     emitter.on(VAULT_BALANCES_FULL_RETURNED, this.networkChanged);
+    emitter.on(HAPPY_HOUR_RETURN, this.handleHappyHour);
   }
 
   componentWillUnmount() {
@@ -766,6 +777,10 @@ class Vault extends Component {
     emitter.removeListener(CHANGE_NETWORK, this.networkChanged);
     emitter.removeListener(VAULT_BALANCES_FULL_RETURNED, this.networkChanged);
   }
+
+  handleHappyHour = (payload) => {
+    this.setState({ happyHour: payload.happyHour });
+  };
 
   networkChanged = (obj) => {
     const account = store.getStore("account");
@@ -975,7 +990,8 @@ class Vault extends Component {
             { this.renderBasedOn() } */}
             {/* { this.renderChart() } */}
             <RiskLevelTab selectedRiskCallback={this.selectTab}></RiskLevelTab>
-
+            <ConnectBiconomy></ConnectBiconomy>
+            
             {this.renderAssetBlocks()}
           </div>
         </div>
@@ -1036,7 +1052,11 @@ class Vault extends Component {
                     <use xlinkHref="#iconinformation-day"></use>
                   </svg>
                 </a>
-                {this.renderPopularIcon(asset)}
+                {asset.isPopularItem || this.state.happyHour
+                  ? this.state.happyHour && asset.strategyType === "citadel"
+                    ? this.renderHappyHourIcon(asset)
+                    : this.renderPopularIcon(asset)
+                  : null}
               </Grid>
               <RiskLevelLabel risk={asset.risk}></RiskLevelLabel>
             </Grid>
@@ -1092,10 +1112,9 @@ class Vault extends Component {
                             <Typography
                               variant={"h5"}
                               className={classes.assetLabel1}>
-                              {asset.strategyType === 'citadel' && (
-                                <Typography
-                                  variant={"caption"}>
-                                    est.&nbsp;
+                              {asset.strategyType === "citadel" && (
+                                <Typography variant={"caption"}>
+                                  est.&nbsp;
                                 </Typography>
                               )}
                               {this._getAPY(asset)}
@@ -1116,10 +1135,9 @@ class Vault extends Component {
                               variant={"h3"}
                               noWrap
                               className={classes.assetLabel1}>
-                                {asset.strategyType === 'citadel' && (
-                                <Typography
-                                  variant={"caption"}>
-                                    est.&nbsp;
+                              {asset.strategyType === "citadel" && (
+                                <Typography variant={"caption"}>
+                                  est.&nbsp;
                                 </Typography>
                               )}
                               {this._getAPY(asset)}
@@ -1134,10 +1152,9 @@ class Vault extends Component {
                               <Typography
                                 variant={"h5"}
                                 className={classes.assetLabel1}>
-                                {asset.strategyType === 'citadel' && (
-                                  <Typography
-                                    variant={"caption"}>
-                                      est.&nbsp;
+                                {asset.strategyType === "citadel" && (
+                                  <Typography variant={"caption"}>
+                                    est.&nbsp;
                                   </Typography>
                                 )}
                                 {this._getAPY(asset)}
@@ -1153,10 +1170,9 @@ class Vault extends Component {
                                 variant={"h3"}
                                 noWrap
                                 className={classes.assetLabel1}>
-                                {asset.strategyType === 'citadel' && (
-                                  <Typography
-                                    variant={"caption"}>
-                                      est.&nbsp;
+                                {asset.strategyType === "citadel" && (
+                                  <Typography variant={"caption"}>
+                                    est.&nbsp;
                                   </Typography>
                                 )}
                                 {this._getAPY(asset)}
@@ -1335,6 +1351,18 @@ class Vault extends Component {
     );
   };
 
+  renderHappyHourIcon = (asset) => {
+    return (
+      <div>
+        <img
+          alt="icon-popular"
+          src={require("../../assets/img_new/icon_happyhour.svg")}
+          style={{ marginLeft: "10px", marginTop: "8px" }}
+        />
+      </div>
+    );
+  };
+
   handleChecked = (event) => {
     this.setState({ hideZero: event.target.checked });
     localStorage.setItem(
@@ -1371,7 +1399,7 @@ class Vault extends Component {
     if (asset && asset.stats) {
       if (asset.strategyType === "compound") {
         if (asset.stats.compoundApy) {
-          return (asset.stats.compoundApy / 1).toFixed(2) + '%';
+          return (asset.stats.compoundApy / 1).toFixed(2) + "%";
         } else {
           return "0.00%";
         }
@@ -1381,11 +1409,20 @@ class Vault extends Component {
       ) {
         switch (basedOn) {
           case 1:
-            return this.calculateYearnAPY(parseFloat(asset.earnApr), asset.stats.apyOneWeekSample);
+            return this.calculateYearnAPY(
+              parseFloat(asset.earnApr),
+              asset.stats.apyOneWeekSample
+            );
           case 2:
-            return this.calculateYearnAPY(parseFloat(asset.earnApr), asset.stats.apyOneMonthSample);
+            return this.calculateYearnAPY(
+              parseFloat(asset.earnApr),
+              asset.stats.apyOneMonthSample
+            );
           case 3:
-            return this.calculateYearnAPY(parseFloat(asset.earnApr), asset.stats.apyInceptionSample);
+            return this.calculateYearnAPY(
+              parseFloat(asset.earnApr),
+              asset.stats.apyInceptionSample
+            );
           default:
             return this.calculateYearnAPY(parseFloat(asset.earnApr), asset.apy);
         }
@@ -1395,7 +1432,7 @@ class Vault extends Component {
         // } else {
         //   return "0.00%";
         // }
-        return '55% - 75%';
+        return "55% - 75%";
       }
     } else {
       return "0.00%";
@@ -1404,11 +1441,21 @@ class Vault extends Component {
 
   calculateYearnAPY = (earnAPR, vaultAPY) => {
     if (earnAPR * 100 > vaultAPY) {
-      return (vaultAPY / 1).toFixed(2) + "% - " + (earnAPR * 100 / 1).toFixed(2) + '%';
+      return (
+        (vaultAPY / 1).toFixed(2) +
+        "% - " +
+        ((earnAPR * 100) / 1).toFixed(2) +
+        "%"
+      );
     } else {
-      return (earnAPR * 100 / 1).toFixed(2) + "% - " + (vaultAPY / 1).toFixed(2) + '%';
+      return (
+        ((earnAPR * 100) / 1).toFixed(2) +
+        "% - " +
+        (vaultAPY / 1).toFixed(2) +
+        "%"
+      );
     }
-  }
+  };
 
   renderBasedOn = () => {
     const { classes } = this.props;
