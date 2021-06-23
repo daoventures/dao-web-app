@@ -3,6 +3,8 @@ services:
   nginx:
     container_name: 'frontend'
     restart: always
+    env_file:
+      - .env
     build: 
       context: .
     ports: 
