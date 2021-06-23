@@ -1,62 +1,59 @@
-import React, { Component } from "react";
-import { withRouter } from "react-router-dom";
-import { withStyles } from "@material-ui/core/styles";
 import {
-  Typography,
+  ADVANCE,
+  APPROVE_COMPLETED,
+  APPROVE_TRANSACTING,
+  BASIC,
+  CHANGE_NETWORK,
+  CONNECTION_CONNECTED,
+  CONNECTION_DISCONNECTED,
+  DEGEN,
+  DEPOSIT_ALL_CONTRACT_RETURNED,
+  DEPOSIT_ALL_CONTRACT_RETURNED_COMPLETED,
+  DEPOSIT_CONTRACT_RETURNED,
+  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+  ERROR,
+  EXPERT,
+  GET_STRATEGY_BALANCES_FULL,
+  HAPPY_HOUR_RETURN,
+  STRATEGY_BALANCES_FULL_RETURNED,
+  VAULT_BALANCES_FULL_RETURNED,
+  WITHDRAW_BOTH_VAULT_RETURNED,
+  WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
+  WITHDRAW_VAULT_RETURNED,
+  WITHDRAW_VAULT_RETURNED_COMPLETED,
+} from "../../constants";
+import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
-  TextField,
-  InputAdornment,
-  FormControlLabel,
   Checkbox,
-  Tooltip,
-  MenuItem,
+  FormControlLabel,
   Grid,
+  InputAdornment,
+  MenuItem,
+  TextField,
+  Tooltip,
+  Typography,
 } from "@material-ui/core";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import SearchIcon from "@material-ui/icons/Search";
-import InfoIcon from "@material-ui/icons/Info";
-import { withNamespaces } from "react-i18next";
+import React, { Component } from "react";
 import { colors, drawerWidth } from "../../theme";
 
-import Snackbar from "../snackbar";
 import Asset from "./asset";
+import ConnectBiconomy from "../connectBiconomy";
+import ConnectWallet from "../common/connectWallet/connectWallet";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import InfoIcon from "@material-ui/icons/Info";
 import Loader from "../loader";
 import RiskLevelLabel from "../common/riskLevelLabel/riskLevelLabel";
-
 import RiskLevelTab from '../common/riskLevelTab/riskLevelTab';
-import queryString from 'query-string';
-
-import {
-  ERROR,
-  DEPOSIT_CONTRACT_RETURNED,
-  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-  WITHDRAW_VAULT_RETURNED,
-  WITHDRAW_VAULT_RETURNED_COMPLETED,
-  DEPOSIT_ALL_CONTRACT_RETURNED,
-  DEPOSIT_ALL_CONTRACT_RETURNED_COMPLETED,
-  WITHDRAW_BOTH_VAULT_RETURNED,
-  WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
-  CONNECTION_CONNECTED,
-  CONNECTION_DISCONNECTED,
-  GET_STRATEGY_BALANCES_FULL,
-  STRATEGY_BALANCES_FULL_RETURNED,
-  CHANGE_NETWORK,
-  VAULT_BALANCES_FULL_RETURNED,
-  BASIC,
-  ADVANCE,
-  EXPERT,
-  DEGEN,
-  APPROVE_TRANSACTING,
-  APPROVE_COMPLETED,
-  HAPPY_HOUR_RETURN,
-} from "../../constants";
-
+import SearchIcon from "@material-ui/icons/Search";
+import Snackbar from "../snackbar";
 import Store from "../../stores";
 import UnlockModal from "../unlock/unlockModal";
-import ConnectWallet from "../common/connectWallet/connectWallet";
-import ConnectBiconomy from "../connectBiconomy";
+import queryString from 'query-string';
+import { withNamespaces } from "react-i18next";
+import { withRouter } from "react-router-dom";
+import { withStyles } from "@material-ui/core/styles";
 
 const emitter = Store.emitter;
 const dispatcher = Store.dispatcher;
@@ -1257,7 +1254,10 @@ class Vault extends Component {
                       
                       <Grid item sm={3} xs={6} className={classes.gridItemColumn}>
                         {/* 暂时不知道取什么 */}
-                        <Typography variant={'h5'} className={classes.assetLabel1, classes.assetLabelTextRight}>$ {asset.tvl ? Number(asset.tvl).toFixed(4) : '0.00'}</Typography>
+                        <Typography variant={'h5'} className={classes.assetLabel1, classes.assetLabelTextRight}>$ {asset.tvl ? Number(asset.tvl).toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  }) : '0.00'}</Typography>
                         <Typography variant={'h5'} className={classes.assetLabel2, classes.assetLabelTextRight1}>Total Value Locked</Typography>
                       </Grid>
                   </Grid>
