@@ -4379,14 +4379,15 @@ class Store {
     var amountToSend = web3.utils.toBN(amount * 10 ** decimals).toString();
 
     console.log("🚀 | tx | amount", amount);
-    let tx = await vaultContract.methods
+    let tx = vaultContract.methods
       .deposit(amountToSend, tokenIndex)
       .send({
         from: account.address,
         signatureType: "EIP712_SIGN",
         //optionally you can add other options like gasLimit
-      })
-      .on("transactionHash", function (txnHash) {
+      });
+
+    tx.on("transactionHash", function (txnHash) {
         console.log(txnHash);
         callback(null, txnHash, null);
       })
@@ -4395,19 +4396,21 @@ class Store {
         callback(null, null, receipt);
       })
       .on("error", function (error) {
-        if (!error.toString().includes("-32601")) {
+        console.log("🚀 | error", error)
+        if (!error.toString().includes("4001")) {
           if (error.message) {
             return callback(error.message);
           }
-          callback(error, null, null);
+          callback(error);
         }
       })
       .catch((error) => {
-        if (!error.toString().includes("-32601")) {
+        console.log("🚀 | error", error)
+        if (!error.toString().includes("4001")) {
           if (error.message) {
             return callback(error.message);
           }
-          callback(error, null, null);
+          callback(error);
         }
       });
   };
@@ -4444,6 +4447,7 @@ class Store {
       })
       .on("error", function (error) {
         if (!error.toString().includes("-32601")) {
+
           if (error.message) {
             return callback(error.message);
           }
@@ -5596,6 +5600,7 @@ class Store {
         happyHour: result.body.happyHour,
         happyHourStartTime: result.body.startTime,
         happyHourEndTime: result.body.endTime,
+        happyHourThreshold: result.body.threshold,
       };
     } else {
       _result = { happyHour: result.body.happyHour };
@@ -5691,15 +5696,7 @@ class Store {
     const allowed = ["daoCDV"];
 
     const citadelAsset = assets.filter((el) => el.id == "daoCDV");
-    console.log(
-      "🚀 | Store | saveBiconomyProvider= | citadelAsset",
-      citadelAsset
-    );
 
-    console.log(
-      "🚀 | Store | saveBiconomyProvider= | citadelAsset",
-      citadelAsset
-    );
     if (happyHourWeb3) {
       // Initialize Contract
       const happyHourContract = new happyHourWeb3.eth.Contract(
@@ -5707,10 +5704,6 @@ class Store {
         citadelAsset[0].vaultContractAddress
       );
 
-      console.log(
-        "🚀 | Store | saveBiconomyProvider= | citadelAsset.vaultContractAddress",
-        citadelAsset[0].vaultContractAddress
-      );
       store.setStore({ happyHourContract: happyHourContract });
     }
 

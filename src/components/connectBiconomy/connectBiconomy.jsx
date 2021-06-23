@@ -1,42 +1,48 @@
-import React, { Component, useState, useEffect } from "react";
-import { withRouter } from "react-router-dom";
-import { withStyles } from "@material-ui/core/styles";
-import {
-  Typography,
-  TextField,
-  MenuItem,
-  Grid,
-  Button,
-} from "@material-ui/core";
-import { colors, drawerWidth } from "../../theme/theme";
+import * as moment from "moment";
 
-import Loader from "../loader/loader";
-
-import { ERROR, BICONOMY_CONNECTED } from "../../constants/constants";
-
+import { BICONOMY_CONNECTED, ERROR } from "../../constants/constants";
 import {
   Biconomy,
-  PermitClient,
   HTTP_CODES,
+  PermitClient,
   RESPONSE_CODES,
 } from "@biconomy/mexa";
+import {
+  Button,
+  Grid,
+  MenuItem,
+  TextField,
+  Typography,
+} from "@material-ui/core";
+import React, { Component, useEffect, useState } from "react";
+import { colors, drawerWidth } from "../../theme/theme";
 
-import * as moment from "moment";
-import _ from "lodash";
-
-// blocknative测试
-import { initOnboard } from "../../walletsServices.js";
-
-import config from "../../config/config";
-
-import citadelABI from "./citadelABI.json";
-
-import Web3 from "web3";
-
-import Store from "../../stores/store";
-import UnlockModal from "../unlock/unlockModal";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
+import Loader from "../loader/loader";
+import Store from "../../stores/store";
+import UnlockModal from "../unlock/unlockModal";
+import Web3 from "web3";
+import _ from "lodash";
+import citadelABI from "./citadelABI.json";
+import config from "../../config/config";
+import { initOnboard } from "../../walletsServices.js";
+import { withRouter } from "react-router-dom";
+import { withStyles } from "@material-ui/core/styles";
+
+// blocknative测试
+
+
+
+
+
+
+
+
+
+
+
+
 const emitter = Store.emitter;
 const dispatcher = Store.dispatcher;
 const store = Store.store;
@@ -128,6 +134,7 @@ class ConnectBiconomy extends Component {
       })
       .onEvent(happyHourbiconomy.ERROR, () => {
         // Handle error while initializing mexa
+        console.log("hi")
       });
 
     erc20Paymentbiconomy

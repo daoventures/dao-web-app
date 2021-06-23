@@ -1,32 +1,31 @@
-import React, { Component } from "react";
-import { withStyles } from "@material-ui/core/styles";
-import { IconButton, Typography } from "@material-ui/core";
-import { withRouter } from "react-router-dom";
-import { colors } from "../../theme";
-import ENS from "ethjs-ens";
-
 import {
+  CHANGE_NETWORK,
   CONNECTION_CONNECTED,
   CONNECTION_DISCONNECTED,
-  TOGGLE_DRAWER,
   CURRENT_THEME_RETURNED,
-  CHANGE_NETWORK,
   GET_HAPPY_HOUR_STATUS,
   HAPPY_HOUR_RETURN,
+  TOGGLE_DRAWER,
 } from "../../constants";
 import {
   HEADER_TITLE_DAOMINE,
+  HEADER_TITLE_DAOVIP,
   HEADER_TITLE_INVEST,
   HEADER_TITLE_PORTFOLIO,
-  HEADER_TITLE_SWAP,
-  HEADER_TITLE_DAOVIP
+  HEADER_TITLE_SWAP
 } from "../../constants/page-constant";
+import { IconButton, Typography } from "@material-ui/core";
+import React, { Component } from "react";
 
-import UnlockModal from "../unlock/unlockModal.jsx";
-import ToggleTheme from "../toggleTheme";
+import ENS from "ethjs-ens";
 import HappyHourTimer from "../happyHourTimer";
-
 import Store from "../../stores";
+import ToggleTheme from "../toggleTheme";
+import UnlockModal from "../unlock/unlockModal.jsx";
+import { colors } from "../../theme";
+import { withRouter } from "react-router-dom";
+import { withStyles } from "@material-ui/core/styles";
+
 const emitter = Store.emitter;
 const dispatcher = Store.dispatcher;
 const store = Store.store;
@@ -305,7 +304,7 @@ class Header extends Component {
   }
 
   handleHappyHour = (payload) => {
-    this.setState({ happyHour: payload.happyHour });
+    this.setState({ happyHour: payload.happyHour, threshold: payload.happyHourThreshold });
   };
 
   currentThemeChanged = () => {
@@ -546,6 +545,8 @@ class Header extends Component {
     let happyHour = store.getStore("happyHour");
     let happyHourStartTime = store.getStore("happyHourStartTime");
     let happyHourEndTime = store.getStore("happyHourEndTime");
+    let happyHourThreshold = store.getStore("happyHourThreshold");
+    console.log("🚀 | Header | happyHourThreshold", happyHourThreshold)
     // let happyHour = true;
     // let happyHourStartTime = "1624368201289";
     // let happyHourEndTime = Date.now() + 600000;
@@ -555,6 +556,7 @@ class Header extends Component {
         <HappyHourTimer
           happyHourStartTime={happyHourStartTime}
           happyHourEndTime={happyHourEndTime}
+          happyHourThreshold={happyHourThreshold}
           color="inherit"
           aria-label="Open drawer"></HappyHourTimer>
       );

@@ -91,13 +91,14 @@ const styles = (theme) => ({
   },
 });
 
-const HappyHourHelpBox = ({ classes, enabled }) => {
+const HappyHourHelpBox = ({ classes, enabled, threshold }) => {
   if (enabled) {
     return (
       <div className={classes.dialogRoot}>
         {/* <div className={classes.dialogContent}> */}
         <ul>
           <li>Enjoy <b>gas-free deposits</b> on during Daily Happy Hours! Just enter the deposit amount and sign the transaction, we take care of the rest!</li>
+          <li>Deposit {threshold} USD or more to our flagship strategies and enjoy gas free (up to 0.05ETH) deposits.</li>
         </ul>
         {/* </div>{" "} */}
       </div>
@@ -107,7 +108,7 @@ const HappyHourHelpBox = ({ classes, enabled }) => {
   }
 };
 
-const HappyHourTimer = ({ classes, happyHourStartTime, happyHourEndTime }) => {
+const HappyHourTimer = ({ classes, happyHourStartTime, happyHourEndTime, happyHourThreshold }) => {
   let initialTime; // initial time in milliseconds, defaults to 60000
   const interval = 1000; // interval to change remaining time amount, defaults to 1000
 
@@ -157,7 +158,9 @@ const HappyHourTimer = ({ classes, happyHourStartTime, happyHourEndTime }) => {
         onMouseLeave={() => _handleHappyHourHelpBox(false)}>
         <HappyHourHelpBox
           classes={classes}
-          enabled={helpBox}></HappyHourHelpBox>
+          enabled={helpBox}
+          threshold={happyHourThreshold}>
+          </HappyHourHelpBox>
         <div className={classes.happyHourTimeBox}>
           {" "}
           <Typography className={classes.happyHourTimeValueText}>
