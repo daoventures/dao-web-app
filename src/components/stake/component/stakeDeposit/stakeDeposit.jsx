@@ -255,7 +255,11 @@ class StakeDeposit extends Component {
     if (vaultName === 'ETH<->DVG') {
       window.open("https://info.uniswap.org/#/pools/0xa58262270521d7732fccbbdcdf9fcd1fc70d47e5", "_blank");
       return;
-    }
+    } 
+    if (vaultName === 'vipDVG') {
+      this.props.history.push("/stake");
+      return;
+    } 
     const path = "/invest#id=" + vaultName;
     this.props.history.push(path);
   }
