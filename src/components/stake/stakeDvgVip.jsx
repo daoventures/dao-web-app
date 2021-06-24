@@ -557,7 +557,7 @@ const styles = theme => ({
     },
 
     errorMessage: {
-        color: theme.themeColors.red,
+        color: theme.themeColors.formError,
         marginTop: "3px"
     }
 });
