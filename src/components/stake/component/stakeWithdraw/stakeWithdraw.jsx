@@ -6,7 +6,8 @@ import { Typography, TextField, Button } from "@material-ui/core";
 import Store from "../../../../stores/store";
 import {
     WITHDRAW_DAOMINE,
-    WITHDRAW_DAOMINE_RETURNED_COMPLETED
+    WITHDRAW_DAOMINE_RETURNED_COMPLETED,
+    ERROR
 } from '../../../../constants/constants';
 
 const styles = (theme) => ({
@@ -37,7 +38,6 @@ const styles = (theme) => ({
         flex: 1,
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
         width: "100%",
         padding: "15px",
         margin: "auto",
@@ -146,6 +146,11 @@ const styles = (theme) => ({
         marginBottom: "15px",
         justifyContent: "space-between",
         alignItems: "flex-end"
+    },
+
+    errorMessage: {
+        color: theme.themeColors.formError,
+        marginTop: "3px"
     }
 });
 
@@ -162,20 +167,23 @@ class StakeWithdraw extends Component {
             loading: false,
             amount: 0,
             percent: 0,
+            errorMessage: ""
         };
     }
 
     componentWillMount() {
         emitter.on(WITHDRAW_DAOMINE_RETURNED_COMPLETED, this.onWithdrawCompleted);
+        emitter.on(ERROR, this.errorReturned);
     }
 
     componentWillUnmount() {
-        emitter.on(WITHDRAW_DAOMINE_RETURNED_COMPLETED, this.onWithdrawCompleted);
+        emitter.removeListener(WITHDRAW_DAOMINE_RETURNED_COMPLETED, this.onWithdrawCompleted);
+        emitter.removeListener(ERROR, this.errorReturned);
     }
 
     // Staked amount input on change handler
     onChange = (event) => {
-        this.setState({amountError: false});
+        this.setState({ amountError: false, errorMessage: "", percent: 0 });
         let val = [];
         val[event.target.id] = event.target.value;
         this.setState(val);
@@ -186,25 +194,30 @@ class StakeWithdraw extends Component {
         this.setState({
             amount: 0,
             amountError: false,
+            errorMessage: "",
             percent: 0,
             loading: false
         })
-    } 
+    }
+
+    errorReturned = () => {
+        this.setState({ loading: false });
+    }
 
     // Handler to set amount to staked amount input field
     setAmount = (percent) => {
         const { pool } = this.props;
         const { userInfo } = pool;
         this.setState({
-          amount:
-            Math.floor((userInfo.depositedLPAmount / 10 ** pool.decimal) * 10000) /
-            10000,
-          percent,
+            amount:
+                Math.floor((userInfo.depositedLPAmount / 10 ** pool.decimal) * 10000) /
+                10000,
+            percent,
         });
     };
 
     onWithdrawal = () => {
-        this.setState({ amountError: false });
+        this.setState({ amountError: false, errorMessage: "" });
 
         const { startLoading, pool } = this.props;
         const { amount } = this.state;
@@ -215,14 +228,12 @@ class StakeWithdraw extends Component {
         let finalAmount = 0;
 
         if (!digitRegex.test(amount)) {
-            alert("Please provide an amount in numeric.");
-            this.setState({ amountError: true });
+            this.setState({ amountError: true, errorMessage: "Invalid amount" });
             return;
         }
 
         if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
-            alert("Please provide an amount to withdraw.");
-            this.setState({ amountError: true });
+            this.setState({ amountError: true, errorMessage: "Invalid amount" });
             return;
         }
 
@@ -237,8 +248,8 @@ class StakeWithdraw extends Component {
         } else if (parseFloat(amount) > parseFloat(exactStakedAmount)) {
             // Example remaining = 0.45219, display on UI as 0.4521 (4 d.p.)
             // User input to withdraw 0.452198
-            // 0.452198 > 0.45219, prompt alert.
-            alert("Please provide an amount which less than staked amount.");
+            // 0.452198 > 0.45219, show error message.
+            this.setState({ amountError: true, errorMessage: "Exceed available balance" });
             return;
         } else if (parseFloat(amount) < parseFloat(displayStakedAmount) ||
             parseFloat(amount) <= exactStakedAmount) {
@@ -246,7 +257,7 @@ class StakeWithdraw extends Component {
             // Case 1 : User input to withdraw 0.2, 0.2 < 0.45219, final amount = 0.2
             // Case 2 : User input to withdraw 0.45215, still <= 0.45219, final amount = 0.45215
             finalAmount = parseFloat(amount);
-        } 
+        }
 
         this.setState({ loading: true });
         startLoading();
@@ -261,7 +272,7 @@ class StakeWithdraw extends Component {
     };
 
     render() {
-        const { amount, loading, amountError, percent } = this.state;
+        const { amount, loading, amountError, percent, errorMessage } = this.state;
         const { classes, pool } = this.props;
 
         const { userInfo } = pool;
@@ -330,9 +341,19 @@ class StakeWithdraw extends Component {
                         </div>
                     </div>
 
+                    {/** Error Message */}
+                    {
+                        errorMessage !== "" && (
+                            <Typography variant={"h5"} className={classes.errorMessage}>
+                                {this.state.errorMessage}
+                            </Typography>
+                        )
+                    }
+
                     {/** Withdrawal Button */}
                     <div className={classes.withdrawlButtonBox}>
                         <Button
+                            disabled={loading}
                             className={classes.withdrawalActionButton}
                             onClick={this.onWithdrawal}
                         >

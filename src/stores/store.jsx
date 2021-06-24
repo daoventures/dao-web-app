@@ -6123,7 +6123,6 @@ class Store {
       callback(null, result);
     } catch (err) {
       console.log("Error _getUserDepositForDAOmine", err);
-      callback(null, err);
     }
   }
 
@@ -6136,18 +6135,6 @@ class Store {
       callback(null, parseFloat(balance));
     } catch (err) {
       console.log("Error in _getUserBalanceForLpToken(), ", err);
-      callback(null, null);
-    }
-  }
-
-  _getContractDecimal = async (contract, callback) => {
-    try {
-      const decimals = await contract.methods
-        .decimals()
-        .call();
-      callback(null, parseInt(decimals));
-    } catch (err) {
-      console.log("Error in _getContractDecimal()", err);
       callback(null, null);
     }
   }
@@ -6201,10 +6188,6 @@ class Store {
               },
               (callbackInner) => {
                 this._getUserDepositForDAOmine(daoMineContract, dvgDecimal, account, pool.pid, callbackInner);
-              },
-              (callbackInner) => {
-                // Get pool decimal
-                this._getContractDecimal(poolContract, callbackInner);
               }
             ],
             (err, data) => {
@@ -6216,11 +6199,10 @@ class Store {
 
               userInfo.tokenBalance = data[0];
               userInfo.finishedDVG = data[1] ? data[1].userDepositInfo.finishedDVG : null;
-              userInfo.depositedLPAmount = data[1] ? data[1].userDepositInfo.lpAmount : null;
+              userInfo.depositedLPAmount = data[1] ? parseInt(data[1].userDepositInfo.lpAmount) : null;
               userInfo.pendingDVG = data[1] ? data[1].userPendingDVG : null;
 
               pool.userInfo = userInfo;
-              pool.decimal = data[2];
 
               callback(null, pool);
             }
@@ -6513,7 +6495,7 @@ class Store {
           console.log("withdrawDAOmine() Error: ", error);
           if (!error.toString().includes("-32601")) {
             if (error.message) {
-              emitter.emit(ERROR, error);
+              emitter.emit(ERROR, error.message);
             }
           }
         })
@@ -6521,13 +6503,12 @@ class Store {
           console.log("withdrawDAOmine() Error: ", error);
           if (!error.toString().includes("-32601")) {
             if (error.message) {
-              emitter.emit(ERROR, error);
+              emitter.emit(ERROR, error.message);
             }
           }
         });
     } catch (err) {
       console.log("withdrawDAOmine() Error: ", err);
-      emitter.emit(ERROR, err);
     }  
   }
 
