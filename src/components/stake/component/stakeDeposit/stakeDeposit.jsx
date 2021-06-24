@@ -6,7 +6,8 @@ import { Typography, TextField, Button } from "@material-ui/core";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import {
    DEPOSIT_DAOMINE,
-   DEPOSIT_DAOMINE_RETURNED_COMPLETED
+   DEPOSIT_DAOMINE_RETURNED_COMPLETED,
+   ERROR
 } from "../../../../constants/constants";
 import Store from "../../../../stores/store";
 
@@ -166,10 +167,16 @@ class StakeDeposit extends Component {
 
   componentWillMount() {
     emitter.on(DEPOSIT_DAOMINE_RETURNED_COMPLETED, this.onDepositCompleted);
+    emitter.on(ERROR, this.errorReturned);
   }
 
   componentWillUnmount() {
     emitter.removeListener(DEPOSIT_DAOMINE_RETURNED_COMPLETED, this.onDepositCompleted);
+    emitter.removeListener(ERROR, this.errorReturned);
+  }
+
+  errorReturned = () => {
+    this.setState({loading: false});
   }
 
   onDepositCompleted = (txnHash) => {
@@ -322,6 +329,7 @@ class StakeDeposit extends Component {
           {/** Deposit Button */}
           <div className={classes.depositButtonBox}>
             <Button
+              disabled={loading}
               className={classes.depositActionButton}
               onClick={this.onDeposit}
             >

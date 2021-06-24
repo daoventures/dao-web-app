@@ -6,7 +6,8 @@ import { Typography, TextField, Button } from "@material-ui/core";
 import Store from "../../../../stores/store";
 import {
     WITHDRAW_DAOMINE,
-    WITHDRAW_DAOMINE_RETURNED_COMPLETED
+    WITHDRAW_DAOMINE_RETURNED_COMPLETED,
+    ERROR
 } from '../../../../constants/constants';
 
 const styles = (theme) => ({
@@ -167,10 +168,12 @@ class StakeWithdraw extends Component {
 
     componentWillMount() {
         emitter.on(WITHDRAW_DAOMINE_RETURNED_COMPLETED, this.onWithdrawCompleted);
+        emitter.on(ERROR, this.errorReturned);
     }
 
     componentWillUnmount() {
-        emitter.on(WITHDRAW_DAOMINE_RETURNED_COMPLETED, this.onWithdrawCompleted);
+        emitter.removeListener(WITHDRAW_DAOMINE_RETURNED_COMPLETED, this.onWithdrawCompleted);
+        emitter.removeListener(ERROR, this.errorReturned);
     }
 
     // Staked amount input on change handler
@@ -190,6 +193,10 @@ class StakeWithdraw extends Component {
             loading: false
         })
     } 
+
+    errorReturned = () => {
+        this.setState({loading: false});
+    }
 
     // Handler to set amount to staked amount input field
     setAmount = (percent) => {
@@ -333,6 +340,7 @@ class StakeWithdraw extends Component {
                     {/** Withdrawal Button */}
                     <div className={classes.withdrawlButtonBox}>
                         <Button
+                            disabled={loading}
                             className={classes.withdrawalActionButton}
                             onClick={this.onWithdrawal}
                         >

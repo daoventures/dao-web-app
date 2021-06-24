@@ -6501,7 +6501,7 @@ class Store {
           console.log("withdrawDAOmine() Error: ", error);
           if (!error.toString().includes("-32601")) {
             if (error.message) {
-              emitter.emit(ERROR, error);
+              emitter.emit(ERROR, error.message);
             }
           }
         })
@@ -6509,13 +6509,12 @@ class Store {
           console.log("withdrawDAOmine() Error: ", error);
           if (!error.toString().includes("-32601")) {
             if (error.message) {
-              emitter.emit(ERROR, error);
+              emitter.emit(ERROR, error.message);
             }
           }
         });
     } catch (err) {
       console.log("withdrawDAOmine() Error: ", err);
-      emitter.emit(ERROR, err);
     }  
   }
 
