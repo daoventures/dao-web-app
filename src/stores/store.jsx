@@ -5575,16 +5575,16 @@ class Store {
     const resultString = await rp(url);
     const result = JSON.parse(resultString);
     console.log("🚀 | Store | _eventVerifyAmount= | result", result);
-    if (
-      result.body.happyHour === true &&
-      result.body.amountAboveThreshold === true
-    ) {
+    if ( result.body.happyHour === true ) {
+      if (result.body.amountAboveThreshold === true) {
       alert("Gasless Transaction!");
-      store.setStore({ happyHour: true }); // Might be redundant
-      return true;
-    } else {
+        store.setStore({ happyHour: true }); // Might be redundant
+        return true;
+      } else {
       alert(result.body.message);
-      store.setStore({ happyHour: false });
+      return false;
+      }
+    } else {
       return false;
     }
   };
