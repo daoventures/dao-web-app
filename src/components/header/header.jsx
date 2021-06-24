@@ -435,7 +435,6 @@ class Header extends Component {
             {/*** Page Header Title */}
             {!hideNav && (
               <span>
-                {console.log(this.props.history.location)}
                 {this.state.menuObj[this.props.history.location.pathname]}
               </span>
             )}

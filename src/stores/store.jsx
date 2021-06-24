@@ -6145,18 +6145,6 @@ class Store {
     }
   }
 
-  _getContractDecimal = async (contract, callback) => {
-    try {
-      const decimals = await contract.methods
-        .decimals()
-        .call();
-      callback(null, parseInt(decimals));
-    } catch (err) {
-      console.log("Error in _getContractDecimal()", err);
-      callback(null, null);
-    }
-  }
-
   findDAOminePool = async (payload) => {
     const account = store.getStore("account");
 
@@ -6206,10 +6194,6 @@ class Store {
               },
               (callbackInner) => {
                 this._getUserDepositForDAOmine(daoMineContract, dvgDecimal, account, pool.pid, callbackInner);
-              },
-              (callbackInner) => {
-                // Get pool decimal
-                this._getContractDecimal(poolContract, callbackInner);
               }
             ],
             (err, data) => {
@@ -6225,7 +6209,6 @@ class Store {
               userInfo.pendingDVG = data[1] ? data[1].userPendingDVG : null;
 
               pool.userInfo = userInfo;
-              pool.decimal = data[2];
 
               callback(null, pool);
             }
