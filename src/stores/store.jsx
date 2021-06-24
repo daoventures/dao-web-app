@@ -6552,7 +6552,6 @@ class Store {
           return callback(err)
         }
         asset.balance = data[0];
-        console.log(data,'5898##');
         callback(null, asset)
       })
     }, (err, assets) => {
@@ -6599,11 +6598,13 @@ class Store {
       xdvg.abi,
       xdvg.erc20address
     );
+
     //查询xdvg授权数量
     const allowance = await dvgContract.methods
       .allowance(account.address, xdvg.erc20address)
       .call({ from: account.address });
     console.log(allowance, 'allowance###5552');
+
     let _amount='';
     if(max){
       //查询dvg可用
@@ -6613,6 +6614,7 @@ class Store {
     }else{
       _amount = web3.utils.toWei(amount, "ether")
     }
+  
     //xdvg授权数量小于金额的话 需要重新授权
     if (parseFloat(amount) > parseFloat(allowance)) {
       
@@ -6745,15 +6747,16 @@ class Store {
       xdvg.abi,
       xdvg.erc20address
     );
+
     let _amount = '';
     if(max){
       _amount = await xDVGCOntract.methods
     .balanceOf(account.address)
     .call({ from: account.address });
     }else{
-
       _amount = web3.utils.toWei(amount, "ether");
     }
+
     console.log(_amount,'_amount5702');
     xDVGCOntract.methods
       .withdraw(_amount)
@@ -6787,7 +6790,6 @@ class Store {
           callback(error);
         }
       })
-
   }
 
   getDvgApr=async()=>{
