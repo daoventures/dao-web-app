@@ -709,7 +709,7 @@ class Stake extends Component {
                         {/** Multiplier */}
                         <Grid
                           item
-                          sm={2}
+                          sm={1}
                           xs={6}
                           className={classes.gridItemColumn}
                         >

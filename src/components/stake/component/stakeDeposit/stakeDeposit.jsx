@@ -5,9 +5,9 @@ import { withStyles } from "@material-ui/core/styles";
 import { Typography, TextField, Button } from "@material-ui/core";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import {
-   DEPOSIT_DAOMINE,
-   DEPOSIT_DAOMINE_RETURNED_COMPLETED,
-   ERROR
+  DEPOSIT_DAOMINE,
+  DEPOSIT_DAOMINE_RETURNED_COMPLETED,
+  ERROR
 } from "../../../../constants/constants";
 import Store from "../../../../stores/store";
 
@@ -39,7 +39,6 @@ const styles = (theme) => ({
     flex: 1,
     display: "flex",
     flexDirection: "column",
-    alignItems: "center",
     width: "100%",
     margin: "auto",
     padding: "15px",
@@ -146,6 +145,11 @@ const styles = (theme) => ({
     color: theme.themeColors.textP,
     cursor: "pointer"
   },
+
+  errorMessage: {
+    color: theme.themeColors.formError,
+    marginTop: "3px"
+  }
 });
 
 const store = Store.store;
@@ -162,6 +166,7 @@ class StakeDeposit extends Component {
       loading: false,
       amount: 0,
       percent: 0,
+      errorMessage: ""
     };
   }
 
@@ -176,20 +181,21 @@ class StakeDeposit extends Component {
   }
 
   errorReturned = () => {
-    this.setState({loading: false});
+    this.setState({ loading: false });
   }
 
   onDepositCompleted = (txnHash) => {
     this.setState({
       amount: 0,
       amountError: false,
+      errorMessage: "",
       percent: 0,
       loading: false
     })
   }
 
   onChange = (event) => {
-    this.setState({amountError: false});
+    this.setState({ amountError: false, errorMessage: "", percent: 0 });
     let val = [];
     val[event.target.id] = event.target.value;
     this.setState(val);
@@ -207,7 +213,7 @@ class StakeDeposit extends Component {
   };
 
   onDeposit = () => {
-    this.setState({ amountError: false });
+    this.setState({ amountError: false, errorMessage: "" });
 
     const { startLoading, pool } = this.props;
     const { amount } = this.state;
@@ -215,24 +221,21 @@ class StakeDeposit extends Component {
 
     const digitRegex = /^[0-9]\d*(\.\d+)?$/;
 
-    if(!digitRegex.test(amount)) {
-        alert("Please provide an amount in numeric.");
-        this.setState({amountError: true});
-        return;
+    if (!digitRegex.test(amount)) {
+      this.setState({ amountError: true, errorMessage: "Invalid amount" });
+      return;
     }
 
-    if(!amount || isNaN(amount) || parseFloat(amount) <= 0 ) {
-        alert("Please provide an amount to deposit.");
-        this.setState({amountError: true});
-        return;
+    if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+      this.setState({ amountError: true, errorMessage: "Invalid amount" });
+      return;
     }
 
-    const tokenBalance =  Math.floor((userInfo.tokenBalance / 10 ** pool.decimal) * 10000) / 10000;
+    const tokenBalance = Math.floor((userInfo.tokenBalance / 10 ** pool.decimal) * 10000) / 10000;
 
-    if(parseFloat(amount) > tokenBalance) {
-        alert("Please provide an amount less than your available balance ("+ tokenBalance +") to deposit.");
-        this.setState({amountError: true});
-        return;
+    if (parseFloat(amount) > tokenBalance) {
+      this.setState({ amountError: true, errorMessage: "Exceed available balance" });
+      return;
     }
 
     this.setState({ loading: true });
@@ -245,24 +248,24 @@ class StakeDeposit extends Component {
         amount: amount.toString()
       }
     })
-    
+
   };
 
   navigate = (vaultName) => {
-    if(vaultName === 'ETH<->DVG') {
+    if (vaultName === 'ETH<->DVG') {
       window.open("https://info.uniswap.org/#/pools/0xa58262270521d7732fccbbdcdf9fcd1fc70d47e5", "_blank");
       return;
     }
-    const path = "/invest#id="+ vaultName;
+    const path = "/invest#id=" + vaultName;
     this.props.history.push(path);
   }
 
   render() {
-    const { amount, loading, amountError, percent } = this.state;
+    const { amount, loading, amountError, percent, errorMessage } = this.state;
     const { classes, pool } = this.props;
 
     const { userInfo } = pool;
- 
+
     return (
       <div className={classes.depositContainer}>
         <div className={classes.tradeContainer}>
@@ -282,10 +285,10 @@ class StakeDeposit extends Component {
             >
               {userInfo.tokenBalance
                 ? (
-                    Math.floor(
-                      (userInfo.tokenBalance / 10 ** pool.decimal) * 10000
-                    ) / 10000
-                  ).toFixed(4)
+                  Math.floor(
+                    (userInfo.tokenBalance / 10 ** pool.decimal) * 10000
+                  ) / 10000
+                ).toFixed(4)
                 : "0.0000"}
               {" " + pool.name}
             </Typography>
@@ -326,6 +329,15 @@ class StakeDeposit extends Component {
             </div>
           </div>
 
+          {/** Error Message */}
+          {
+            errorMessage !== "" && (
+              <Typography variant={"h5"} className={classes.errorMessage}>
+                {this.state.errorMessage}
+              </Typography>
+            )
+          }
+
           {/** Deposit Button */}
           <div className={classes.depositButtonBox}>
             <Button
@@ -339,7 +351,7 @@ class StakeDeposit extends Component {
 
           {/** Get LP Link*/}
           <div className={classes.displayInfoBox}>
-            <a onClick={()=> this.navigate(pool.name)} className={classes.lpLink}>
+            <a onClick={() => this.navigate(pool.name)} className={classes.lpLink}>
               Get {pool.label}<OpenInNewIcon></OpenInNewIcon>
             </a>
           </div>
