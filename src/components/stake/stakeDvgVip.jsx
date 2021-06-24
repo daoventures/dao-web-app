@@ -630,11 +630,53 @@ class StakeDvgVip extends Component {
     }
 
     submitStake = () => {
-        if (this.state.type == 'stake') {
-            dispatcher.dispatch({ type: DEPOSIT_XDVG, content: { amount: this.state.amount, asset: this.state.dvgInfoObj[1], max: this.state.max } })
-        } else {
-            dispatcher.dispatch({ type: WIDTHDRAW_XDVG, content: { amount: this.state.amount, asset: this.state.dvgInfoObj[1], max: this.state.max } })
+        const { amount } = this.state;
+
+        // Validate "amount" must be number
+        const digitRegex = /^[0-9]\d*(\.\d+)?$/;
+        if(!digitRegex.test(amount)) {
+            alert("Please provide an amount in numeric");
+            this.setState({amountError: true});
+            return;
         }
+
+        let action = "";
+        let actionShortForm = "";
+        let balance = 0;
+
+        if(this.state.type === "stake") {
+            action = DEPOSIT_XDVG;
+            actionShortForm = "deposit";
+            balance = this.state.dvgInfoObj[1].balance
+        } else {
+            action = WIDTHDRAW_XDVG;
+            actionShortForm = "withdraw";
+            balance = this.state.dvgInfoObj[0].balance
+        }
+
+        // Validate balance must not be 0.
+        if(!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+            alert("Please provide an amount to " + actionShortForm);
+            this.setState({amountError: true});
+            return;
+        }
+
+        balance = (Math.floor(balance * 10000) / 10000).toFixed(4);
+        
+        // Validate balance must be less than or equal to available balance displayed on UI
+        if(parseFloat(amount) > parseFloat(balance)) {
+            alert("Please provide an amount less than your available balance (" + balance + ") to "+ actionShortForm);
+            this.setState({amountError: true});
+            return;
+        }
+
+        dispatcher.dispatch({ 
+            type: action, 
+            content: { 
+                amount: amount.toString(), 
+                asset: this.state.dvgInfoObj[1], 
+            } 
+        })
     }
 
     onChange = (event) => {
@@ -664,16 +706,11 @@ class StakeDvgVip extends Component {
 
     maxAmount() {
         const { type, dvgInfoObj } = this.state;
-        if (type == 'stake') {
+
+        if(dvgInfoObj) {
+            const objIndex = type === "stake" ? 1 : 0; 
             this.setState({
-                // amount: Number(dvgInfoObj && dvgInfoObj[1].balance).toFixed(4)
-                amount: dvgInfoObj && dvgInfoObj[1].balance.toString(),
-                max: true
-            })
-        } else {
-            this.setState({
-                // amount: Number(dvgInfoObj && dvgInfoObj[0].balance).toFixed(4)
-                amount: dvgInfoObj && dvgInfoObj[0].balance.toString(),
+                amount: (Math.floor(dvgInfoObj[objIndex].balance * 10000) / 10000).toFixed(4),
                 max: true
             })
         }
@@ -695,6 +732,19 @@ class StakeDvgVip extends Component {
         this.setState({
             isShowApr: !this.state.isShowApr
         })
+    }
+
+    renderAvailableAmount = (amount, symbol) => {
+        const { classes } = this.props;
+
+        return (
+            <div className={classes.available}>
+                Available：
+                {(Math.floor(amount * 10000) / 10000).toFixed(4)}
+                {" "}
+                {symbol}
+            </div>
+        )
     }
 
     render() {
@@ -728,12 +778,12 @@ class StakeDvgVip extends Component {
                             <div className={classes.toTrade}>
                                 <div className={classes.toTradeUniswap} onClick={() => this.goUrl('https://app.uniswap.org/#/swap?outputCurrency=0x51e00a95748dbd2a3f47bc5c3b3e7b3f0fea666c')}>Buy on Uniswap</div>
                                 <div className={classes.toTradePancakeswap} onClick={() => this.goUrl('https://exchange.pancakeswap.finance/#/swap?outputCurrency=0x51e00a95748dbd2a3f47bc5c3b3e7b3f0fea666c')}>Buy on Pancakeswap</div>
-
                             </div>
                         </div>
 
                     </div>
                 </Grid>
+
                 <div className={classes.content}>
                     <div className={classes.contentLeft}>
                         <div className={classes.contentLeftTitle}>
@@ -745,30 +795,35 @@ class StakeDvgVip extends Component {
                         </div>
                         <div className={classes.contentCenter}>
                             <div className={classes.contentHeader}>
+                                {/** Stake or Unstake Button */}
                                 <div className={classes.stakeTab}>
-                                    <div className={type == 'stake' ? classes.stake : classes.unStake} onClick={() => this.stakeTab('stake')}>Stake</div>
-                                    <div className={type == 'stake' ? classes.unStake : classes.stake} onClick={() => this.stakeTab('unStake')}>Unstake</div>
+                                    <div className={type === 'stake' ? classes.stake : classes.unStake} onClick={() => this.stakeTab('stake')}>Stake</div>
+                                    <div className={type ==='stake' ? classes.unStake : classes.stake} onClick={() => this.stakeTab('unStake')}>Unstake</div>
                                 </div>
-                                {type == 'stake' ?
-                                    <div className={classes.available}>Available：{dvgBalance && dvgBalance.toString().match(/^\d+(?:\.\d{0,8})?/)}DVG</div>
-                                    : <div className={classes.available}>Available：{xdvgBalance && xdvgBalance.toString().match(/^\d+(?:\.\d{0,8})?/)}vipDVG</div>
 
+                                {/** Available Amount in Wallet */}
+                                {
+                                    (type === "stake") 
+                                        ? this.renderAvailableAmount(dvgBalance, "DVG")
+                                        : this.renderAvailableAmount(xdvgBalance, "vipDVG")
                                 }
                             </div>
-                            <div className={classes.stakeInput}>
 
+                            {/** Amount Input Field */}
+                            <div className={classes.stakeInput}>
                                 <input className={classes.input} value={amount} onChange={this.onChange} type="text" />
                                 <div className={classes.max} onClick={() => this.maxAmount()}>Max</div>
                             </div>
 
+                            {/** Button to trigger stake function */}
                             <div className={amount ? classes.approveStakingActive : classes.approveStaking} onClick={() => { this.submitStake() }}>
-
                                 {
-                                    type == 'stake' ? 'Approve Staking' : 'Approve Unstaking'
+                                    type === 'stake' ? 'Approve Staking' : 'Approve Unstaking'
                                 }
                             </div>
                         </div>
                     </div>
+
                     <div className={classes.contentRight}>
                         <div className={classes.totalApr}>
                             <div className={classes.total}>
