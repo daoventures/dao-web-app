@@ -6205,7 +6205,7 @@ class Store {
 
               userInfo.tokenBalance = data[0];
               userInfo.finishedDVG = data[1] ? data[1].userDepositInfo.finishedDVG : null;
-              userInfo.depositedLPAmount = data[1] ? data[1].userDepositInfo.lpAmount : null;
+              userInfo.depositedLPAmount = data[1] ? parseInt(data[1].userDepositInfo.lpAmount) : null;
               userInfo.pendingDVG = data[1] ? data[1].userPendingDVG : null;
 
               pool.userInfo = userInfo;

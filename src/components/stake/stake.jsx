@@ -666,7 +666,7 @@ class Stake extends Component {
                             }}
                             className={classes.assetLabel1}
                           >
-                            {pool.userInfo.depositedLPAmount
+                            { pool.userInfo.depositedLPAmount 
                               ? (
                                   Number(pool.userInfo.depositedLPAmount) /
                                   10 ** pool.decimal
