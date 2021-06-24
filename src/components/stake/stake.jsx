@@ -600,7 +600,7 @@ class Stake extends Component {
                         {/** Pool Title */}
                         <Grid
                           item
-                          sm={2}
+                          sm={3}
                           xs={4}
                           className={classes.gridItemColumn}
                         >
