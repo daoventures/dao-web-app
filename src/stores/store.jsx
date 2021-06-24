@@ -505,6 +505,50 @@ class Store {
           isPopularItem: true, // use to render popular item icon
           // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
         },
+        /* {
+          id: "daoELO",
+          name: "USDT/USDC/DAI",
+          symbol: "USDT",
+          symbols: ["USDT", "USDC", "DAI"],
+          description: "Stablecoins",
+          vaultSymbol: "daoELO",
+          erc20addresses: [
+            "0xdac17f958d2ee523a2206206994597c13d831ec7",
+            "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+            "0x6b175474e89094c44da98b954eedeac495271d0f",
+          ],
+          erc20address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
+          vaultContractAddress: "",
+          vaultContractABI: config.vaultDAOELOContractABI,
+          balance: 0,
+          balances: [0, 0, 0],
+          vaultBalance: 0,
+          decimals: 18,
+          deposit: true,
+          depositAll: true,
+          withdraw: true,
+          withdrawAll: true,
+          lastMeasurement: 12586420,
+          measurement: 1e18,
+          price_id: ["tether", "usd-coin", "dai"],
+          priceInUSD: [0, 0, 0],
+          strategyName: "DAO Elon: USDT USDC DAI",
+          strategy: "DAO Elon",
+          strategyAddress: "",
+          strategyContractABI: config.strategyDAOELOContractABI,
+          historicalPriceId: "daoELO_price",
+          logoFormat: "svg",
+          risk: BASIC,
+          strategyType: "elon",
+          cTokenAddress: "",
+          cAbi: "",
+          group: BASIC,
+          tvlKey: "daoELO_tvl",
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-elo-vault",
+          isPopularItem: false,
+          // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
+        }, */
         {
           id: "USDT",
           name: "USDT",
@@ -788,6 +832,50 @@ class Store {
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-citadel-vault",
           isPopularItem: true,
+          // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
+        },
+        {
+          id: "daoELO",
+          name: "USDT/USDC/DAI",
+          symbol: "USDT",
+          symbols: ["USDT", "USDC", "DAI"],
+          description: "Stablecoins",
+          vaultSymbol: "daoELO",
+          erc20addresses: [
+            "0x07de306ff27a2b630b1141956844eb1552b956b5",
+            "0xb7a4f3e9097c08da09517b5ab877f7a917224ede",
+            "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
+          ],
+          erc20address: "0x07de306ff27a2b630b1141956844eb1552b956b5",
+          vaultContractAddress: "0xf03fa8553379d872b4e2Bafbc679409Fb82604c2",
+          vaultContractABI: config.vaultDAOELOContractABI,
+          balance: 0, // Stores balance of selectedERC20Address
+          balances: [0, 0, 0],
+          vaultBalance: 0,
+          decimals: 18,
+          deposit: true,
+          depositAll: true,
+          withdraw: true,
+          withdrawAll: true,
+          lastMeasurement: 25413059,
+          measurement: 1e18,
+          price_id: ["tether", "usd-coin", "dai"],
+          priceInUSD: [0, 0, 0],
+          strategyName: "DAO Elon: USDT USDC DAI",
+          strategy: "DAO Elon",
+          strategyAddress: "0xa4F71f88bd522b33af3ae515Caafa956BD1bbFa1",
+          strategyContractABI: config.strategyDAOELOContractABI,
+          historicalPriceId: "daoELO_price",
+          logoFormat: "svg",
+          risk: BASIC,
+          strategyType: "elon",
+          cTokenAddress: "",
+          cAbi: "",
+          group: BASIC,
+          tvlKey: "daoELO_tvl",
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-elon-vault",
+          isPopularItem: false,
           // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
         },
         {
@@ -2315,7 +2403,7 @@ class Store {
     async.map(
       assets,
       (asset, callback) => {
-        if (asset.strategyType === "citadel") {
+        if (this.isUsdVault(asset)) {
           async.parallel(
             [
               (callbackInner) => {
@@ -2463,7 +2551,7 @@ class Store {
   };
 
   _getERC20BalancesCitadel = async (web3, asset, account, callback) => {
-    if (asset.strategyType !== "citadel") {
+    if (!this.isUsdVault(asset)) {
       return callback(null, {
         balances: [0, 0, 0],
         sumBalances: 0,
@@ -3703,7 +3791,7 @@ class Store {
             );
           }
         });
-      } else if (asset.strategyType === "citadel") {
+      } else if (this.isUsdVault(asset)) {
         vault = vaultStatistics.filter((stats) => {
           return (
             stats.address.toLowerCase() ===
@@ -3955,7 +4043,7 @@ class Store {
         vaultBalance: 0,
         strategyBalance: balance,
       });
-    } else if (asset.strategyType === "citadel") {
+    } else if (this.isUsdVault(asset)) {
       const vaultContract = new web3.eth.Contract(
         asset.vaultContractABI,
         asset.vaultContractAddress
@@ -4163,6 +4251,46 @@ class Store {
           }
         );
       }
+    } else if (asset.strategyType === "elon") {
+      await this._checkApprovalCitadel(
+        asset,
+        account,
+        amount,
+        asset.vaultContractAddress,
+        tokenIndex,
+        (err, txnHash, approvalResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(APPROVE_TRANSACTING, txnHash);
+          }
+          if (approvalResult) {
+            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
+          }
+        }
+      );
+
+      await this._callDepositAmountContractCitadel(
+        asset,
+        account,
+        amount,
+        tokenIndex,
+        (err, txnHash, depositResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+          }
+          if (depositResult) {
+            return emitter.emit(
+              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+              depositResult.transactionHash
+            );
+          }
+        }
+      );
     }
   };
 
@@ -4688,6 +4816,46 @@ class Store {
           }
         );
       }
+    } else if (asset.strategyType === "elon") {
+      await this._checkApprovalCitadel(
+        asset,
+        account,
+        amount,
+        asset.vaultContractAddress,
+        tokenIndex,
+        (err, txnHash, approvalResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(APPROVE_TRANSACTING, txnHash);
+          }
+          if (approvalResult) {
+            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
+          }
+        }
+      );
+
+      await this._callDepositAmountContractCitadel(
+        asset,
+        account,
+        amount,
+        tokenIndex,
+        (err, txnHash, depositResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+          }
+          if (depositResult) {
+            return emitter.emit(
+              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+              depositResult.transactionHash
+            );
+          }
+        }
+      );
     }
   };
 
@@ -4887,7 +5055,7 @@ class Store {
         }
       );
     } else {
-      if (asset.strategyType === "citadel") {
+      if (this.isUsdVault(asset)) {
         this._callWithdrawAllVaultCitadel(
           asset,
           account,
@@ -5167,6 +5335,25 @@ class Store {
           vaultPricePerFullShare: 0,
           compoundExchangeRate: 0,
           citadelPricePerFullShare: pricePerFullShare,
+          elonPricePerFullShare: 0,
+        };
+        return callback(null, returnObj);
+      } else if (asset.strategyType === "elon") {
+        const elonContract = new web3.eth.Contract(
+          asset.vaultContractABI,
+          asset.vaultContractAddress
+        );
+
+        const pool = await elonContract.methods.getAllPoolInUSD().call();
+        const totalSupply = await elonContract.methods.totalSupply().call();
+        const pricePerFullShare = pool / totalSupply;
+
+        const returnObj = {
+          earnPricePerFullShare: 0,
+          vaultPricePerFullShare: 0,
+          compoundExchangeRate: 0,
+          citadelPricePerFullShare: 0,
+          elonPricePerFullShare: pricePerFullShare,
         };
         return callback(null, returnObj);
       }
@@ -5557,6 +5744,8 @@ class Store {
         vaultAddress = asset.vaultContractAddress;
       } else if (asset.strategyType === "citadel") {
         vaultAddress = asset.vaultContractAddress;
+      } else if (asset.strategyType === "elon") {
+        vaultAddress = asset.vaultContractAddress;
       }
       const url = `${config.statsProvider}vaults/historical-apy/${vaultAddress}/${interval}`;
       const resultString = await rp(url);
@@ -5801,6 +5990,39 @@ class Store {
     }
   };
 
+  _isSufficientLiquidityUsd = async (
+    asset,
+    vaultContract,
+    withdrawAmount,
+    tokenIndex
+  ) => {
+    const web3 = new Web3(store.getStore("web3context").library.provider);
+
+    let erc20Contract = new web3.eth.Contract(
+      config.erc20ABI,
+      asset.erc20addresses[tokenIndex]
+    );
+
+    let balance = parseFloat(
+      await erc20Contract.methods.balanceOf(asset.vaultContractAddress).call()
+    );
+
+    const decimals = parseInt(await erc20Contract.methods.decimals().call());
+    const pool = await vaultContract.methods.getAllPoolInUSD().call();
+    const totalSupply = await vaultContract.methods.totalSupply().call();
+
+    const withdrawAmountUSD =
+      ((withdrawAmount * pool) / totalSupply) * 10 ** (decimals - 6);
+    const withdawAmountInToken =
+      withdrawAmountUSD / asset.priceInUSD[tokenIndex];
+
+    if (withdawAmountInToken > balance) {
+      alert(
+        "Due to insufficient liquidity of the desired token in vault for withdrawal, gas fees may be very high. Are you sure to proceed?"
+      );
+    }
+  };
+
   // TODO: REFACTOR: Currently all 3 types of vaults use this
   withdrawBoth = async (payload) => {
     const { earnAmount, vaultAmount, asset, amount, tokenIndex } =
@@ -5973,6 +6195,61 @@ class Store {
       // } else {
       //   return emitter.emit(WITHDRAW_BOTH_VAULT_FAIL_RETURNED);
       // }
+    } else if (this.isUsdVault(asset)) {
+      const vaultContract = new web3.eth.Contract(
+        asset.vaultContractABI,
+        asset.vaultContractAddress
+      );
+
+      // Soft Check for sufficient liquidity
+      // if (
+      await this._isSufficientLiquidityUsd(
+        asset,
+        vaultContract,
+        amount,
+        tokenIndex
+      );
+      // ) {
+      await vaultContract.methods
+        .withdraw(amount, tokenIndex)
+        .send({
+          from: account.address,
+          gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+        })
+        .on("transactionHash", function (txnHash) {
+          console.log(txnHash);
+          return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
+          // callback(null, txnHash, null);
+        })
+        .on("receipt", function (receipt) {
+          console.log("Reciept", receipt);
+          emitter.emit(
+            WITHDRAW_VAULT_RETURNED_COMPLETED,
+            receipt.transactionHash
+          );
+          // callback(null, null, receipt);
+        })
+        .on("error", function (error) {
+          if (!error.toString().includes("-32601")) {
+            if (error.message) {
+              emitter.emit(ERROR, error);
+              // return callback(error.message);
+            }
+            // callback(error, null, null);
+          }
+        })
+        .catch((error) => {
+          if (!error.toString().includes("-32601")) {
+            if (error.message) {
+              // return callback(error.message);
+              emitter.emit(ERROR, error);
+            }
+            // callback(error, null, null);
+          }
+        });
+      // } else {
+      //   return emitter.emit(WITHDRAW_BOTH_VAULT_FAIL_RETURNED);
+      // }
     }
   };
 
@@ -6080,6 +6357,9 @@ class Store {
             asset.compoundExchangeRate = data[4].compoundExchangeRate;
             asset.citadelPricePerFullShare = data[4].citadelPricePerFullShare
               ? data[4].citadelPricePerFullShare
+              : null;
+            asset.elonPricePerFullShare = data[4].elonPricePerFullShare
+              ? data[4].elonPricePerFullShare
               : null;
             asset.apy = data[4].apy; // Vault APY
             asset.addressStatistics = data[5];
@@ -6812,6 +7092,10 @@ class Store {
       // return store.getStore('universalGasPrice')
     }
   };
+
+  isUsdVault = (asset) => {
+    return (asset.strategyType === "citadel" || asset.strategyType === "elon") ? true : false;
+  }
 }
 
 

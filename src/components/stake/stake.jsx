@@ -797,6 +797,7 @@ class Stake extends Component {
       vipDVG: { filename: "vipDVG", format: "png" },
       "ETH<->DVG": { filename: "vipDVG", format: "png" }, // TODO: Update this once available
       daoCDV: { filename: "citadel", format: "svg" },
+      daoELO: { filename: "elon", format: "svg" },
     };
 
     const poolImage = images[pool.name];

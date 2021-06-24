@@ -931,6 +931,10 @@ class Vault extends Component {
     });
   };
 
+  isUsdVault = (asset) => {
+    return (asset.strategyType === "citadel" || asset.strategyType === "elon") ? true : false;
+  }
+
   render() {
     const { classes } = this.props;
     const { loading, account, snackbarMessage, modalOpen } = this.state;
@@ -1081,7 +1085,7 @@ class Vault extends Component {
                         <img
                           alt=""
                           src={require("../../assets/img_new/" +
-                            (asset.strategyType === "citadel"
+                            (this.isUsdVault(asset)
                               ? asset.strategyType
                               : asset.symbol) +
                             "-logo." +
@@ -1108,7 +1112,7 @@ class Vault extends Component {
                             <Typography
                               variant={"h5"}
                               className={classes.assetLabel1}>
-                              {asset.strategyType === "citadel" && (
+                              {this.isUsdVault(asset) && (
                                 <Typography variant={"caption"}>
                                   est.&nbsp;
                                 </Typography>
@@ -1118,20 +1122,20 @@ class Vault extends Component {
                             <Typography
                               variant={"body1"}
                               className={classes.assetLabel2}>
-                              { asset.strategyType === 'citadel' ? "YTD Performance" : "Yearly Growth" }
+                              { this.isUsdVault(asset) ? "YTD Performance" : "Yearly Growth" }
                             </Typography>
                           </div>
                           <div className={classes.showMobile}>
                             <Typography
                               variant={"h5"}
                               className={classes.assetLabel2}>
-                              { asset.strategyType === 'citadel' ? "YTD Performance" : "Yearly Growth" }
+                              { this.isUsdVault(asset) ? "YTD Performance" : "Yearly Growth" }
                             </Typography>
                             <Typography
                               variant={"h3"}
                               noWrap
                               className={classes.assetLabel1}>
-                              {asset.strategyType === "citadel" && (
+                              {this.isUsdVault(asset) && (
                                 <Typography variant={"caption"}>
                                   est.&nbsp;
                                 </Typography>
@@ -1148,7 +1152,7 @@ class Vault extends Component {
                               <Typography
                                 variant={"h5"}
                                 className={classes.assetLabel1}>
-                                {asset.strategyType === "citadel" && (
+                                {this.isUsdVault(asset) && (
                                   <Typography variant={"caption"}>
                                     est.&nbsp;
                                   </Typography>
@@ -1158,7 +1162,7 @@ class Vault extends Component {
                               <Typography
                                 variant={"body1"}
                                 className={classes.assetLabel2}>
-                                { asset.strategyType === 'citadel' ? "YTD Performance" : "Yearly Growth" }
+                                { this.isUsdVault(asset) ? "YTD Performance" : "Yearly Growth" }
                               </Typography>
                             </div>
                             <div className={classes.showMobile}>
@@ -1166,7 +1170,7 @@ class Vault extends Component {
                                 variant={"h3"}
                                 noWrap
                                 className={classes.assetLabel1}>
-                                {asset.strategyType === "citadel" && (
+                                {this.isUsdVault(asset) && (
                                   <Typography variant={"caption"}>
                                     est.&nbsp;
                                   </Typography>
@@ -1176,7 +1180,7 @@ class Vault extends Component {
                               <Typography
                                 variant={"h5"}
                                 className={classes.assetLabel2}>
-                                { asset.strategyType === 'citadel' ? "YTD Performance" : "Yearly Growth" }
+                                { this.isUsdVault(asset) ? "YTD Performance" : "Yearly Growth" }
                               </Typography>
                             </div>
                           </div>
@@ -1191,7 +1195,7 @@ class Vault extends Component {
                             variant={"h5"}
                             className={classes.assetLabel1}>
                             <div>
-                              {(asset.strategyType === "citadel"
+                              {(this.isUsdVault(asset)
                                 ? asset.sumBalances
                                   ? asset.sumBalances.toLocaleString(undefined, {
                                     minimumFractionDigits: 2,
@@ -1205,7 +1209,7 @@ class Vault extends Component {
                                   })
                                   : "0.00") +
                                 " " +
-                                (asset.strategyType === "citadel"
+                                (this.isUsdVault(asset)
                                   ? "USD"
                                   : asset.symbol)}
                             </div>
@@ -1224,7 +1228,7 @@ class Vault extends Component {
                             noWrap
                             className={classes.assetLabel1}>
                             <div>
-                              {(asset.strategyType === "citadel"
+                              {(this.isUsdVault(asset)
                                 ? asset.sumBalances
                                   ? asset.sumBalances.toLocaleString(undefined, {
                                     minimumFractionDigits: 2,
@@ -1238,7 +1242,7 @@ class Vault extends Component {
                                   })
                                   : "0.00") +
                                 " " +
-                                (asset.strategyType === "citadel"
+                                (this.isUsdVault(asset)
                                   ? "USD"
                                   : asset.symbol)}
                             </div>
@@ -1432,6 +1436,12 @@ class Vault extends Component {
         //   return "0.00%";
         // }
         return "55% - 75%";
+      } else if (asset.strategyType === "elon") {
+        if (asset.stats.elonApy) {
+          return (asset.stats.elonApy / 1).toFixed(2) + "%";
+        } else {
+          return "0.00%";
+        }
       }
     } else {
       return "0.00%";
