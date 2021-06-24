@@ -19,7 +19,7 @@ import {
   DEPOSIT_DAOMINE_RETURNED_COMPLETED,
   WITHDRAW_DAOMINE_RETURNED,
   WITHDRAW_DAOMINE_RETURNED_COMPLETED,
-  ERROR,
+  ERROR
 } from "../../constants/constants";
 
 import RiskLevelTab from "../common/riskLevelTab/riskLevelTab";
@@ -223,8 +223,8 @@ const styles = (theme) => ({
     alignItems: "center",
     verticalAlign: "middle",
     borderRadius: "20px",
-    height: "30px",
-    width: "30px",
+    height: "50px",
+    width: "50px",
     textAlign: "center",
     cursor: "pointer",
     marginRight: "20px",
@@ -720,9 +720,7 @@ class Stake extends Component {
                             }}
                             className={classes.assetLabel1}
                           >
-                            {pool.multiplier
-                              ? Number(pool.multiplier).toFixed(2)
-                              : "0.00"}
+                            {this.renderMultiplier(pool.category)}
                           </Typography>
                           <Typography
                             variant={"body1"}
@@ -795,11 +793,26 @@ class Stake extends Component {
       dvlUSDC: { filename: "USDC", format: "png" },
       dvlDAI: { filename: "DAI", format: "png" },
       vipDVG: { filename: "vipDVG", format: "png" },
-      "ETH<->DVG": { filename: "vipDVG", format: "png" }, // TODO: Update this once available
+      "ETH<->DVG": { filename: "ethDvg", format: "png" },
       daoCDV: { filename: "citadel", format: "svg" },
     };
 
     const poolImage = images[pool.name];
+
+    if(pool.name === "ETH<->DVG") {
+      return (
+        <img
+          alt="pool"
+          src={require("../../assets/img_new/" +
+            poolImage.filename +
+            "-logo." +
+            poolImage.format)}
+          // height={ '50px' }
+          className={classes.assetIconImg}
+          style={{height: "100%"}}
+        />
+      );
+    }
 
     return poolImage ? (
       <img
@@ -813,6 +826,16 @@ class Stake extends Component {
       />
     ) : null;
   };
+
+  renderMultiplier = (category) => {
+    const multiplier = {
+      Basic : "1x",
+      Advance: "2x",
+      Expert: "3x",
+      Degen: "4x"
+    };
+    return category ? multiplier[category] : null;
+  }
 
   showHashApproval = (txHash) => {
     const snackbarObj = { snackbarMessage: null, snackbarType: null };
