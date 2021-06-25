@@ -655,7 +655,7 @@ class Stake extends Component {
                         {/** Staked */}
                         <Grid
                           item
-                          sm={1}
+                          sm={2}
                           xs={6}
                           className={classes.gridItemColumn}
                         >
@@ -709,7 +709,7 @@ class Stake extends Component {
                         {/** Multiplier */}
                         <Grid
                           item
-                          sm={1}
+                          sm={2}
                           xs={6}
                           className={classes.gridItemColumn}
                         >
@@ -731,7 +731,7 @@ class Stake extends Component {
                         </Grid>
 
                         {/** TVL */}
-                        <Grid
+                        {/* <Grid
                           item
                           sm={2}
                           xs={6}
@@ -753,7 +753,7 @@ class Stake extends Component {
                           >
                             Liquidity
                           </Typography>
-                        </Grid>
+                        </Grid> */}
                       </Grid>
                     </div>
                   </AccordionSummary>
