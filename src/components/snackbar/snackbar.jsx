@@ -1,17 +1,16 @@
-import React, { Component, useState } from "react";
 import {
-  Snackbar,
-  IconButton,
   Button,
-  Typography,
+  IconButton,
   LinearProgress,
+  Snackbar,
   SvgIcon,
+  Typography,
 } from "@material-ui/core";
-
-import { colors } from "../../theme";
-import { withNamespaces } from "react-i18next";
+import React, { Component, useState } from "react";
 
 import { BLOCK_EXPLORERS } from "../../constants";
+import { colors } from "../../theme";
+import { withNamespaces } from "react-i18next";
 
 const iconStyle = {
   fontSize: "22px",
@@ -78,6 +77,19 @@ function InfoIcon(props) {
     </SvgIcon>
   );
 }
+
+function ConfettiIcon(){
+  
+  return (
+    <div style={iconStyle}>
+      <img
+        alt="icon-popular"
+        src={require("../../assets/img_new/confetti.svg")}
+      />
+    </div>
+  );
+}
+
 function ProgressBar(props) {
   return (
     <div
@@ -154,6 +166,23 @@ class MySnackbar extends Component {
         color = colors.green;
         autoHideDuration = 6000;
         messageType = t("Transaction Success");
+        actions = [
+          <Button
+            variant="text"
+            size="small"
+            onClick={() => window.open(messageLink, "_blank")}>
+            View
+          </Button>,
+          <IconButton key="close" aria-label="Close" onClick={this.handleClose}>
+            <CloseIcon />
+          </IconButton>,
+        ];
+        break;
+      case "Happy Hour Success":
+        icon = <ConfettiIcon/>;
+        color = colors.yellow;
+        autoHideDuration = 6000;
+        messageType = t("You have successfully completed a gas free deposit");
         actions = [
           <Button
             variant="text"

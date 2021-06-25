@@ -1,53 +1,54 @@
-import React, { Component } from "react";
-import { withRouter } from "react-router-dom";
-import { withStyles } from "@material-ui/core/styles";
-import {
-  Typography,
-  TextField,
-  Button,
-  Slider,
-  Grid,
-  Tooltip,
-  Dialog,
-  IconButton,
-  DialogContent,
-  List,
-  ListItem,
-  ListItemText,
-  Slide,
-  ListItemAvatar,
-  Avatar,
-} from "@material-ui/core";
-import MuiDialogTitle from "@material-ui/core/DialogTitle";
-import CloseIcon from "@material-ui/icons/Close";
-import ArrowDropDownCircleIcon from "@material-ui/icons/ArrowDropDownCircle";
+import * as moment from "moment";
 
 import {
-  ERROR,
-  DEPOSIT_CONTRACT,
-  DEPOSIT_CONTRACT_RETURNED,
-  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-  WITHDRAW_BOTH,
-  WITHDRAW_VAULT_RETURNED,
-  WITHDRAW_VAULT_RETURNED_COMPLETED,
+  Avatar,
+  Button,
+  Dialog,
+  DialogContent,
+  Grid,
+  IconButton,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Slide,
+  Slider,
+  TextField,
+  Tooltip,
+  Typography,
+} from "@material-ui/core";
+import {
   DEPOSIT_ALL_CONTRACT,
   DEPOSIT_ALL_CONTRACT_RETURNED,
   DEPOSIT_ALL_CONTRACT_RETURNED_COMPLETED,
+  DEPOSIT_CONTRACT,
+  DEPOSIT_CONTRACT_RETURNED,
+  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+  ERROR,
+  GET_STRATEGY_BALANCES_FULL,
+  USD_PRICE_RETURNED,
+  WITHDRAW_BOTH,
   WITHDRAW_BOTH_VAULT,
+  WITHDRAW_BOTH_VAULT_FAIL_RETURNED,
   WITHDRAW_BOTH_VAULT_RETURNED,
   WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
-  USD_PRICE_RETURNED,
-  GET_STRATEGY_BALANCES_FULL,
-  WITHDRAW_BOTH_VAULT_FAIL_RETURNED,
+  WITHDRAW_VAULT_RETURNED,
+  WITHDRAW_VAULT_RETURNED_COMPLETED,
 } from "../../constants";
+import React, { Component } from "react";
 
+import ArrowDropDownCircleIcon from "@material-ui/icons/ArrowDropDownCircle";
+import CloseIcon from "@material-ui/icons/Close";
+import Highcharts from "highcharts";
+import HighchartsReact from "highcharts-react-official";
+import InfoIcon from "@material-ui/icons/Info";
+import MuiDialogTitle from "@material-ui/core/DialogTitle";
+import Store from "../../stores";
 import { colors } from "../../theme";
 import { getTheme } from "../../theme";
-import * as moment from "moment";
-import Store from "../../stores";
-import HighchartsReact from "highcharts-react-official";
-import Highcharts from "highcharts";
-import InfoIcon from "@material-ui/icons/Info";
+import { withRouter } from "react-router-dom";
+import { withStyles } from "@material-ui/core/styles";
+
 const emitter = Store.emitter;
 const dispatcher = Store.dispatcher;
 const store = Store.store;
@@ -323,7 +324,7 @@ const styles = (theme) => ({
   inputStyle: {
     borderRadius: "0px",
   },
-  depositIputBox: {
+  depositInputBox: {
     width: "100%",
     position: "relative",
   },
@@ -1114,11 +1115,9 @@ class Asset extends Component {
                     </DialogContent>
                   </Dialog>
                 </div>
-                <div className={classes.depositIputBox}>
+                <div className={classes.depositInputBox}>
                   <TextField
-                    style={{
-                      width: "100%",
-                    }}
+                    style={{width: "100%"}}
                     className={classes.actionInput}
                     id="amount"
                     value={amount}
@@ -1463,7 +1462,7 @@ class Asset extends Component {
                           {asset.vaultSymbol}){" "}
                         </Typography>
                       </div>
-                      <div className={classes.depositIputBox}>
+                      <div className={classes.depositInputBox}>
                         <TextField
                           style={{ width: "100%" }}
                           className={classes.actionInput}
@@ -1576,7 +1575,7 @@ class Asset extends Component {
                         </Typography>
                       </div>
 
-                      <div className={classes.depositIputBox}>
+                      <div className={classes.depositInputBox}>
                         <TextField
                           style={{ width: "100%" }}
                           className={classes.actionInput}

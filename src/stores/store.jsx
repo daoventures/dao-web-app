@@ -14,6 +14,7 @@ import {
   DEPOSIT_ALL_CONTRACT_RETURNED,
   DEPOSIT_ALL_CONTRACT_RETURNED_COMPLETED,
   DEPOSIT_CONTRACT,
+  DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED,
   DEPOSIT_CONTRACT_RETURNED,
   DEPOSIT_CONTRACT_RETURNED_COMPLETED,
   DEPOSIT_DAOMINE,
@@ -4135,7 +4136,7 @@ class Store {
             }
             if (depositResult) {
               return emitter.emit(
-                DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED,
                 depositResult.transactionHash
               );
             }

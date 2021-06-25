@@ -9,6 +9,7 @@ import {
   DEGEN,
   DEPOSIT_ALL_CONTRACT_RETURNED,
   DEPOSIT_ALL_CONTRACT_RETURNED_COMPLETED,
+  DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED,
   DEPOSIT_CONTRACT_RETURNED,
   DEPOSIT_CONTRACT_RETURNED_COMPLETED,
   ERROR,
@@ -743,6 +744,7 @@ class Vault extends Component {
     emitter.on(CHANGE_NETWORK, this.networkChanged);
     emitter.on(VAULT_BALANCES_FULL_RETURNED, this.networkChanged);
     emitter.on(HAPPY_HOUR_RETURN, this.handleHappyHour);
+    emitter.on(DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED, this.handleHappyHourCompleted)
   }
 
   componentWillUnmount() {
@@ -905,6 +907,24 @@ class Vault extends Component {
       that.setState(snackbarObj);
     });
   };
+
+  handleHappyHourCompleted = (txHash) => {
+    dispatcher.dispatch({
+      type: GET_STRATEGY_BALANCES_FULL,
+      content: { interval: "30d" },
+    });
+    const snackbarObj = { snackbarMessage: null, snackbarType: null };
+    this.setState(snackbarObj);
+    this.setState({ loading: false });
+    const that = this;
+    setTimeout(() => {
+      const snackbarObj = {
+        snackbarMessage: txHash,
+        snackbarType: "Happy Hour Success",
+      };
+      that.setState(snackbarObj);
+    });
+  }
 
   showHash = (txHash) => {
     const snackbarObj = { snackbarMessage: null, snackbarType: null };

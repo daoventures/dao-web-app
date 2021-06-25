@@ -1,6 +1,5 @@
-import createBreakpoints from '@material-ui/core/styles/createBreakpoints'
-
 import WorkSansTTF from '../assets/fonts/WorkSans-VariableFont_wght.ttf';
+import createBreakpoints from '@material-ui/core/styles/createBreakpoints'
 
 const WorkSans = {
   fontFamily: 'Work Sans Thin',
@@ -32,7 +31,7 @@ export const colors = {
   compoundGreen: '#00d395',
   tomato: '#e56b73',
   purple: '#935dff',
-
+  yellow: '#FFBF41',
   text: "#212529",
   lightBlue: "#2F80ED",
   topaz: "#0b8f92",
