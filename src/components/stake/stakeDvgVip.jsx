@@ -5,7 +5,9 @@ import { withNamespaces } from 'react-i18next';
 import {
     Grid,
     Popover,
-    Typography
+    TextField,
+    Typography,
+    Button
 } from '@material-ui/core';
 import {
     GET_DVG_INFO,
@@ -250,6 +252,28 @@ const styles = theme => ({
         "& input::placeholder": {
             color: theme.themeColors.textP,
         },
+    },
+    actionInput: {
+        // padding: '0px 0px 12px 0px',
+        "fontSize": "0.5rem",
+        "marginTop": "1rem",
+        "height": "42px",
+        "width": "100%",
+        "background": theme.themeColors.inputBack,
+        "& input": {
+            color: theme.themeColors.textT,
+        },
+        "& .MuiInputBase-root": {
+            borderRadius: "0px",
+            height: "42px",
+        },
+        "& input::placeholder": {
+            color: theme.themeColors.textP,
+        },
+        // '& input:valid + fieldset': {
+        //   borderColor: 'green',
+        //   borderWidth: 2,
+        // },
     },
     approveStaking: {
         height: '44px',
@@ -508,11 +532,34 @@ const styles = theme => ({
         textDecoration: "underline",
         cursor: "pointer",
         color: theme.themeColors.textT,
+    },
+    depositScaleContainer: {
+        display: "flex",
+        justifyContent: "space-between",
+        padding: "0px 0px 12px 0px",
+        alignItems: "center",
+        flexWrap: "wrap",
+        position: "absolute",
+        right: "10px",
+        top: "31px",
+    },
+    depositScale: {
+        color: theme.themeColors.textP,
+        minWidth: "30px",
+        padding: "0px 6px",
+    },
+    depositScaleActive: {
+        minWidth: "30px",
+        padding: "0px 6px",
+        color: theme.themeColors.textT,
+        // background: 'rgba(24, 160, 251, 0.2)',
+        // borderRadius: '5px'
+    },
+
+    errorMessage: {
+        color: theme.themeColors.red,
+        marginTop: "3px"
     }
-
-
-
-
 });
 
 
@@ -533,6 +580,8 @@ class StakeDvgVip extends Component {
             aprInfo: {
                 tvl: 0
             },
+            amountError: false,
+            errorMessage: ''
         }
         if (account && account.address) {
             dispatcher.dispatch({ type: GET_DVG_INFO })
@@ -630,17 +679,65 @@ class StakeDvgVip extends Component {
     }
 
     submitStake = () => {
-        if (this.state.type == 'stake') {
-            dispatcher.dispatch({ type: DEPOSIT_XDVG, content: { amount: this.state.amount, asset: this.state.dvgInfoObj[1], max: this.state.max } })
-        } else {
-            dispatcher.dispatch({ type: WIDTHDRAW_XDVG, content: { amount: this.state.amount, asset: this.state.dvgInfoObj[1], max: this.state.max } })
+        const { amount } = this.state;
+        this.setState({amountError: false, errorMessage: ""})
+
+        // Validate "amount" must be number
+        const digitRegex = /^[0-9]\d*(\.\d+)?$/;
+        if (!digitRegex.test(amount)) {
+            this.setState({ 
+                amountError: true,
+                errorMessage: "Invalid amount"
+            });
+            return;
         }
+
+        let action = "";
+        let balance = 0;
+
+        if (this.state.type === "stake") {
+            action = DEPOSIT_XDVG;
+            balance = this.state.dvgInfoObj[1].balance
+        } else {
+            action = WIDTHDRAW_XDVG;
+            balance = this.state.dvgInfoObj[0].balance
+        }
+
+        // Validate balance must not be 0.
+        if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+            this.setState({ 
+                amountError: true ,
+                errorMessage: "Invalid Amount"
+            });
+            return;
+        }
+
+        balance = (Math.floor(balance * 10000) / 10000).toFixed(4);
+
+        // Validate balance must be less than or equal to available balance displayed on UI
+        if (parseFloat(amount) > parseFloat(balance)) {
+            this.setState({ 
+                amountError: true,
+                errorMessage: "Exceed available balance"
+            });
+            return;
+        }
+
+        dispatcher.dispatch({
+            type: action,
+            content: {
+                amount: amount.toString(),
+                asset: this.state.dvgInfoObj[1],
+            }
+        })
     }
 
     onChange = (event) => {
         this.setState({
             amount: event.target.value,
-            max: false
+            max: false,
+            amountError: false,
+            errorMessage: ""
         })
     }
 
@@ -649,7 +746,9 @@ class StakeDvgVip extends Component {
             this.setState({
                 type: type,
                 amount: '',
-                max: false
+                max: false,
+                amountError: false,
+                errorMessage: ""
             })
         }
     }
@@ -664,17 +763,13 @@ class StakeDvgVip extends Component {
 
     maxAmount() {
         const { type, dvgInfoObj } = this.state;
-        if (type == 'stake') {
+        if (dvgInfoObj) {
+            const objIndex = type === "stake" ? 1 : 0;
             this.setState({
-                // amount: Number(dvgInfoObj && dvgInfoObj[1].balance).toFixed(4)
-                amount: dvgInfoObj && dvgInfoObj[1].balance.toString(),
-                max: true
-            })
-        } else {
-            this.setState({
-                // amount: Number(dvgInfoObj && dvgInfoObj[0].balance).toFixed(4)
-                amount: dvgInfoObj && dvgInfoObj[0].balance.toString(),
-                max: true
+                amount: (Math.floor(dvgInfoObj[objIndex].balance * 10000) / 10000).toFixed(4),
+                max: true,
+                amountError: false,
+                errorMessage: ""
             })
         }
     }
@@ -697,6 +792,19 @@ class StakeDvgVip extends Component {
         })
     }
 
+    renderAvailableAmount = (amount, symbol) => {
+        const { classes } = this.props;
+
+        return (
+            <div className={classes.available}>
+                Available：
+                {(Math.floor(amount * 10000) / 10000).toFixed(4)}
+                {" "}
+                {symbol}
+            </div>
+        )
+    }
+
     render() {
         const {
             classes
@@ -709,6 +817,9 @@ class StakeDvgVip extends Component {
             dvgInfoObj,
             isShowApr,
             aprInfo,
+            amountError,
+            max, 
+            errorMessage
         } = this.state
 
         const dvgBalance = dvgInfoObj && dvgInfoObj[1].balance;
@@ -728,12 +839,12 @@ class StakeDvgVip extends Component {
                             <div className={classes.toTrade}>
                                 <div className={classes.toTradeUniswap} onClick={() => this.goUrl('https://app.uniswap.org/#/swap?outputCurrency=0x51e00a95748dbd2a3f47bc5c3b3e7b3f0fea666c')}>Buy on Uniswap</div>
                                 <div className={classes.toTradePancakeswap} onClick={() => this.goUrl('https://exchange.pancakeswap.finance/#/swap?outputCurrency=0x51e00a95748dbd2a3f47bc5c3b3e7b3f0fea666c')}>Buy on Pancakeswap</div>
-
                             </div>
                         </div>
 
                     </div>
                 </Grid>
+
                 <div className={classes.content}>
                     <div className={classes.contentLeft}>
                         <div className={classes.contentLeftTitle}>
@@ -745,30 +856,64 @@ class StakeDvgVip extends Component {
                         </div>
                         <div className={classes.contentCenter}>
                             <div className={classes.contentHeader}>
+                                {/** Stake or Unstake Button */}
                                 <div className={classes.stakeTab}>
-                                    <div className={type == 'stake' ? classes.stake : classes.unStake} onClick={() => this.stakeTab('stake')}>Stake</div>
-                                    <div className={type == 'stake' ? classes.unStake : classes.stake} onClick={() => this.stakeTab('unStake')}>Unstake</div>
+                                    <div className={type === 'stake' ? classes.stake : classes.unStake} onClick={() => this.stakeTab('stake')}>Stake</div>
+                                    <div className={type === 'stake' ? classes.unStake : classes.stake} onClick={() => this.stakeTab('unStake')}>Unstake</div>
                                 </div>
-                                {type == 'stake' ?
-                                    <div className={classes.available}>Available：{dvgBalance && dvgBalance.toString().match(/^\d+(?:\.\d{0,8})?/)}DVG</div>
-                                    : <div className={classes.available}>Available：{xdvgBalance && xdvgBalance.toString().match(/^\d+(?:\.\d{0,8})?/)}vipDVG</div>
 
+                                {/** Available Amount in Wallet */}
+                                {
+                                    (type === "stake")
+                                        ? this.renderAvailableAmount(dvgBalance, "DVG")
+                                        : this.renderAvailableAmount(xdvgBalance, "vipDVG")
                                 }
                             </div>
-                            <div className={classes.stakeInput}>
 
-                                <input className={classes.input} value={amount} onChange={this.onChange} type="text" />
-                                <div className={classes.max} onClick={() => this.maxAmount()}>Max</div>
+                            {/** Amount Input Field */}
+                            <div className={classes.stakeInput}>
+                                <TextField className={classes.actionInput}
+                                    id="amount"
+                                    value={amount}
+                                    onChange={this.onChange}
+                                    error={amountError}
+                                    disabled={loading}
+                                    placeholder="0.00"
+                                    variant="outlined" />
+                                <div className={classes.depositScaleContainer}>
+                                    <Button className={
+                                        max
+                                            ? classes.depositScaleActive
+                                            : classes.depositScale
+                                        }
+                                        variant="text"
+                                        disabled={loading}
+                                        onClick={() => {
+                                            this.maxAmount(100);
+                                        }}>
+                                        <Typography variant={"h5"}>Max</Typography>
+                                    </Button>
+                                </div>
+                                {/* <div className={classes.max} onClick={() => this.maxAmount()}>Max</div> */}
                             </div>
 
-                            <div className={amount ? classes.approveStakingActive : classes.approveStaking} onClick={() => { this.submitStake() }}>
+                            {
+                                errorMessage !== "" && (
+                                    <Typography variant={"h5"} className={classes.errorMessage}>
+                                        {this.state.errorMessage}
+                                    </Typography>
+                                )
+                            }
 
+                            {/** Button to trigger stake function */}
+                            <div className={amount ? classes.approveStakingActive : classes.approveStaking} onClick={() => { this.submitStake() }}>
                                 {
-                                    type == 'stake' ? 'Approve Staking' : 'Approve Unstaking'
+                                    type === 'stake' ? 'Approve Staking' : 'Approve Unstaking'
                                 }
                             </div>
                         </div>
                     </div>
+
                     <div className={classes.contentRight}>
                         <div className={classes.totalApr}>
                             <div className={classes.total}>
@@ -862,13 +1007,13 @@ class StakeDvgVip extends Component {
                             <div className={classes.shareContent}>
                                 <div className={classes.aprIntroduction}>
                                     <h3>
-                                        Stake before 5th July 2021 14.00 UTC to receive early bird reward. 
+                                        Stake before 5th July 2021 14.00 UTC to receive early bird reward.
                                     </h3>
 
                                     <h4>
                                         <a href="https://daoventuresco.medium.com/daoventures-launches-dvg-staking-program-daovip-dacde7986814" target="_blank" className={classes.seeMore}>See more here.</a>
                                     </h4>
-                                   
+
                                     <ul>
                                         <li>
                                             <h3>
