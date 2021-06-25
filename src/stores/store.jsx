@@ -5346,7 +5346,7 @@ class Store {
 
         const pool = await elonContract.methods.getAllPoolInUSD().call();
         const totalSupply = await elonContract.methods.totalSupply().call();
-        const pricePerFullShare = pool / totalSupply;
+        const pricePerFullShare = totalSupply ? pool / totalSupply : 0;
 
         const returnObj = {
           earnPricePerFullShare: 0,
