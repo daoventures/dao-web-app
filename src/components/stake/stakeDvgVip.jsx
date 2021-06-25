@@ -7,7 +7,7 @@ import {
     Popover,
     TextField,
     Typography,
-    Button
+    Button,
 } from '@material-ui/core';
 import {
     GET_DVG_INFO,
@@ -24,11 +24,13 @@ import {
     GET_DVG_APR,
     GET_XDVG_APR_SUCCESS,
     WITHDRAW_DVG_RETURNED,
-    DEPOSIT_DVG_RETURNED
+    DEPOSIT_DVG_RETURNED,
+    ERROR
 } from '../../constants'
 import Store from "../../stores";
 import ConnectWallet from "../common/connectWallet/connectWallet";
 import { initOnboard } from '../../walletsServices.js';
+import Snackbar from "../snackbar/snackbar";
 
 const emitter = Store.emitter
 const dispatcher = Store.dispatcher
@@ -559,6 +561,39 @@ const styles = theme => ({
     errorMessage: {
         color: theme.themeColors.formError,
         marginTop: "3px"
+    },
+
+    depositButtonBox: {
+        width: "100%",
+        display: "flex",
+        marginTop: "20px",
+        marginBottom: "15px",
+        justifyContent: "space-between",
+    },
+
+    depositActionButton: {
+        height: "42px",
+        margin: "auto",
+        background: "none",
+        borderColor: theme.themeColors.border,
+        color: theme.themeColors.textT,
+        borderWidth: "1px",
+        borderStyle: "solid",
+        marginLeft: "20px",
+        borderRadius: "0px",
+        cursor: "pointer",
+        flex: "1",
+        "&:hover": {
+            background: theme.themeColors.btnBack,
+        },
+        "&.Mui-disabled": {
+            borderColor: theme.themeColors.btnDisabled,
+            cursor: "not-allowed",
+            color: theme.themeColors.textD,
+        },
+        "&:first-child": {
+            marginLeft: "0px",
+        },
     }
 });
 
@@ -581,7 +616,8 @@ class StakeDvgVip extends Component {
                 tvl: 0
             },
             amountError: false,
-            errorMessage: ''
+            errorMessage: '',
+            network: 0
         }
         if (account && account.address) {
             dispatcher.dispatch({ type: GET_DVG_INFO })
@@ -628,6 +664,7 @@ class StakeDvgVip extends Component {
         emitter.on(GET_XDVG_APR_SUCCESS, this.getAprInfo)
         emitter.on(WITHDRAW_DVG_RETURNED, this.withdrawReturned)
         emitter.on(DEPOSIT_DVG_RETURNED, this.depositReturned)
+        emitter.on(ERROR, this.errorReturned)
     }
 
     componentWillUnmount() {
@@ -639,10 +676,26 @@ class StakeDvgVip extends Component {
         emitter.removeListener(GET_XDVG_APR_SUCCESS, this.getAprInfo)
         emitter.removeListener(WITHDRAW_DVG_RETURNED, this.withdrawReturned)
         emitter.removeListener(DEPOSIT_DVG_RETURNED, this.depositReturned)
+        emitter.removeListener(ERROR, this.errorReturned)
     }
+
+    errorReturned = (error) => {
+        const snackbarObj = { snackbarMessage: null, snackbarType: null };
+        this.setState(snackbarObj);
+        this.setState({ loading: false });
+        const that = this;
+        setTimeout(() => {
+            const snackbarObj = {
+                snackbarMessage: error,
+                snackbarType: "Error",
+            };
+            that.setState(snackbarObj);
+        });
+    };
 
 
     networkChanged = (obj) => {
+        this.setState({ networkId: obj.network });
         const account = store.getStore('account')
         if (account && account.address) {
             dispatcher.dispatch({ type: GET_DASHBOARD_SNAPSHOT, content: { interval: this.state.period } })
@@ -680,12 +733,12 @@ class StakeDvgVip extends Component {
 
     submitStake = () => {
         const { amount } = this.state;
-        this.setState({amountError: false, errorMessage: ""})
+        this.setState({ amountError: false, errorMessage: "" })
 
         // Validate "amount" must be number
         const digitRegex = /^[0-9]\d*(\.\d+)?$/;
         if (!digitRegex.test(amount)) {
-            this.setState({ 
+            this.setState({
                 amountError: true,
                 errorMessage: "Invalid amount"
             });
@@ -705,8 +758,8 @@ class StakeDvgVip extends Component {
 
         // Validate balance must not be 0.
         if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
-            this.setState({ 
-                amountError: true ,
+            this.setState({
+                amountError: true,
                 errorMessage: "Invalid Amount"
             });
             return;
@@ -716,12 +769,14 @@ class StakeDvgVip extends Component {
 
         // Validate balance must be less than or equal to available balance displayed on UI
         if (parseFloat(amount) > parseFloat(balance)) {
-            this.setState({ 
+            this.setState({
                 amountError: true,
                 errorMessage: "Exceed available balance"
             });
             return;
         }
+
+        this.setState({ loading: true });
 
         dispatcher.dispatch({
             type: action,
@@ -805,6 +860,17 @@ class StakeDvgVip extends Component {
         )
     }
 
+    renderSnackbar = () => {
+        var { snackbarType, snackbarMessage } = this.state;
+        return (
+            <Snackbar
+                type={snackbarType}
+                message={snackbarMessage}
+                open={true}
+            />
+        );
+    }
+
     render() {
         const {
             classes
@@ -818,7 +884,7 @@ class StakeDvgVip extends Component {
             isShowApr,
             aprInfo,
             amountError,
-            max, 
+            max,
             errorMessage
         } = this.state
 
@@ -885,7 +951,7 @@ class StakeDvgVip extends Component {
                                         max
                                             ? classes.depositScaleActive
                                             : classes.depositScale
-                                        }
+                                    }
                                         variant="text"
                                         disabled={loading}
                                         onClick={() => {
@@ -897,6 +963,7 @@ class StakeDvgVip extends Component {
                                 {/* <div className={classes.max} onClick={() => this.maxAmount()}>Max</div> */}
                             </div>
 
+                            {/** Render error message */}
                             {
                                 errorMessage !== "" && (
                                     <Typography variant={"h5"} className={classes.errorMessage}>
@@ -906,10 +973,14 @@ class StakeDvgVip extends Component {
                             }
 
                             {/** Button to trigger stake function */}
-                            <div className={amount ? classes.approveStakingActive : classes.approveStaking} onClick={() => { this.submitStake() }}>
-                                {
-                                    type === 'stake' ? 'Approve Staking' : 'Approve Unstaking'
-                                }
+                            <div className={classes.depositButtonBox}>
+                                <Button
+                                    disabled={loading}
+                                    className={classes.depositActionButton}
+                                    onClick={() => this.submitStake()}
+                                >
+                                    <span>{ (type === "stake") ? "Approve Staking" : "Approve Unstaking"}</span>
+                                </Button>
                             </div>
                         </div>
                     </div>
@@ -1035,6 +1106,8 @@ class StakeDvgVip extends Component {
                             </div>
                         </div>
                     </div> : null}
+                {/** Snackbar */}
+                {this.state.snackbarMessage && this.renderSnackbar()}
             </div>
         }
 
