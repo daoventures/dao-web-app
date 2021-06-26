@@ -6451,7 +6451,20 @@ class Store {
 
         dvgDecimal = await dvgContract.methods.decimals().call();
 
-      } else if (network === 1) { }
+      } else if (network === 1) { 
+        // TODO: Update this to mainnet address
+        // daoMineContract = new web3.eth.Contract(
+        //   config.daoStakeContractABI,
+        //   config.daoStakeTestContract
+        // );
+
+        // dvgContract = new web3.eth.Contract(
+        //   config.dvgTokenContractABI,
+        //   config.dvgTokenTestContract
+        // );
+
+        // dvgDecimal = await dvgContract.methods.decimals().call();
+      }
 
       async.map(
         pools,
