@@ -4122,6 +4122,29 @@ class Store {
         vaultBalance: 0,
         strategyBalance: balance,
       });
+    } else if (asset.strategyType === "harvest") {
+      let harvestContract = new web3.eth.Contract(
+        asset.vaultContractABI,
+        asset.vaultContractAddress
+      );
+      let strategyAddress = await harvestContract.methods
+        .strategy()
+        .call({ from: account.address });
+      let strategyContract = new web3.eth.Contract(
+        asset.strategyContractABI,
+        strategyAddress
+      );
+
+      let balance = await strategyContract.methods
+        .getCurrentBalance(account.address)
+        .call({ from: account.address });
+      balance = parseFloat(balance) / 10 ** asset.decimals;
+
+      callback(null, {
+        earnBalance: 0,
+        vaultBalance: 0,
+        strategyBalance: balance,
+      });
     } else if (asset.strategyType === "citadel") {
       const vaultContract = new web3.eth.Contract(
         asset.vaultContractABI,
@@ -4228,6 +4251,43 @@ class Store {
         }
       );
     } else if (asset.strategyType === "compound") {
+      await this._checkApproval(
+        asset,
+        account,
+        amount,
+        strategyAddress,
+        (err, txnHash, approvalResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(APPROVE_TRANSACTING, txnHash);
+          }
+          if (approvalResult) {
+            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
+          }
+        }
+      );
+      await this._callDepositAmountContract(
+        asset,
+        account,
+        amount,
+        (err, txnHash, depositResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+          }
+          if (depositResult) {
+            return emitter.emit(
+              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+              depositResult.transactionHash
+            );
+          }
+        }
+      );
+    } else if (asset.strategyType === "harvest") {
       await this._checkApproval(
         asset,
         account,
@@ -4654,6 +4714,44 @@ class Store {
         }
       );
     } else if (asset.strategyType === "compound") {
+      await this._checkApproval(
+        asset,
+        account,
+        amount,
+        asset.vaultContractAddress,
+        (err, txnHash, approvalResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(APPROVE_TRANSACTING, txnHash);
+          }
+          if (approvalResult) {
+            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
+          }
+        }
+      );
+
+      await this._callDepositAmountContract(
+        asset,
+        account,
+        amount,
+        (err, txnHash, depositResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+          }
+          if (depositResult) {
+            return emitter.emit(
+              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+              depositResult.transactionHash
+            );
+          }
+        }
+      );
+    } else if (asset.strategyType === "harvest") {
       await this._checkApproval(
         asset,
         account,
@@ -5599,6 +5697,8 @@ class Store {
       } else if (asset.strategyType === "compound") {
         vaultAddress = asset.vaultContractAddress;
       } else if (asset.strategyType === "citadel") {
+        vaultAddress = asset.vaultContractAddress;
+      } else if (asset.strategyType === "harvest") {
         vaultAddress = asset.vaultContractAddress;
       }
       const url = `${config.statsProvider}vaults/historical-apy/${vaultAddress}/${interval}`;
