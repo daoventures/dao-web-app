@@ -1,53 +1,55 @@
-import React, { Component } from "react";
-import { withRouter } from "react-router-dom";
-import { withStyles } from "@material-ui/core/styles";
-import {
-  Typography,
-  TextField,
-  Button,
-  Slider,
-  Grid,
-  Tooltip,
-  Dialog,
-  IconButton,
-  DialogContent,
-  List,
-  ListItem,
-  ListItemText,
-  Slide,
-  ListItemAvatar,
-  Avatar,
-} from "@material-ui/core";
-import MuiDialogTitle from "@material-ui/core/DialogTitle";
-import CloseIcon from "@material-ui/icons/Close";
-import ArrowDropDownCircleIcon from "@material-ui/icons/ArrowDropDownCircle";
+import * as moment from "moment";
 
 import {
-  ERROR,
-  DEPOSIT_CONTRACT,
-  DEPOSIT_CONTRACT_RETURNED,
-  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-  WITHDRAW_BOTH,
-  WITHDRAW_VAULT_RETURNED,
-  WITHDRAW_VAULT_RETURNED_COMPLETED,
+  Avatar,
+  Button,
+  Dialog,
+  DialogContent,
+  Grid,
+  IconButton,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Slide,
+  Slider,
+  TextField,
+  Tooltip,
+  Typography,
+} from "@material-ui/core";
+import {
   DEPOSIT_ALL_CONTRACT,
   DEPOSIT_ALL_CONTRACT_RETURNED,
   DEPOSIT_ALL_CONTRACT_RETURNED_COMPLETED,
+  DEPOSIT_CONTRACT,
+  DEPOSIT_CONTRACT_RETURNED,
+  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+  ERROR,
+  GET_STRATEGY_BALANCES_FULL,
+  HAPPY_HOUR_VERIFY,
+  USD_PRICE_RETURNED,
+  WITHDRAW_BOTH,
   WITHDRAW_BOTH_VAULT,
+  WITHDRAW_BOTH_VAULT_FAIL_RETURNED,
   WITHDRAW_BOTH_VAULT_RETURNED,
   WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
-  USD_PRICE_RETURNED,
-  GET_STRATEGY_BALANCES_FULL,
-  WITHDRAW_BOTH_VAULT_FAIL_RETURNED,
+  WITHDRAW_VAULT_RETURNED,
+  WITHDRAW_VAULT_RETURNED_COMPLETED,
 } from "../../constants";
+import React, { Component } from "react";
 
+import ArrowDropDownCircleIcon from "@material-ui/icons/ArrowDropDownCircle";
+import CloseIcon from "@material-ui/icons/Close";
+import Highcharts from "highcharts";
+import HighchartsReact from "highcharts-react-official";
+import InfoIcon from "@material-ui/icons/Info";
+import MuiDialogTitle from "@material-ui/core/DialogTitle";
+import Store from "../../stores";
 import { colors } from "../../theme";
 import { getTheme } from "../../theme";
-import * as moment from "moment";
-import Store from "../../stores";
-import HighchartsReact from "highcharts-react-official";
-import Highcharts from "highcharts";
-import InfoIcon from "@material-ui/icons/Info";
+import { withRouter } from "react-router-dom";
+import { withStyles } from "@material-ui/core/styles";
+
 const emitter = Store.emitter;
 const dispatcher = Store.dispatcher;
 const store = Store.store;
@@ -56,12 +58,16 @@ const styles = (theme) => ({
   value: {
     cursor: "pointer",
   },
+  test: {
+    borderColor: "#ff0000",
+  },
   actionInput: {
+    borderColor: "#ff0000",
     // padding: '0px 0px 12px 0px',
-    "fontSize": "0.5rem",
-    "marginTop": "1rem",
-    "height": "42px",
-    "background": theme.themeColors.inputBack,
+    fontSize: "0.5rem",
+    marginTop: "1rem",
+    height: "42px",
+    background: theme.themeColors.inputBack,
     "& input": {
       color: theme.themeColors.textT,
     },
@@ -112,12 +118,12 @@ const styles = (theme) => ({
     paddingRight: "24px",
   },
   actionButton: {
-    "height": "47px",
-    "margin": "auto",
-    "borderRadius": "5px",
-    "background": "#18a0fb",
-    "color": "#ffffff",
-    "width": "49%",
+    height: "47px",
+    margin: "auto",
+    borderRadius: "5px",
+    background: "#18a0fb",
+    color: "#ffffff",
+    width: "49%",
     "&:hover": {
       background: "#00c2ff",
     },
@@ -128,16 +134,16 @@ const styles = (theme) => ({
     marginTop: "10px",
   },
   withdrawButton: {
-    "height": "42px",
-    "margin": "auto",
-    "borderRadius": "0px",
-    "background": "none",
-    "borderColor": theme.themeColors.border,
-    "borderStyle": "solid",
-    "borderWidth": "1px",
-    "color": theme.themeColors.textT,
-    "flex": 1,
-    "marginLeft": "20px",
+    height: "42px",
+    margin: "auto",
+    borderRadius: "0px",
+    background: "none",
+    borderColor: theme.themeColors.border,
+    borderStyle: "solid",
+    borderWidth: "1px",
+    color: theme.themeColors.textT,
+    flex: 1,
+    marginLeft: "20px",
     "&:hover": {
       background: theme.themeColors.btnBack,
     },
@@ -197,11 +203,11 @@ const styles = (theme) => ({
   },
   scale: {
     // width: '24%',
-    "minWidth": "auto",
-    "width": "auto",
-    "padding": "0px",
-    "color": theme.themeColors.textP,
-    "marginLeft": "12px",
+    minWidth: "auto",
+    width: "auto",
+    padding: "0px",
+    color: theme.themeColors.textP,
+    marginLeft: "12px",
     "&:first-child": {
       marginLeft: "0px",
     },
@@ -324,6 +330,7 @@ const styles = (theme) => ({
     borderRadius: "0px",
   },
   depositIputBox: {
+    borderColor: "#ff0000",
     width: "100%",
     position: "relative",
   },
@@ -356,18 +363,18 @@ const styles = (theme) => ({
     justifyContent: "space-between",
   },
   depositActionButton: {
-    "height": "42px",
-    "margin": "auto",
-    "background": "none",
-    "borderColor": theme.themeColors.border,
-    "color": theme.themeColors.textT,
-    "borderWidth": "1px",
-    "borderStyle": "solid",
-    "marginLeft": "20px",
+    height: "42px",
+    margin: "auto",
+    background: "none",
+    borderColor: theme.themeColors.border,
+    color: theme.themeColors.textT,
+    borderWidth: "1px",
+    borderStyle: "solid",
+    marginLeft: "20px",
     // width: '49%',
-    "borderRadius": "0px",
-    "cursor": "pointer",
-    "flex": "1",
+    borderRadius: "0px",
+    cursor: "pointer",
+    flex: "1",
     "&:hover": {
       background: theme.themeColors.btnBack,
     },
@@ -408,8 +415,8 @@ const styles = (theme) => ({
     },
   },
   yearnEarnAndVaultItem: {
-    "flex": 1,
-    "marginLeft": "20px",
+    flex: 1,
+    marginLeft: "20px",
     "&:first-child": {
       marginLeft: "0px",
     },
@@ -464,14 +471,14 @@ const styles = (theme) => ({
     border: "1px solid " + theme.themeColors.border,
     marginTop: "10px",
     color: theme.themeColors.textT,
-    '&:active':{
-        background:theme.themeColors.buttonActive
-    }
+    "&:active": {
+      background: theme.themeColors.buttonActive,
+    },
   },
   assetIconImg: {
-    width:'20px',
+    width: "20px",
     height: "20px",
-    marginRight:'5px',
+    marginRight: "5px",
   },
   dialogRoot: {
     border: "1px solid " + theme.themeColors.border,
@@ -488,6 +495,11 @@ const styles = (theme) => ({
   arrowDropdownIcon: {
     height: "15px",
     fill: theme.themeColors.textP,
+  },
+  errorMessage: {
+    align: "left",
+    color: theme.themeColors.formWarning,
+    marginTop: "3px",
   },
 });
 
@@ -547,6 +559,8 @@ class Asset extends Component {
       interestTheme: {}, // 当前主题数据,
       selectedCurrency: "USDT",
       tokenIndex: 0,
+      errorMessage: "",
+      amountAboveThreshold: false,
     };
   }
 
@@ -559,6 +573,7 @@ class Asset extends Component {
     emitter.on(ERROR, this.errorReturned);
     emitter.on("CURRENT_THEME_RETURNED", this.currentThemeChanged);
     emitter.on(USD_PRICE_RETURNED, this.handleUSDPricesReturned);
+    emitter.on(HAPPY_HOUR_VERIFY, this.happyHourVerify);
     const localTheme = localStorage.getItem("daobenturesTheme");
     this.currentThemeChanged(localTheme);
   }
@@ -580,6 +595,7 @@ class Asset extends Component {
     window.removeEventListener("resize", this.resize.bind(this));
     emitter.removeListener("CURRENT_THEME_RETURNED", this.currentThemeChanged);
     emitter.removeListener(USD_PRICE_RETURNED, this.handleUSDPricesReturned);
+    emitter.removeListener(HAPPY_HOUR_VERIFY, this.happyHourVerify);
   }
 
   resize() {
@@ -619,6 +635,7 @@ class Asset extends Component {
       tokenIndex: tokenIndex,
       amount: "",
       percent: 0,
+      errorMessage: "",
     });
 
     this.handleModalDisplay(false);
@@ -636,13 +653,43 @@ class Asset extends Component {
     this.setState({ loading: false });
   };
 
+  happyHourVerify = (payload) => {
+    if (
+      payload.body.happyHour === true &&
+      payload.body.amountAboveThreshold === false
+    ) {
+      this.setState({
+        amountAboveThreshold: payload.body.amountAboveThreshold,
+        errorMessage: payload.body.message,
+      });
+    }
+  };
+
   handleUSDPricesReturned = () => {
     this.setState({ usdPrices: store.getStore("usdPrices") });
   };
 
   isUsdVault = (asset) => {
-    return (asset.strategyType === "citadel" || asset.strategyType === "elon") ? true : false;
-  }
+    return asset.strategyType === "citadel" || asset.strategyType === "elon"
+      ? true
+      : false;
+  };
+
+  renderErrorMessage = (classes) => {
+    const errorMessage = this.state.errorMessage;
+    const amountAboveThreshold = this.state.amountAboveThreshold;
+    if (errorMessage !== "" && amountAboveThreshold === false) {
+      console.log("🚀 | Asset | errorMessage", errorMessage);
+      return (
+        <Typography variant={"h5"} className={classes.errorMessage}>
+          {/* {"HELLO"} */}
+          {this.state.errorMessage}
+        </Typography>
+      );
+    } else {
+      return null;
+    }
+  };
 
   render() {
     const { classes, asset } = this.props;
@@ -664,6 +711,8 @@ class Asset extends Component {
       openEarnInfo,
       openVaultInfo,
       displayCurrencyModal,
+      amountAboveThreshold,
+      errorMessage,
     } = this.state;
 
     return (
@@ -867,7 +916,8 @@ class Asset extends Component {
                           color: "#7B25D2",
                           display: "flex",
                           alignItems: "center",
-                        }}>
+                        }}
+                      >
                         <HtmlTooltip
                           placement={"top"}
                           title={
@@ -876,7 +926,8 @@ class Asset extends Component {
                                 See{" "}
                                 <a
                                   href="https://daoventures.gitbook.io/daoventures/"
-                                  target="_blank">
+                                  target="_blank"
+                                >
                                   FAQ: Product
                                 </a>{" "}
                                 for more information
@@ -893,7 +944,8 @@ class Asset extends Component {
                           }}
                           disableFocusListener
                           disableHoverListener
-                          disableTouchListener>
+                          disableTouchListener
+                        >
                           <InfoIcon
                             style={{
                               verticalAlign: "text-top",
@@ -912,7 +964,8 @@ class Asset extends Component {
                       <Typography
                         className={classes.apyText}
                         variant="h4"
-                        noWrap>
+                        noWrap
+                      >
                         {"APY " + this._getEstimatedAPY(asset) + "%"}
                       </Typography>
                     </div>
@@ -923,7 +976,8 @@ class Asset extends Component {
                           color: "#027AFF",
                           display: "flex",
                           alignItems: "center",
-                        }}>
+                        }}
+                      >
                         {"yVault: " + vaultRatio + "%"}
                         &nbsp;
                         <HtmlTooltip
@@ -934,7 +988,8 @@ class Asset extends Component {
                                 See{" "}
                                 <a
                                   href="https://daoventures.gitbook.io/daoventures/"
-                                  target="_blank">
+                                  target="_blank"
+                                >
                                   FAQ: Product
                                 </a>{" "}
                                 for more information
@@ -951,7 +1006,8 @@ class Asset extends Component {
                           }}
                           disableFocusListener
                           disableHoverListener
-                          disableTouchListener>
+                          disableTouchListener
+                        >
                           <InfoIcon
                             style={{
                               verticalAlign: "text-top",
@@ -993,7 +1049,8 @@ class Asset extends Component {
                     noWrap
                     onClick={() => {
                       this.setAmount(100);
-                    }}>
+                    }}
+                  >
                     Your wallet
                   </Typography>
 
@@ -1003,7 +1060,8 @@ class Asset extends Component {
                       this.setAmount(100);
                     }}
                     className={classes.value}
-                    noWrap>
+                    noWrap
+                  >
                     {/** Wallet Balance */}
                     {this.isUsdVault(asset) && (
                       <div>
@@ -1037,7 +1095,8 @@ class Asset extends Component {
                         className={classes.accountInfo}
                         onClick={() => {
                           this.handleModalDisplay(true);
-                        }}>
+                        }}
+                      >
                         <img
                           alt=""
                           src={require("../../assets/" +
@@ -1064,15 +1123,18 @@ class Asset extends Component {
                     maxWidth={"sm"}
                     classes={{ paper: classes.dialogRoot }}
                     aria-labelledby="customized-dialog-title"
-                    open={displayCurrencyModal}>
+                    open={displayCurrencyModal}
+                  >
                     <MuiDialogTitle
                       disableTypography
-                      className={classes.dialogTitle}>
+                      className={classes.dialogTitle}
+                    >
                       <Typography variant="h6">Select a Currency</Typography>
                       <IconButton
                         aria-label="close"
                         className={classes.closeButton}
-                        onClick={() => this.handleModalDisplay(false)}>
+                        onClick={() => this.handleModalDisplay(false)}
+                      >
                         <CloseIcon />
                       </IconButton>
                     </MuiDialogTitle>
@@ -1081,7 +1143,8 @@ class Asset extends Component {
                         <ListItem
                           button
                           onClick={() => this.handleSelectedCurrency("USDT")}
-                          className={classes.modalListItem}>
+                          className={classes.modalListItem}
+                        >
                           <ListItemAvatar>
                             <Avatar
                               alt=""
@@ -1093,7 +1156,8 @@ class Asset extends Component {
                         <ListItem
                           button
                           onClick={() => this.handleSelectedCurrency("USDC")}
-                          className={classes.modalListItem}>
+                          className={classes.modalListItem}
+                        >
                           <ListItemAvatar>
                             <Avatar
                               alt=""
@@ -1105,7 +1169,8 @@ class Asset extends Component {
                         <ListItem
                           button
                           onClick={() => this.handleSelectedCurrency("DAI")}
-                          className={classes.modalListItem}>
+                          className={classes.modalListItem}
+                        >
                           <ListItemAvatar>
                             <Avatar
                               alt=""
@@ -1119,20 +1184,22 @@ class Asset extends Component {
                   </Dialog>
                 </div>
                 <div className={classes.depositIputBox}>
-                  <TextField
-                    style={{
-                      width: "100%",
-                    }}
-                    className={classes.actionInput}
-                    id="amount"
-                    value={amount}
-                    error={amountError}
-                    onChange={this.onChange}
-                    disabled={loading}
-                    placeholder="0.00"
-                    variant="outlined"
-                    onKeyDown={this.inputKeyDown}
-                  />
+                  <div className={classes.test}>
+                    <TextField
+                      style={{
+                        width: "100%",
+                      }}
+                      className={classes.actionInput}
+                      id="amount"
+                      value={amount}
+                      error={amountError}
+                      onChange={this.onChange}
+                      disabled={loading}
+                      placeholder="0.00"
+                      variant="outlined"
+                      onKeyDown={this.inputKeyDown}
+                    />
+                  </div>
                   <div className={classes.depositScaleContainer}>
                     <Button
                       className={
@@ -1144,7 +1211,8 @@ class Asset extends Component {
                       disabled={loading}
                       onClick={() => {
                         this.setAmount(25);
-                      }}>
+                      }}
+                    >
                       <Typography variant={"h5"}>25%</Typography>
                     </Button>
                     <Button
@@ -1157,7 +1225,8 @@ class Asset extends Component {
                       disabled={loading}
                       onClick={() => {
                         this.setAmount(50);
-                      }}>
+                      }}
+                    >
                       <Typography variant={"h5"}>50%</Typography>
                     </Button>
                     <Button
@@ -1170,7 +1239,8 @@ class Asset extends Component {
                       disabled={loading}
                       onClick={() => {
                         this.setAmount(75);
-                      }}>
+                      }}
+                    >
                       <Typography variant={"h5"}>75%</Typography>
                     </Button>
                     <Button
@@ -1183,12 +1253,16 @@ class Asset extends Component {
                       disabled={loading}
                       onClick={() => {
                         this.setAmount(100);
-                      }}>
+                      }}
+                    >
                       {/* <Typography variant={'h5'}>100%</Typography> */}
                       <Typography variant={"h5"}>Max</Typography>
                     </Button>
                   </div>
+                  {/** Error Message */}
+                  {this.renderErrorMessage(classes)}
                 </div>
+
                 <div className={classes.depositButtonBox}>
                   {asset.deposit === true && (
                     <Button
@@ -1198,7 +1272,8 @@ class Asset extends Component {
                         asset.balance <= 0 ||
                         asset.depositDisabled === true
                       }
-                      onClick={this.onDeposit}>
+                      onClick={this.onDeposit}
+                    >
                       {/* <Typography className={ classes.depositButtonText } variant={ 'h5'} color={asset.disabled?'':'secondary'}>Deposit</Typography> */}
                       <span>Deposit</span>
                     </Button>
@@ -1211,7 +1286,8 @@ class Asset extends Component {
                         asset.balance <= 0 ||
                         asset.depositDisabled === true
                       }
-                      onClick={this.onDepositAll}>
+                      onClick={this.onDepositAll}
+                    >
                       {/* <Typography className={ classes.depositButtonText } variant={ 'h5'} color={asset.disabled?'':'secondary'}>Deposit All</Typography> */}
                       <span>Deposit All</span>
                     </Button>
@@ -1236,7 +1312,8 @@ class Asset extends Component {
                       <Typography
                         variant="h5"
                         style={{ color: "#7B25D2" }}
-                        className={classes.withdrawalText}>
+                        className={classes.withdrawalText}
+                      >
                         Earn
                       </Typography>
                       <Typography
@@ -1245,7 +1322,8 @@ class Asset extends Component {
                           this.setRedeemEarnAmount(100);
                         }}
                         className={classes.earnAndVaultValue}
-                        noWrap>
+                        noWrap
+                      >
                         {asset.earnBalance
                           ? (
                               Math.floor(
@@ -1286,7 +1364,8 @@ class Asset extends Component {
                           color="primary"
                           onClick={() => {
                             this.setRedeemEarnAmount(25);
-                          }}>
+                          }}
+                        >
                           <Typography variant={"h5"}>25%</Typography>
                         </Button>
                         <Button
@@ -1300,7 +1379,8 @@ class Asset extends Component {
                           color="primary"
                           onClick={() => {
                             this.setRedeemEarnAmount(50);
-                          }}>
+                          }}
+                        >
                           <Typography variant={"h5"}>50%</Typography>
                         </Button>
                         <Button
@@ -1314,7 +1394,8 @@ class Asset extends Component {
                           color="primary"
                           onClick={() => {
                             this.setRedeemEarnAmount(75);
-                          }}>
+                          }}
+                        >
                           <Typography variant={"h5"}>75%</Typography>
                         </Button>
                         <Button
@@ -1328,7 +1409,8 @@ class Asset extends Component {
                           color="primary"
                           onClick={() => {
                             this.setRedeemEarnAmount(100);
-                          }}>
+                          }}
+                        >
                           <Typography variant={"h5"}>Max</Typography>
                         </Button>
                       </div>
@@ -1337,7 +1419,8 @@ class Asset extends Component {
                       <Typography
                         variant="h5"
                         style={{ color: "#027AFF" }}
-                        className={classes.withdrawalText}>
+                        className={classes.withdrawalText}
+                      >
                         Vault
                       </Typography>
                       <Typography
@@ -1346,7 +1429,8 @@ class Asset extends Component {
                           this.setRedeemVaultAmount(100);
                         }}
                         className={classes.earnAndVaultValue}
-                        noWrap>
+                        noWrap
+                      >
                         {asset.vaultBalance
                           ? (
                               Math.floor(
@@ -1388,7 +1472,8 @@ class Asset extends Component {
                           color="primary"
                           onClick={() => {
                             this.setRedeemVaultAmount(25);
-                          }}>
+                          }}
+                        >
                           <Typography variant={"h5"}>25%</Typography>
                         </Button>
                         <Button
@@ -1402,7 +1487,8 @@ class Asset extends Component {
                           color="primary"
                           onClick={() => {
                             this.setRedeemVaultAmount(50);
-                          }}>
+                          }}
+                        >
                           <Typography variant={"h5"}>50%</Typography>
                         </Button>
                         <Button
@@ -1416,7 +1502,8 @@ class Asset extends Component {
                           color="primary"
                           onClick={() => {
                             this.setRedeemVaultAmount(75);
-                          }}>
+                          }}
+                        >
                           <Typography variant={"h5"}>75%</Typography>
                         </Button>
                         <Button
@@ -1430,7 +1517,8 @@ class Asset extends Component {
                           color="primary"
                           onClick={() => {
                             this.setRedeemVaultAmount(100);
-                          }}>
+                          }}
+                        >
                           <Typography variant={"h5"}>Max</Typography>
                         </Button>
                       </div>
@@ -1447,7 +1535,8 @@ class Asset extends Component {
                             this.setRedeemAmount(100);
                           }}
                           className={classes.value}
-                          noWrap>
+                          noWrap
+                        >
                           {asset.strategyBalance
                             ? (
                                 Math.floor(
@@ -1492,7 +1581,8 @@ class Asset extends Component {
                             color="primary"
                             onClick={() => {
                               this.setRedeemAmount(25);
-                            }}>
+                            }}
+                          >
                             <Typography variant={"h5"}>25%</Typography>
                           </Button>
 
@@ -1507,7 +1597,8 @@ class Asset extends Component {
                             color="primary"
                             onClick={() => {
                               this.setRedeemAmount(50);
-                            }}>
+                            }}
+                          >
                             <Typography variant={"h5"}>50%</Typography>
                           </Button>
 
@@ -1522,7 +1613,8 @@ class Asset extends Component {
                             color="primary"
                             onClick={() => {
                               this.setRedeemAmount(75);
-                            }}>
+                            }}
+                          >
                             <Typography variant={"h5"}>75%</Typography>
                           </Button>
 
@@ -1537,7 +1629,8 @@ class Asset extends Component {
                             color="primary"
                             onClick={() => {
                               this.setRedeemAmount(100);
-                            }}>
+                            }}
+                          >
                             <Typography variant={"h5"}>Max</Typography>
                           </Button>
                         </div>
@@ -1555,7 +1648,8 @@ class Asset extends Component {
                             this.setRedeemAmount(100);
                           }}
                           className={classes.value}
-                          noWrap>
+                          noWrap
+                        >
                           {(asset.strategyBalance
                             ? (
                                 Math.floor(
@@ -1605,7 +1699,8 @@ class Asset extends Component {
                             color="primary"
                             onClick={() => {
                               this.setRedeemAmount(25);
-                            }}>
+                            }}
+                          >
                             <Typography variant={"h5"}>25%</Typography>
                           </Button>
 
@@ -1620,7 +1715,8 @@ class Asset extends Component {
                             color="primary"
                             onClick={() => {
                               this.setRedeemAmount(50);
-                            }}>
+                            }}
+                          >
                             <Typography variant={"h5"}>50%</Typography>
                           </Button>
 
@@ -1635,7 +1731,8 @@ class Asset extends Component {
                             color="primary"
                             onClick={() => {
                               this.setRedeemAmount(75);
-                            }}>
+                            }}
+                          >
                             <Typography variant={"h5"}>75%</Typography>
                           </Button>
 
@@ -1650,7 +1747,126 @@ class Asset extends Component {
                             color="primary"
                             onClick={() => {
                               this.setRedeemAmount(100);
-                            }}>
+                            }}
+                          >
+                            <Typography variant={"h5"}>Max</Typography>
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {asset.strategyType === "elon" && (
+                  <div className={classes.withdrawContainer}>
+                    <div className={classes.tradeContainer}>
+                      <div className={classes.balances}>
+                        <Typography
+                          variant="body1"
+                          onClick={() => {
+                            this.setRedeemAmount(100);
+                          }}
+                          className={classes.value}
+                          noWrap
+                        >
+                          {(asset.strategyBalance
+                            ? (
+                                Math.floor(
+                                  (asset.strategyBalance /
+                                    10 ** asset.decimals) *
+                                    10000
+                                ) / 10000
+                              ).toFixed(4)
+                            : "0.0000") + " daoELO"}{" "}
+                          {asset.strategyBalance > 0 && (
+                            <span>
+                              (
+                              {asset.depositedSharesInUSD
+                                ? (
+                                    asset.depositedSharesInUSD /
+                                    asset.priceInUSD[this.state.tokenIndex]
+                                  ).toFixed(4)
+                                : "0.0000"}{" "}
+                              {asset.symbols[this.state.tokenIndex]})
+                            </span>
+                          )}
+                        </Typography>
+                      </div>
+
+                      <div className={classes.depositIputBox}>
+                        <TextField
+                          style={{ width: "100%" }}
+                          className={classes.actionInput}
+                          id="redeemAmount"
+                          value={redeemAmount}
+                          error={redeemAmountError}
+                          onChange={this.onChange}
+                          disabled={loading}
+                          placeholder="0.00"
+                          variant="outlined"
+                          onKeyDown={this.inputRedeemKeyDown}
+                        />
+                        <div className={classes.depositScaleContainer}>
+                          <Button
+                            className={
+                              redeemAmountPercent === 25
+                                ? classes.depositScaleActive
+                                : classes.depositScale
+                            }
+                            variant="text"
+                            disabled={loading}
+                            color="primary"
+                            onClick={() => {
+                              this.setRedeemAmount(25);
+                            }}
+                          >
+                            <Typography variant={"h5"}>25%</Typography>
+                          </Button>
+
+                          <Button
+                            className={
+                              redeemAmountPercent === 50
+                                ? classes.depositScaleActive
+                                : classes.depositScale
+                            }
+                            variant="text"
+                            disabled={loading}
+                            color="primary"
+                            onClick={() => {
+                              this.setRedeemAmount(50);
+                            }}
+                          >
+                            <Typography variant={"h5"}>50%</Typography>
+                          </Button>
+
+                          <Button
+                            className={
+                              redeemAmountPercent === 75
+                                ? classes.depositScaleActive
+                                : classes.depositScale
+                            }
+                            variant="text"
+                            disabled={loading}
+                            color="primary"
+                            onClick={() => {
+                              this.setRedeemAmount(75);
+                            }}
+                          >
+                            <Typography variant={"h5"}>75%</Typography>
+                          </Button>
+
+                          <Button
+                            className={
+                              redeemAmountPercent === 100
+                                ? classes.depositScaleActive
+                                : classes.depositScale
+                            }
+                            variant="text"
+                            disabled={loading}
+                            color="primary"
+                            onClick={() => {
+                              this.setRedeemAmount(100);
+                            }}
+                          >
                             <Typography variant={"h5"}>Max</Typography>
                           </Button>
                         </div>
@@ -1782,7 +1998,8 @@ class Asset extends Component {
                           asset.earnBalance <= 0 ** asset.strategyBalance <= 0)
                       }
                       onClick={this.onWithdraw}
-                      fullWidth>
+                      fullWidth
+                    >
                       {/* <Typography className={ classes.withdrawButtonText } variant={ 'h5'}>Withdraw</Typography> */}
                       <span>Withdraw</span>
                     </Button>
@@ -1796,7 +2013,8 @@ class Asset extends Component {
                           asset.earnBalance <= 0 ** asset.strategyBalance <= 0)
                       }
                       onClick={this.onWithdrawAll}
-                      fullWidth>
+                      fullWidth
+                    >
                       {/* <Typography className={ classes.withdrawButtonText } variant={ 'h5'}>Withdraw All</Typography> */}
                       <span>Withdraw All</span>
                     </Button>
@@ -2086,7 +2304,7 @@ class Asset extends Component {
       y: 20,
       style: {
         fontSize: "14px",
-        
+
         color: this.state.interestTheme.themeColors.textT,
       },
     };
@@ -2231,8 +2449,8 @@ class Asset extends Component {
     const { asset, startLoading } = this.props;
 
     let assetBalance = !this.isUsdVault(asset)
-        ? asset.balance
-        : asset.balances[this.state.tokenIndex];
+      ? asset.balance
+      : asset.balances[this.state.tokenIndex];
 
     assetBalance = (Math.floor(assetBalance * 10000) / 10000).toFixed(4);
 
@@ -2347,13 +2565,10 @@ class Asset extends Component {
       ).toFixed(4);
 
       const vaultShares = (
-        Math.floor(
-          asset.vaultBalance *
-            asset.vaultPricePerFullShare *
-            10000
-        ) / 10000
+        Math.floor(asset.vaultBalance * asset.vaultPricePerFullShare * 10000) /
+        10000
       ).toFixed(4);
-      
+
       if (
         !redeemVaultAmount ||
         isNaN(redeemVaultAmount) ||
@@ -2365,17 +2580,13 @@ class Asset extends Component {
       }
 
       // let redeemEarnAmount = this.state.redeemEarnAmount.toString();
-      redeemEarnAmount = (
-        Math.floor(redeemEarnAmount * 10000) 
-        / 10000
-      ).toFixed(4);
+      redeemEarnAmount = (Math.floor(redeemEarnAmount * 10000) / 10000).toFixed(
+        4
+      );
 
       const earnShares = (
-        Math.floor(
-          asset.earnBalance *
-            asset.earnPricePerFullShare *
-            10000
-        ) / 10000
+        Math.floor(asset.earnBalance * asset.earnPricePerFullShare * 10000) /
+        10000
       ).toFixed(4);
 
       if (
@@ -2403,16 +2614,18 @@ class Asset extends Component {
     } else if (asset.strategyType === "compound") {
       // let redeemAmount = this.state.redeemAmount.toString();
       redeemAmount = (Math.floor(redeemAmount * 10000) / 10000).toFixed(4);
-      
+
       const depositedShares = (
-        Math.floor(
-          asset.strategyBalance *
-            asset.compoundExchangeRate *
-            10000
-        ) / 10000
+        Math.floor(asset.strategyBalance * asset.compoundExchangeRate * 10000) /
+        10000
       ).toFixed(4);
 
-      if (!redeemAmount || isNaN(redeemAmount) || redeemAmount < parseFloat("0.0") || redeemAmount > depositedShares) {
+      if (
+        !redeemAmount ||
+        isNaN(redeemAmount) ||
+        redeemAmount < parseFloat("0.0") ||
+        redeemAmount > depositedShares
+      ) {
         this.setState({ redeemAmountError: true });
         return false;
       }
@@ -2434,9 +2647,17 @@ class Asset extends Component {
       // let tokenIndex = this.state
       redeemAmount = (Math.floor(redeemAmount * 10000) / 10000).toFixed(4);
 
-      const depositedShares = (Math.floor((asset.strategyBalance / 10 ** asset.decimals) * 10000) / 10000).toFixed(4);
+      const depositedShares = (
+        Math.floor((asset.strategyBalance / 10 ** asset.decimals) * 10000) /
+        10000
+      ).toFixed(4);
 
-      if (!redeemAmount || isNaN(redeemAmount) || redeemAmount < parseFloat("0.0") || redeemAmount > depositedShares ) {
+      if (
+        !redeemAmount ||
+        isNaN(redeemAmount) ||
+        redeemAmount < parseFloat("0.0") ||
+        redeemAmount > depositedShares
+      ) {
         this.setState({ redeemAmountError: true });
         return false;
       }
