@@ -640,6 +640,10 @@ class Asset extends Component {
     this.setState({ usdPrices: store.getStore("usdPrices") });
   };
 
+  isUsdVault = (asset) => {
+    return (asset.strategyType === "citadel" || asset.strategyType === "elon") ? true : false;
+  }
+
   render() {
     const { classes, asset } = this.props;
     const {
@@ -728,17 +732,17 @@ class Asset extends Component {
                   <div className={classes.flexy}>
                     <Typography variant={"h4"} noWrap>
                       {/**Total Earnings */}
-                      {asset.strategyType === "citadel" &&
+                      {this.isUsdVault(asset) &&
                         (asset.addressStatistics
                           ? Number(asset.addressStatistics.earnings).toFixed(2)
                           : "0.00")}
-                      {asset.strategyType !== "citadel" &&
+                      {!this.isUsdVault(asset) &&
                         (asset.addressStatistics
                           ? (
                               asset.addressStatistics.earnings / asset.decimals
                             ).toFixed(2)
                           : "0.00")}
-                      {asset.strategyType === "citadel" ? "USD" : asset.symbol}
+                      {this.isUsdVault(asset) ? "USD" : asset.symbol}
                     </Typography>
                   </div>
                 </Grid>
@@ -749,21 +753,21 @@ class Asset extends Component {
                   <div className={classes.flexy}>
                     <Typography variant={"h4"} noWrap>
                       {/** Total Deposits */}
-                      {asset.strategyType === "citadel" &&
+                      {this.isUsdVault(asset) &&
                         this.state.usdPrices &&
                         (asset.addressStatistics
                           ? Number(
                               asset.addressStatistics.totalDepositsInUSD
                             ).toFixed(2)
                           : "0.00")}
-                      {asset.strategyType !== "citadel" &&
+                      {!this.isUsdVault(asset) &&
                         (asset.addressStatistics
                           ? (
                               asset.addressStatistics.totalDeposits /
                               10 ** asset.decimals
                             ).toFixed(2)
                           : "0.00")}
-                      {asset.strategyType === "citadel" ? "USD" : asset.symbol}
+                      {this.isUsdVault(asset) ? "USD" : asset.symbol}
                     </Typography>
                   </div>
                 </Grid>
@@ -774,21 +778,21 @@ class Asset extends Component {
                   <div className={classes.flexy}>
                     <Typography variant={"h4"} noWrap>
                       {/** Total Withdrawals */}
-                      {asset.strategyType === "citadel" &&
+                      {this.isUsdVault(asset) &&
                         this.state.usdPrices &&
                         (asset.addressStatistics
                           ? Number(
                               asset.addressStatistics.totalWithdrawalsInUSD
                             ).toFixed(2)
                           : "0.00")}
-                      {asset.strategyType !== "citadel" &&
+                      {!this.isUsdVault(asset) &&
                         (asset.addressStatistics
                           ? (
                               asset.addressStatistics.totalWithdrawals /
                               10 ** asset.decimals
                             ).toFixed(2)
                           : "0.00")}
-                      {asset.strategyType === "citadel" ? "USD" : asset.symbol}
+                      {this.isUsdVault(asset) ? "USD" : asset.symbol}
                     </Typography>
                   </div>
                 </Grid>
@@ -799,7 +803,7 @@ class Asset extends Component {
                   <div className={classes.flexy}>
                     <Typography variant={"h4"} noWrap>
                       {/** Total Transferred In */}
-                      {asset.strategyType === "citadel" &&
+                      {this.isUsdVault(asset) &&
                         this.state.usdPrices &&
                         (asset.addressStatistics
                           ? (
@@ -808,14 +812,14 @@ class Asset extends Component {
                               this.state.usdPrices["ethereum"].usd
                             ).toFixed(2)
                           : "0.00")}
-                      {asset.strategyType !== "citadel" &&
+                      {!this.isUsdVault(asset) &&
                         (asset.addressStatistics
                           ? (
                               asset.addressStatistics.totalTransferredIn /
                               10 ** asset.decimals
                             ).toFixed(2)
                           : "0.00")}
-                      {asset.strategyType === "citadel" ? "USD" : asset.symbol}
+                      {this.isUsdVault(asset) ? "USD" : asset.symbol}
                     </Typography>
                   </div>
                 </Grid>
@@ -826,7 +830,7 @@ class Asset extends Component {
                   <div className={classes.flexy}>
                     <Typography variant={"h4"} noWrap>
                       {/**Total Transferred Out */}
-                      {asset.strategyType === "citadel" &&
+                      {this.isUsdVault(asset) &&
                         this.state.usdPrices &&
                         (asset.addressStatistics
                           ? (
@@ -835,14 +839,14 @@ class Asset extends Component {
                               this.state.usdPrices["ethereum"].usd
                             ).toFixed(2)
                           : "0.00")}
-                      {asset.strategyType !== "citadel" &&
+                      {!this.isUsdVault(asset) &&
                         (asset.addressStatistics
                           ? (
                               asset.addressStatistics.totalTransferredOut /
                               10 ** asset.decimals
                             ).toFixed(2)
                           : "0.00")}
-                      {asset.strategyType === "citadel" ? "USD" : asset.symbol}
+                      {this.isUsdVault(asset) ? "USD" : asset.symbol}
                     </Typography>
                   </div>
                 </Grid>
@@ -1001,7 +1005,7 @@ class Asset extends Component {
                     className={classes.value}
                     noWrap>
                     {/** Wallet Balance */}
-                    {asset.strategyType === "citadel" && (
+                    {this.isUsdVault(asset) && (
                       <div>
                         {asset.balances
                           ? asset.balances[this.state.tokenIndex].toFixed(4)
@@ -1011,7 +1015,7 @@ class Asset extends Component {
                           : ""}
                       </div>
                     )}
-                    {asset.strategyType !== "citadel" && (
+                    {!this.isUsdVault(asset) && (
                       <span>
                         {asset.balance
                           ? (Math.floor(asset.balance * 10000) / 10000).toFixed(
@@ -1027,7 +1031,7 @@ class Asset extends Component {
                     </Typography> */}
 
                   {/** Change Currency  */}
-                  {asset.strategyType === "citadel" && (
+                  {this.isUsdVault(asset) && (
                     <div className={classes.accountInfoBlock}>
                       <div
                         className={classes.accountInfo}
@@ -1654,6 +1658,119 @@ class Asset extends Component {
                     </div>
                   </div>
                 )}
+                {asset.strategyType === "elon" && (
+                  <div className={classes.withdrawContainer}>
+                    <div className={classes.tradeContainer}>
+                      <div className={classes.balances}>
+                        <Typography
+                          variant="body1"
+                          onClick={() => {
+                            this.setRedeemAmount(100);
+                          }}
+                          className={classes.value}
+                          noWrap>
+                          {(asset.strategyBalance
+                            ? (
+                                Math.floor(
+                                  (asset.strategyBalance /
+                                    10 ** asset.decimals) *
+                                    10000
+                                ) / 10000
+                              ).toFixed(4)
+                            : "0.0000") + " daoELO"}{" "}
+                          {asset.strategyBalance > 0 && (
+                            <span>
+                              (
+                              {asset.depositedSharesInUSD
+                                ? (
+                                    asset.depositedSharesInUSD /
+                                    asset.priceInUSD[this.state.tokenIndex]
+                                  ).toFixed(4)
+                                : "0.0000"}{" "}
+                              {asset.symbols[this.state.tokenIndex]})
+                            </span>
+                          )}
+                        </Typography>
+                      </div>
+
+                      <div className={classes.depositIputBox}>
+                        <TextField
+                          style={{ width: "100%" }}
+                          className={classes.actionInput}
+                          id="redeemAmount"
+                          value={redeemAmount}
+                          error={redeemAmountError}
+                          onChange={this.onChange}
+                          disabled={loading}
+                          placeholder="0.00"
+                          variant="outlined"
+                          onKeyDown={this.inputRedeemKeyDown}
+                        />
+                        <div className={classes.depositScaleContainer}>
+                          <Button
+                            className={
+                              redeemAmountPercent === 25
+                                ? classes.depositScaleActive
+                                : classes.depositScale
+                            }
+                            variant="text"
+                            disabled={loading}
+                            color="primary"
+                            onClick={() => {
+                              this.setRedeemAmount(25);
+                            }}>
+                            <Typography variant={"h5"}>25%</Typography>
+                          </Button>
+
+                          <Button
+                            className={
+                              redeemAmountPercent === 50
+                                ? classes.depositScaleActive
+                                : classes.depositScale
+                            }
+                            variant="text"
+                            disabled={loading}
+                            color="primary"
+                            onClick={() => {
+                              this.setRedeemAmount(50);
+                            }}>
+                            <Typography variant={"h5"}>50%</Typography>
+                          </Button>
+
+                          <Button
+                            className={
+                              redeemAmountPercent === 75
+                                ? classes.depositScaleActive
+                                : classes.depositScale
+                            }
+                            variant="text"
+                            disabled={loading}
+                            color="primary"
+                            onClick={() => {
+                              this.setRedeemAmount(75);
+                            }}>
+                            <Typography variant={"h5"}>75%</Typography>
+                          </Button>
+
+                          <Button
+                            className={
+                              redeemAmountPercent === 100
+                                ? classes.depositScaleActive
+                                : classes.depositScale
+                            }
+                            variant="text"
+                            disabled={loading}
+                            color="primary"
+                            onClick={() => {
+                              this.setRedeemAmount(100);
+                            }}>
+                            <Typography variant={"h5"}>Max</Typography>
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div className={classes.withdrawButtonBox}>
                   {asset.withdraw === true && (
@@ -1698,6 +1815,7 @@ class Asset extends Component {
     var vaultAPY = [];
     var compoundAPY = [];
     var citadelAPY = [];
+    var elonAPY = [];
     var labels = [];
 
     const { hideNav } = this.state;
@@ -1745,6 +1863,11 @@ class Asset extends Component {
               date,
               parseFloat(groups[date][0].citadelApy.toFixed(4)),
             ]);
+          } else if (asset.strategyType === "elon") {
+            elonAPY.push([
+              date,
+              parseFloat(groups[date][0].elonApy.toFixed(4)),
+            ]);
           }
 
           // second attempt
@@ -1774,6 +1897,11 @@ class Asset extends Component {
               citadelAPY.push([
                 date,
                 parseFloat(groups[date][halfCount].citadelApy.toFixed(4)),
+              ]);
+            } else if (asset.strategyType === "elon") {
+              elonAPY.push([
+                date,
+                parseFloat(groups[date][halfCount].elonApy.toFixed(4)),
               ]);
             }
           }
@@ -1894,12 +2022,48 @@ class Asset extends Component {
           enabled: false,
         },
       };
+    } else if (asset.strategyType === "elon") {
+      options = {
+        chart: {
+          width: hideNav ? 300 : 420,
+        },
+        title: {
+          text: "Historical Vault Performance",
+        },
+        xAxis: {
+          categories: labels,
+        },
+        series: [
+          {
+            name: "Elon",
+            data: elonAPY,
+          },
+        ],
+        responsive: {
+          rules: [
+            {
+              condition: {
+                maxWidth: 450,
+                chartOptions: {
+                  chart: {
+                    width: 300,
+                  },
+                },
+              },
+            },
+          ],
+        },
+        credits: {
+          enabled: false,
+        },
+      };
     }
 
     const chartTitle = {
       yearn: "Historical Earn & Vault Performance",
       compound: "Historical Vault Performance",
       citadel: "Historical Vault Performance",
+      elon: "Historical Vault Performance",
     };
 
     // 调整折线图展示
@@ -2017,6 +2181,8 @@ class Asset extends Component {
         }
       } else if (asset.strategyType === "citadel") {
         return asset.stats.citadelApy;
+      } else if (asset.strategyType === "elon") {
+        return asset.stats.elonApy;
       }
     } else {
       return "0.00";
@@ -2064,8 +2230,7 @@ class Asset extends Component {
     const { amount, earnRatio, vaultRatio, tokenIndex } = this.state;
     const { asset, startLoading } = this.props;
 
-    let assetBalance =
-      asset.strategyType !== "citadel"
+    let assetBalance = !this.isUsdVault(asset)
         ? asset.balance
         : asset.balances[this.state.tokenIndex];
 
@@ -2104,7 +2269,7 @@ class Asset extends Component {
           asset,
         },
       });
-    } else if (asset.strategyType === "citadel") {
+    } else if (this.isUsdVault(asset)) {
       dispatcher.dispatch({
         type: DEPOSIT_CONTRACT,
         content: {
@@ -2125,7 +2290,7 @@ class Asset extends Component {
     startLoading();
     let amount;
 
-    if (asset.strategyType === "citadel") {
+    if (this.isUsdVault(asset)) {
       amount = (asset.balances[this.state.tokenIndex] * 100) / 100;
     } else {
       const balance = asset.balance;
@@ -2154,7 +2319,7 @@ class Asset extends Component {
           asset,
         },
       });
-    } else if (asset.strategyType === "citadel") {
+    } else if (this.isUsdVault(asset)) {
       dispatcher.dispatch({
         type: DEPOSIT_ALL_CONTRACT,
         content: {
@@ -2264,7 +2429,7 @@ class Asset extends Component {
           asset: asset,
         },
       });
-    } else if (asset.strategyType === "citadel") {
+    } else if (this.isUsdVault(asset)) {
       // let redeemAmount = this.state.redeemAmount.toString();
       // let tokenIndex = this.state
       redeemAmount = (Math.floor(redeemAmount * 10000) / 10000).toFixed(4);
@@ -2315,7 +2480,7 @@ class Asset extends Component {
 
     let amount = 0.0;
 
-    if (asset.strategyType === "citadel") {
+    if (this.isUsdVault(asset)) {
       amount = (asset.balances[this.state.tokenIndex] * percent) / 100;
     } else {
       const balance = asset.balance;
@@ -2350,7 +2515,7 @@ class Asset extends Component {
     const asset = this.props.asset;
     let amount;
 
-    if (asset.strategyType === "citadel") {
+    if (this.isUsdVault(asset)) {
       amount = (balance * percent) / 100;
       amount = Math.floor((amount / 10 ** decimals) * 10000) / 10000;
     } else {

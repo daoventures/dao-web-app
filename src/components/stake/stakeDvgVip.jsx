@@ -27,7 +27,7 @@ import {
     DEPOSIT_DVG_RETURNED
 } from '../../constants'
 import Store from "../../stores";
-import ConnectWallet from "../connectWallet";
+import ConnectWallet from "../common/connectWallet/connectWallet";
 import { initOnboard } from '../../walletsServices.js';
 
 const emitter = Store.emitter
@@ -557,7 +557,7 @@ const styles = theme => ({
     },
 
     errorMessage: {
-        color: theme.themeColors.red,
+        color: theme.themeColors.formError,
         marginTop: "3px"
     }
 });

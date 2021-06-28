@@ -26,7 +26,7 @@ const styles = (theme) => ({
       paddingTop: "66px",
     },
     [theme.breakpoints.down("md")]: {
-      paddingTop: "2rem",
+      paddingTop: "4rem",
     },
   },
   welcomeText: {

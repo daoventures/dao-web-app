@@ -1,0 +1,17 @@
+{
+  "folders": [
+	{
+		"path": "..\\..\\.."
+	},
+	{
+		"path": "..\\..\\..\\..\\iearn-finance-backup"
+	}
+],
+  "settings": {
+    "conventionalCommits.scopes": [
+      "Citadel Withdraw",
+      "Citadel Deposit",
+      "DAO-106"
+    ]
+  }
+}
