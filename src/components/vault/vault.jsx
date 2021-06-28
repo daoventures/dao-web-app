@@ -952,6 +952,10 @@ class Vault extends Component {
   };
 
   isUsdVault = (asset) => {
+    return (asset.strategyType === "citadel") ? true : false;
+  }
+
+  isLogoVault = (asset) => {
     return (asset.strategyType === "citadel" || asset.strategyType === "elon") ? true : false;
   }
 
@@ -1105,7 +1109,7 @@ class Vault extends Component {
                         <img
                           alt=""
                           src={require("../../assets/img_new/" +
-                            (this.isUsdVault(asset)
+                            (this.isLogoVault(asset)
                               ? asset.strategyType
                               : asset.symbol) +
                             "-logo." +
@@ -1215,7 +1219,7 @@ class Vault extends Component {
                             variant={"h5"}
                             className={classes.assetLabel1}>
                             <div>
-                              {(this.isUsdVault(asset)
+                              {(this.isLogoVault(asset)
                                 ? asset.sumBalances
                                   ? asset.sumBalances.toLocaleString(undefined, {
                                     minimumFractionDigits: 2,
@@ -1229,7 +1233,7 @@ class Vault extends Component {
                                   })
                                   : "0.00") +
                                 " " +
-                                (this.isUsdVault(asset)
+                                (this.isLogoVault(asset)
                                   ? "USD"
                                   : asset.symbol)}
                             </div>
@@ -1248,7 +1252,7 @@ class Vault extends Component {
                             noWrap
                             className={classes.assetLabel1}>
                             <div>
-                              {(this.isUsdVault(asset)
+                              {(this.isLogoVault(asset)
                                 ? asset.sumBalances
                                   ? asset.sumBalances.toLocaleString(undefined, {
                                     minimumFractionDigits: 2,
@@ -1262,7 +1266,7 @@ class Vault extends Component {
                                   })
                                   : "0.00") +
                                 " " +
-                                (this.isUsdVault(asset)
+                                (this.isLogoVault(asset)
                                   ? "USD"
                                   : asset.symbol)}
                             </div>
