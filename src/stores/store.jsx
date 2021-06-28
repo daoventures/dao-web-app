@@ -5800,7 +5800,7 @@ class Store {
 
     if (withdawAmountInToken > balance) {
       alert(
-        "Due to insufficient liquidity of the desired token in vault for withdrawal, gas fees may be very high. Are you sure to proceed?"
+        "Due to insufficient liquidity of the selected token in the Vault for withdrawal, gas fees may be very high. To reduce gas fee, please select a different currency or try a smaller amount. \n\n Are you sure you wish to proceed with the withdrawal using the selected currency?"
       );
     }
   };
