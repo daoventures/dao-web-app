@@ -6429,8 +6429,6 @@ class Store {
     }
   };
 
-<<<<<<< HEAD
-=======
   _getContractDecimal = async (contract, callback) => {
     try {
       const decimals = await contract.methods.decimals().call();
@@ -6441,7 +6439,6 @@ class Store {
     }
   };
 
->>>>>>> cd9cde64598ebd106c12eb7a57fb7cb3fc4f2067
   findDAOminePool = async (payload) => {
     const account = store.getStore("account");
 
