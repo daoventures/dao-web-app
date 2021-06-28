@@ -519,18 +519,6 @@ class SideDrawer extends Component {
 
         
         <List>
-          {/**
-             * <ListItem button key={'PORTFOLIO'} className={this.linkSelected('/portfolio') ? classes.selected : classes.menuItem} onClick={() => { this.navInApp('portfolio') }}>
-                <ListItemIcon>
-                  <svg className={(this.linkSelected('/portfolio')) ? classes.selectedSvg : classes.menuSvg} aria-hidden="true">
-                    <use xlinkHref="#iconmenu_porftfolio_nor_day"></use>
-                  </svg>
-                </ListItemIcon>
-                <ListItemText primary={'PORTFOLIO'} />
-              </ListItem>
-           */}
-          
-
           <ListItem button key={'INVEST'} className={this.linkSelected('/invest') ? classes.selected : classes.menuItem} onClick={() => { this.navInApp('invest') }}>
             <ListItemIcon>
               {/* {this.renderIcon('line-chart', '/invest')} */}
@@ -656,22 +644,19 @@ class SideDrawer extends Component {
             </div>
             <div className={classes.totalValueLeft}>
               <div className={classes.totalValueRightText}>Total Value Locked</div>
-              <div className={classes.totalValueRightNum}>$ {this.state.totalValue}</div>
+              <div className={classes.totalValueRightNum}>$ 3,500,289.749</div>
             </div>
           </div>
         </div>}
         <List>
-          {/**
-           * <ListItem button key={'Portfolios'} className={this.linkSelected('/portfolio') ? classes.selected : classes.menuItem} onClick={() => { this.navInApp('portfolio') }}>
-                <ListItemIcon>
-                  <svg className={(this.linkSelected('/portfolio')) ? classes.selectedSvg : classes.menuSvg} aria-hidden="true">
-                    <use xlinkHref="#iconmenu_porftfolio_nor_day"></use>
-                  </svg>
-                </ListItemIcon>
-              <ListItemText primary={'Portfolios'} />
-          </ListItem>
-           */}
-         
+          {/* <ListItem button key={'Portfolios'} className={this.linkSelected('/portfolio') ? classes.selected : classes.menuItem} onClick={() => { this.navInApp('portfolio') }}>
+            <ListItemIcon>
+              <svg className={(this.linkSelected('/portfolio')) ? classes.selectedSvg : classes.menuSvg} aria-hidden="true">
+                <use xlinkHref="#iconmenu_porftfolio_nor_day"></use>
+              </svg>
+            </ListItemIcon>
+            <ListItemText primary={'Portfolios'} />
+          </ListItem> */}
 
           <ListItem button key={'Invest'} className={this.linkSelected('/invest') ? classes.selected : classes.menuItem} onClick={() => { this.navInApp('invest') }}>
             <ListItemIcon>

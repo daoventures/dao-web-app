@@ -25,17 +25,16 @@ import Dashboard from "./components/dashboard";
 import SideDrawer from "./components/sideDrawer";
 import MainContainer from "./components/mainContainer";
 
-import Stake from "./components/stake/stakeComingSoon";
 import StakeDvgVip from './components/stake/stakeDvgVip';
+import Stake from './components/stake';
 
-import Swap from "./components/swap";
+import Swap from './components/swap';
 
 import { injected } from "./stores/connectors";
 import { initOnboard } from "./walletsServices.js";
 
 import {
   CONNECTION_CONNECTED,
-  CURRENT_THEME_RETURNED,
   TOGGLE_THEME,
   GET_VAULT_INFO,
 } from "./constants";
@@ -185,18 +184,19 @@ class App extends Component {
                 <Header />
                 <Vaults />
               </Route> */}
-              <Route path="/portfolio">
-                <Header />
-                <SideDrawer />
-                <MainContainer />
-                <Dashboard />
-              </Route>
-              {/* <Route path="/earn">
+                {/* <Route path="/earn">
                 <Header />
                 <SideDrawer />
                 <MainContainer />
                 <InvestSimple />
               </Route> */}
+              {/* <Route path="/portfolio">
+                <Header />
+                <SideDrawer />
+                <MainContainer />
+                <Dashboard />
+              </Route> */}
+            
               <Route path="/invest">
                 <Header />
                 <SideDrawer />
@@ -215,6 +215,7 @@ class App extends Component {
                 <MainContainer />
                 <StakeDvgVip />
               </Route>
+
               <Route path="/swap">
                 <Header />
                 <SideDrawer />
