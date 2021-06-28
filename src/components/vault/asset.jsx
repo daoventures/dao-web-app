@@ -498,7 +498,17 @@ const styles = (theme) => ({
   },
   errorMessage: {
     align: "left",
+    color: theme.themeColors.formError,
+    marginTop: "3px",
+  },
+  happyHourWarning: {
+    align: "left",
     color: theme.themeColors.formWarning,
+    marginTop: "3px",
+  },
+  happyHourMessage: {
+    align: "left",
+    color: theme.themeColors.formHappyHour,
     marginTop: "3px",
   },
 });
@@ -660,7 +670,7 @@ class Asset extends Component {
     ) {
       this.setState({
         amountAboveThreshold: payload.body.amountAboveThreshold,
-        errorMessage: payload.body.message,
+        happyHourWarning: payload.body.message,
       });
     }
   };
@@ -675,19 +685,38 @@ class Asset extends Component {
       : false;
   };
 
+  // Handle input validation message
   renderErrorMessage = (classes) => {
-    const errorMessage = this.state.errorMessage;
-    const amountAboveThreshold = this.state.amountAboveThreshold;
-    if (errorMessage !== "" && amountAboveThreshold === false) {
+    const {
+      errorMessage,
+      happyHourMessage,
+      happyHourThreshold,
+      happyHourWarning,
+      amountAboveThreshold,
+    } = this.state;
+    if (errorMessage !== "") {
       console.log("🚀 | Asset | errorMessage", errorMessage);
       return (
         <Typography variant={"h5"} className={classes.errorMessage}>
-          {/* {"HELLO"} */}
-          {this.state.errorMessage}
+          {errorMessage}
         </Typography>
       );
     } else {
-      return null;
+      if (happyHourWarning !== "") {
+        return (
+          <Typography variant={"h5"} className={classes.happyHourWarning}>
+            {happyHourWarning}
+          </Typography>
+        );
+      } else if (happyHourMessage !== "") {
+        return (
+          <Typography variant={"h5"} className={classes.happyHourMessage}>
+            {happyHourMessage}
+          </Typography>
+        );
+      } else {
+        return null;
+      }
     }
   };
 
@@ -1193,11 +1222,12 @@ class Asset extends Component {
                       id="amount"
                       value={amount}
                       error={amountError}
-                      onChange={this.onChange}
+                      onChange={this.onChangeDeposit}
                       disabled={loading}
                       placeholder="0.00"
                       variant="outlined"
                       onKeyDown={this.inputKeyDown}
+                      autoComplete="off"
                     />
                   </div>
                   <div className={classes.depositScaleContainer}>
@@ -1884,7 +1914,8 @@ class Asset extends Component {
                             this.setRedeemAmount(100);
                           }}
                           className={classes.value}
-                          noWrap>
+                          noWrap
+                        >
                           {(asset.strategyBalance
                             ? (
                                 Math.floor(
@@ -1934,7 +1965,8 @@ class Asset extends Component {
                             color="primary"
                             onClick={() => {
                               this.setRedeemAmount(25);
-                            }}>
+                            }}
+                          >
                             <Typography variant={"h5"}>25%</Typography>
                           </Button>
 
@@ -1949,7 +1981,8 @@ class Asset extends Component {
                             color="primary"
                             onClick={() => {
                               this.setRedeemAmount(50);
-                            }}>
+                            }}
+                          >
                             <Typography variant={"h5"}>50%</Typography>
                           </Button>
 
@@ -1964,7 +1997,8 @@ class Asset extends Component {
                             color="primary"
                             onClick={() => {
                               this.setRedeemAmount(75);
-                            }}>
+                            }}
+                          >
                             <Typography variant={"h5"}>75%</Typography>
                           </Button>
 
@@ -1979,7 +2013,8 @@ class Asset extends Component {
                             color="primary"
                             onClick={() => {
                               this.setRedeemAmount(100);
-                            }}>
+                            }}
+                          >
                             <Typography variant={"h5"}>Max</Typography>
                           </Button>
                         </div>
@@ -2428,8 +2463,79 @@ class Asset extends Component {
 
   onChange = (event) => {
     let val = [];
+    console.log("🚀 | Asset | val", val);
     val[event.target.id] = event.target.value;
     this.setState(val);
+  };
+
+  onChangeDeposit = (event) => {
+    let val = [];
+    val[event.target.id] = event.target.value;
+    console.log("🚀 | Asset | val", val[event.target.id]);
+
+    this.verifyInput(val[event.target.id]);
+    this.setState({ amount: val[event.target.id] });
+    // this.setState(val);
+  };
+
+  verifyInput = (amount) => {
+    // const { amount } = this.state;
+    console.log("🚀 | Asset | amount", amount);
+    const { asset, startLoading, happyHour, happyHourThreshold } = this.props;
+    console.log("🚀 | Asset | happyHour", happyHour);
+    console.log("🚀 | Asset | amount", amount);
+    console.log("🚀 | Asset | happyHourThreshold", happyHourThreshold);
+    let assetBalance = !this.isUsdVault(asset)
+      ? asset.balance
+      : asset.balances[this.state.tokenIndex];
+
+    assetBalance = (Math.floor(assetBalance * 10000) / 10000).toFixed(4);
+
+    const digitRegex = /^[0-9]\d*(\.\d+)?$/;
+
+    if (!digitRegex.test(amount)) {
+      this.setState({ amountError: true, errorMessage: "Invalid amount" });
+      return;
+    }
+
+    if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+      this.setState({ amountError: true, errorMessage: "Invalid amount" });
+      return;
+    }
+
+    if (parseFloat(amount) > assetBalance) {
+      this.setState({
+        amountError: true,
+        errorMessage: "Exceed available balance",
+      });
+      return;
+    }
+
+    if (
+      parseFloat(amount) <= parseFloat("0.0") ||
+      parseFloat(amount) > assetBalance
+    ) {
+      this.setState({ amountError: true });
+      // return false;
+    } else {
+      this.setState({ amountError: false, errorMessage: "" });
+    }
+
+    if (asset.strategyType === "citadel" && happyHour === true) {
+      if (parseFloat(amount) < parseFloat(happyHourThreshold)) {
+        this.setState({
+          // amountError: true,
+          happyHourWarning: `Below required deposit ${happyHourThreshold} USD for Happy Hour. Gas fee will be required.`,
+          happyHourMessage: "",
+        });
+      } else {
+        this.setState({
+          // amountError: true,
+          happyHourWarning: "",
+          happyHourMessage: "Gas fee is on us!",
+        });
+      }
+    }
   };
 
   inputKeyDown = (event) => {
@@ -2709,6 +2815,7 @@ class Asset extends Component {
       amount = Math.floor(amount * 10000) / 10000;
     }
 
+    this.verifyInput(amount.toFixed(4));
     this.setState({ amount: amount.toFixed(4), percent });
   };
 
