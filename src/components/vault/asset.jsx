@@ -175,7 +175,7 @@ const styles = (theme) => ({
     flex: 1,
     display: "flex",
     flexDirection: "column",
-    alignItems: "center",
+    // alignItems: "center",
     width: "100%",
     margin: "auto",
     marginBottom: "1.5rem",
@@ -561,6 +561,8 @@ class Asset extends Component {
       tokenIndex: 0,
       errorMessage: "",
       amountAboveThreshold: false,
+      scales: [25, 50, 75, 100],
+      withdrawErrorMessage: "",
     };
   }
 
@@ -670,7 +672,7 @@ class Asset extends Component {
   };
 
   isUsdVault = (asset) => {
-    return asset.strategyType === "citadel" || asset.strategyType === "elon"
+    return asset.strategyType === "citadel" || asset.strategyType === "elon" || asset.strategyType === "daoFaang"
       ? true
       : false;
   };
@@ -691,28 +693,143 @@ class Asset extends Component {
     }
   };
 
-  render() {
-    const { classes, asset } = this.props;
+  renderCurrencyModal = (currencies) => {
+    const { classes } = this.props;
+    const { displayCurrencyModal } = this.state;
+
+    return (
+      <Dialog
+        onClose={() => this.handleModalDisplay(false)}
+        fullWidth={true}
+        maxWidth={"sm"}
+        classes={{ paper: classes.dialogRoot }}
+        aria-labelledby="customized-dialog-title"
+        open={displayCurrencyModal}
+      >
+        <MuiDialogTitle disableTypography className={classes.dialogTitle}>
+          <Typography variant="h6">Select a Currency</Typography>
+          <IconButton
+            aria-label="close"
+            className={classes.closeButton}
+            onClick={() => this.handleModalDisplay(false)}
+          >
+            <CloseIcon />
+          </IconButton>
+        </MuiDialogTitle>
+        <DialogContent dividers className={classes.dialogContent}>
+          <List component="nav" aria-label="main mailbox folders">
+            {currencies.length > 0 &&
+              currencies.map((currency) => {
+                return (
+                  <ListItem
+                    button
+                    onClick={() => this.handleSelectedCurrency(currency)}
+                    className={classes.modalListItem}
+                  >
+                    <ListItemAvatar>
+                      <Avatar
+                        alt=""
+                        src={require("../../assets/" + currency + "-logo.png")}
+                      />
+                    </ListItemAvatar>
+                    <ListItemText primary={currency} />
+                  </ListItem>
+                );
+              })}
+          </List>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
+  renderDepositWithdrawInput = (isDeposit) => {
+    const { classes } = this.props;
     const {
       amount,
       amountError,
-      redeemEarnAmount,
+      scales,
+      loading,
       redeemAmount,
+      redeemAmountError,
+      amountAboveThreshold
+    } = this.state;
+
+    const selectedPercentage = isDeposit
+      ? this.state.percent
+      : this.state.redeemAmountPercent;
+
+    return (
+      <React.Fragment>
+        <div className={classes.depositIputBox}>
+          <TextField
+            style={{
+              width: "100%",
+            }}
+            className={classes.actionInput}
+            id={isDeposit ? "amount" : "redeemAmount"}
+            value={isDeposit ? amount : redeemAmount}
+            error={isDeposit ? amountError : redeemAmountError}
+            onChange={this.onChange}
+            disabled={loading}
+            placeholder="0.00"
+            variant="outlined"
+            onKeyDown={isDeposit ? this.inputKeyDown : this.inputRedeemKeyDown}
+          />
+          <div className={classes.depositScaleContainer}>
+            {scales.length > 0 &&
+              scales.map((percentage) => {
+                return (
+                  <Button
+                    className={
+                      selectedPercentage === percentage
+                        ? classes.depositScaleActive
+                        : classes.depositScale
+                    }
+                    variant="text"
+                    disabled={loading}
+                    onClick={() => {
+                      this.setAmount(percentage);
+                    }}
+                  >
+                    <Typography variant={"h5"}>
+                      {percentage === 100 ? "Max" : percentage + "%"}
+                    </Typography>
+                  </Button>
+                );
+              })}
+          </div>
+        </div>
+
+        {/** Error Message */}
+        {isDeposit && this.state.errorMessage !== ""  && (
+          <Typography variant={"h5"} className={classes.errorMessage}>
+            {this.state.errorMessage}
+          </Typography>
+        )}
+        {!isDeposit && this.state.withdrawErrorMessage !== "" && (
+          <Typography variant={"h5"} className={classes.errorMessage}>
+            {this.state.withdrawErrorMessage}
+          </Typography>
+        )}
+      </React.Fragment>
+    );
+  };
+
+  render() {
+    const { classes, asset } = this.props;
+    const {
+      redeemEarnAmount,
       redeemVaultAmount,
       redeemAmountError,
       loading,
       ratio,
       earnRatio,
       vaultRatio,
-      percent,
       earnPercent,
       vaultPercent,
-      redeemAmountPercent,
       openEarnInfo,
       openVaultInfo,
-      displayCurrencyModal,
-      amountAboveThreshold,
-      errorMessage,
+      scales,
     } = this.state;
 
     return (
@@ -720,19 +837,19 @@ class Asset extends Component {
         <Grid container className={classes.assetSummary}>
           <Grid item sm={6} xs={12}>
             {this.renderChart(asset)}
-            {/* STRATEGY 和 STATISTICS */}
+
             <Grid item sm={12} xs={12} className={classes.assetDetails}>
+              {/* STRATEGY */}
               <Typography variant={"h4"} className={classes.subtitle} noWrap>
                 STRATEGY
               </Typography>
-
               <Grid container style={{ marginTop: "1rem" }}>
                 <Grid item sm={3} xs={6}>
                   <Typography variant={"h5"} className={classes.grey}>
                     Currently Active:
                   </Typography>
                   <div className={classes.flexy}>
-                    <Typography variant={"h4"} noWrap>
+                    <Typography variant={"h4"} styles={{wordWrap: "break-word"}}>
                       {asset.strategy}
                     </Typography>
                   </div>
@@ -768,133 +885,109 @@ class Asset extends Component {
                   </div>
                 </Grid>
               </Grid>
+
               <div className={classes.fullWidth}></div>
+
+              {/** STATISTICS */}
               <Typography variant={"h4"} className={classes.subtitle} noWrap>
                 STATISTICS
               </Typography>
-
               <Grid container style={{ marginTop: "1rem" }}>
+                {/** Total Earnings */}
                 <Grid item sm={3} xs={6}>
                   <Typography variant={"h5"} className={classes.grey}>
                     Total Earnings:
                   </Typography>
                   <div className={classes.flexy}>
                     <Typography variant={"h4"} noWrap>
-                      {/**Total Earnings */}
-                      {this.isUsdVault(asset) &&
-                        (asset.addressStatistics
-                          ? Number(asset.addressStatistics.earnings).toFixed(2)
-                          : "0.00")}
-                      {!this.isUsdVault(asset) &&
-                        (asset.addressStatistics
-                          ? (
-                              asset.addressStatistics.earnings / asset.decimals
-                            ).toFixed(2)
-                          : "0.00")}
+                      {asset.addressStatistics
+                        ? (this.isUsdVault(asset)
+                            ? Number(asset.addressStatistics.earnings)
+                            : asset.addressStatistics.earnings / asset.decimals
+                          ).toFixed(2)
+                        : "0.00"}{" "}
                       {this.isUsdVault(asset) ? "USD" : asset.symbol}
                     </Typography>
                   </div>
                 </Grid>
+
+                {/** Deposit */}
                 <Grid item sm={3} xs={6}>
                   <Typography variant={"h5"} className={classes.grey}>
                     Deposits:
                   </Typography>
                   <div className={classes.flexy}>
                     <Typography variant={"h4"} noWrap>
-                      {/** Total Deposits */}
-                      {this.isUsdVault(asset) &&
-                        this.state.usdPrices &&
-                        (asset.addressStatistics
-                          ? Number(
-                              asset.addressStatistics.totalDepositsInUSD
-                            ).toFixed(2)
-                          : "0.00")}
-                      {!this.isUsdVault(asset) &&
-                        (asset.addressStatistics
-                          ? (
-                              asset.addressStatistics.totalDeposits /
+                      {asset.addressStatistics
+                        ? (this.isUsdVault(asset)
+                            ? Number(asset.addressStatistics.totalDepositsInUSD)
+                            : asset.addressStatistics.totalDeposits /
                               10 ** asset.decimals
-                            ).toFixed(2)
-                          : "0.00")}
+                          ).toFixed(2)
+                        : "0.00"}{" "}
                       {this.isUsdVault(asset) ? "USD" : asset.symbol}
                     </Typography>
                   </div>
                 </Grid>
+
+                {/** Withdrawals */}
                 <Grid item sm={3} xs={6}>
                   <Typography variant={"h5"} className={classes.grey}>
                     Withdrawals:
                   </Typography>
                   <div className={classes.flexy}>
                     <Typography variant={"h4"} noWrap>
-                      {/** Total Withdrawals */}
-                      {this.isUsdVault(asset) &&
-                        this.state.usdPrices &&
-                        (asset.addressStatistics
-                          ? Number(
-                              asset.addressStatistics.totalWithdrawalsInUSD
-                            ).toFixed(2)
-                          : "0.00")}
-                      {!this.isUsdVault(asset) &&
-                        (asset.addressStatistics
-                          ? (
-                              asset.addressStatistics.totalWithdrawals /
+                      {asset.addressStatistics
+                        ? (this.isUsdVault(asset)
+                            ? Number(
+                                asset.addressStatistics.totalWithdrawalsInUSD
+                              )
+                            : asset.addressStatistics.totalWithdrawals /
                               10 ** asset.decimals
-                            ).toFixed(2)
-                          : "0.00")}
+                          ).toFixed(2)
+                        : "0.00"}{" "}
                       {this.isUsdVault(asset) ? "USD" : asset.symbol}
                     </Typography>
                   </div>
                 </Grid>
+
+                {/** Transferred In */}
                 <Grid item sm={3} xs={6}>
                   <Typography variant={"h5"} className={classes.grey}>
                     Transferred In:
                   </Typography>
                   <div className={classes.flexy}>
                     <Typography variant={"h4"} noWrap>
-                      {/** Total Transferred In */}
-                      {this.isUsdVault(asset) &&
-                        this.state.usdPrices &&
-                        (asset.addressStatistics
-                          ? (
-                              (asset.addressStatistics.totalTransferredIn /
-                                10 ** asset.decimals) *
-                              this.state.usdPrices["ethereum"].usd
-                            ).toFixed(2)
-                          : "0.00")}
-                      {!this.isUsdVault(asset) &&
-                        (asset.addressStatistics
-                          ? (
-                              asset.addressStatistics.totalTransferredIn /
+                      {asset.addressStatistics
+                        ? (this.isUsdVault(asset)
+                            ? Number(
+                                asset.addressStatistics.totalTransferredInUSD
+                              )
+                            : asset.addressStatistics.totalTransferredIn /
                               10 ** asset.decimals
-                            ).toFixed(2)
-                          : "0.00")}
+                          ).toFixed(2)
+                        : "0.00"}{" "}
                       {this.isUsdVault(asset) ? "USD" : asset.symbol}
                     </Typography>
                   </div>
                 </Grid>
+
+                {/** Transferred Out */}
                 <Grid item sm={3} xs={6}>
                   <Typography variant={"h5"} className={classes.grey}>
                     Transferred Out:
                   </Typography>
                   <div className={classes.flexy}>
                     <Typography variant={"h4"} noWrap>
-                      {/**Total Transferred Out */}
-                      {this.isUsdVault(asset) &&
-                        this.state.usdPrices &&
-                        (asset.addressStatistics
-                          ? (
-                              (asset.addressStatistics.totalTransferredOut /
-                                10 ** asset.decimals) *
-                              this.state.usdPrices["ethereum"].usd
-                            ).toFixed(2)
-                          : "0.00")}
-                      {!this.isUsdVault(asset) &&
-                        (asset.addressStatistics
-                          ? (
-                              asset.addressStatistics.totalTransferredOut /
+                      {asset.addressStatistics
+                        ? (this.isUsdVault(asset)
+                            ? Number(
+                                asset.addressStatistics.totalTransferredOutInUSD
+                              )
+                            : asset.addressStatistics.totalTransferredOut /
                               10 ** asset.decimals
-                            ).toFixed(2)
-                          : "0.00")}
+                          ).toFixed(2)
+                        : "0.00"}{" "}
                       {this.isUsdVault(asset) ? "USD" : asset.symbol}
                     </Typography>
                   </div>
@@ -1042,7 +1135,7 @@ class Asset extends Component {
               {/* 充值部分 */}
               <div className={classes.tradeContainer}>
                 <div className={classes.balances}>
-                  {/* <Typography variant='h4' onClick={ () => { this.setAmount(100) } } className={ classes.value } noWrap>{ 'Your wallet: '+ (asset.balance ? (Math.floor(asset.balance*10000)/10000).toFixed(4) : '0.0000') } { asset.tokenSymbol ? asset.tokenSymbol : asset.symbol }</Typography> */}
+                  {/** Wallet Balance */}
                   <Typography
                     variant="body1"
                     className={classes.value}
@@ -1084,185 +1177,46 @@ class Asset extends Component {
                       </span>
                     )}
                   </Typography>
-                  {/* <Typography variant='body2'  className={ classes.value } noWrap>
-                     
-                    </Typography> */}
 
                   {/** Change Currency  */}
                   {this.isUsdVault(asset) && (
-                    <div className={classes.accountInfoBlock}>
-                      <div
-                        className={classes.accountInfo}
-                        onClick={() => {
-                          this.handleModalDisplay(true);
-                        }}
-                      >
-                        <img
-                          alt=""
-                          src={require("../../assets/" +
-                            this.state.selectedCurrency +
-                            "-logo.png")}
-                          className={classes.assetIconImg}
-                          style={
-                            asset.disabled ? { filter: "grayscale(100%)" } : {}
-                          }
-                        />
-                        <span className={classes.addressSpan}>
-                          {this.state.selectedCurrency}
-                        </span>
-                        <ArrowDropDownCircleIcon
-                          className={classes.arrowDropdownIcon}
-                        />
+                    <React.Fragment>
+                      <div className={classes.accountInfoBlock}>
+                        <div
+                          className={classes.accountInfo}
+                          onClick={() => {
+                            this.handleModalDisplay(true);
+                          }}
+                        >
+                          <img
+                            alt=""
+                            src={require("../../assets/" +
+                              this.state.selectedCurrency +
+                              "-logo.png")}
+                            className={classes.assetIconImg}
+                            style={
+                              asset.disabled
+                                ? { filter: "grayscale(100%)" }
+                                : {}
+                            }
+                          />
+                          <span className={classes.addressSpan}>
+                            {this.state.selectedCurrency}
+                          </span>
+                          <ArrowDropDownCircleIcon
+                            className={classes.arrowDropdownIcon}
+                          />
+                        </div>
                       </div>
-                    </div>
+                      {this.renderCurrencyModal(asset.symbols)}
+                    </React.Fragment>
                   )}
-
-                  <Dialog
-                    onClose={() => this.handleModalDisplay(false)}
-                    fullWidth={true}
-                    maxWidth={"sm"}
-                    classes={{ paper: classes.dialogRoot }}
-                    aria-labelledby="customized-dialog-title"
-                    open={displayCurrencyModal}
-                  >
-                    <MuiDialogTitle
-                      disableTypography
-                      className={classes.dialogTitle}
-                    >
-                      <Typography variant="h6">Select a Currency</Typography>
-                      <IconButton
-                        aria-label="close"
-                        className={classes.closeButton}
-                        onClick={() => this.handleModalDisplay(false)}
-                      >
-                        <CloseIcon />
-                      </IconButton>
-                    </MuiDialogTitle>
-                    <DialogContent dividers className={classes.dialogContent}>
-                      <List component="nav" aria-label="main mailbox folders">
-                        <ListItem
-                          button
-                          onClick={() => this.handleSelectedCurrency("USDT")}
-                          className={classes.modalListItem}
-                        >
-                          <ListItemAvatar>
-                            <Avatar
-                              alt=""
-                              src={require("../../assets/USDT-logo.png")}
-                            />
-                          </ListItemAvatar>
-                          <ListItemText primary="USDT" />
-                        </ListItem>
-                        <ListItem
-                          button
-                          onClick={() => this.handleSelectedCurrency("USDC")}
-                          className={classes.modalListItem}
-                        >
-                          <ListItemAvatar>
-                            <Avatar
-                              alt=""
-                              src={require("../../assets/USDC-logo.png")}
-                            />
-                          </ListItemAvatar>
-                          <ListItemText primary="USDC" />
-                        </ListItem>
-                        <ListItem
-                          button
-                          onClick={() => this.handleSelectedCurrency("DAI")}
-                          className={classes.modalListItem}
-                        >
-                          <ListItemAvatar>
-                            <Avatar
-                              alt=""
-                              src={require("../../assets/DAI-logo.png")}
-                            />
-                          </ListItemAvatar>
-                          <ListItemText primary="DAI" />
-                        </ListItem>
-                      </List>
-                    </DialogContent>
-                  </Dialog>
                 </div>
-                <div className={classes.depositIputBox}>
-                  <div className={classes.test}>
-                    <TextField
-                      style={{
-                        width: "100%",
-                      }}
-                      className={classes.actionInput}
-                      id="amount"
-                      value={amount}
-                      error={amountError}
-                      onChange={this.onChange}
-                      disabled={loading}
-                      placeholder="0.00"
-                      variant="outlined"
-                      onKeyDown={this.inputKeyDown}
-                    />
-                  </div>
-                  <div className={classes.depositScaleContainer}>
-                    <Button
-                      className={
-                        percent === 25
-                          ? classes.depositScaleActive
-                          : classes.depositScale
-                      }
-                      variant="text"
-                      disabled={loading}
-                      onClick={() => {
-                        this.setAmount(25);
-                      }}
-                    >
-                      <Typography variant={"h5"}>25%</Typography>
-                    </Button>
-                    <Button
-                      className={
-                        percent === 50
-                          ? classes.depositScaleActive
-                          : classes.depositScale
-                      }
-                      variant="text"
-                      disabled={loading}
-                      onClick={() => {
-                        this.setAmount(50);
-                      }}
-                    >
-                      <Typography variant={"h5"}>50%</Typography>
-                    </Button>
-                    <Button
-                      className={
-                        percent === 75
-                          ? classes.depositScaleActive
-                          : classes.depositScale
-                      }
-                      variant="text"
-                      disabled={loading}
-                      onClick={() => {
-                        this.setAmount(75);
-                      }}
-                    >
-                      <Typography variant={"h5"}>75%</Typography>
-                    </Button>
-                    <Button
-                      className={
-                        percent === 100
-                          ? classes.depositScaleActive
-                          : classes.depositScale
-                      }
-                      variant="text"
-                      disabled={loading}
-                      onClick={() => {
-                        this.setAmount(100);
-                      }}
-                    >
-                      {/* <Typography variant={'h5'}>100%</Typography> */}
-                      <Typography variant={"h5"}>Max</Typography>
-                    </Button>
-                  </div>
-                  {/** Error Message */}
-                  {this.renderErrorMessage(classes)}
-                </div>
+             
+                {/** Deposit Input */}
+                {this.renderDepositWithdrawInput(true)}
 
+                {/** Deposit Buttons */}
                 <div className={classes.depositButtonBox}>
                   {asset.deposit === true && (
                     <Button
@@ -1274,7 +1228,6 @@ class Asset extends Component {
                       }
                       onClick={this.onDeposit}
                     >
-                      {/* <Typography className={ classes.depositButtonText } variant={ 'h5'} color={asset.disabled?'':'secondary'}>Deposit</Typography> */}
                       <span>Deposit</span>
                     </Button>
                   )}
@@ -1288,7 +1241,6 @@ class Asset extends Component {
                       }
                       onClick={this.onDepositAll}
                     >
-                      {/* <Typography className={ classes.depositButtonText } variant={ 'h5'} color={asset.disabled?'':'secondary'}>Deposit All</Typography> */}
                       <span>Deposit All</span>
                     </Button>
                   )}
@@ -1304,11 +1256,13 @@ class Asset extends Component {
 
               <div className={classes.sepperator}></div>
 
-              {/* 提现部分 Withdrawer */}
+              {/* 提现部分 Withdrawal */}
               <div className={classes.tradeContainer}>
+                {/** Yearn Strategy */}
                 {asset.strategyType === "yearn" && (
                   <div className={classes.yearnEarnAndVaultBlock}>
                     <div className={classes.yearnEarnAndVaultItem}>
+                      {/** Earn Balance*/}
                       <Typography
                         variant="h5"
                         style={{ color: "#7B25D2" }}
@@ -1341,6 +1295,8 @@ class Asset extends Component {
                           : "0.0000"}{" "}
                         {asset.vaultSymbol}){" "}
                       </Typography>
+
+                      {/** Earn Amount Input */}
                       <TextField
                         className={`${classes.actionInput} ${classes.earnAndVaultInput}`}
                         id="redeemEarnAmount"
@@ -1353,69 +1309,32 @@ class Asset extends Component {
                         onKeyDown={this.inputRedeemKeyDown}
                       />
                       <div className={classes.scaleContainer}>
-                        <Button
-                          className={
-                            earnPercent === 25
-                              ? classes.depositScaleActive
-                              : classes.depositScale
-                          }
-                          variant="text"
-                          disabled={loading}
-                          color="primary"
-                          onClick={() => {
-                            this.setRedeemEarnAmount(25);
-                          }}
-                        >
-                          <Typography variant={"h5"}>25%</Typography>
-                        </Button>
-                        <Button
-                          className={
-                            earnPercent === 50
-                              ? classes.depositScaleActive
-                              : classes.depositScale
-                          }
-                          variant="text"
-                          disabled={loading}
-                          color="primary"
-                          onClick={() => {
-                            this.setRedeemEarnAmount(50);
-                          }}
-                        >
-                          <Typography variant={"h5"}>50%</Typography>
-                        </Button>
-                        <Button
-                          className={
-                            earnPercent === 75
-                              ? classes.depositScaleActive
-                              : classes.depositScale
-                          }
-                          variant="text"
-                          disabled={loading}
-                          color="primary"
-                          onClick={() => {
-                            this.setRedeemEarnAmount(75);
-                          }}
-                        >
-                          <Typography variant={"h5"}>75%</Typography>
-                        </Button>
-                        <Button
-                          className={
-                            earnPercent === 100
-                              ? classes.depositScaleActive
-                              : classes.depositScale
-                          }
-                          variant="text"
-                          disabled={loading}
-                          color="primary"
-                          onClick={() => {
-                            this.setRedeemEarnAmount(100);
-                          }}
-                        >
-                          <Typography variant={"h5"}>Max</Typography>
-                        </Button>
+                        {
+                          scales.length > 0 && scales.map(percentage => {
+                            return (
+                              <Button
+                                className={
+                                  earnPercent === percentage
+                                    ? classes.depositScaleActive
+                                    : classes.depositScale
+                                }
+                                variant="text"
+                                disabled={loading}
+                                color="primary"
+                                onClick={() => {
+                                  this.setRedeemEarnAmount(percentage);
+                                }}
+                              >
+                                <Typography variant={"h5"}>{percentage === 100 ? "Max" : percentage+"%"}</Typography>
+                              </Button>
+                            )
+                          }) 
+                        }
                       </div>
                     </div>
+
                     <div className={classes.yearnEarnAndVaultItem}>
+                      {/** Vault Balance */}
                       <Typography
                         variant="h5"
                         style={{ color: "#027AFF" }}
@@ -1448,6 +1367,8 @@ class Asset extends Component {
                           : "0.0000"}{" "}
                         {asset.vaultSymbol}){" "}
                       </Typography>
+
+                      {/** Vault Amount Input */}
                       <TextField
                         fullWidth
                         className={`${classes.actionInput} ${classes.earnAndVaultInput}`}
@@ -1460,71 +1381,33 @@ class Asset extends Component {
                         variant="outlined"
                         onKeyDown={this.inputRedeemKeyDown}
                       />
-                      <div className={classes.scaleContainer}>
-                        <Button
-                          className={
-                            vaultPercent === 25
-                              ? classes.depositScaleActive
-                              : classes.depositScale
-                          }
-                          variant="text"
-                          disabled={loading}
-                          color="primary"
-                          onClick={() => {
-                            this.setRedeemVaultAmount(25);
-                          }}
-                        >
-                          <Typography variant={"h5"}>25%</Typography>
-                        </Button>
-                        <Button
-                          className={
-                            vaultPercent === 50
-                              ? classes.depositScaleActive
-                              : classes.depositScale
-                          }
-                          variant="text"
-                          disabled={loading}
-                          color="primary"
-                          onClick={() => {
-                            this.setRedeemVaultAmount(50);
-                          }}
-                        >
-                          <Typography variant={"h5"}>50%</Typography>
-                        </Button>
-                        <Button
-                          className={
-                            vaultPercent === 75
-                              ? classes.depositScaleActive
-                              : classes.depositScale
-                          }
-                          variant="text"
-                          disabled={loading}
-                          color="primary"
-                          onClick={() => {
-                            this.setRedeemVaultAmount(75);
-                          }}
-                        >
-                          <Typography variant={"h5"}>75%</Typography>
-                        </Button>
-                        <Button
-                          className={
-                            vaultPercent === 100
-                              ? classes.depositScaleActive
-                              : classes.depositScale
-                          }
-                          variant="text"
-                          disabled={loading}
-                          color="primary"
-                          onClick={() => {
-                            this.setRedeemVaultAmount(100);
-                          }}
-                        >
-                          <Typography variant={"h5"}>Max</Typography>
-                        </Button>
+                       <div className={classes.scaleContainer}>
+                        {
+                          scales.length > 0 && scales.map(percentage => {
+                            return (
+                              <Button
+                                className={
+                                  vaultPercent === percentage
+                                    ? classes.depositScaleActive
+                                    : classes.depositScale
+                                }
+                                variant="text"
+                                disabled={loading}
+                                color="primary"
+                                onClick={() => {
+                                  this.setRedeemVaultAmount(percentage);
+                                }}
+                              >
+                                <Typography variant={"h5"}>{percentage === 100 ? "Max" : percentage+"%"}</Typography>
+                              </Button>
+                            )
+                          }) 
+                        }
                       </div>
                     </div>
                   </div>
                 )}
+                {/** Compound Strategy */}
                 {asset.strategyType === "compound" && (
                   <div className={classes.withdrawContainer}>
                     <div className={classes.tradeContainer}>
@@ -1556,89 +1439,14 @@ class Asset extends Component {
                           {asset.vaultSymbol}){" "}
                         </Typography>
                       </div>
-                      <div className={classes.depositIputBox}>
-                        <TextField
-                          style={{ width: "100%" }}
-                          className={classes.actionInput}
-                          id="redeemAmount"
-                          value={redeemAmount}
-                          error={redeemAmountError}
-                          onChange={this.onChange}
-                          disabled={loading}
-                          placeholder="0.00"
-                          variant="outlined"
-                          onKeyDown={this.inputRedeemKeyDown}
-                        />
-                        <div className={classes.depositScaleContainer}>
-                          <Button
-                            className={
-                              redeemAmountPercent === 25
-                                ? classes.depositScaleActive
-                                : classes.depositScale
-                            }
-                            variant="text"
-                            disabled={loading}
-                            color="primary"
-                            onClick={() => {
-                              this.setRedeemAmount(25);
-                            }}
-                          >
-                            <Typography variant={"h5"}>25%</Typography>
-                          </Button>
-
-                          <Button
-                            className={
-                              redeemAmountPercent === 50
-                                ? classes.depositScaleActive
-                                : classes.depositScale
-                            }
-                            variant="text"
-                            disabled={loading}
-                            color="primary"
-                            onClick={() => {
-                              this.setRedeemAmount(50);
-                            }}
-                          >
-                            <Typography variant={"h5"}>50%</Typography>
-                          </Button>
-
-                          <Button
-                            className={
-                              redeemAmountPercent === 75
-                                ? classes.depositScaleActive
-                                : classes.depositScale
-                            }
-                            variant="text"
-                            disabled={loading}
-                            color="primary"
-                            onClick={() => {
-                              this.setRedeemAmount(75);
-                            }}
-                          >
-                            <Typography variant={"h5"}>75%</Typography>
-                          </Button>
-
-                          <Button
-                            className={
-                              redeemAmountPercent === 100
-                                ? classes.depositScaleActive
-                                : classes.depositScale
-                            }
-                            variant="text"
-                            disabled={loading}
-                            color="primary"
-                            onClick={() => {
-                              this.setRedeemAmount(100);
-                            }}
-                          >
-                            <Typography variant={"h5"}>Max</Typography>
-                          </Button>
-                        </div>
-                      </div>
+                      {this.renderDepositWithdrawInput(false)}
                     </div>
                   </div>
                 )}
-                {asset.strategyType === "citadel" && (
+                {/** Citadel, Elon, DAO Faang Strategy*/}
+                {(asset.strategyType === "citadel" ||
+                  asset.strategyType === "elon" ||
+                  asset.strategyType === "daoFaang") && (
                   <div className={classes.withdrawContainer}>
                     <div className={classes.tradeContainer}>
                       <div className={classes.balances}>
@@ -1658,7 +1466,9 @@ class Asset extends Component {
                                     10000
                                 ) / 10000
                               ).toFixed(4)
-                            : "0.0000") + " daoCDV"}{" "}
+                            : "0.0000") +
+                            " " +
+                            asset.id}{" "}
                           {asset.strategyBalance > 0 && (
                             <span>
                               (
@@ -1673,317 +1483,7 @@ class Asset extends Component {
                           )}
                         </Typography>
                       </div>
-
-                      <div className={classes.depositIputBox}>
-                        <TextField
-                          style={{ width: "100%" }}
-                          className={classes.actionInput}
-                          id="redeemAmount"
-                          value={redeemAmount}
-                          error={redeemAmountError}
-                          onChange={this.onChange}
-                          disabled={loading}
-                          placeholder="0.00"
-                          variant="outlined"
-                          onKeyDown={this.inputRedeemKeyDown}
-                        />
-                        <div className={classes.depositScaleContainer}>
-                          <Button
-                            className={
-                              redeemAmountPercent === 25
-                                ? classes.depositScaleActive
-                                : classes.depositScale
-                            }
-                            variant="text"
-                            disabled={loading}
-                            color="primary"
-                            onClick={() => {
-                              this.setRedeemAmount(25);
-                            }}
-                          >
-                            <Typography variant={"h5"}>25%</Typography>
-                          </Button>
-
-                          <Button
-                            className={
-                              redeemAmountPercent === 50
-                                ? classes.depositScaleActive
-                                : classes.depositScale
-                            }
-                            variant="text"
-                            disabled={loading}
-                            color="primary"
-                            onClick={() => {
-                              this.setRedeemAmount(50);
-                            }}
-                          >
-                            <Typography variant={"h5"}>50%</Typography>
-                          </Button>
-
-                          <Button
-                            className={
-                              redeemAmountPercent === 75
-                                ? classes.depositScaleActive
-                                : classes.depositScale
-                            }
-                            variant="text"
-                            disabled={loading}
-                            color="primary"
-                            onClick={() => {
-                              this.setRedeemAmount(75);
-                            }}
-                          >
-                            <Typography variant={"h5"}>75%</Typography>
-                          </Button>
-
-                          <Button
-                            className={
-                              redeemAmountPercent === 100
-                                ? classes.depositScaleActive
-                                : classes.depositScale
-                            }
-                            variant="text"
-                            disabled={loading}
-                            color="primary"
-                            onClick={() => {
-                              this.setRedeemAmount(100);
-                            }}
-                          >
-                            <Typography variant={"h5"}>Max</Typography>
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                {asset.strategyType === "elon" && (
-                  <div className={classes.withdrawContainer}>
-                    <div className={classes.tradeContainer}>
-                      <div className={classes.balances}>
-                        <Typography
-                          variant="body1"
-                          onClick={() => {
-                            this.setRedeemAmount(100);
-                          }}
-                          className={classes.value}
-                          noWrap
-                        >
-                          {(asset.strategyBalance
-                            ? (
-                                Math.floor(
-                                  (asset.strategyBalance /
-                                    10 ** asset.decimals) *
-                                    10000
-                                ) / 10000
-                              ).toFixed(4)
-                            : "0.0000") + " daoELO"}{" "}
-                          {asset.strategyBalance > 0 && (
-                            <span>
-                              (
-                              {asset.depositedSharesInUSD
-                                ? (
-                                    asset.depositedSharesInUSD /
-                                    asset.priceInUSD[this.state.tokenIndex]
-                                  ).toFixed(4)
-                                : "0.0000"}{" "}
-                              {asset.symbols[this.state.tokenIndex]})
-                            </span>
-                          )}
-                        </Typography>
-                      </div>
-
-                      <div className={classes.depositIputBox}>
-                        <TextField
-                          style={{ width: "100%" }}
-                          className={classes.actionInput}
-                          id="redeemAmount"
-                          value={redeemAmount}
-                          error={redeemAmountError}
-                          onChange={this.onChange}
-                          disabled={loading}
-                          placeholder="0.00"
-                          variant="outlined"
-                          onKeyDown={this.inputRedeemKeyDown}
-                        />
-                        <div className={classes.depositScaleContainer}>
-                          <Button
-                            className={
-                              redeemAmountPercent === 25
-                                ? classes.depositScaleActive
-                                : classes.depositScale
-                            }
-                            variant="text"
-                            disabled={loading}
-                            color="primary"
-                            onClick={() => {
-                              this.setRedeemAmount(25);
-                            }}
-                          >
-                            <Typography variant={"h5"}>25%</Typography>
-                          </Button>
-
-                          <Button
-                            className={
-                              redeemAmountPercent === 50
-                                ? classes.depositScaleActive
-                                : classes.depositScale
-                            }
-                            variant="text"
-                            disabled={loading}
-                            color="primary"
-                            onClick={() => {
-                              this.setRedeemAmount(50);
-                            }}
-                          >
-                            <Typography variant={"h5"}>50%</Typography>
-                          </Button>
-
-                          <Button
-                            className={
-                              redeemAmountPercent === 75
-                                ? classes.depositScaleActive
-                                : classes.depositScale
-                            }
-                            variant="text"
-                            disabled={loading}
-                            color="primary"
-                            onClick={() => {
-                              this.setRedeemAmount(75);
-                            }}
-                          >
-                            <Typography variant={"h5"}>75%</Typography>
-                          </Button>
-
-                          <Button
-                            className={
-                              redeemAmountPercent === 100
-                                ? classes.depositScaleActive
-                                : classes.depositScale
-                            }
-                            variant="text"
-                            disabled={loading}
-                            color="primary"
-                            onClick={() => {
-                              this.setRedeemAmount(100);
-                            }}
-                          >
-                            <Typography variant={"h5"}>Max</Typography>
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                {asset.strategyType === "elon" && (
-                  <div className={classes.withdrawContainer}>
-                    <div className={classes.tradeContainer}>
-                      <div className={classes.balances}>
-                        <Typography
-                          variant="body1"
-                          onClick={() => {
-                            this.setRedeemAmount(100);
-                          }}
-                          className={classes.value}
-                          noWrap>
-                          {(asset.strategyBalance
-                            ? (
-                                Math.floor(
-                                  (asset.strategyBalance /
-                                    10 ** asset.decimals) *
-                                    10000
-                                ) / 10000
-                              ).toFixed(4)
-                            : "0.0000") + " daoELO"}{" "}
-                          {asset.strategyBalance > 0 && (
-                            <span>
-                              (
-                              {asset.depositedSharesInUSD
-                                ? (
-                                    asset.depositedSharesInUSD /
-                                    asset.priceInUSD[this.state.tokenIndex]
-                                  ).toFixed(4)
-                                : "0.0000"}{" "}
-                              {asset.symbols[this.state.tokenIndex]})
-                            </span>
-                          )}
-                        </Typography>
-                      </div>
-
-                      <div className={classes.depositIputBox}>
-                        <TextField
-                          style={{ width: "100%" }}
-                          className={classes.actionInput}
-                          id="redeemAmount"
-                          value={redeemAmount}
-                          error={redeemAmountError}
-                          onChange={this.onChange}
-                          disabled={loading}
-                          placeholder="0.00"
-                          variant="outlined"
-                          onKeyDown={this.inputRedeemKeyDown}
-                        />
-                        <div className={classes.depositScaleContainer}>
-                          <Button
-                            className={
-                              redeemAmountPercent === 25
-                                ? classes.depositScaleActive
-                                : classes.depositScale
-                            }
-                            variant="text"
-                            disabled={loading}
-                            color="primary"
-                            onClick={() => {
-                              this.setRedeemAmount(25);
-                            }}>
-                            <Typography variant={"h5"}>25%</Typography>
-                          </Button>
-
-                          <Button
-                            className={
-                              redeemAmountPercent === 50
-                                ? classes.depositScaleActive
-                                : classes.depositScale
-                            }
-                            variant="text"
-                            disabled={loading}
-                            color="primary"
-                            onClick={() => {
-                              this.setRedeemAmount(50);
-                            }}>
-                            <Typography variant={"h5"}>50%</Typography>
-                          </Button>
-
-                          <Button
-                            className={
-                              redeemAmountPercent === 75
-                                ? classes.depositScaleActive
-                                : classes.depositScale
-                            }
-                            variant="text"
-                            disabled={loading}
-                            color="primary"
-                            onClick={() => {
-                              this.setRedeemAmount(75);
-                            }}>
-                            <Typography variant={"h5"}>75%</Typography>
-                          </Button>
-
-                          <Button
-                            className={
-                              redeemAmountPercent === 100
-                                ? classes.depositScaleActive
-                                : classes.depositScale
-                            }
-                            variant="text"
-                            disabled={loading}
-                            color="primary"
-                            onClick={() => {
-                              this.setRedeemAmount(100);
-                            }}>
-                            <Typography variant={"h5"}>Max</Typography>
-                          </Button>
-                        </div>
-                      </div>
+                      {this.renderDepositWithdrawInput(false)}
                     </div>
                   </div>
                 )}
@@ -2000,7 +1500,6 @@ class Asset extends Component {
                       onClick={this.onWithdraw}
                       fullWidth
                     >
-                      {/* <Typography className={ classes.withdrawButtonText } variant={ 'h5'}>Withdraw</Typography> */}
                       <span>Withdraw</span>
                     </Button>
                   )}
@@ -2015,7 +1514,6 @@ class Asset extends Component {
                       onClick={this.onWithdrawAll}
                       fullWidth
                     >
-                      {/* <Typography className={ classes.withdrawButtonText } variant={ 'h5'}>Withdraw All</Typography> */}
                       <span>Withdraw All</span>
                     </Button>
                   )}
@@ -2034,6 +1532,7 @@ class Asset extends Component {
     var compoundAPY = [];
     var citadelAPY = [];
     var elonAPY = [];
+    var faangAPY = [];
     var labels = [];
 
     const { hideNav } = this.state;
@@ -2086,6 +1585,11 @@ class Asset extends Component {
               date,
               parseFloat(groups[date][0].elonApy.toFixed(4)),
             ]);
+          } else if (asset.strategyType === "daoFaang") {
+            faangAPY.push([
+              date,
+              parseFloat(groups[date][0].faangApy.toFixed(4)),
+            ]);
           }
 
           // second attempt
@@ -2120,6 +1624,11 @@ class Asset extends Component {
               elonAPY.push([
                 date,
                 parseFloat(groups[date][halfCount].elonApy.toFixed(4)),
+              ]);
+            } else if (asset.strategyType === "daoFaang") {
+              faangAPY.push([
+                date,
+                parseFloat(groups[date][halfCount].faangApy.toFixed(4)),
               ]);
             }
           }
@@ -2275,6 +1784,41 @@ class Asset extends Component {
           enabled: false,
         },
       };
+    } else if (asset.strategyType === "daoFaang") {
+      options = {
+        chart: {
+          width: hideNav ? 300 : 420,
+        },
+        title: {
+          text: "Historical Vault Performance",
+        },
+        xAxis: {
+          categories: labels,
+        },
+        series: [
+          {
+            name: "FAANG Stonk",
+            data: faangAPY,
+          },
+        ],
+        responsive: {
+          rules: [
+            {
+              condition: {
+                maxWidth: 450,
+                chartOptions: {
+                  chart: {
+                    width: 300,
+                  },
+                },
+              },
+            },
+          ],
+        },
+        credits: {
+          enabled: false,
+        },
+      };
     }
 
     const chartTitle = {
@@ -2282,6 +1826,7 @@ class Asset extends Component {
       compound: "Historical Vault Performance",
       citadel: "Historical Vault Performance",
       elon: "Historical Vault Performance",
+      daoFaang: "Historical Vault Performance",
     };
 
     // 调整折线图展示
@@ -2401,6 +1946,8 @@ class Asset extends Component {
         return asset.stats.citadelApy;
       } else if (asset.strategyType === "elon") {
         return asset.stats.elonApy;
+      } else if (asset.strategyType === "daoFaang") {
+        return asset.stats.faangApy;
       }
     } else {
       return "0.00";
@@ -2427,6 +1974,12 @@ class Asset extends Component {
   };
 
   onChange = (event) => {
+    const divID = event.target.id;
+    if (divID === "amount") {
+      this.setState({ amountError: false, errorMessage: "" });
+    } else if (divID === "redeemAmount") {
+      this.setState({ redeemAmountError: false, withdrawErrorMessage: "" });
+    }
     let val = [];
     val[event.target.id] = event.target.value;
     this.setState(val);
@@ -2443,24 +1996,42 @@ class Asset extends Component {
   };
 
   onDeposit = () => {
-    this.setState({ amountError: false });
+    this.setState({ amountError: false, errorMessage: "" });
 
     const { amount, earnRatio, vaultRatio, tokenIndex } = this.state;
     const { asset, startLoading } = this.props;
 
+    const digitRegex = /^[0-9]\d*(\.\d+)?$/;
+
+    // Validate user input is number
+    if (!digitRegex.test(amount)) {
+      this.setState({
+        amountError: true,
+        errorMessage: "Invalid amount",
+      });
+      return;
+    }
+
+    // Validate user input must be greater than 0
+    if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+      this.setState({
+        amountError: true,
+        errorMessage: "Invalid amount",
+      });
+      return;
+    }
+
+    // Validate user has sufficient balance
     let assetBalance = !this.isUsdVault(asset)
       ? asset.balance
       : asset.balances[this.state.tokenIndex];
-
     assetBalance = (Math.floor(assetBalance * 10000) / 10000).toFixed(4);
 
-    if (
-      !amount ||
-      isNaN(amount) ||
-      parseFloat(amount) <= parseFloat("0.0") ||
-      parseFloat(amount) > assetBalance
-    ) {
-      this.setState({ amountError: true });
+    if (parseFloat(amount) > assetBalance) {
+      this.setState({
+        amountError: true,
+        errorMessage: "Exceed available balance",
+      });
       return false;
     }
 
@@ -2552,11 +2123,37 @@ class Asset extends Component {
   };
 
   onWithdraw = () => {
-    this.setState({ redeemAmountError: false });
+    this.setState({ redeemAmountError: false, withdrawErrorMessage: "" });
     let { redeemVaultAmount, redeemEarnAmount, redeemAmount, tokenIndex } =
       this.state;
 
     const { asset, startLoading } = this.props;
+
+    // Validate user input is number
+    const digitRegex = /^[0-9]\d*(\.\d+)?$/;
+    if (!digitRegex.test(redeemAmount)) {
+      this.setState({
+        redeemAmountError: true,
+        withdrawErrorMessage: "Invalid amount",
+      });
+      return;
+    }
+
+    // Validate user input is greater than 0
+    if (asset.strategyType === "yearn") {
+    } else {
+      if (
+        !redeemAmount ||
+        isNaN(redeemAmount) ||
+        redeemAmount < parseFloat("0.0")
+      ) {
+        this.setState({
+          redeemAmountError: true,
+          withdrawErrorMessage: "Invalid amount",
+        });
+        return;
+      }
+    }
 
     if (asset.strategyType === "yearn") {
       // let redeemVaultAmount = this.state.redeemVaultAmount.toString();
@@ -2620,13 +2217,11 @@ class Asset extends Component {
         10000
       ).toFixed(4);
 
-      if (
-        !redeemAmount ||
-        isNaN(redeemAmount) ||
-        redeemAmount < parseFloat("0.0") ||
-        redeemAmount > depositedShares
-      ) {
-        this.setState({ redeemAmountError: true });
+      if (redeemAmount > depositedShares) {
+        this.setState({
+          redeemAmountError: true,
+          withdrawErrorMessage: "Exceed available balance",
+        });
         return false;
       }
 
@@ -2643,8 +2238,6 @@ class Asset extends Component {
         },
       });
     } else if (this.isUsdVault(asset)) {
-      // let redeemAmount = this.state.redeemAmount.toString();
-      // let tokenIndex = this.state
       redeemAmount = (Math.floor(redeemAmount * 10000) / 10000).toFixed(4);
 
       const depositedShares = (
@@ -2652,13 +2245,11 @@ class Asset extends Component {
         10000
       ).toFixed(4);
 
-      if (
-        !redeemAmount ||
-        isNaN(redeemAmount) ||
-        redeemAmount < parseFloat("0.0") ||
-        redeemAmount > depositedShares
-      ) {
-        this.setState({ redeemAmountError: true });
+      if (redeemAmount > depositedShares) {
+        this.setState({
+          redeemAmountError: true,
+          withdrawErrorMessage: "Exceed available balance",
+        });
         return false;
       }
 

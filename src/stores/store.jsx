@@ -552,6 +552,49 @@ class Store {
           // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
         },
         {
+          id: "daoSTO",
+          name: "USDT/USDC/DAI",
+          symbol: "USDT",
+          symbols: ["USDT", "USDC", "DAI"],
+          description: "Stablecoins",
+          vaultSymbol: "daoSTO",
+          erc20addresses: [
+            "0xdac17f958d2ee523a2206206994597c13d831ec7",
+            "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+            "0x6b175474e89094c44da98b954eedeac495271d0f",
+          ],
+          erc20address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
+          vaultContractAddress: "", // TODO: Update to mainnet vault contract address
+          vaultContractABI: config.vaultDAOSTOContractABI,
+          balance: 0,
+          balances: [0, 0, 0],
+          vaultBalance: 0,
+          decimals: 18,
+          deposit: true,
+          depositAll: true,
+          withdraw: true,
+          withdrawAll: true,
+          lastMeasurement: "", // TODO: Update mainnet last measurement
+          measurement: 1e18,
+          price_id: ["tether", "usd-coin", "dai"],
+          priceInUSD: [0, 0, 0],
+          strategyName: "DAO FAANG Stonk: USDT USDC DAI",
+          strategy: "DAO FAANG Stonk",
+          strategyAddress: "",  // TODO: Update to mainnet strategy contract address
+          strategyContractABI: config.strategyDAOSTOContractABI,
+          historicalPriceId: "daoSTO_price",
+          logoFormat: "png",
+          risk: ADVANCE,
+          strategyType: "daoFaang",
+          cTokenAddress: "",
+          cAbi: "",
+          group: ADVANCE,
+          tvlKey: "daoSTO_tvl",
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-citadel-vault", // TODO: Update
+          isPopularItem: false, // use to render popular item icon
+        },
+        {
           id: "USDT",
           name: "USDT",
           symbol: "USDT",
@@ -879,6 +922,49 @@ class Store {
             "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-elon-vault",
           isPopularItem: false,
           // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
+        },
+        {
+          id: "daoSTO",
+          name: "USDT/USDC/DAI",
+          symbol: "USDT",
+          symbols: ["USDT", "USDC", "DAI"],
+          description: "Stablecoins",
+          vaultSymbol: "daoSTO",
+          erc20addresses: [
+            "0x07de306ff27a2b630b1141956844eb1552b956b5",
+            "0xb7a4f3e9097c08da09517b5ab877f7a917224ede",
+            "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
+          ],
+          erc20address: "0x07de306ff27a2b630b1141956844eb1552b956b5",
+          vaultContractAddress: "0xe97f5e5a755f8e633d23a2bae167b628dec22948",
+          vaultContractABI: config.vaultDAOSTOContractABI,
+          balance: 0,
+          balances: [0, 0, 0],
+          vaultBalance: 0,
+          decimals: 18,
+          deposit: true,
+          depositAll: true,
+          withdraw: true,
+          withdrawAll: true,
+          lastMeasurement: "25680643",
+          measurement: 1e18,
+          price_id: ["tether", "usd-coin", "dai"],
+          priceInUSD: [0, 0, 0],
+          strategyName: "DAO FAANG Stonk: USDT USDC DAI",
+          strategy: "DAO FAANG Stonk",
+          strategyAddress: "0xccced6278e9c6e68210f3bdc1bc3444e830cad33",
+          strategyContractABI: config.strategyDAOSTOContractABI,
+          historicalPriceId: "daoSTO_price",
+          logoFormat: "png",
+          risk: ADVANCE,
+          strategyType: "daoFaang",
+          cTokenAddress: "",
+          cAbi: "",
+          group: ADVANCE,
+          tvlKey: "daoSTO_tvl",
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-citadel-vault",
+          isPopularItem: false, // use to render popular item icon
         },
         {
           id: "USDT",
@@ -2409,7 +2495,7 @@ class Store {
           async.parallel(
             [
               (callbackInner) => {
-                this._getERC20BalancesCitadel(
+                this._getERC20Balances(
                   web3,
                   asset,
                   account,
@@ -2552,18 +2638,18 @@ class Store {
     }
   };
 
-  _getERC20BalancesCitadel = async (web3, asset, account, callback) => {
-    if (!this.isUsdVault(asset)) {
+  _getERC20Balances = async (web3, asset, account, callback) => {
+    // Strategy which required to get balances for multiple token
+    const strategyTypes = ["citadel", "daoFaang"];
+    if (!strategyTypes.includes(asset.strategyType)) {
       return callback(null, {
         balances: [0, 0, 0],
         sumBalances: 0,
       });
     }
 
-    let priceInUSD = [];
-
     const coinsInUSDPrice = await this._getUSDPrices();
-
+    let priceInUSD = [];
     for (let i = 0; i < asset.price_id.length; i++) {
       const coinPrice = coinsInUSDPrice[asset.price_id[i]].usd;
       priceInUSD.push(coinPrice);
@@ -3782,7 +3868,7 @@ class Store {
           if (typeof stats.tokenAddress == "string") {
             return (
               stats.tokenAddress.toLowerCase() ===
-                asset.erc20address.toLowerCase() &&
+              asset.erc20address.toLowerCase() &&
               stats.address.toLowerCase() === asset.vaultAddress.toLowerCase()
             );
           } else if (Array.isArray(stats.tokenAddress)) {
@@ -5358,6 +5444,24 @@ class Store {
           elonPricePerFullShare: pricePerFullShare,
         };
         return callback(null, returnObj);
+      } else if (asset.strategyType === "daoFaang") {
+        const daoFaangContract = new web3.eth.Contract(
+          asset.vaultContractABI,
+          asset.vaultContractAddress
+        );
+        const pool = await daoFaangContract.methods.getTotalValueInPool().call();
+
+        const totalSupply = await daoFaangContract.methods.totalSupply().call();
+
+        const pricePerFullShare = pool / totalSupply;
+
+        const returnObj = {
+          earnPricePerFullShare: 0,
+          vaultPricePerFullShare: 0,
+          compoundExchangeRate: 0,
+          faangPricePerFullShare: pricePerFullShare,
+        };
+        return callback(null, returnObj);
       }
     } catch (e) {
       console.log(e);
@@ -5748,7 +5852,9 @@ class Store {
         vaultAddress = asset.vaultContractAddress;
       } else if (asset.strategyType === "elon") {
         vaultAddress = asset.vaultContractAddress;
-      }
+      } else if (asset.strategyType === "daoFaang") {
+        vaultAddress = asset.vaultContractAddress;
+      } 
       const url = `${config.statsProvider}vaults/historical-apy/${vaultAddress}/${interval}`;
       const resultString = await rp(url);
       const result = JSON.parse(resultString);
@@ -6272,6 +6378,7 @@ class Store {
       return null;
     }
     const vaultStatistics = await this._getStatistics();
+    console.log("Vault statistics in getStrategyBalancesFull()", vaultStatistics);
     const addressStatistics = await this._getAddressStatistics(account.address);
     // const addressTXHitory = await this._getAddressTxHistory(account.address)
 
@@ -6284,33 +6391,41 @@ class Store {
         async.parallel(
           [
             (callbackInner) => {
-              this._getERC20Balance(web3, asset, account, callbackInner);
+              // 0
+              this._getERC20Balance(web3, asset, account, callbackInner); 
             },
             (callbackInner) => {
-              this._getBalances(web3, asset, account, callbackInner);
+              // 1
+              this._getBalances(web3, asset, account, callbackInner); 
             },
             (callbackInner) => {
-              this._getStatsAPY(vaultStatistics, asset, callbackInner);
+              // 2
+              this._getStatsAPY(vaultStatistics, asset, callbackInner); 
             },
             (callbackInner) => {
+              // 3
               this._getAssetUSDPrices(
                 web3,
                 asset,
                 account,
                 usdPrices,
                 callbackInner
-              );
+              ); 
             },
             (callbackInner) => {
-              this._getVaultAPY(web3, asset, account, callbackInner);
+              // 4
+              this._getVaultAPY(web3, asset, account, callbackInner); 
             },
             (callbackInner) => {
-              this._getAddressStats(addressStatistics, asset, callbackInner);
+              // 5
+              this._getAddressStats(addressStatistics, asset, callbackInner); 
             },
             (callbackInner) => {
+              // 6
               this._getMaxAPR(web3, asset, account, callbackInner);
             },
             (callbackInner) => {
+              // 7
               this._getHistoricalAPY(
                 web3,
                 asset,
@@ -6320,19 +6435,12 @@ class Store {
               );
             },
             (callbackInner) => {
-              this._getHistoricalAPY(
-                web3,
-                asset,
-                account,
-                interval,
-                callbackInner
-              );
-            },
-            (callbackInner) => {
+              // 8
               this._getTvl(asset.tvlKey, callbackInner);
             },
             (callbackInner) => {
-              this._getERC20BalancesCitadel(
+              // 9
+              this._getERC20Balances(
                 web3,
                 asset,
                 account,
@@ -6356,11 +6464,16 @@ class Store {
               : null;
             asset.stats = data[2];
             asset.usdPrice = data[3].usdPrice;
+
+            // Price per full share
             asset.earnPricePerFullShare = data[4].earnPricePerFullShare;
             asset.vaultPricePerFullShare = data[4].vaultPricePerFullShare;
-            asset.compoundExchangeRate = data[4].compoundExchangeRate;
+            asset.compoundExchangeRate = data[4].compoundExchangeRate; 
             asset.citadelPricePerFullShare = data[4].citadelPricePerFullShare
               ? data[4].citadelPricePerFullShare
+              : null; 
+            asset.faangPricePerFullShare = data[4].faangPricePerFullShare
+              ? data[4].faangPricePerFullShare
               : null;
             asset.elonPricePerFullShare = data[4].elonPricePerFullShare
               ? data[4].elonPricePerFullShare
@@ -6369,14 +6482,23 @@ class Store {
             asset.addressStatistics = data[5];
             asset.earnApr = data[6];
             asset.historicalAPY = data[7];
-            asset.tvl = data[9][0].tvl;
+            asset.tvl = data[8][0].tvl;
+
+            // Balances for strategy support multiple token
             asset.balances =
-              data[10] && data[10].balances ? data[10].balances : null;
+              data[9] && data[9].balances ? data[9].balances : null;
             asset.priceInUSD =
-              data[10] && data[10].priceInUSD ? data[10].priceInUSD : null;
-            asset.sumBalances = data[10].sumBalances;
+              data[9] && data[9].priceInUSD ? data[9].priceInUSD : null;
+            asset.sumBalances = data[9].sumBalances;
+
+
             // asset.addressTransactions = data[7]
             // asset.vaultHoldings = data[3]
+
+            console.log("Asset", asset);
+            if (asset.id === "daoSTO") {
+              console.log(`Asset for STONK ${asset}`);
+            }
             callback(null, asset);
           }
         );
