@@ -580,7 +580,7 @@ class Store {
           priceInUSD: [0, 0, 0],
           strategyName: "DAO FAANG Stonk: USDT USDC DAI",
           strategy: "DAO FAANG Stonk",
-          strategyAddress: "",  // TODO: Update to mainnet strategy contract address
+          strategyAddress: "", // TODO: Update to mainnet strategy contract address
           strategyContractABI: config.strategyDAOSTOContractABI,
           historicalPriceId: "daoSTO_price",
           logoFormat: "png",
@@ -2495,12 +2495,7 @@ class Store {
           async.parallel(
             [
               (callbackInner) => {
-                this._getERC20Balances(
-                  web3,
-                  asset,
-                  account,
-                  callbackInner
-                );
+                this._getERC20Balances(web3, asset, account, callbackInner);
               },
               (callbackInner) => {
                 this._getInvestedBalance(web3, asset, account, callbackInner);
@@ -3868,7 +3863,7 @@ class Store {
           if (typeof stats.tokenAddress == "string") {
             return (
               stats.tokenAddress.toLowerCase() ===
-              asset.erc20address.toLowerCase() &&
+                asset.erc20address.toLowerCase() &&
               stats.address.toLowerCase() === asset.vaultAddress.toLowerCase()
             );
           } else if (Array.isArray(stats.tokenAddress)) {
@@ -4133,7 +4128,7 @@ class Store {
         vaultBalance: 0,
         strategyBalance: balance,
       });
-    } else if (this.isUsdVault(asset)) {
+    } else if (asset.strategyType === "citadel" || asset.strategyType === "elon") {
       const vaultContract = new web3.eth.Contract(
         asset.vaultContractABI,
         asset.vaultContractAddress
@@ -4141,13 +4136,46 @@ class Store {
 
       const pool = await vaultContract.methods.getAllPoolInUSD().call();
       const totalSupply = await vaultContract.methods.totalSupply().call();
-
-      let depositedShares = await vaultContract.methods
+      const depositedShares = await vaultContract.methods
         .balanceOf(account.address)
         .call({ from: account.address });
 
       const depositedSharesInUSD =
         (depositedShares * pool) / totalSupply / 10 ** 6;
+
+      callback(null, {
+        earnBalance: 0,
+        vaultBalance: 0,
+        strategyBalance: depositedShares,
+        depositedSharesInUSD: depositedSharesInUSD,
+      });
+    } else if (asset.strategyType === "daoFaang") {
+      const network = store.getStore("network");
+      const vaultContract = new web3.eth.Contract(
+        asset.vaultContractABI,
+        asset.vaultContractAddress
+      );
+      // USDT to USD price feed contract
+      const usdtUsdPriceFeedContract = new web3.eth.Contract(
+        config.eacAggregatoorProxyContract,
+        network === 1
+          ? config.USDTUSDPriceFeedMainnetContract
+          : config.USDTUSDPriceFeedKovanContract
+      );
+
+      // USDT / USD conversion result
+      const usdtToUsdPrice = await usdtUsdPriceFeedContract.methods
+        .latestAnswer()
+        .call();
+
+      const pool = await vaultContract.methods.getTotalValueInPool().call();
+      const totalSupply = await vaultContract.methods.totalSupply().call();
+      const depositedShares = await vaultContract.methods
+        .balanceOf(account.address)
+        .call({ from: account.address });
+
+      const poolInUSD = (pool * usdtToUsdPrice) / (10 ** 20);
+      const depositedSharesInUSD = (depositedShares * poolInUSD) / totalSupply / 10 ** 6;
 
       callback(null, {
         earnBalance: 0,
@@ -5400,10 +5428,9 @@ class Store {
           asset.vaultContractAddress
         );
 
-        // TODO: Undo this comment once citadel contract updated with latest one
         // USDT to ETH price feed contract
         const usdtEthPriceFeedContract = new web3.eth.Contract(
-          config.USDTETHPriceFeedContractABI,
+          config.eacAggregatoorProxyContract,
           config.USDTETHPriceFeedContract
         );
         // USDT / ETH conversion result
@@ -5449,7 +5476,10 @@ class Store {
           asset.vaultContractABI,
           asset.vaultContractAddress
         );
-        const pool = await daoFaangContract.methods.getTotalValueInPool().call();
+
+        const pool = await daoFaangContract.methods
+          .getTotalValueInPool()
+          .call();
 
         const totalSupply = await daoFaangContract.methods.totalSupply().call();
 
@@ -6378,9 +6408,7 @@ class Store {
       return null;
     }
     const vaultStatistics = await this._getStatistics();
-    console.log("Vault statistics in getStrategyBalancesFull()", vaultStatistics);
     const addressStatistics = await this._getAddressStatistics(account.address);
-    // const addressTXHitory = await this._getAddressTxHistory(account.address)
 
     const usdPrices = await this._getUSDPrices();
     await this.getUSDPrices();
@@ -6392,15 +6420,15 @@ class Store {
           [
             (callbackInner) => {
               // 0
-              this._getERC20Balance(web3, asset, account, callbackInner); 
+              this._getERC20Balance(web3, asset, account, callbackInner);
             },
             (callbackInner) => {
               // 1
-              this._getBalances(web3, asset, account, callbackInner); 
+              this._getBalances(web3, asset, account, callbackInner);
             },
             (callbackInner) => {
               // 2
-              this._getStatsAPY(vaultStatistics, asset, callbackInner); 
+              this._getStatsAPY(vaultStatistics, asset, callbackInner);
             },
             (callbackInner) => {
               // 3
@@ -6410,15 +6438,15 @@ class Store {
                 account,
                 usdPrices,
                 callbackInner
-              ); 
+              );
             },
             (callbackInner) => {
               // 4
-              this._getVaultAPY(web3, asset, account, callbackInner); 
+              this._getVaultAPY(web3, asset, account, callbackInner);
             },
             (callbackInner) => {
               // 5
-              this._getAddressStats(addressStatistics, asset, callbackInner); 
+              this._getAddressStats(addressStatistics, asset, callbackInner);
             },
             (callbackInner) => {
               // 6
@@ -6440,12 +6468,7 @@ class Store {
             },
             (callbackInner) => {
               // 9
-              this._getERC20Balances(
-                web3,
-                asset,
-                account,
-                callbackInner
-              );
+              this._getERC20Balances(web3, asset, account, callbackInner);
             },
 
             // (callbackInner) => { this._getVaultHoldings(web3, asset, account, callbackInner) },
@@ -6468,10 +6491,10 @@ class Store {
             // Price per full share
             asset.earnPricePerFullShare = data[4].earnPricePerFullShare;
             asset.vaultPricePerFullShare = data[4].vaultPricePerFullShare;
-            asset.compoundExchangeRate = data[4].compoundExchangeRate; 
+            asset.compoundExchangeRate = data[4].compoundExchangeRate;
             asset.citadelPricePerFullShare = data[4].citadelPricePerFullShare
               ? data[4].citadelPricePerFullShare
-              : null; 
+              : null;
             asset.faangPricePerFullShare = data[4].faangPricePerFullShare
               ? data[4].faangPricePerFullShare
               : null;
@@ -6491,13 +6514,10 @@ class Store {
               data[9] && data[9].priceInUSD ? data[9].priceInUSD : null;
             asset.sumBalances = data[9].sumBalances;
 
-
             // asset.addressTransactions = data[7]
             // asset.vaultHoldings = data[3]
-
-            console.log("Asset", asset);
             if (asset.id === "daoSTO") {
-              console.log(`Asset for STONK ${asset}`);
+              console.log("Asset for STONK", asset);
             }
             callback(null, asset);
           }
@@ -7041,13 +7061,11 @@ class Store {
     let xdvg = this.getStore("dvg")[0];
     //创建xdvg合约对象
     const xDVGCOntract = new web3.eth.Contract(xdvg.abi, xdvg.erc20address);
-
     //查询xdvg授权数量
     const allowance = await dvgContract.methods
       .allowance(account.address, xdvg.erc20address)
       .call({ from: account.address });
     console.log(allowance, "allowance###5552");
-
     let _amount = "";
     if (max) {
       //查询dvg可用
@@ -7182,7 +7200,6 @@ class Store {
     let xdvg = this.getStore("dvg")[0];
     //创建xdvg合约对象
     const xDVGCOntract = new web3.eth.Contract(xdvg.abi, xdvg.erc20address);
-
     let _amount = "";
     if (max) {
       _amount = await xDVGCOntract.methods
@@ -7191,7 +7208,6 @@ class Store {
     } else {
       _amount = web3.utils.toWei(amount, "ether");
     }
-
     console.log(_amount, "_amount5702");
     xDVGCOntract.methods
       .withdraw(_amount)
@@ -7226,7 +7242,6 @@ class Store {
         }
       });
   };
-
   getDvgApr = async () => {
     const apr = await this._getDvgApr();
     const aprInfo = apr.xdvg;
@@ -7248,7 +7263,7 @@ class Store {
   };
 
   isUsdVault = (asset) => {
-    return (asset.strategyType === "citadel" || asset.strategyType === "elon") ? true : false;
+    return (asset.strategyType === "citadel" || asset.strategyType === "elon" || asset.strategyType === "daoFaang") ? true : false;
   }
 }
 
