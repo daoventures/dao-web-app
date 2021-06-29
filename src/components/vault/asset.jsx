@@ -738,11 +738,9 @@ class Asset extends Component {
       loading,
       redeemAmount,
       redeemAmountError,
+      percent,
+      redeemAmountPercent
     } = this.state;
-
-    const selectedPercentage = isDeposit
-      ? this.state.percent
-      : this.state.redeemAmountPercent;
 
     return (
       <React.Fragment>
@@ -767,14 +765,18 @@ class Asset extends Component {
                 return (
                   <Button
                     className={
-                      selectedPercentage === percentage
-                        ? classes.depositScaleActive
-                        : classes.depositScale
+                      isDeposit 
+                        ? percent === percentage
+                          ? classes.depositScaleActive
+                          : classes.depositScale
+                        : redeemAmountPercent === percentage 
+                          ? classes.depositScaleActive
+                          : classes.depositScale
                     }
                     variant="text"
                     disabled={loading}
                     onClick={() => {
-                      this.setAmount(percentage);
+                      isDeposit ? this.setAmount(percentage) :this.setRedeemAmount(percentage)
                     }}
                   >
                     <Typography variant={"h5"}>
