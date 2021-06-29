@@ -780,7 +780,6 @@ class Vault extends Component {
   }
 
   handleHappyHour = (payload) => {
-    console.log("🚀 | Vault | payload", payload);
     this.setState({
       happyHour: payload.happyHour,
       happyHourThreshold: payload.happyHourThreshold,
@@ -959,12 +958,14 @@ class Vault extends Component {
   };
 
   isUsdVault = (asset) => {
-    return (asset.strategyType === "citadel") ? true : false;
-  }
+    return asset.strategyType === "citadel" ? true : false;
+  };
 
   isLogoVault = (asset) => {
-    return (asset.strategyType === "citadel" || asset.strategyType === "elon") ? true : false;
-  }
+    return asset.strategyType === "citadel" || asset.strategyType === "elon"
+      ? true
+      : false;
+  };
 
   render() {
     const { classes } = this.props;
@@ -1251,70 +1252,70 @@ class Vault extends Component {
                         )}
                     </Grid>
 
-                      <Grid item sm={3} xs={6} className={classes.gridItemColumn}>
-                        {/** Available to deposit */}
-                        {/** Desktop */}
-                        <div className={classes.showDesktop}>
-                          <Typography
-                            variant={"h5"}
-                            className={classes.assetLabel1}>
-                            <div>
-                              {(this.isLogoVault(asset)
-                                ? asset.sumBalances
-                                  ? asset.sumBalances.toLocaleString(undefined, {
+                    <Grid item sm={3} xs={6} className={classes.gridItemColumn}>
+                      {/** Available to deposit */}
+                      {/** Desktop */}
+                      <div className={classes.showDesktop}>
+                        <Typography
+                          variant={"h5"}
+                          className={classes.assetLabel1}
+                        >
+                          <div>
+                            {(this.isLogoVault(asset)
+                              ? asset.sumBalances
+                                ? asset.sumBalances.toLocaleString(undefined, {
                                     minimumFractionDigits: 2,
                                     maximumFractionDigits: 2,
                                   })
-                                  : "0.00"
-                                : asset.balance
-                                  ? asset.balance.toLocaleString(undefined, {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2,
-                                  })
-                                  : "0.00") +
-                                " " +
-                                (this.isLogoVault(asset)
-                                  ? "USD"
-                                  : asset.symbol)}
-                            </div>
-                          </Typography>
-                          <Typography
-                            variant={"body1"}
-                            className={classes.assetLabel2}>
-                            Available to deposit
+                                : "0.00"
+                              : asset.balance
+                              ? asset.balance.toLocaleString(undefined, {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })
+                              : "0.00") +
+                              " " +
+                              (this.isLogoVault(asset) ? "USD" : asset.symbol)}
+                          </div>
+                        </Typography>
+                        <Typography
+                          variant={"body1"}
+                          className={classes.assetLabel2}
+                        >
+                          Available to deposit
                         </Typography>
                       </div>
 
-                        {/** Mobile */}
-                        <div className={classes.showMobile}>
-                          <Typography
-                            variant={"h3"}
-                            noWrap
-                            className={classes.assetLabel1}>
-                            <div>
-                              {(this.isLogoVault(asset)
-                                ? asset.sumBalances
-                                  ? asset.sumBalances.toLocaleString(undefined, {
+                      {/** Mobile */}
+                      <div className={classes.showMobile}>
+                        <Typography
+                          variant={"h3"}
+                          noWrap
+                          className={classes.assetLabel1}
+                        >
+                          <div>
+                            {(this.isLogoVault(asset)
+                              ? asset.sumBalances
+                                ? asset.sumBalances.toLocaleString(undefined, {
                                     minimumFractionDigits: 2,
                                     maximumFractionDigits: 2,
                                   })
-                                  : "0.00"
-                                : asset.balance
-                                  ? asset.balance.toLocaleString(undefined, {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2,
-                                  })
-                                  : "0.00") +
-                                " " +
-                                (this.isLogoVault(asset)
-                                  ? "USD"
-                                  : asset.symbol)}
-                            </div>
-                          </Typography>
-                          <Typography
-                            variant={"h5"}
-                            className={classes.assetLabel2}>
-                            Available to deposit
+                                : "0.00"
+                              : asset.balance
+                              ? asset.balance.toLocaleString(undefined, {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })
+                              : "0.00") +
+                              " " +
+                              (this.isLogoVault(asset) ? "USD" : asset.symbol)}
+                          </div>
+                        </Typography>
+                        <Typography
+                          variant={"h5"}
+                          className={classes.assetLabel2}
+                        >
+                          Available to deposit
                         </Typography>
                       </div>
                     </Grid>

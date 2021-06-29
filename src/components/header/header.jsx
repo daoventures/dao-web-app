@@ -12,7 +12,7 @@ import {
   HEADER_TITLE_DAOVIP,
   HEADER_TITLE_INVEST,
   HEADER_TITLE_PORTFOLIO,
-  HEADER_TITLE_SWAP
+  HEADER_TITLE_SWAP,
 } from "../../constants/page-constant";
 import { IconButton, Typography } from "@material-ui/core";
 import React, { Component } from "react";
@@ -61,16 +61,16 @@ const styles = (theme) => ({
     borderBottomWidth: "1px",
     borderBottomStyle: "solid",
     borderColor: theme.themeColors.lineT,
-    borderTop: 'none',
-    width: '100%',
-    display: 'flex',
-    padding: '15px 0px',
-    alignItems: 'center',
-    justifyContent: 'center',
-    [theme.breakpoints.down('sm')]: {
-      justifyContent: 'space-between',
-      padding: '15px',
-      background:theme.themeColors.itemBack
+    borderTop: "none",
+    width: "100%",
+    display: "flex",
+    padding: "15px 0px",
+    alignItems: "center",
+    justifyContent: "center",
+    [theme.breakpoints.down("sm")]: {
+      justifyContent: "space-between",
+      padding: "15px",
+      background: theme.themeColors.itemBack,
     },
   },
   icon: {
@@ -86,9 +86,9 @@ const styles = (theme) => ({
     },
   },
   link: {
-    "padding": "12px 0px",
-    "margin": "0px 12px",
-    "cursor": "pointer",
+    padding: "12px 0px",
+    margin: "0px 12px",
+    cursor: "pointer",
     "&:hover": {
       paddingBottom: "9px",
       borderBottom: "3px solid " + colors.darkGray,
@@ -114,12 +114,12 @@ const styles = (theme) => ({
     },
   },
   walletAddress: {
-    "padding": "12px",
-    "borderRadius": "41px",
-    "display": "flex",
-    "alignItems": "center",
-    "cursor": "pointer",
-    "background": "rgba(24,160,251,0.1)",
+    padding: "12px",
+    borderRadius: "41px",
+    display: "flex",
+    alignItems: "center",
+    cursor: "pointer",
+    background: "rgba(24,160,251,0.1)",
     "&:hover": {
       background: "rgba(47, 128, 237, 0.1)",
     },
@@ -219,13 +219,13 @@ const styles = (theme) => ({
     height: "14px",
     transform: "rotate(180deg)",
   },
-  pathname:{
-    fontSize:'22px',
-    padding:'16px 0px 16px 11px',
-    color:theme.themeColors.contactUsText,
-    background:theme.themeColors.back,
-    borderBottom:'1px solid '+theme.themeColors.lineT
-  }
+  pathname: {
+    fontSize: "22px",
+    padding: "16px 0px 16px 11px",
+    color: theme.themeColors.contactUsText,
+    background: theme.themeColors.back,
+    borderBottom: "1px solid " + theme.themeColors.lineT,
+  },
 });
 
 class Header extends Component {
@@ -304,7 +304,10 @@ class Header extends Component {
   }
 
   handleHappyHour = (payload) => {
-    this.setState({ happyHour: payload.happyHour, threshold: payload.happyHourThreshold });
+    this.setState({
+      happyHour: payload.happyHour,
+      threshold: payload.happyHourThreshold,
+    });
   };
 
   currentThemeChanged = () => {
@@ -439,84 +442,61 @@ class Header extends Component {
             )}
 
             {/*** Network Type */}
-            {
-              (
-                this.state.currentNetwork === 1 ||
-                this.state.currentNetwork === 56 ||
-                this.state.currentNetwork === 42
-              )
-                ? (
-                  <div className={classes.netWork}>
-                    {
-                        (
-                          this.state.currentNetwork === 1 ||
-                          this.state.currentNetwork === 42
-                        ) ? (
-                        <svg aria-hidden="true" className={classes.netWorkIcon}>
-                          <use xlinkHref="#iconETH"></use>
-                        </svg>
-                      ) : null}
-                    {
-                      (
-                        this.state.currentNetwork === 56
-                      )
-                        ? (
-                          <img
-                            alt="bnb-icon"
-                            src={require("../../assets/img_new/bnb-icon.png")}
-                            className={classes.netWorkIcon}
-                          />
-                        )
-                        : null
-                    }
-                    <span>{networkObj[this.state.currentNetwork]}</span>
+            {this.state.currentNetwork === 1 ||
+            this.state.currentNetwork === 56 ||
+            this.state.currentNetwork === 42 ? (
+              <div className={classes.netWork}>
+                {this.state.currentNetwork === 1 ||
+                this.state.currentNetwork === 42 ? (
+                  <svg aria-hidden="true" className={classes.netWorkIcon}>
+                    <use xlinkHref="#iconETH"></use>
+                  </svg>
+                ) : null}
+                {this.state.currentNetwork === 56 ? (
+                  <img
+                    alt="bnb-icon"
+                    src={require("../../assets/img_new/bnb-icon.png")}
+                    className={classes.netWorkIcon}
+                  />
+                ) : null}
+                <span>{networkObj[this.state.currentNetwork]}</span>
 
-
-                    {/* <svg className={this.state.isShowNetWorkList ?classes.selectIconActive :classes.selectIcon} aria-hidden="true">
+                {/* <svg className={this.state.isShowNetWorkList ?classes.selectIconActive :classes.selectIcon} aria-hidden="true">
                         <use xlinkHref="#iconicon_menu_dropDown__day"></use>
                     </svg> */}
 
-
-                    {
-                      (
-                        this.state.isShowNetWorkList
-                      )
-                        ? (
-                          <div className={classes.netWorkList}>
-                            <div
-                              className={classes.netWorkItem}
-                              onClick={(e) => {
-                                this.checkNetWork(1, e);
-                              }}
-                            >
-                              <img
-                                alt="eth-logo"
-                                src={require("../../assets/ETH-logo.png")}
-                                className={classes.netWorkIcon}
-                              />
-                              <span>Ethereum</span>
-                            </div>
-                            <div
-                              className={classes.netWorkItem}
-                              onClick={(e) => {
-                                this.checkNetWork(56, e);
-                              }}
-                            >
-                              <img
-                                alt="bnb-icon"
-                                src={require("../../assets/img_new/bnb-icon.png")}
-                                className={classes.netWorkIcon}
-                              />
-                              <span>Binance</span>
-                            </div>
-                          </div>
-                        )
-                        : null
-                    }
+                {this.state.isShowNetWorkList ? (
+                  <div className={classes.netWorkList}>
+                    <div
+                      className={classes.netWorkItem}
+                      onClick={(e) => {
+                        this.checkNetWork(1, e);
+                      }}
+                    >
+                      <img
+                        alt="eth-logo"
+                        src={require("../../assets/ETH-logo.png")}
+                        className={classes.netWorkIcon}
+                      />
+                      <span>Ethereum</span>
+                    </div>
+                    <div
+                      className={classes.netWorkItem}
+                      onClick={(e) => {
+                        this.checkNetWork(56, e);
+                      }}
+                    >
+                      <img
+                        alt="bnb-icon"
+                        src={require("../../assets/img_new/bnb-icon.png")}
+                        className={classes.netWorkIcon}
+                      />
+                      <span>Binance</span>
+                    </div>
                   </div>
-                )
-                : null
-            }
+                ) : null}
+              </div>
+            ) : null}
 
             <div>
               {/* <svg aria-hidden="true" className={classes.netWorkIcon}>
@@ -540,7 +520,6 @@ class Header extends Component {
     let happyHourStartTime = store.getStore("happyHourStartTime");
     let happyHourEndTime = store.getStore("happyHourEndTime");
     let happyHourThreshold = store.getStore("happyHourThreshold");
-    console.log("🚀 | Header | happyHourThreshold", happyHourThreshold)
     // let happyHour = true;
     // let happyHourStartTime = "1624368201289";
     // let happyHourEndTime = Date.now() + 600000;
@@ -552,7 +531,8 @@ class Header extends Component {
           happyHourEndTime={happyHourEndTime}
           happyHourThreshold={happyHourThreshold}
           color="inherit"
-          aria-label="Open drawer"></HappyHourTimer>
+          aria-label="Open drawer"
+        ></HappyHourTimer>
       );
     } else {
       return null;
@@ -567,7 +547,8 @@ class Header extends Component {
         color="inherit"
         aria-label="Open drawer"
         onClick={this.handleDrawerOpen}
-        className={classes.menuButton}>
+        className={classes.menuButton}
+      >
         {/* <MenuIcon /> */}
         <svg aria-hidden="true" className={classes.menuIcon}>
           <use xlinkHref="#iconmenu-fold-line"></use>
@@ -588,7 +569,8 @@ class Header extends Component {
         }
         onClick={() => {
           this.nav(screen);
-        }}>
+        }}
+      >
         <Typography variant={"h4"} className={`title`}>
           {this.captializeFirstLetter(screen)}
         </Typography>
