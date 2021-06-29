@@ -32,17 +32,6 @@ import { withStyles } from "@material-ui/core/styles";
 
 // blocknative测试
 
-
-
-
-
-
-
-
-
-
-
-
 const emitter = Store.emitter;
 const dispatcher = Store.dispatcher;
 const store = Store.store;
@@ -110,16 +99,16 @@ class ConnectBiconomy extends Component {
       apiKey: happyHourapiKey,
       // debug: true,
     });
-    const erc20Paymentbiconomy = new Biconomy(provider, {
-      walletProvider: window.ethereum,
-      apiKey: erc20PaymentapiKey,
-      // debug: true,
-    });
+    // const erc20Paymentbiconomy = new Biconomy(provider, {
+    //   walletProvider: window.ethereum,
+    //   apiKey: erc20PaymentapiKey,
+    //   // debug: true,
+    // });
 
     // This web3 instance is used to read normally and write to contract via meta transactions.
     const happyHourWeb3 = new Web3(happyHourbiconomy);
 
-    const erc20PaymentWeb3 = new Web3(erc20Paymentbiconomy);
+    // const erc20PaymentWeb3 = new Web3(erc20Paymentbiconomy);
 
     happyHourbiconomy
       .onEvent(happyHourbiconomy.READY, () => {
@@ -134,22 +123,22 @@ class ConnectBiconomy extends Component {
       })
       .onEvent(happyHourbiconomy.ERROR, () => {
         // Handle error while initializing mexa
-        console.log("hi")
+        console.log("hi");
       });
 
-    erc20Paymentbiconomy
-      .onEvent(erc20Paymentbiconomy.READY, () => {
-        // Initialize your dapp here like getting user accounts etc
-        dispatcher.dispatch({
-          type: BICONOMY_CONNECTED,
-          content: {
-            erc20PaymentWeb3: erc20PaymentWeb3,
-          },
-        });
-      })
-      .onEvent(erc20Paymentbiconomy.ERROR, () => {
-        // Handle error while initializing mexa
-      });
+    // erc20Paymentbiconomy
+    //   .onEvent(erc20Paymentbiconomy.READY, () => {
+    //     // Initialize your dapp here like getting user accounts etc
+    //     dispatcher.dispatch({
+    //       type: BICONOMY_CONNECTED,
+    //       content: {
+    //         erc20PaymentWeb3: erc20PaymentWeb3,
+    //       },
+    //     });
+    //   })
+    //   .onEvent(erc20Paymentbiconomy.ERROR, () => {
+    //     // Handle error while initializing mexa
+    //   });
   }
 
   componentWillUnmount() {
