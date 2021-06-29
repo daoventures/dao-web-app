@@ -11,7 +11,6 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemText,
-  Slide,
   Slider,
   TextField,
   Tooltip,
@@ -22,12 +21,9 @@ import {
   DEPOSIT_ALL_CONTRACT_RETURNED,
   DEPOSIT_ALL_CONTRACT_RETURNED_COMPLETED,
   DEPOSIT_CONTRACT,
-  DEPOSIT_CONTRACT_RETURNED,
   DEPOSIT_CONTRACT_RETURNED_COMPLETED,
   ERROR,
-  GET_STRATEGY_BALANCES_FULL,
   HAPPY_HOUR_VERIFY,
-  USD_PRICE_RETURNED,
   WITHDRAW_BOTH,
   WITHDRAW_BOTH_VAULT,
   WITHDRAW_BOTH_VAULT_FAIL_RETURNED,
@@ -45,7 +41,6 @@ import HighchartsReact from "highcharts-react-official";
 import InfoIcon from "@material-ui/icons/Info";
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import Store from "../../stores";
-import { colors } from "../../theme";
 import { getTheme } from "../../theme";
 import { withRouter } from "react-router-dom";
 import { withStyles } from "@material-ui/core/styles";
@@ -503,20 +498,6 @@ const styles = (theme) => ({
   },
 });
 
-const marks = [
-  {
-    value: 0,
-    label: "100",
-  },
-  {
-    value: 50,
-    label: "50",
-  },
-  {
-    value: 100,
-    label: "100",
-  },
-];
 
 const HtmlTooltip = withStyles((theme) => ({
   tooltip: {
@@ -528,9 +509,6 @@ const HtmlTooltip = withStyles((theme) => ({
   },
 }))(Tooltip);
 
-function Transition(props) {
-  return <Slide direction="up" {...props} />;
-}
 
 class Asset extends Component {
   constructor() {
@@ -543,6 +521,7 @@ class Asset extends Component {
       redeemVaultAmount: "",
       redeemAmount: "",
       redeemAmountError: false,
+      redeemEarnAmountError: false,
       account: store.getStore("account"),
       ratio: 50,
       earnRatio: 50,
@@ -562,6 +541,7 @@ class Asset extends Component {
       amountAboveThreshold: false,
       scales: [25, 50, 75, 100],
       withdrawErrorMessage: "",
+      withdrawEarnErrorMessage: "",
     };
   }
 
@@ -583,10 +563,22 @@ class Asset extends Component {
   }
 
   componentWillUnmount() {
-    emitter.removeListener(DEPOSIT_CONTRACT_RETURNED_COMPLETED, this.depositReturned);
-    emitter.removeListener(DEPOSIT_ALL_CONTRACT_RETURNED_COMPLETED, this.depositReturned);
-    emitter.removeListener(WITHDRAW_VAULT_RETURNED_COMPLETED, this.withdrawReturned);
-    emitter.removeListener(WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED, this.withdrawReturned);
+    emitter.removeListener(
+      DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+      this.depositReturned
+    );
+    emitter.removeListener(
+      DEPOSIT_ALL_CONTRACT_RETURNED_COMPLETED,
+      this.depositReturned
+    );
+    emitter.removeListener(
+      WITHDRAW_VAULT_RETURNED_COMPLETED,
+      this.withdrawReturned
+    );
+    emitter.removeListener(
+      WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
+      this.withdrawReturned
+    );
     emitter.removeListener(
       WITHDRAW_BOTH_VAULT_FAIL_RETURNED,
       this.errorReturned
@@ -644,11 +636,11 @@ class Asset extends Component {
     this.setState({ loading: false, amount: "" });
   };
 
-  withdrawReturned = (txHash) => {
+  withdrawReturned = () => {
     this.setState({ loading: false, redeemAmount: "" });
   };
 
-  errorReturned = (error) => {
+  errorReturned = () => {
     this.setState({ loading: false });
   };
 
@@ -665,7 +657,9 @@ class Asset extends Component {
   };
 
   isUsdVault = (asset) => {
-    return asset.strategyType === "citadel" || asset.strategyType === "elon" || asset.strategyType === "daoFaang"
+    return asset.strategyType === "citadel" ||
+      asset.strategyType === "elon" ||
+      asset.strategyType === "daoFaang"
       ? true
       : false;
   };
@@ -744,7 +738,6 @@ class Asset extends Component {
       loading,
       redeemAmount,
       redeemAmountError,
-      amountAboveThreshold
     } = this.state;
 
     const selectedPercentage = isDeposit
@@ -762,7 +755,7 @@ class Asset extends Component {
             id={isDeposit ? "amount" : "redeemAmount"}
             value={isDeposit ? amount : redeemAmount}
             error={isDeposit ? amountError : redeemAmountError}
-            onChange={this.onChange}
+            onChange={isDeposit ? this.onChangeDeposit : this.onChange}
             disabled={loading}
             placeholder="0.00"
             variant="outlined"
@@ -794,7 +787,7 @@ class Asset extends Component {
         </div>
 
         {/** Error Message */}
-        {isDeposit && this.state.errorMessage !== ""  && (
+        {isDeposit && this.state.errorMessage !== "" && (
           <Typography variant={"h5"} className={classes.errorMessage}>
             {this.state.errorMessage}
           </Typography>
@@ -808,20 +801,77 @@ class Asset extends Component {
     );
   };
 
+  renderYearnRatio = (isYEarn) => {
+    const { classes, asset } = this.props;
+    const { openEarnInfo, openVaultInfo, earnRatio, vaultRatio } = this.state;
+
+    return (
+      <React.Fragment>
+        <Typography
+          variant="h4"
+          style={{
+            color: isYEarn ? "#7B25D2" : "#027AFF",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <HtmlTooltip
+            placement={"top"}
+            title={
+              <React.Fragment>
+                <Typography>
+                  See{" "}
+                  <a
+                    href="https://daoventures.gitbook.io/daoventures/"
+                    target="_blank"
+                  >
+                    FAQ: Product
+                  </a>{" "}
+                  for more information
+                </Typography>
+              </React.Fragment>
+            }
+            open={isYEarn ? openEarnInfo : openVaultInfo}
+            onClose={isYEarn ? this.handleTooltipEarnClose : this.handleTooltipVaultClose}
+            PopperProps={{
+              disablePortal: true,
+              style: {
+                pointerEvents: "auto",
+              },
+            }}
+            disableFocusListener
+            disableHoverListener
+            disableTouchListener
+          >
+            <InfoIcon
+              style={{
+                verticalAlign: "text-top",
+                cursor: "pointer",
+                width: "16px",
+                height: "16px",
+              }}
+              onClick={() => isYEarn ? this.handleTooltipEarnClose() : this.handleTooltipVaultClose() }
+            />
+          </HtmlTooltip>
+          &nbsp;
+          { isYEarn ? "yEarn: " + earnRatio : "yVault: " + vaultRatio }
+          { " %"}
+        </Typography>
+      </React.Fragment>
+    );
+  };
+
   render() {
     const { classes, asset } = this.props;
     const {
       redeemEarnAmount,
-      redeemVaultAmount,
+      redeemEarnAmountError,
+      redeemAmount,
       redeemAmountError,
       loading,
       ratio,
-      earnRatio,
-      vaultRatio,
       earnPercent,
       vaultPercent,
-      openEarnInfo,
-      openVaultInfo,
       scales,
     } = this.state;
 
@@ -842,7 +892,10 @@ class Asset extends Component {
                     Currently Active:
                   </Typography>
                   <div className={classes.flexy}>
-                    <Typography variant={"h4"} styles={{wordWrap: "break-word"}}>
+                    <Typography
+                      variant={"h4"}
+                      styles={{ wordWrap: "break-word" }}
+                    >
                       {asset.strategy}
                     </Typography>
                   </div>
@@ -996,55 +1049,7 @@ class Asset extends Component {
                 <Grid item xs={12}>
                   <div className={classes.ratioContainer}>
                     <div className={classes.leftLabelContainer}>
-                      <Typography
-                        variant="h4"
-                        style={{
-                          color: "#7B25D2",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <HtmlTooltip
-                          placement={"top"}
-                          title={
-                            <React.Fragment>
-                              <Typography>
-                                See{" "}
-                                <a
-                                  href="https://daoventures.gitbook.io/daoventures/"
-                                  target="_blank"
-                                >
-                                  FAQ: Product
-                                </a>{" "}
-                                for more information
-                              </Typography>
-                            </React.Fragment>
-                          }
-                          open={openEarnInfo}
-                          onClose={this.handleTooltipEarnClose}
-                          PopperProps={{
-                            disablePortal: true,
-                            style: {
-                              pointerEvents: "auto",
-                            },
-                          }}
-                          disableFocusListener
-                          disableHoverListener
-                          disableTouchListener
-                        >
-                          <InfoIcon
-                            style={{
-                              verticalAlign: "text-top",
-                              cursor: "pointer",
-                              width: "16px",
-                              height: "16px",
-                            }}
-                            onClick={() => this.handleTooltipEarnClose()}
-                          />
-                        </HtmlTooltip>
-                        &nbsp;
-                        {"yEarn: " + earnRatio + "%"}
-                      </Typography>
+                      {this.renderYearnRatio(true)}
                     </div>
                     <div>
                       <Typography
@@ -1056,55 +1061,7 @@ class Asset extends Component {
                       </Typography>
                     </div>
                     <div className={classes.rightLabelContainer}>
-                      <Typography
-                        variant="h4"
-                        style={{
-                          color: "#027AFF",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        {"yVault: " + vaultRatio + "%"}
-                        &nbsp;
-                        <HtmlTooltip
-                          placement={"top"}
-                          title={
-                            <React.Fragment>
-                              <Typography>
-                                See{" "}
-                                <a
-                                  href="https://daoventures.gitbook.io/daoventures/"
-                                  target="_blank"
-                                >
-                                  FAQ: Product
-                                </a>{" "}
-                                for more information
-                              </Typography>
-                            </React.Fragment>
-                          }
-                          open={openVaultInfo}
-                          onClose={this.handleTooltipVaultClose}
-                          PopperProps={{
-                            disablePortal: true,
-                            style: {
-                              pointerEvents: "auto",
-                            },
-                          }}
-                          disableFocusListener
-                          disableHoverListener
-                          disableTouchListener
-                        >
-                          <InfoIcon
-                            style={{
-                              verticalAlign: "text-top",
-                              cursor: "pointer",
-                              width: "16px",
-                              height: "16px",
-                            }}
-                            onClick={() => this.handleTooltipVaultClose()}
-                          />
-                        </HtmlTooltip>
-                      </Typography>
+                      {this.renderYearnRatio(true)}
                     </div>
                   </div>
                   <Slider
@@ -1205,7 +1162,7 @@ class Asset extends Component {
                     </React.Fragment>
                   )}
                 </div>
-             
+
                 {/** Deposit Input */}
                 {this.renderDepositWithdrawInput(true)}
 
@@ -1294,7 +1251,7 @@ class Asset extends Component {
                         className={`${classes.actionInput} ${classes.earnAndVaultInput}`}
                         id="redeemEarnAmount"
                         value={redeemEarnAmount}
-                        error={redeemAmountError}
+                        error={redeemEarnAmountError}
                         onChange={this.onChange}
                         disabled={loading}
                         placeholder="0.00"
@@ -1302,8 +1259,8 @@ class Asset extends Component {
                         onKeyDown={this.inputRedeemKeyDown}
                       />
                       <div className={classes.scaleContainer}>
-                        {
-                          scales.length > 0 && scales.map(percentage => {
+                        {scales.length > 0 &&
+                          scales.map((percentage) => {
                             return (
                               <Button
                                 className={
@@ -1318,13 +1275,26 @@ class Asset extends Component {
                                   this.setRedeemEarnAmount(percentage);
                                 }}
                               >
-                                <Typography variant={"h5"}>{percentage === 100 ? "Max" : percentage+"%"}</Typography>
+                                <Typography variant={"h5"}>
+                                  {percentage === 100
+                                    ? "Max"
+                                    : percentage + "%"}
+                                </Typography>
                               </Button>
-                            )
-                          }) 
-                        }
+                            );
+                          })}
                       </div>
+                      {
+                        this.state.redeemEarnAmountError && 
+                          this.state.withdrawEarnErrorMessage !== "" && 
+                        (
+                          <Typography variant={"h5"} className={classes.errorMessage}>
+                            {this.state.withdrawEarnErrorMessage}
+                          </Typography>
+                        )
+                      }
                     </div>
+                    
 
                     <div className={classes.yearnEarnAndVaultItem}>
                       {/** Vault Balance */}
@@ -1366,7 +1336,7 @@ class Asset extends Component {
                         fullWidth
                         className={`${classes.actionInput} ${classes.earnAndVaultInput}`}
                         id="redeemVaultAmount"
-                        value={redeemVaultAmount}
+                        value={redeemAmount}
                         error={redeemAmountError}
                         onChange={this.onChange}
                         disabled={loading}
@@ -1374,9 +1344,9 @@ class Asset extends Component {
                         variant="outlined"
                         onKeyDown={this.inputRedeemKeyDown}
                       />
-                       <div className={classes.scaleContainer}>
-                        {
-                          scales.length > 0 && scales.map(percentage => {
+                      <div className={classes.scaleContainer}>
+                        {scales.length > 0 &&
+                          scales.map((percentage) => {
                             return (
                               <Button
                                 className={
@@ -1391,12 +1361,24 @@ class Asset extends Component {
                                   this.setRedeemVaultAmount(percentage);
                                 }}
                               >
-                                <Typography variant={"h5"}>{percentage === 100 ? "Max" : percentage+"%"}</Typography>
+                                <Typography variant={"h5"}>
+                                  {percentage === 100
+                                    ? "Max"
+                                    : percentage + "%"}
+                                </Typography>
                               </Button>
-                            )
-                          }) 
-                        }
+                            );
+                          })}
                       </div>
+                      {
+                        this.state.redeemAmountError && 
+                          this.state.withdrawErrorMessage !== "" && 
+                        (
+                          <Typography variant={"h5"} className={classes.errorMessage}>
+                            {this.state.withdrawErrorMessage}
+                          </Typography>
+                        )
+                      }
                     </div>
                   </div>
                 )}
@@ -1967,15 +1949,170 @@ class Asset extends Component {
   };
 
   onChange = (event) => {
-    const divID = event.target.id;
-    if (divID === "amount") {
-      this.setState({ amountError: false, errorMessage: "" });
-    } else if (divID === "redeemAmount") {
-      this.setState({ redeemAmountError: false, withdrawErrorMessage: "" });
-    }
     let val = [];
     val[event.target.id] = event.target.value;
-    this.setState(val);
+    this.verifyWithdrawInput(val[event.target.id], event.target.id);
+    if(event.target.id === "redeemEarnAmount") { 
+      this.setState({ redeemEarnAmount: val[event.target.id], earnPercent: 0 });
+    } else {
+      this.setState({ redeemAmount: val[event.target.id], vaultPercent: 0 , redeemPercent: 0});
+    }
+  };
+
+  onChangeDeposit = (event) => {
+    let val = [];
+    val[event.target.id] = event.target.value;
+    this.verifyInput(val[event.target.id]);
+    if(event.target.id === "amount") { 
+      this.setState({ amount: val[event.target.id] , percent: 0 });
+    } 
+  };
+
+  validateDigit = (amount) => {
+    const digitRegex = /^[0-9]\d*(\.\d+)?$/;
+    return digitRegex.test(amount);
+  };
+
+  validateAmount = (amount) => {
+    return !amount || isNaN(amount) || parseFloat(amount) <= 0;
+  };
+
+  validateInputValMoreThanBalance = (amount, balance) => {
+    return parseFloat(amount) > parseFloat(balance);
+  };
+
+  calculateDepositShare = (asset, type) => {
+    if (asset.strategyType === "compound") {
+      return (
+        Math.floor(asset.strategyBalance * asset.compoundExchangeRate * 10000) /
+        10000
+      ).toFixed(4);
+    } else if (this.isUsdVault(asset)) {
+      return (
+        Math.floor((asset.strategyBalance / 10 ** asset.decimals) * 10000) /
+        10000
+      ).toFixed(4);
+    }else if (asset.strategyType === "yearn") {
+      if(type === "earn") {
+        return (
+          Math.floor(asset.earnBalance * asset.earnPricePerFullShare * 10000) /
+          10000
+        ).toFixed(4);
+      } else {
+        return (
+          Math.floor(asset.vaultBalance * asset.vaultPricePerFullShare * 10000) /
+          10000
+        ).toFixed(4);
+      }
+    } else {
+      return 0;
+    }
+  }
+
+  setRedeemAmountError = (message) => {
+    this.setState({ redeemAmountError: true, withdrawErrorMessage: message });
+  }
+
+  verifyWithdrawInput = (amount, divId) => {
+    const { asset } = this.props;
+
+
+    if(asset.strategyType === "yearn") {
+      if (!this.validateDigit(amount)) {
+        const errorMessage = "Invalid amount";
+        (divId === "redeemEarnAmount") 
+          ? this.setState({redeemEarnAmountError: true, withdrawEarnErrorMessage: errorMessage}) 
+          : this.setState({redeemAmountError: true, withdrawErrorMessage: errorMessage});
+        return; 
+      }
+
+      // No need to validate 0 input, as either one of them can be 0
+      if(!amount || isNaN(amount) || parseFloat(amount) < 0) {
+        const errorMessage = "Invalid amount";
+        (divId === "redeemEarnAmount") 
+        ? this.setState({redeemEarnAmountError: true, withdrawEarnErrorMessage: errorMessage}) 
+        : this.setState({redeemAmountError: true, withdrawErrorMessage: errorMessage});
+        return;
+      }
+
+      const depositedShares = this.calculateDepositShare(asset, (divId === "redeemEarnAmount") ? "earn" : "vault");
+      
+      if(this.validateInputValMoreThanBalance(amount, depositedShares)) {
+        const errorMessage = "Exceed Available Balance";
+        (divId === "redeemEarnAmount") 
+        ? this.setState({redeemEarnAmountError: true, withdrawEarnErrorMessage: errorMessage}) 
+        : this.setState({redeemAmountError: true, withdrawErrorMessage: errorMessage});
+        return;
+      }
+
+      (divId === "redeemEarnAmount") 
+      ? this.setState({redeemEarnAmountError: false, withdrawEarnErrorMessage: ""}) 
+      : this.setState({redeemAmountError: false, withdrawErrorMessage: ""});
+    } else {
+      if (!this.validateDigit(amount)) {
+        this.setRedeemAmountError("Invalid amount");
+        return;
+      }
+  
+      if (this.validateAmount(amount)) {
+        this.setRedeemAmountError("Invalid amount");
+        return;
+      }
+  
+      const depositedShares = this.calculateDepositShare(asset, null);
+      if (this.validateInputValMoreThanBalance(amount, depositedShares)) {
+        this.setRedeemAmountError("Exceed available balance");
+        return;
+      }
+
+      this.setState({ redeemAmountError: false, withdrawErrorMessage: "" });
+    }
+  };
+
+  verifyInput = (amount) => {
+    const { asset, happyHour, happyHourThreshold } = this.props;
+
+    let assetBalance = !this.isUsdVault(asset)
+      ? asset.balance
+      : asset.balances[this.state.tokenIndex];
+
+    assetBalance = (Math.floor(assetBalance * 10000) / 10000).toFixed(4);
+
+    if (!this.validateDigit(amount)) {
+      this.setState({ amountError: true, errorMessage: "Invalid amount" });
+      return;
+    }
+
+    if (this.validateAmount(amount)) {
+      this.setState({ amountError: true, errorMessage: "Invalid amount" });
+      return;
+    }
+
+    if (this.validateInputValMoreThanBalance(amount, assetBalance)) {
+      this.setState({
+        amountError: true,
+        errorMessage: "Exceed available balance",
+      });
+      return;
+    }
+
+    this.setState({ amountError: false, errorMessage: "" });
+
+    if (asset.strategyType === "citadel" && happyHour === true) {
+      if (parseFloat(amount) < parseFloat(happyHourThreshold)) {
+        this.setState({
+          // amountError: true,
+          happyHourWarning: `Below required deposit ${happyHourThreshold} USD for Happy Hour. Gas fee will be required.`,
+          happyHourMessage: "",
+        });
+      } else {
+        this.setState({
+          // amountError: true,
+          happyHourWarning: "",
+          happyHourMessage: "Gas fee is on us!",
+        });
+      }
+    }
   };
 
   inputKeyDown = (event) => {
@@ -1989,79 +2126,53 @@ class Asset extends Component {
   };
 
   onDeposit = () => {
-    this.setState({ amountError: false, errorMessage: "" });
-
-    const { amount, earnRatio, vaultRatio, tokenIndex } = this.state;
+    const { amount, earnRatio, vaultRatio, tokenIndex, amountError, errorMessage } = this.state;
     const { asset, startLoading } = this.props;
 
-    const digitRegex = /^[0-9]\d*(\.\d+)?$/;
-
-    // Validate user input is number
-    if (!digitRegex.test(amount)) {
+    if(this.validateAmount(amount)) {
       this.setState({
         amountError: true,
-        errorMessage: "Invalid amount",
-      });
+        errorMessage: "Invalid amount"
+      })
       return;
     }
 
-    // Validate user input must be greater than 0
-    if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
-      this.setState({
-        amountError: true,
-        errorMessage: "Invalid amount",
-      });
-      return;
-    }
-
-    // Validate user has sufficient balance
-    let assetBalance = !this.isUsdVault(asset)
-      ? asset.balance
-      : asset.balances[this.state.tokenIndex];
-    assetBalance = (Math.floor(assetBalance * 10000) / 10000).toFixed(4);
-
-    if (parseFloat(amount) > assetBalance) {
-      this.setState({
-        amountError: true,
-        errorMessage: "Exceed available balance",
-      });
-      return false;
-    }
-
-    this.setState({ loading: true });
-    startLoading();
-
-    if (asset.strategyType === "yearn") {
-      dispatcher.dispatch({
-        type: DEPOSIT_CONTRACT,
-        content: {
-          earnAmount: ((amount * earnRatio) / 100).toString(),
-          vaultAmount: ((amount * vaultRatio) / 100).toString(),
-          amount: "0",
-          asset,
-        },
-      });
-    } else if (asset.strategyType === "compound") {
-      dispatcher.dispatch({
-        type: DEPOSIT_CONTRACT,
-        content: {
-          earnAmount: 0,
-          vaultAmount: 0,
-          amount: amount.toString(),
-          asset,
-        },
-      });
-    } else if (this.isUsdVault(asset)) {
-      dispatcher.dispatch({
-        type: DEPOSIT_CONTRACT,
-        content: {
-          earnAmount: 0,
-          vaultAmount: 0,
-          amount: amount.toString(),
-          tokenIndex: tokenIndex, // TODO: Change to state variable
-          asset,
-        },
-      });
+    if(!amountError && errorMessage === "") {
+      this.setState({ loading: true });
+      startLoading();
+  
+      if (asset.strategyType === "yearn") {
+        dispatcher.dispatch({
+          type: DEPOSIT_CONTRACT,
+          content: {
+            earnAmount: ((amount * earnRatio) / 100).toString(),
+            vaultAmount: ((amount * vaultRatio) / 100).toString(),
+            amount: "0",
+            asset,
+          },
+        });
+      } else if (asset.strategyType === "compound") {
+        dispatcher.dispatch({
+          type: DEPOSIT_CONTRACT,
+          content: {
+            earnAmount: 0,
+            vaultAmount: 0,
+            amount: amount.toString(),
+            asset,
+          },
+        });
+      } else if (this.isUsdVault(asset)) {
+        dispatcher.dispatch({
+          type: DEPOSIT_CONTRACT,
+          content: {
+            earnAmount: 0,
+            vaultAmount: 0,
+            amount: amount.toString(),
+            tokenIndex: tokenIndex, // TODO: Change to state variable
+            asset,
+          },
+        });
+      }
     }
   };
 
@@ -2116,151 +2227,90 @@ class Asset extends Component {
   };
 
   onWithdraw = () => {
-    this.setState({ redeemAmountError: false, withdrawErrorMessage: "" });
-    let { redeemVaultAmount, redeemEarnAmount, redeemAmount, tokenIndex } =
+    let { redeemEarnAmount, redeemAmount, tokenIndex } =
       this.state;
 
     const { asset, startLoading } = this.props;
 
-    // Validate user input is number
-    const digitRegex = /^[0-9]\d*(\.\d+)?$/;
-    if (!digitRegex.test(redeemAmount)) {
-      this.setState({
-        redeemAmountError: true,
-        withdrawErrorMessage: "Invalid amount",
-      });
-      return;
-    }
-
-    // Validate user input is greater than 0
     if (asset.strategyType === "yearn") {
-    } else {
-      if (
-        !redeemAmount ||
-        isNaN(redeemAmount) ||
-        redeemAmount < parseFloat("0.0")
-      ) {
+      // Both input field are blank
+      if( (!redeemAmount || isNaN(redeemAmount)) && (!redeemEarnAmount || isNaN(redeemEarnAmount))) {
+        this.setState({ 
+          redeemAmountError: true ,
+          redeemEarnAmountError: true,
+          withdrawErrorMessage: "Invalid amount",
+          withdrawEarnErrorMessage: "Invalid amount",
+        });
+        return;
+      }
+
+      if ((!this.state.redeemAmountError && this.state.withdrawErrorMessage === "") &&
+        (!this.state.redeemEarnAmountError && this.state.withdrawEarnErrorMessage === "")) {
+        redeemAmount = redeemAmount ? redeemAmount : 0;
+        redeemEarnAmount = redeemEarnAmount ? redeemEarnAmount : 0;
+
+        this.setState({ loading: true });
+        startLoading();
+
+        dispatcher.dispatch({
+          type: WITHDRAW_BOTH,
+          content: {
+            earnAmount: Number(redeemEarnAmount).toFixed(4),
+            vaultAmount: Number(redeemAmount).toFixed(4),
+            amount: "0",
+            asset: asset,
+          },
+        });
+      }
+    } else if (asset.strategyType === "compound") {
+      if(this.validateAmount(redeemAmount)) {
         this.setState({
           redeemAmountError: true,
           withdrawErrorMessage: "Invalid amount",
         });
         return;
       }
-    }
 
-    if (asset.strategyType === "yearn") {
-      // let redeemVaultAmount = this.state.redeemVaultAmount.toString();
-      redeemVaultAmount = (
-        Math.floor(redeemVaultAmount * 10000) / 10000
-      ).toFixed(4);
-
-      const vaultShares = (
-        Math.floor(asset.vaultBalance * asset.vaultPricePerFullShare * 10000) /
-        10000
-      ).toFixed(4);
-
-      if (
-        !redeemVaultAmount ||
-        isNaN(redeemVaultAmount) ||
-        redeemVaultAmount < parseFloat("0.0") ||
-        redeemVaultAmount > vaultShares
-      ) {
-        this.setState({ redeemAmountError: true });
-        return false;
-      }
-
-      // let redeemEarnAmount = this.state.redeemEarnAmount.toString();
-      redeemEarnAmount = (Math.floor(redeemEarnAmount * 10000) / 10000).toFixed(
-        4
-      );
-
-      const earnShares = (
-        Math.floor(asset.earnBalance * asset.earnPricePerFullShare * 10000) /
-        10000
-      ).toFixed(4);
-
-      if (
-        !redeemEarnAmount ||
-        isNaN(redeemEarnAmount) ||
-        redeemEarnAmount < parseFloat("0.0") ||
-        redeemEarnAmount > earnShares
-      ) {
-        this.setState({ redeemAmountError: true });
-        return false;
-      }
-
-      this.setState({ loading: true });
-      startLoading();
-
-      dispatcher.dispatch({
-        type: WITHDRAW_BOTH,
-        content: {
-          earnAmount: redeemEarnAmount,
-          vaultAmount: redeemVaultAmount,
-          amount: "0",
-          asset: asset,
-        },
-      });
-    } else if (asset.strategyType === "compound") {
-      // let redeemAmount = this.state.redeemAmount.toString();
-      redeemAmount = (Math.floor(redeemAmount * 10000) / 10000).toFixed(4);
-
-      const depositedShares = (
-        Math.floor(asset.strategyBalance * asset.compoundExchangeRate * 10000) /
-        10000
-      ).toFixed(4);
-
-      if (redeemAmount > depositedShares) {
-        this.setState({
-          redeemAmountError: true,
-          withdrawErrorMessage: "Exceed available balance",
+      if (!this.state.redeemAmountError && this.withdrawErrorMessage !== "") {
+        this.setState({ loading: true });
+        startLoading();
+  
+        dispatcher.dispatch({
+          type: WITHDRAW_BOTH,
+          content: {
+            earnAmount: "0",
+            vaultAmount: "0",
+            amount: redeemAmount,
+            asset: asset,
+          },
         });
-        return false;
       }
-
-      this.setState({ loading: true });
-      startLoading();
-
-      dispatcher.dispatch({
-        type: WITHDRAW_BOTH,
-        content: {
-          earnAmount: "0",
-          vaultAmount: "0",
-          amount: redeemAmount,
-          asset: asset,
-        },
-      });
     } else if (this.isUsdVault(asset)) {
-      redeemAmount = (Math.floor(redeemAmount * 10000) / 10000).toFixed(4);
-
-      const depositedShares = (
-        Math.floor((asset.strategyBalance / 10 ** asset.decimals) * 10000) /
-        10000
-      ).toFixed(4);
-
-      if (redeemAmount > depositedShares) {
+      if(this.validateAmount(redeemAmount)) {
         this.setState({
           redeemAmountError: true,
-          withdrawErrorMessage: "Exceed available balance",
+          withdrawErrorMessage: "Invalid amount",
         });
-        return false;
+        return;
       }
 
-      let shares = (redeemAmount * 10 ** asset.decimals).toString();
+      if (!this.state.redeemAmountError && this.withdrawErrorMessage !== "") {
+        let shares = (redeemAmount * 10 ** asset.decimals).toString();
 
-      this.setState({ loading: true });
-      startLoading();
-
-      dispatcher.dispatch({
-        type: WITHDRAW_BOTH,
-        content: {
-          earnAmount: "0",
-          vaultAmount: "0",
-          amount: shares,
-          asset: asset,
-          tokenIndex: tokenIndex,
-        },
-      });
+        this.setState({ loading: true });
+        startLoading();
+  
+        dispatcher.dispatch({
+          type: WITHDRAW_BOTH,
+          content: {
+            earnAmount: "0",
+            vaultAmount: "0",
+            amount: shares,
+            asset: asset,
+            tokenIndex: tokenIndex,
+          },
+        });
+      }
     }
   };
 
@@ -2360,6 +2410,8 @@ class Asset extends Component {
     amount = Math.floor(amount * 10000) / 10000;
 
     this.setState({
+      redeemEarnAmountError: false,
+      withdrawEarnErrorMessage: "",
       redeemEarnAmount: amount.toFixed(4),
       earnPercent: percent,
     });
