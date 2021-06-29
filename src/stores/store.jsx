@@ -5768,7 +5768,6 @@ class Store {
     console.log("🚀 | Store | _eventVerifyAmount= | result", result);
     if (result.body.happyHour === true) {
       if (result.body.amountAboveThreshold === true) {
-        alert("Gasless Transaction!");
         store.setStore({ happyHour: true }); // Might be redundant
         emitter.emit(HAPPY_HOUR_VERIFY, result);
         return true;
@@ -6512,8 +6511,12 @@ class Store {
               const userInfo = {};
 
               userInfo.tokenBalance = data[0];
-              userInfo.finishedDVG = data[1] ? data[1].userDepositInfo.finishedDVG : null;
-              userInfo.depositedLPAmount = data[1] ? parseInt(data[1].userDepositInfo.lpAmount) : null;
+              userInfo.finishedDVG = data[1]
+                ? data[1].userDepositInfo.finishedDVG
+                : null;
+              userInfo.depositedLPAmount = data[1]
+                ? parseInt(data[1].userDepositInfo.lpAmount)
+                : null;
               userInfo.pendingDVG = data[1] ? data[1].userPendingDVG : null;
 
               pool.userInfo = userInfo;
@@ -7126,8 +7129,10 @@ class Store {
   };
 
   isUsdVault = (asset) => {
-    return (asset.strategyType === "citadel" || asset.strategyType === "elon") ? true : false;
-  }
+    return asset.strategyType === "citadel" || asset.strategyType === "elon"
+      ? true
+      : false;
+  };
 }
 
 var store = new Store();
