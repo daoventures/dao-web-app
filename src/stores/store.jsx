@@ -5018,6 +5018,50 @@ class Store {
           }
         }
       );
+    } else if (asset.strategyType === "daoFaang") {
+      let approvalErr;
+      await this._checkApprovalCitadel(
+        asset,
+        account,
+        amount,
+        asset.vaultContractAddress,
+        tokenIndex,
+        (err, txnHash, approvalResult) => {
+          if (err) {
+            approvalErr = err;
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(APPROVE_TRANSACTING, txnHash);
+          }
+          if (approvalResult) {
+            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
+          }
+        }
+      );
+
+      if(!approvalErr) {
+        await this._callDepositAmountContractCitadel(
+          asset,
+          account,
+          amount,
+          tokenIndex,
+          (err, txnHash, depositResult) => {
+            if (err) {
+              return emitter.emit(ERROR, err);
+            }
+            if (txnHash) {
+              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+            }
+            if (depositResult) {
+              return emitter.emit(
+                DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                depositResult.transactionHash
+              );
+            }
+          }
+        );
+      }
     }
   };
 
