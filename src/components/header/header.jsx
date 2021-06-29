@@ -525,7 +525,7 @@ class Header extends Component {
             </div>
           </div>
           {!hideNav && <ToggleTheme></ToggleTheme>}
-          {/* {this.renderHappyHourTimer()} */}
+          {this.renderHappyHourTimer()}
         </div>
         
         { modalOpen && this.renderModal()}
