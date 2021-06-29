@@ -695,7 +695,6 @@ class Asset extends Component {
       amountAboveThreshold,
     } = this.state;
     if (errorMessage !== "") {
-      console.log("🚀 | Asset | errorMessage", errorMessage);
       return (
         <Typography variant={"h5"} className={classes.errorMessage}>
           {errorMessage}
@@ -2463,7 +2462,6 @@ class Asset extends Component {
 
   onChange = (event) => {
     let val = [];
-    console.log("🚀 | Asset | val", val);
     val[event.target.id] = event.target.value;
     this.setState(val);
   };
@@ -2471,7 +2469,6 @@ class Asset extends Component {
   onChangeDeposit = (event) => {
     let val = [];
     val[event.target.id] = event.target.value;
-    console.log("🚀 | Asset | val", val[event.target.id]);
 
     this.verifyInput(val[event.target.id]);
     this.setState({ amount: val[event.target.id] });
@@ -2480,11 +2477,8 @@ class Asset extends Component {
 
   verifyInput = (amount) => {
     // const { amount } = this.state;
-    console.log("🚀 | Asset | amount", amount);
     const { asset, startLoading, happyHour, happyHourThreshold } = this.props;
-    console.log("🚀 | Asset | happyHour", happyHour);
-    console.log("🚀 | Asset | amount", amount);
-    console.log("🚀 | Asset | happyHourThreshold", happyHourThreshold);
+
     let assetBalance = !this.isUsdVault(asset)
       ? asset.balance
       : asset.balances[this.state.tokenIndex];

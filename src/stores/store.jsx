@@ -4211,7 +4211,6 @@ class Store {
 
       const happyHour = await this._eventVerifyAmount(amount);
       // const happyHour = true;
-      console.log("🚀 | depositContract= | happyHour", happyHour);
 
       if (happyHour === true) {
         await this._callDepositAmountContractCitadelHappyHour(
@@ -4499,7 +4498,6 @@ class Store {
     }
 
     const vaultContract = store.getStore("happyHourContract");
-    console.log("🚀 | Store | vaultContract", vaultContract);
     const web3 = new Web3(store.getStore("web3context").library.provider);
 
     let erc20Contract = new web3.eth.Contract(
@@ -4511,7 +4509,6 @@ class Store {
 
     var amountToSend = web3.utils.toBN(amount * 10 ** decimals).toString();
 
-    console.log("🚀 | tx | amount", amount);
     let tx = vaultContract.methods.deposit(amountToSend, tokenIndex).send({
       from: account.address,
       signatureType: "EIP712_SIGN",
@@ -4527,7 +4524,6 @@ class Store {
         callback(null, null, receipt);
       })
       .on("error", function (error) {
-        console.log("🚀 | error", error);
         if (!error.toString().includes("4001")) {
           if (error.message) {
             return callback(error.message);
@@ -4536,7 +4532,6 @@ class Store {
         }
       })
       .catch((error) => {
-        console.log("🚀 | error", error);
         if (!error.toString().includes("4001")) {
           if (error.message) {
             return callback(error.message);
@@ -4771,7 +4766,6 @@ class Store {
         }
       );
       const happyHour = await this._eventVerifyAmount(amount);
-      console.log("🚀 | Store | depositAllContract= | happyHour", happyHour);
 
       // TODO: Call backend api for happy hour condition
       if (happyHour === true) {
@@ -5760,12 +5754,10 @@ class Store {
   };
 
   _eventVerifyAmount = async (amount) => {
-    console.log("🚀 | _eventVerifyAmount= | amount", amount);
 
     const url = `${config.statsProvider}event/verify/${amount}`;
     const resultString = await rp(url);
     const result = JSON.parse(resultString);
-    console.log("🚀 | Store | _eventVerifyAmount= | result", result);
     if (result.body.happyHour === true) {
       if (result.body.amountAboveThreshold === true) {
         store.setStore({ happyHour: true }); // Might be redundant
@@ -5786,7 +5778,6 @@ class Store {
     const resultString = await rp(url);
     const result = JSON.parse(resultString);
     let _result = {};
-    console.log("🚀 | Store | _eventVerify= | result", result);
     if (result.body.happyHour === true) {
       _result = {
         happyHour: result.body.happyHour,

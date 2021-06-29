@@ -80,18 +80,12 @@ class ConnectBiconomy extends Component {
     // Ethereum user detected. You can now use the provider.
     const provider = store.getStore("web3context").library.provider;
     const web3 = new Web3(provider);
-    console.log(
-      "🚀 | ConnectBiconomy | componentWillMount | provider",
-      provider
-    );
+
     // const provider = window["ethereum"];
     // await provider.enable();
 
     const networkId = await web3.eth.net.getId();
-    console.log(
-      "🚀 | ConnectBiconomy | componentWillMount | networkId",
-      networkId
-    );
+
     const happyHourapiKey = this.getBiconomyHappyHourAPIKey(networkId);
     const erc20PaymentapiKey = this.getBiconomyERC20PaymentAPIKey(networkId);
     const happyHourbiconomy = new Biconomy(provider, {
@@ -112,7 +106,6 @@ class ConnectBiconomy extends Component {
 
     happyHourbiconomy
       .onEvent(happyHourbiconomy.READY, () => {
-        console.log("🚀 | ConnectBiconomy | happyHourbiconomy");
         // Initialize your dapp here like getting user accounts etc
         dispatcher.dispatch({
           type: BICONOMY_CONNECTED,
