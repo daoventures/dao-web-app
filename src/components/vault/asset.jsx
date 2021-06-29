@@ -544,7 +544,6 @@ class Asset extends Component {
       redeemAmount: "",
       redeemAmountError: false,
       account: store.getStore("account"),
-      usdPrices: store.getStore("usdPrices"),
       ratio: 50,
       earnRatio: 50,
       vaultRatio: 50,
@@ -567,14 +566,13 @@ class Asset extends Component {
   }
 
   componentWillMount() {
-    emitter.on(DEPOSIT_CONTRACT_RETURNED, this.depositReturned);
-    emitter.on(WITHDRAW_VAULT_RETURNED, this.withdrawReturned);
+    emitter.on(DEPOSIT_CONTRACT_RETURNED_COMPLETED, this.depositReturned); // Trigger function after deposit contract process is completd
     emitter.on(DEPOSIT_ALL_CONTRACT_RETURNED, this.depositReturned);
+    emitter.on(WITHDRAW_VAULT_RETURNED, this.withdrawReturned);
     emitter.on(WITHDRAW_BOTH_VAULT_RETURNED, this.withdrawReturned);
     emitter.on(WITHDRAW_BOTH_VAULT_FAIL_RETURNED, this.errorReturned);
     emitter.on(ERROR, this.errorReturned);
     emitter.on("CURRENT_THEME_RETURNED", this.currentThemeChanged);
-    emitter.on(USD_PRICE_RETURNED, this.handleUSDPricesReturned);
     emitter.on(HAPPY_HOUR_VERIFY, this.happyHourVerify);
     const localTheme = localStorage.getItem("daobenturesTheme");
     this.currentThemeChanged(localTheme);
@@ -585,10 +583,10 @@ class Asset extends Component {
   }
 
   componentWillUnmount() {
-    emitter.removeListener(DEPOSIT_CONTRACT_RETURNED, this.depositReturned);
-    emitter.removeListener(WITHDRAW_VAULT_RETURNED, this.withdrawReturned);
-    emitter.removeListener(DEPOSIT_ALL_CONTRACT_RETURNED, this.depositReturned);
-    emitter.removeListener(WITHDRAW_BOTH_VAULT_RETURNED, this.withdrawReturned);
+    emitter.removeListener(DEPOSIT_CONTRACT_RETURNED_COMPLETED, this.depositReturned);
+    emitter.removeListener(DEPOSIT_ALL_CONTRACT_RETURNED_COMPLETED, this.depositReturned);
+    emitter.removeListener(WITHDRAW_VAULT_RETURNED_COMPLETED, this.withdrawReturned);
+    emitter.removeListener(WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED, this.withdrawReturned);
     emitter.removeListener(
       WITHDRAW_BOTH_VAULT_FAIL_RETURNED,
       this.errorReturned
@@ -596,7 +594,6 @@ class Asset extends Component {
     emitter.removeListener(ERROR, this.errorReturned);
     window.removeEventListener("resize", this.resize.bind(this));
     emitter.removeListener("CURRENT_THEME_RETURNED", this.currentThemeChanged);
-    emitter.removeListener(USD_PRICE_RETURNED, this.handleUSDPricesReturned);
     emitter.removeListener(HAPPY_HOUR_VERIFY, this.happyHourVerify);
   }
 
@@ -665,10 +662,6 @@ class Asset extends Component {
         errorMessage: payload.body.message,
       });
     }
-  };
-
-  handleUSDPricesReturned = () => {
-    this.setState({ usdPrices: store.getStore("usdPrices") });
   };
 
   isUsdVault = (asset) => {

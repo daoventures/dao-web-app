@@ -850,7 +850,7 @@ class Vault extends Component {
     const that = this;
     setTimeout(() => {
       const snackbarObj = {
-        snackbarMessage: error.toString(),
+        snackbarMessage: error,
         snackbarType: "Error",
       };
       that.setState(snackbarObj);

@@ -2042,7 +2042,6 @@ class Store {
 
       const ethAllowance = web3.utils.fromWei(allowance, "ether");
 
-      console.log(allowance, amount);
       if (parseFloat(ethAllowance) < parseFloat(amount)) {
         /*
           code to accomodate for "assert _value == 0 or self.allowances[msg.sender][_spender] == 0" in contract
@@ -4410,6 +4409,50 @@ class Store {
           }
         }
       );
+    } else if (asset.strategyType === "daoFaang") {
+      let approvalErr; // To prevent execution on deposit contract, after user denied for _checkApprovalCitadel()
+      await this._checkApprovalCitadel(
+        asset,
+        account,
+        amount,
+        asset.vaultContractAddress,
+        tokenIndex,
+        (err, txnHash, approvalResult) => {
+          if (err) {
+            approvalErr = err;
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(APPROVE_TRANSACTING, txnHash);
+          }
+          if (approvalResult) {
+            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
+          }
+        }
+      );
+
+      if(!approvalErr) {
+        await this._callDepositAmountContractCitadel(
+          asset,
+          account,
+          amount,
+          tokenIndex,
+          (err, txnHash, depositResult) => {
+            if (err) {
+              return emitter.emit(ERROR, err);
+            }
+            if (txnHash) {
+              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+            }
+            if (depositResult) {
+              return emitter.emit(
+                DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                depositResult.transactionHash
+              );
+            }
+          }
+        );
+      }     
     }
   };
 
@@ -4557,8 +4600,11 @@ class Store {
 
     var amountToSend = web3.utils.toBN(amount * 10 ** decimals).toString();
 
+    // Citadel and Elon pass token's index for deposit, while FAANG pass token address
+    const tokenToSent = (asset.strategyType === "daoFaang") ? asset.erc20addresses[tokenIndex] : tokenIndex;
+
     vaultContract.methods
-      .deposit(amountToSend, tokenIndex)
+      .deposit(amountToSend, tokenToSent)
       .send({
         from: account.address,
         gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
