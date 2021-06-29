@@ -1,13 +1,12 @@
 import {
   Biconomy,
-  PermitClient,
   HTTP_CODES,
+  PermitClient,
   RESPONSE_CODES,
 } from "@biconomy/mexa";
 
-import config from "../config";
-
 import Web3 from "web3";
+import config from "../config";
 
 // Return Happy Hour API Key based on network
 const getBiconomyHappyHourAPIKey = (networkId) => {
@@ -127,7 +126,6 @@ export const callCitadelHappyHourDeposit = async (
         .toBN(amount * 10 ** decimals)
         .toString();
 
-      console.log("🚀 | tx | amount", amount);
       let tx = await contract.methods
         .deposit(amountToSend, tokenIndex)
         .send({

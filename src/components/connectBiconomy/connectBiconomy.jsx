@@ -32,17 +32,6 @@ import { withStyles } from "@material-ui/core/styles";
 
 // blocknative测试
 
-
-
-
-
-
-
-
-
-
-
-
 const emitter = Store.emitter;
 const dispatcher = Store.dispatcher;
 const store = Store.store;
@@ -91,18 +80,12 @@ class ConnectBiconomy extends Component {
     // Ethereum user detected. You can now use the provider.
     const provider = store.getStore("web3context").library.provider;
     const web3 = new Web3(provider);
-    console.log(
-      "🚀 | ConnectBiconomy | componentWillMount | provider",
-      provider
-    );
+
     // const provider = window["ethereum"];
     // await provider.enable();
 
     const networkId = await web3.eth.net.getId();
-    console.log(
-      "🚀 | ConnectBiconomy | componentWillMount | networkId",
-      networkId
-    );
+
     const happyHourapiKey = this.getBiconomyHappyHourAPIKey(networkId);
     const erc20PaymentapiKey = this.getBiconomyERC20PaymentAPIKey(networkId);
     const happyHourbiconomy = new Biconomy(provider, {
@@ -110,20 +93,19 @@ class ConnectBiconomy extends Component {
       apiKey: happyHourapiKey,
       // debug: true,
     });
-    const erc20Paymentbiconomy = new Biconomy(provider, {
-      walletProvider: window.ethereum,
-      apiKey: erc20PaymentapiKey,
-      // debug: true,
-    });
+    // const erc20Paymentbiconomy = new Biconomy(provider, {
+    //   walletProvider: window.ethereum,
+    //   apiKey: erc20PaymentapiKey,
+    //   // debug: true,
+    // });
 
     // This web3 instance is used to read normally and write to contract via meta transactions.
     const happyHourWeb3 = new Web3(happyHourbiconomy);
 
-    const erc20PaymentWeb3 = new Web3(erc20Paymentbiconomy);
+    // const erc20PaymentWeb3 = new Web3(erc20Paymentbiconomy);
 
     happyHourbiconomy
       .onEvent(happyHourbiconomy.READY, () => {
-        console.log("🚀 | ConnectBiconomy | happyHourbiconomy");
         // Initialize your dapp here like getting user accounts etc
         dispatcher.dispatch({
           type: BICONOMY_CONNECTED,
@@ -134,22 +116,22 @@ class ConnectBiconomy extends Component {
       })
       .onEvent(happyHourbiconomy.ERROR, () => {
         // Handle error while initializing mexa
-        console.log("hi")
+        console.log("hi");
       });
 
-    erc20Paymentbiconomy
-      .onEvent(erc20Paymentbiconomy.READY, () => {
-        // Initialize your dapp here like getting user accounts etc
-        dispatcher.dispatch({
-          type: BICONOMY_CONNECTED,
-          content: {
-            erc20PaymentWeb3: erc20PaymentWeb3,
-          },
-        });
-      })
-      .onEvent(erc20Paymentbiconomy.ERROR, () => {
-        // Handle error while initializing mexa
-      });
+    // erc20Paymentbiconomy
+    //   .onEvent(erc20Paymentbiconomy.READY, () => {
+    //     // Initialize your dapp here like getting user accounts etc
+    //     dispatcher.dispatch({
+    //       type: BICONOMY_CONNECTED,
+    //       content: {
+    //         erc20PaymentWeb3: erc20PaymentWeb3,
+    //       },
+    //     });
+    //   })
+    //   .onEvent(erc20Paymentbiconomy.ERROR, () => {
+    //     // Handle error while initializing mexa
+    //   });
   }
 
   componentWillUnmount() {
