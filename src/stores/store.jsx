@@ -6237,8 +6237,28 @@ class Store {
       await erc20Contract.methods.balanceOf(asset.vaultContractAddress).call()
     );
 
+    let pool = 0;
+    if(asset.strategyType === "daoFaang") {
+      const network = store.getStore("network");
+      const usdtUsdPriceFeedContract = new web3.eth.Contract(
+      config.eacAggregatoorProxyContract,
+      network === 1
+        ? config.USDTUSDPriceFeedMainnetContract
+        : config.USDTUSDPriceFeedKovanContract
+      );
+
+      // USDT / USD conversion result
+      const usdtToUsdPrice = await usdtUsdPriceFeedContract.methods
+        .latestAnswer()
+        .call();
+
+      const totalValueInPool = await vaultContract.methods.getTotalValueInPool().call(); 
+      pool = (totalValueInPool * usdtToUsdPrice) / (10 ** 20);
+    } else {
+      pool = await vaultContract.methods.getAllPoolInUSD().call();
+    }
+
     const decimals = parseInt(await erc20Contract.methods.decimals().call());
-    const pool = await vaultContract.methods.getAllPoolInUSD().call();
     const totalSupply = await vaultContract.methods.totalSupply().call();
 
     const withdrawAmountUSD =
@@ -6439,9 +6459,11 @@ class Store {
         amount,
         tokenIndex
       );
-      // ) {
+
+      const token = (asset.strategyType === "daoFaang") ? asset.erc20addresses[tokenIndex] : tokenIndex;
+
       await vaultContract.methods
-        .withdraw(amount, tokenIndex)
+        .withdraw(amount, token)
         .send({
           from: account.address,
           gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
