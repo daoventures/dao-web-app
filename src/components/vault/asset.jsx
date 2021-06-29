@@ -670,7 +670,7 @@ class Asset extends Component {
     ) {
       this.setState({
         amountAboveThreshold: payload.body.amountAboveThreshold,
-        happyHourWarning: payload.body.message,
+        // happyHourWarning: payload.body.message,
       });
     }
   };
