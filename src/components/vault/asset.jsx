@@ -1545,6 +1545,119 @@ class Asset extends Component {
                     </div>
                   </div>
                 )}
+                {asset.strategyType === "harvest" && (
+                  <div className={classes.withdrawContainer}>
+                    <div className={classes.tradeContainer}>
+                      <div className={classes.balances}>
+                        <Typography
+                          variant="body1"
+                          onClick={() => {
+                            this.setRedeemAmount(100);
+                          }}
+                          className={classes.value}
+                          noWrap>
+                          {(asset.strategyBalance
+                            ? (
+                                Math.floor(
+                                  (asset.strategyBalance /
+                                    10 ** asset.decimals) *
+                                    10000
+                                ) / 10000
+                              ).toFixed(4)
+                            : "0.0000") + "daoH"}{" "}
+                          {asset.strategyBalance > 0 && (
+                            <span>
+                              (
+                              {asset.depositedSharesInUSD
+                                ? (
+                                    asset.depositedSharesInUSD /
+                                    asset.priceInUSD[this.state.tokenIndex]
+                                  ).toFixed(4)
+                                : "0.0000"}{" "}
+                              {asset.symbols[this.state.tokenIndex]})
+                            </span>
+                          )}
+                        </Typography>
+                      </div>
+
+                      <div className={classes.depositIputBox}>
+                        <TextField
+                          style={{ width: "100%" }}
+                          className={classes.actionInput}
+                          id="redeemAmount"
+                          value={redeemAmount}
+                          error={redeemAmountError}
+                          onChange={this.onChange}
+                          disabled={loading}
+                          placeholder="0.00"
+                          variant="outlined"
+                          onKeyDown={this.inputRedeemKeyDown}
+                        />
+                        <div className={classes.depositScaleContainer}>
+                          <Button
+                            className={
+                              redeemAmountPercent === 25
+                                ? classes.depositScaleActive
+                                : classes.depositScale
+                            }
+                            variant="text"
+                            disabled={loading}
+                            color="primary"
+                            onClick={() => {
+                              this.setRedeemAmount(25);
+                            }}>
+                            <Typography variant={"h5"}>25%</Typography>
+                          </Button>
+
+                          <Button
+                            className={
+                              redeemAmountPercent === 50
+                                ? classes.depositScaleActive
+                                : classes.depositScale
+                            }
+                            variant="text"
+                            disabled={loading}
+                            color="primary"
+                            onClick={() => {
+                              this.setRedeemAmount(50);
+                            }}>
+                            <Typography variant={"h5"}>50%</Typography>
+                          </Button>
+
+                          <Button
+                            className={
+                              redeemAmountPercent === 75
+                                ? classes.depositScaleActive
+                                : classes.depositScale
+                            }
+                            variant="text"
+                            disabled={loading}
+                            color="primary"
+                            onClick={() => {
+                              this.setRedeemAmount(75);
+                            }}>
+                            <Typography variant={"h5"}>75%</Typography>
+                          </Button>
+
+                          <Button
+                            className={
+                              redeemAmountPercent === 100
+                                ? classes.depositScaleActive
+                                : classes.depositScale
+                            }
+                            variant="text"
+                            disabled={loading}
+                            color="primary"
+                            onClick={() => {
+                              this.setRedeemAmount(100);
+                            }}>
+                            <Typography variant={"h5"}>Max</Typography>
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 {asset.strategyType === "citadel" && (
                   <div className={classes.withdrawContainer}>
                     <div className={classes.tradeContainer}>
