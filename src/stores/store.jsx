@@ -100,6 +100,7 @@ import async from "async";
 import citadelABI from "./citadelABI.json";
 import config from "../config";
 import { injected } from "./connectors";
+import BigNumber from "bignumber.js";
 
 // import { callCitadelHappyHourDeposit } from "./biconomyHelper";
 
@@ -5340,9 +5341,9 @@ class Store {
           asset.vaultContractAddress
         );
 
-        const pool = await elonContract.methods.getAllPoolInUSD().call();
+        const pool = await elonContract.methods.getAllPoolInUSD().call(); // All pool in USD (6 decimals)
         const totalSupply = await elonContract.methods.totalSupply().call();
-        const pricePerFullShare = totalSupply ? pool / totalSupply : 0;
+        const pricePerFullShare = totalSupply ? (new BigNumber(pool)).shiftedBy(12).dividedBy(totalSupply).toNumber() : 0;
 
         const returnObj = {
           earnPricePerFullShare: 0,
