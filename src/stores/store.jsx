@@ -2635,7 +2635,7 @@ class Store {
 
   _getERC20Balances = async (web3, asset, account, callback) => {
     // Strategy which required to get balances for multiple token
-    const strategyTypes = ["citadel", "daoFaang"];
+    const strategyTypes = ["citadel", "daoFaang", "elon"];
     if (!strategyTypes.includes(asset.strategyType)) {
       return callback(null, {
         balances: [0, 0, 0],
@@ -2673,7 +2673,7 @@ class Store {
         return callback(ex);
       }
     }
-
+    
     const returnObj = {
       balances,
       priceInUSD,
@@ -6516,7 +6516,7 @@ class Store {
 
             // asset.addressTransactions = data[7]
             // asset.vaultHoldings = data[3]
-            if (asset.id === "daoSTO") {
+            if (asset.id === "daoSTO" || asset.id === "daoELO") {
               console.log("Asset for STONK", asset);
             }
             callback(null, asset);

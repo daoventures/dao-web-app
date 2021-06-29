@@ -956,7 +956,7 @@ class Vault extends Component {
   }
 
   isLogoVault = (asset) => {
-    return (asset.strategyType === "citadel" || asset.strategyType === "elon") ? true : false;
+    return (asset.strategyType === "citadel" || asset.strategyType === "elon" || asset.strategyType === "daoFaang") ? true : false;
   }
 
   render() {
