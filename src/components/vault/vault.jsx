@@ -1074,7 +1074,9 @@ class Vault extends Component {
     }
     return assets
       .filter((asset) => {
-        return currentTab == "ALL" || asset.group === currentTab ? true : false;
+        return currentTab === "ALL" || asset.group === currentTab
+          ? true
+          : false;
       })
       .map((asset, index) => {
         return (
