@@ -848,9 +848,12 @@ class Vault extends Component {
     this.setState(snackbarObj);
     this.setState({ loading: false });
     const that = this;
+    
+    const errorMessage = (typeof error === "string") ? error : error.message;
+
     setTimeout(() => {
       const snackbarObj = {
-        snackbarMessage: error,
+        snackbarMessage: errorMessage,
         snackbarType: "Error",
       };
       that.setState(snackbarObj);
@@ -1106,7 +1109,7 @@ class Vault extends Component {
     }
     return assets
       .filter((asset) => {
-        return currentTab == "ALL" || asset.group === currentTab ? true : false;
+        return currentTab === "All" || asset.group === currentTab ? true : false;
       })
       .map((asset, index) => {
         return (
