@@ -2274,17 +2274,18 @@ class Asset extends Component {
 
       if ((!this.state.redeemAmountError && this.state.withdrawErrorMessage === "") &&
         (!this.state.redeemEarnAmountError && this.state.withdrawEarnErrorMessage === "")) {
-        redeemAmount = redeemAmount ? redeemAmount : 0;
-        redeemEarnAmount = redeemEarnAmount ? redeemEarnAmount : 0;
+        redeemAmount = redeemAmount ? (Math.floor(redeemAmount * 10000) / 10000).toFixed(4) : 0;
+        redeemEarnAmount = redeemEarnAmount ? (Math.floor(redeemEarnAmount * 10000) / 10000).toFixed(4) : 0;
 
         this.setState({ loading: true });
         startLoading();
 
+      
         dispatcher.dispatch({
           type: WITHDRAW_BOTH,
           content: {
-            earnAmount: Number(redeemEarnAmount).toFixed(4),
-            vaultAmount: Number(redeemAmount).toFixed(4),
+            earnAmount: redeemEarnAmount,
+            vaultAmount: redeemAmount,
             amount: "0",
             asset: asset,
           },
@@ -2302,6 +2303,8 @@ class Asset extends Component {
       if (!this.state.redeemAmountError && this.withdrawErrorMessage !== "") {
         this.setState({ loading: true });
         startLoading();
+
+        redeemAmount = (Math.floor(redeemAmount * 10000) / 10000).toFixed(4);
   
         dispatcher.dispatch({
           type: WITHDRAW_BOTH,
@@ -2323,6 +2326,7 @@ class Asset extends Component {
       }
 
       if (!this.state.redeemAmountError && this.withdrawErrorMessage !== "") {
+        redeemAmount = (Math.floor(redeemAmount * 10000) / 10000).toFixed(4);
         let shares = (redeemAmount * 10 ** asset.decimals).toString();
 
         this.setState({ loading: true });
