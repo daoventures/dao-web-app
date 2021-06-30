@@ -507,6 +507,7 @@ const styles = (theme) => ({
     marginTop: "3px",
   },
   happyHourMessage: {
+    fontSize: "12px",
     align: "left",
     color: theme.themeColors.formHappyHour,
     marginTop: "3px",
