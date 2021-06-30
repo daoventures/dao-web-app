@@ -553,7 +553,7 @@ class Stake extends Component {
     return pools && pools.length > 0
       ? pools
           .filter((pool) => {
-            return currentTab === "All" || pool.category === currentTab
+            return currentTab === "ALL" || pool.category === currentTab
               ? true
               : false;
           })
