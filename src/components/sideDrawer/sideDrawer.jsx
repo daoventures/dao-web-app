@@ -27,6 +27,8 @@ import {
   SWAP_PATH,
   SWAP,
   DAOMINE_PATH,
+  PORTFOLIO,
+  PORTFOLIO_PATH,
 } from "../../constants/page-constant";
 import { drawerWidth } from "../../theme/theme";
 import ToggleTheme from "../toggleTheme";
@@ -316,7 +318,7 @@ class SideDrawer extends Component {
         (store.getStore("account") && store.getStore("account").balance) || "",
       totalValue: "",
       listItem: [
-        // { key: PORTFOLIO, name:"portfolio", path: PORTFOLIO_PATH, icon: "#iconmenu_porftfolio_nor_day" },
+        { key: PORTFOLIO, name:"portfolio", path: PORTFOLIO_PATH, icon: "#iconmenu_porftfolio_nor_day" },
         {
           key: INVEST,
           name: "invest",
