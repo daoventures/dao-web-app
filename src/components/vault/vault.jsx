@@ -623,8 +623,9 @@ const styles = (theme) => ({
     },
   },
   assetLabel1: {
-    display: "block",
-    fontSize: "18px",
+    display: 'block',
+    fontSize: '18px',
+    wordWrap: "break-word",
     color: theme.themeColors.textT,
     [theme.breakpoints.down("md")]: {
       fontSize: "14px",
@@ -701,8 +702,7 @@ class Vault extends Component {
       expanded: "",
       modalOpen: false,
       currentTab: "ALL",
-      tabList: ["ALL", BASIC, ADVANCE, EXPERT, DEGEN],
-      disableSetVaultFromURL: false,
+      disableSetVaultFromURL: false
     };
 
     if (account && account.address) {
@@ -780,10 +780,7 @@ class Vault extends Component {
   }
 
   handleHappyHour = (payload) => {
-    this.setState({
-      happyHour: payload.happyHour,
-      happyHourThreshold: payload.happyHourThreshold,
-    });
+    this.setState({ happyHour: payload.happyHour, happyHourThreshold: payload.happyHourThreshold });
   };
 
   networkChanged = (obj) => {
@@ -854,9 +851,12 @@ class Vault extends Component {
     this.setState(snackbarObj);
     this.setState({ loading: false });
     const that = this;
+    
+    const errorMessage = (typeof error === "string") ? error : error.message;
+
     setTimeout(() => {
       const snackbarObj = {
-        snackbarMessage: error.toString(),
+        snackbarMessage: errorMessage,
         snackbarType: "Error",
       };
       that.setState(snackbarObj);
@@ -962,10 +962,8 @@ class Vault extends Component {
   };
 
   isLogoVault = (asset) => {
-    return asset.strategyType === "citadel" || asset.strategyType === "elon"
-      ? true
-      : false;
-  };
+    return (asset.strategyType === "citadel" || asset.strategyType === "elon" || asset.strategyType === "daoFaang") ? true : false;
+  }
 
   render() {
     const { classes } = this.props;
@@ -974,42 +972,6 @@ class Vault extends Component {
     if (!account || !account.address) {
       return (
         <ConnectWallet></ConnectWallet>
-        // <div className={ classes.root }>
-        //   <div className={classes.connectWalletContainer}>
-        //     <div className={ classes.investedContainerLoggedOut }>
-        //       <Typography variant={'h2'} className={classes.welcomeText}>Welcome to DAOventures</Typography>
-        //       <Typography className={classes.titleDesc} variant={'body1'}>Connect an Ethereum wallet to manage and invest your DeFi portfolio</Typography>
-        //       <Typography variant='body1' className={classes.alertDesc}>Alert: The deposit into any of investment strategies will incur high gas fees due to Ethereum network</Typography>
-        //       <div className={classes.buttonContainer}>
-        //         <Grid container className={classes.buttonGroup} onClick={this.addressClicked}>
-        //           <Grid item sm={3} xs={3} className={classes.buttonIconContainer}>
-        //             <img
-        //                 alt=""
-        //                 src={require('../../assets/metamask.svg')}
-        //                 className={classes.connectButtonIcon}
-        //               />
-        //           </Grid>
-        //           <Grid item sm={9} xs={9} className={classes.buttonTextContainer}>
-        //             <Typography variant='h4'>Connect to Metamask wallet</Typography>
-        //           </Grid>
-        //         </Grid>
-        //       </div>
-        //       <div className={classes.descriptionContainer}>
-        //         <div className={classes.shieldContainer}>
-        //           <img
-        //             alt=""
-        //             src={require('../../assets/shield.svg')}
-        //           />
-        //         </div>
-        //         <Typography variant='h3' className={classes.subtitle}>Non-custodial & Secure</Typography>
-        //         <Typography variant='body2' className={classes.securityDesc}>We do not own your private keys and cannot access your funds.</Typography>
-        //       </div>
-        //     </div>
-        //     <Typography variant='body1' className={classes.warningMessage}>*Crypto is volatile, DeFi is new and risky. Please use it at your own risk.</Typography>
-        //   </div>
-        //   { snackbarMessage && this.renderSnackbar() }
-        //   { modalOpen && this.renderModal() }
-        // </div>
       );
     }
 
@@ -1049,6 +1011,87 @@ class Vault extends Component {
     this.setState(val);
   };
 
+  // Yearly Growth 
+  renderYearlyGrowth = (asset, showMobile) => {
+    const { classes } = this.props;
+    return (showMobile) ? (
+      <React.Fragment>
+        <Typography
+          variant={"h5"}
+          className={classes.assetLabel2}>
+          {this.isUsdVault(asset) ? "YTD Performance" : "Yearly Growth"}
+        </Typography>
+        <Typography
+          variant={"h3"}
+          noWrap
+          className={classes.assetLabel1}>
+          {this.isUsdVault(asset) && (
+            <Typography variant={"caption"}>
+              est.&nbsp;
+            </Typography>
+          )}
+          {this._getAPY(asset)}
+        </Typography>
+      </React.Fragment>
+    ) : (
+      <React.Fragment>
+        <Typography
+          variant={"h5"}
+          className={classes.assetLabel1}>
+          {this.isUsdVault(asset) && (
+            <Typography variant={"caption"}>
+              est.&nbsp;
+            </Typography>
+          )}
+          {this._getAPY(asset)}
+        </Typography>
+        <Typography
+          variant={"body1"}
+          className={classes.assetLabel2}>
+          {this.isUsdVault(asset) ? "YTD Performance" : "Yearly Growth"}
+        </Typography>
+      </React.Fragment>
+    )
+  }
+
+  // Available to deposit
+  renderAvailableToDeposit = (asset, showMobile) => {
+    const { classes } = this.props;
+
+    return (
+      <React.Fragment>
+        <Typography
+          variant={showMobile ? "h3" : "h5"}
+          className={classes.assetLabel1}>
+          <div>
+            {(this.isLogoVault(asset)
+              ? asset.sumBalances
+                ? asset.sumBalances.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })
+                : "0.00"
+              : asset.balance
+                ? asset.balance.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })
+                : "0.00") +
+              " " +
+              (this.isLogoVault(asset)
+                ? "USD"
+                : asset.symbol)}
+          </div>
+        </Typography>
+        <Typography
+          variant={showMobile ? "h5" : "body1"}
+          className={classes.assetLabel2}>
+          Available to deposit
+        </Typography>
+      </React.Fragment>
+    )
+  }
+
   renderAssetBlocks = () => {
     const {
       assets,
@@ -1068,15 +1111,14 @@ class Vault extends Component {
       if (expanded !== param.id) {
         this.setState({
           expanded: param.id,
-          disableSetVaultFromURL: true,
-        });
+          disableSetVaultFromURL: true
+        })
       }
+
     }
     return assets
       .filter((asset) => {
-        return currentTab === "ALL" || asset.group === currentTab
-          ? true
-          : false;
+        return currentTab === "ALL" || asset.group === currentTab ? true : false;
       })
       .map((asset, index) => {
         return (
@@ -1121,6 +1163,7 @@ class Vault extends Component {
               >
                 <div className={classes.assetSummary}>
                   <Grid container>
+                    {/** Asset Logo */}
                     <Grid item sm={1} xs={2} className={classes.gridItemColumn}>
                       <div className={classes.assetIcon}>
                         <img
@@ -1139,68 +1182,22 @@ class Vault extends Component {
                         />
                       </div>
                     </Grid>
-                    {/* <Typography variant={ 'body1' } noWrap className={classes.assetName}>{ asset.name }</Typography> */}
 
+                    {/** Asset name */}
                     <Grid item sm={2} xs={4} className={classes.gridItemColumn}>
-                      <Typography
-                        variant={"h5"}
-                        className={classes.assetLabel1}
-                      >
-                        {asset.name}
-                      </Typography>
-                      <Typography
-                        variant={"h5"}
-                        className={classes.assetLabel2}
-                      >
-                        {asset.description}
-                      </Typography>
+                      <Typography variant={'h5'} className={classes.assetLabel1}>{asset.name}</Typography>
+                      <Typography variant={'h5'} className={classes.assetLabel2}>{asset.description}</Typography>
                     </Grid>
 
+                    {/** Yearly Growth */}
                     <Grid item sm={3} xs={6} className={classes.gridItemColumn}>
                       {!["LINK"].includes(asset.id) && asset.vaultBalance > 0 && (
                         <div>
                           <div className={classes.showDesktop}>
-                            <Typography
-                              variant={"h5"}
-                              className={classes.assetLabel1}
-                            >
-                              {this.isUsdVault(asset) && (
-                                <Typography variant={"caption"}>
-                                  est.&nbsp;
-                                </Typography>
-                              )}
-                              {this._getAPY(asset)}
-                            </Typography>
-                            <Typography
-                              variant={"body1"}
-                              className={classes.assetLabel2}
-                            >
-                              {this.isUsdVault(asset)
-                                ? "YTD Performance"
-                                : "Yearly Growth"}
-                            </Typography>
+                            {this.renderYearlyGrowth(asset, false)}
                           </div>
                           <div className={classes.showMobile}>
-                            <Typography
-                              variant={"h5"}
-                              className={classes.assetLabel2}
-                            >
-                              {this.isUsdVault(asset)
-                                ? "YTD Performance"
-                                : "Yearly Growth"}
-                            </Typography>
-                            <Typography
-                              variant={"h3"}
-                              noWrap
-                              className={classes.assetLabel1}
-                            >
-                              {this.isUsdVault(asset) && (
-                                <Typography variant={"caption"}>
-                                  est.&nbsp;
-                                </Typography>
-                              )}
-                              {this._getAPY(asset)}
-                            </Typography>
+                            {this.renderYearlyGrowth(asset, true)}
                           </div>
                         </div>
                       )}
@@ -1208,144 +1205,33 @@ class Vault extends Component {
                         asset.vaultBalance === 0 && (
                           <div>
                             <div className={classes.showDesktop}>
-                              <Typography
-                                variant={"h5"}
-                                className={classes.assetLabel1}
-                              >
-                                {this.isUsdVault(asset) && (
-                                  <Typography variant={"caption"}>
-                                    est.&nbsp;
-                                  </Typography>
-                                )}
-                                {this._getAPY(asset)}
-                              </Typography>
-                              <Typography
-                                variant={"body1"}
-                                className={classes.assetLabel2}
-                              >
-                                {this.isUsdVault(asset)
-                                  ? "YTD Performance"
-                                  : "Yearly Growth"}
-                              </Typography>
+                              {this.renderYearlyGrowth(asset, false)}
                             </div>
                             <div className={classes.showMobile}>
-                              <Typography
-                                variant={"h3"}
-                                noWrap
-                                className={classes.assetLabel1}
-                              >
-                                {this.isUsdVault(asset) && (
-                                  <Typography variant={"caption"}>
-                                    est.&nbsp;
-                                  </Typography>
-                                )}
-                                {this._getAPY(asset)}
-                              </Typography>
-                              <Typography
-                                variant={"h5"}
-                                className={classes.assetLabel2}
-                              >
-                                {this.isUsdVault(asset)
-                                  ? "YTD Performance"
-                                  : "Yearly Growth"}
-                              </Typography>
+                              {this.renderYearlyGrowth(asset, true)}
                             </div>
                           </div>
                         )}
                     </Grid>
 
+                    {/** Underlying Token Balance , Available to deposit */}
                     <Grid item sm={3} xs={6} className={classes.gridItemColumn}>
-                      {/** Available to deposit */}
-                      {/** Desktop */}
                       <div className={classes.showDesktop}>
-                        <Typography
-                          variant={"h5"}
-                          className={classes.assetLabel1}
-                        >
-                          <div>
-                            {(this.isLogoVault(asset)
-                              ? asset.sumBalances
-                                ? asset.sumBalances.toLocaleString(undefined, {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2,
-                                  })
-                                : "0.00"
-                              : asset.balance
-                              ? asset.balance.toLocaleString(undefined, {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2,
-                                })
-                              : "0.00") +
-                              " " +
-                              (this.isLogoVault(asset) ? "USD" : asset.symbol)}
-                          </div>
-                        </Typography>
-                        <Typography
-                          variant={"body1"}
-                          className={classes.assetLabel2}
-                        >
-                          Available to deposit
-                        </Typography>
+                        {this.renderAvailableToDeposit(asset, false)}
                       </div>
 
-                      {/** Mobile */}
                       <div className={classes.showMobile}>
-                        <Typography
-                          variant={"h3"}
-                          noWrap
-                          className={classes.assetLabel1}
-                        >
-                          <div>
-                            {(this.isLogoVault(asset)
-                              ? asset.sumBalances
-                                ? asset.sumBalances.toLocaleString(undefined, {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2,
-                                  })
-                                : "0.00"
-                              : asset.balance
-                              ? asset.balance.toLocaleString(undefined, {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2,
-                                })
-                              : "0.00") +
-                              " " +
-                              (this.isLogoVault(asset) ? "USD" : asset.symbol)}
-                          </div>
-                        </Typography>
-                        <Typography
-                          variant={"h5"}
-                          className={classes.assetLabel2}
-                        >
-                          Available to deposit
-                        </Typography>
+                        {this.renderAvailableToDeposit(asset, false)}  
                       </div>
                     </Grid>
 
+                    {/** Total Value Locked */}
                     <Grid item sm={3} xs={6} className={classes.gridItemColumn}>
-                      {/* 暂时不知道取什么 */}
-                      <Typography
-                        variant={"h5"}
-                        className={
-                          (classes.assetLabel1, classes.assetLabelTextRight)
-                        }
-                      >
-                        ${" "}
-                        {asset.tvl
-                          ? Number(asset.tvl).toLocaleString(undefined, {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })
-                          : "0.00"}
-                      </Typography>
-                      <Typography
-                        variant={"h5"}
-                        className={
-                          (classes.assetLabel2, classes.assetLabelTextRight1)
-                        }
-                      >
-                        Total Value Locked
-                      </Typography>
+                      <Typography variant={'h5'} className={classes.assetLabel1, classes.assetLabelTextRight}>$ {asset.tvl ? Number(asset.tvl).toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      }) : '0.00'}</Typography>
+                      <Typography variant={'h5'} className={classes.assetLabel2, classes.assetLabelTextRight1}>Total Value Locked</Typography>
                     </Grid>
                   </Grid>
                 </div>
@@ -1423,7 +1309,7 @@ class Vault extends Component {
   };
 
   renderRiskLabel = (asset) => {
-    return <RiskLevelLabel risk={asset.risk}></RiskLevelLabel>;
+    return <RiskLevelLabel risk={asset.risk}></RiskLevelLabel>
   };
 
   renderPopularIcon = (asset) => {
@@ -1528,6 +1414,8 @@ class Vault extends Component {
         } else {
           return "0.00%";
         }
+      } else if (asset.strategyType === "daoFaang") {
+        return (asset.stats.faangApy) ? (asset.stats.faangApy / 1).toFixed(2) + "%" : "0.00%"
       }
     } else {
       return "0.00%";
