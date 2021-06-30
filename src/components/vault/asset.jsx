@@ -2434,7 +2434,11 @@ class Asset extends Component {
       } else if (asset.strategyType === "citadel") {
         return asset.stats.citadelApy;
       } else if (asset.strategyType === "elon") {
-        return asset.stats.elonApy;
+        if (asset.stats.elonApy) {
+          return asset.stats.elonApy;
+        } else {
+          return "0.00";
+        }
       }
     } else {
       return "0.00";
