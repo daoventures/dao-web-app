@@ -1209,7 +1209,8 @@ class Asset extends Component {
                       <span>Deposit</span>
                     </Button>
                   )}
-                  {asset.depositAll === true && (
+                  {/** DAO-157: Remove "Deposit All" button from Invest  */}
+                  {/* {asset.depositAll === true && (
                     <Button
                       className={classes.depositActionButton}
                       disabled={
@@ -1221,7 +1222,7 @@ class Asset extends Component {
                     >
                       <span>Deposit All</span>
                     </Button>
-                  )}
+                  )} */}
                 </div>
                 {asset.depositDisabled === true && (
                   <div className={classes.disabledContainer}>
@@ -2375,7 +2376,7 @@ class Asset extends Component {
       amount = Math.floor(amount * 10000) / 10000;
     }
 
-    this.setState({ amount: amount.toFixed(4), percent });
+    this.setState({ amount: amount.toFixed(4), percent, amountError: false, errorMessage: "" });
   };
 
   setCurrency = (tokenIndex) => {
@@ -2413,6 +2414,8 @@ class Asset extends Component {
     this.setState({
       redeemAmount: amount.toFixed(4),
       redeemAmountPercent: percent,
+      redeemAmountError: false, 
+      withdrawErrorMessage: "",
     });
   };
 
@@ -2427,7 +2430,9 @@ class Asset extends Component {
     amount = Math.floor(amount * 10000) / 10000;
 
     this.setState({
-      redeemVaultAmount: amount.toFixed(4),
+      redeemAmount: amount.toFixed(4),
+      redeemAmountError: false,
+      withdrawErrorMessage: "",
       vaultPercent: percent,
     });
   };
