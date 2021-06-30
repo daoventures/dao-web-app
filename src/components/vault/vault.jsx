@@ -625,6 +625,7 @@ const styles = (theme) => ({
   assetLabel1: {
     display: 'block',
     fontSize: '18px',
+    wordWrap: "break-word",
     color: theme.themeColors.textT,
     [theme.breakpoints.down('md')]: {
       fontSize: '14px',
