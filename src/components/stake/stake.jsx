@@ -300,7 +300,7 @@ class Stake extends Component {
           )
         : null,
       pools: store.getStore("stakePools"),
-      currentTab: "All",
+      currentTab: "ALL",
       expanded: "",
       loading: false,
     };
