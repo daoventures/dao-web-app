@@ -701,7 +701,7 @@ class Vault extends Component {
       loading: true,
       expanded: "",
       modalOpen: false,
-      currentTab: "All",
+      currentTab: "ALL",
       disableSetVaultFromURL: false
     };
 
@@ -1109,7 +1109,7 @@ class Vault extends Component {
     }
     return assets
       .filter((asset) => {
-        return currentTab === "All" || asset.group === currentTab ? true : false;
+        return currentTab === "ALL" || asset.group === currentTab ? true : false;
       })
       .map((asset, index) => {
         return (
