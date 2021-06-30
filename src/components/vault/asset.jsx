@@ -101,7 +101,7 @@ const styles = (theme) => ({
     padding: "24px 0",
   },
   withdrawContainer: {
-    paddingBottom: "12px",
+    // paddingBottom: "12px",
     display: "flex",
     flex: "1",
     width: "100%",
@@ -126,7 +126,7 @@ const styles = (theme) => ({
   withdrawButtonBox: {
     display: "flex",
     width: "100%",
-    marginTop: "10px",
+    // marginTop: "10px",
   },
   withdrawButton: {
     height: "42px",
@@ -560,8 +560,8 @@ class Asset extends Component {
   componentWillMount() {
     emitter.on(DEPOSIT_CONTRACT_RETURNED_COMPLETED, this.depositReturned); // Trigger function after deposit contract process is completd
     emitter.on(DEPOSIT_ALL_CONTRACT_RETURNED, this.depositReturned);
-    emitter.on(WITHDRAW_VAULT_RETURNED, this.withdrawReturned);
-    emitter.on(WITHDRAW_BOTH_VAULT_RETURNED, this.withdrawReturned);
+    emitter.on(WITHDRAW_VAULT_RETURNED_COMPLETED, this.withdrawReturned);
+    emitter.on(WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED, this.withdrawReturned);
     emitter.on(WITHDRAW_BOTH_VAULT_FAIL_RETURNED, this.errorReturned);
     emitter.on(ERROR, this.errorReturned);
     emitter.on("CURRENT_THEME_RETURNED", this.currentThemeChanged);
@@ -663,7 +663,7 @@ class Asset extends Component {
     ) {
       this.setState({
         amountAboveThreshold: payload.body.amountAboveThreshold,
-        errorMessage: payload.body.message,
+        // errorMessage: payload.body.message,
       });
     }
   };
@@ -1473,7 +1473,7 @@ class Asset extends Component {
                             : "0.0000") +
                             " " +
                             asset.id}{" "}
-                          {asset.strategyBalance > 0 && (
+                          {asset.strategyBalance  && (
                             <span>
                               (
                               {asset.depositedSharesInUSD
@@ -1507,7 +1507,8 @@ class Asset extends Component {
                       <span>Withdraw</span>
                     </Button>
                   )}
-                  {asset.withdrawAll === true && (
+                  {/** DAO-157 */}
+                  {/* {asset.withdrawAll === true && (
                     <Button
                       className={classes.withdrawButton}
                       disabled={
@@ -1520,7 +1521,7 @@ class Asset extends Component {
                     >
                       <span>Withdraw All</span>
                     </Button>
-                  )}
+                  )} */}
                 </div>
               </div>
             </div>
@@ -1548,6 +1549,7 @@ class Asset extends Component {
     };
 
     if (asset.historicalAPY) {
+      
       // this gives an object with dates as keys
       const groups = asset.historicalAPY
         .sort(sortByTimestamp)
@@ -1629,7 +1631,8 @@ class Asset extends Component {
                 date,
                 parseFloat(groups[date][halfCount].elonApy.toFixed(4)),
               ]);
-            } else if (asset.strategyType === "daoFaang") {
+            } 
+            else if (asset.strategyType === "daoFaang") {
               faangAPY.push([
                 date,
                 parseFloat(groups[date][halfCount].faangApy.toFixed(4)),

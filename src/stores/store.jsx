@@ -6484,7 +6484,8 @@ class Store {
         .on("error", function (error) {
           if (!error.toString().includes("-32601")) {
             if (error.message) {
-              emitter.emit(ERROR, error);
+              console.log("Error in withdrawBoth" ,error);
+              emitter.emit(ERROR, error.message);
               // return callback(error.message);
             }
             // callback(error, null, null);
@@ -6494,7 +6495,8 @@ class Store {
           if (!error.toString().includes("-32601")) {
             if (error.message) {
               // return callback(error.message);
-              emitter.emit(ERROR, error);
+              console.log("Error in withdrawBoth" ,error);
+              emitter.emit(ERROR, error.message);
             }
             // callback(error, null, null);
           }
