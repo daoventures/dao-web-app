@@ -700,8 +700,7 @@ class Vault extends Component {
       loading: true,
       expanded: "",
       modalOpen: false,
-      currentTab: "ALL",
-      tabList: ["ALL", BASIC, ADVANCE, EXPERT, DEGEN],
+      currentTab: "All",
       disableSetVaultFromURL: false
     };
 

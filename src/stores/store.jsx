@@ -583,7 +583,7 @@ class Store {
           strategyAddress: "", // TODO: Update to mainnet strategy contract address
           strategyContractABI: config.strategyDAOSTOContractABI,
           historicalPriceId: "daoSTO_price",
-          logoFormat: "png",
+          logoFormat: "svg",
           risk: ADVANCE,
           strategyType: "daoFaang",
           cTokenAddress: "",
@@ -955,7 +955,7 @@ class Store {
           strategyAddress: "0xccced6278e9c6e68210f3bdc1bc3444e830cad33",
           strategyContractABI: config.strategyDAOSTOContractABI,
           historicalPriceId: "daoSTO_price",
-          logoFormat: "png",
+          logoFormat: "svg",
           risk: ADVANCE,
           strategyType: "daoFaang",
           cTokenAddress: "",
