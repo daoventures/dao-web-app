@@ -82,6 +82,7 @@ const colorObj = {
     borderD: "rgba(115, 103, 247, 0.4)",
     form: "rgba(255, 255, 255, 0.1)",
     formH: "rgba(0, 0, 0, 0.2)",
+    formHappyHour: "#FFBF41",
     formWarning: "#ff6700",
     formError: "#DC0B0C",
     formD: "rgba(115, 103, 247, 0.4)",

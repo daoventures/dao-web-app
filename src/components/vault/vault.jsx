@@ -777,7 +777,7 @@ class Vault extends Component {
   }
 
   handleHappyHour = (payload) => {
-    this.setState({ happyHour: payload.happyHour });
+    this.setState({ happyHour: payload.happyHour, happyHourThreshold: payload.happyHourThreshold });
   };
 
   networkChanged = (obj) => {
@@ -1224,6 +1224,8 @@ class Vault extends Component {
               </AccordionSummary>
               <AccordionDetails className={classes.removePadding}>
                 <Asset
+                  happyHour={this.state.happyHour}
+                  happyHourThreshold={this.state.happyHourThreshold}
                   asset={asset}
                   startLoading={this.startLoading}
                   basedOn={basedOn}

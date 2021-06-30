@@ -493,7 +493,17 @@ const styles = (theme) => ({
   },
   errorMessage: {
     align: "left",
+    color: theme.themeColors.formError,
+    marginTop: "3px",
+  },
+  happyHourWarning: {
+    align: "left",
     color: theme.themeColors.formWarning,
+    marginTop: "3px",
+  },
+  happyHourMessage: {
+    align: "left",
+    color: theme.themeColors.formHappyHour,
     marginTop: "3px",
   },
 });
@@ -542,6 +552,8 @@ class Asset extends Component {
       scales: [25, 50, 75, 100],
       withdrawErrorMessage: "",
       withdrawEarnErrorMessage: "",
+      happyHourWarning: "",
+      happyHourMessage: "",
     };
   }
 
@@ -739,7 +751,9 @@ class Asset extends Component {
       redeemAmount,
       redeemAmountError,
       percent,
-      redeemAmountPercent
+      redeemAmountPercent,
+      happyHourWarning,
+      happyHourMessage,
     } = this.state;
 
     return (
@@ -793,6 +807,18 @@ class Asset extends Component {
           <Typography variant={"h5"} className={classes.errorMessage}>
             {this.state.errorMessage}
           </Typography>
+        )}
+        {
+          isDeposit && this.state.errorMessage === "" && this.state.happyHourWarning !== "" && (
+            <Typography variant={"h5"} className={classes.happyHourWarning}>
+              {happyHourWarning}
+            </Typography>
+        )}
+        {
+          isDeposit && this.state.errorMessage === "" && this.state.happyHourMessage  !== "" && (
+            <Typography variant={"h5"} className={classes.happyHourMessage}>
+              {happyHourMessage}
+            </Typography>
         )}
         {!isDeposit && this.state.withdrawErrorMessage !== "" && (
           <Typography variant={"h5"} className={classes.errorMessage}>
