@@ -2288,8 +2288,8 @@ class Asset extends Component {
         dispatcher.dispatch({
           type: WITHDRAW_BOTH,
           content: {
-            earnAmount: redeemEarnAmount,
-            vaultAmount: redeemAmount,
+            earnAmount: redeemEarnAmount.toString(),
+            vaultAmount: redeemAmount.toString(),
             amount: "0",
             asset: asset,
           },
@@ -2315,7 +2315,7 @@ class Asset extends Component {
           content: {
             earnAmount: "0",
             vaultAmount: "0",
-            amount: redeemAmount,
+            amount: redeemAmount.toString(),
             asset: asset,
           },
         });
