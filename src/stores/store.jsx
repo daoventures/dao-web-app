@@ -6177,18 +6177,17 @@ class Store {
         dvgDecimal = await dvgContract.methods.decimals().call();
 
       } else if (network === 1) { 
-        // TODO: Update this to mainnet address
-        // daoMineContract = new web3.eth.Contract(
-        //   config.daoStakeContractABI,
-        //   config.daoStakeTestContract
-        // );
+        daoMineContract = new web3.eth.Contract(
+          config.daoStakeContractABI,
+          config.daoStakeMainnetContract
+        );
 
-        // dvgContract = new web3.eth.Contract(
-        //   config.dvgTokenContractABI,
-        //   config.dvgTokenTestContract
-        // );
+        dvgContract = new web3.eth.Contract(
+          config.dvgTokenContractABI,
+          config.dvgTokenMainnetContract
+        );
 
-        // dvgDecimal = await dvgContract.methods.decimals().call();
+        dvgDecimal = await dvgContract.methods.decimals().call();
       }
 
       async.map(
@@ -6273,8 +6272,7 @@ class Store {
     if (network === 42) {
       daoMineContractAddress = config.daoStakeTestContract;
     } else if (network === 1) {
-      // TODO: Remember to update this to mainnet address
-      // daoMineContractAddress = config.daoStakeTestContract; 
+      daoMineContractAddress = config.daoStakeMainnetContract; 
     }
 
     const daoMineContract = new web3.eth.Contract(
@@ -6481,8 +6479,7 @@ class Store {
     if (network === 42) {
       daoMineContractAddress = config.daoStakeTestContract;
     } else if (network === 1) {
-      // TODO: Remember to update this to mainnet address
-      // daoMineContractAddress = config.daoStakeTestContract; 
+      daoMineContractAddress = config.daoStakeMainnetContract; 
     }
 
     try {
