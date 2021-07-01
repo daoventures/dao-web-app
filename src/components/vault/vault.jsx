@@ -1442,6 +1442,13 @@ class Vault extends Component {
         } else {
           return "0.00%";
         }
+      } else if (asset.strategyType === "harvest") {
+        // if (asset.stats.harvestApy) {
+        //   return (asset.stats.harvestApy / 1).toFixed(2) + "%";
+        // } else {
+        //   return "0.00%";
+        // }
+        return "0%"
       }
     } else {
       return "0.00%";

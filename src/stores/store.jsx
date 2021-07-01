@@ -3877,7 +3877,14 @@ class Store {
             asset.vaultContractAddress.toLowerCase()
           );
         });
-      }
+      } else if (asset.strategyType === "harvest") {
+        vault = vaultStatistics.filter((stats) => {
+          return (
+            stats.address.toLowerCase() ===
+            asset.vaultContractAddress.toLowerCase()
+          );
+        });
+      } 
 
       if (vault.length === 0) {
         return callback(null, {});
@@ -5308,6 +5315,35 @@ class Store {
           vaultPricePerFullShare: 0,
           compoundExchangeRate: 0,
           citadelPricePerFullShare: pricePerFullShare,
+        };
+        return callback(null, returnObj);
+      } else if (asset.strategyType === "harvest") {
+        const block = await web3.eth.getBlockNumber();
+        const harvestContract = new web3.eth.Contract(
+          asset.vaultContractABI,
+          asset.vaultContractAddress
+        );
+        const usdtEthPriceFeedContract = new web3.eth.Contract(
+          config.USDTETHPriceFeedContractABI,
+          config.USDTETHPriceFeedContract
+        );
+        // USDT / ETH conversion result
+        const ethPrice = await usdtEthPriceFeedContract.methods
+          .latestAnswer()
+          .call();
+        
+        const pool = await harvestContract.methods
+        .getAllPoolInETH(ethPrice)
+        .call();
+        const totalSupply = await harvestContract.methods.totalSupply().call();
+
+        const pricePerFullShare = pool / totalSupply;
+
+        const returnObj = {
+          earnPricePerFullShare: 0,
+          vaultPricePerFullShare: 0,
+          compoundExchangeRate: 0,
+          apy: 0,
         };
         return callback(null, returnObj);
       }
