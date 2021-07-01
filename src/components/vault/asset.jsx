@@ -1137,7 +1137,7 @@ class Asset extends Component {
                     {this.isUsdVault(asset) && (
                       <div>
                         {asset.balances
-                          ? asset.balances[this.state.tokenIndex].toFixed(4)
+                          ? (Math.floor(asset.balances[this.state.tokenIndex] * 10000) / 10000).toFixed(4)
                           : "0.0000"}{" "}
                         {asset.symbols
                           ? asset.symbols[this.state.tokenIndex]
@@ -2092,6 +2092,7 @@ class Asset extends Component {
       }
   
       const depositedShares = this.calculateDepositShare(asset, null);
+
       if (this.validateInputValMoreThanBalance(amount, depositedShares)) {
         this.setRedeemAmountError("Exceed available balance");
         return;
