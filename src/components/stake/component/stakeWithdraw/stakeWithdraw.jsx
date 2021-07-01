@@ -9,6 +9,8 @@ import {
     WITHDRAW_DAOMINE_RETURNED_COMPLETED,
     ERROR
 } from '../../../../constants/constants';
+import { validateDigit, validateInputMoreThanBalance, validateAmountNotExist } from "../../helper/validation";
+
 
 const styles = (theme) => ({
     contentHeader: {
@@ -183,11 +185,34 @@ class StakeWithdraw extends Component {
 
     // Staked amount input on change handler
     onChange = (event) => {
-        this.setState({ amountError: false, errorMessage: "", percent: 0 });
         let val = [];
         val[event.target.id] = event.target.value;
-        this.setState(val);
+        this.verifyInput(val[event.target.id]);
+        this.setState({amount: val[event.target.id]});
     };
+
+    verifyInput = (amount) => {
+        const { pool } = this.props;
+        const { userInfo } = pool;
+    
+        if(!validateDigit(amount) || validateAmountNotExist(amount))  {
+          this.setInputErrorState("Invalid amount");
+          return;
+        }
+    
+        const displayStakedAmount = Math.floor((userInfo.depositedLPAmount / 10 ** pool.decimal) * 10000) / 10000;
+    
+        if(validateInputMoreThanBalance(amount, displayStakedAmount)){
+          this.setInputErrorState("Exceed available balance.");
+          return;
+        }
+    
+        this.setState({ amountError: false, errorMessage: "" });
+      }
+    
+      setInputErrorState = (message) => {
+        this.setState({ amountError: true, errorMessage: message });
+      }
 
     // Handler when withdrawal process completed
     onWithdrawCompleted = (txnHash) => {
@@ -213,6 +238,8 @@ class StakeWithdraw extends Component {
                 Math.floor((userInfo.depositedLPAmount / 10 ** pool.decimal) * 10000) /
                 10000,
             percent,
+            amountError: false,
+            errorMessage: ""
         });
     };
 
@@ -223,19 +250,12 @@ class StakeWithdraw extends Component {
         const { amount } = this.state;
         const { userInfo } = pool;
 
-        const digitRegex = /^[0-9]\d*(\.\d+)?$/;
+        if (validateAmountNotExist(amount)) {
+            this.setState({ amountError: true, errorMessage: "Invalid amount" });
+            return;
+        }
 
         let finalAmount = 0;
-
-        if (!digitRegex.test(amount)) {
-            this.setState({ amountError: true, errorMessage: "Invalid amount" });
-            return;
-        }
-
-        if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
-            this.setState({ amountError: true, errorMessage: "Invalid amount" });
-            return;
-        }
 
         const displayStakedAmount = Math.floor((userInfo.depositedLPAmount / 10 ** pool.decimal) * 10000) / 10000;
         const exactStakedAmount = userInfo.depositedLPAmount / 10 ** pool.decimal;
@@ -245,30 +265,32 @@ class StakeWithdraw extends Component {
             // User input to withdraw 0.4521, which is max on UI
             // Then we append final withdrawal amount as all of staked amount.i.e. 0.45219
             finalAmount = exactStakedAmount;
-        } else if (parseFloat(amount) > parseFloat(exactStakedAmount)) {
-            // Example remaining = 0.45219, display on UI as 0.4521 (4 d.p.)
-            // User input to withdraw 0.452198
-            // 0.452198 > 0.45219, show error message.
-            this.setState({ amountError: true, errorMessage: "Exceed available balance" });
-            return;
         } else if (parseFloat(amount) < parseFloat(displayStakedAmount) ||
             parseFloat(amount) <= exactStakedAmount) {
             // Example remaining = 0.45219, display on UI as 0.4521 (4 d.p.)
             // Case 1 : User input to withdraw 0.2, 0.2 < 0.45219, final amount = 0.2
             // Case 2 : User input to withdraw 0.45215, still <= 0.45219, final amount = 0.45215
             finalAmount = parseFloat(amount);
+        } else if (parseFloat(amount) > parseFloat(exactStakedAmount)) {
+            // Example remaining = 0.45219, display on UI as 0.4521 (4 d.p.)
+            // User input to withdraw 0.452198
+            // 0.452198 > 0.45219, show error message.
+            // this.setState({ amountError: true, errorMessage: "Exceed available balance" });
+            // return;
         }
 
-        this.setState({ loading: true });
-        startLoading();
+        if(!this.state.amountError && this.state.errorMessage === "") {
+            this.setState({ loading: true });
+            startLoading();
 
-        dispatcher.dispatch({
-            type: WITHDRAW_DAOMINE,
-            content: {
-                pool,
-                amount: finalAmount.toString()
-            }
-        })
+            dispatcher.dispatch({
+                type: WITHDRAW_DAOMINE,
+                content: {
+                    pool,
+                    amount: finalAmount.toString()
+                }
+            })
+        }
     };
 
     render() {
