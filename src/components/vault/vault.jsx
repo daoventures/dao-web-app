@@ -51,7 +51,7 @@ import {
   APPROVE_TRANSACTING,
   APPROVE_COMPLETED,
   HAPPY_HOUR_RETURN,
-  ALL
+  ALL,
 } from "../../constants";
 
 import Store from "../../stores";
@@ -749,10 +749,6 @@ class Vault extends Component {
     emitter.on(CHANGE_NETWORK, this.networkChanged);
     emitter.on(VAULT_BALANCES_FULL_RETURNED, this.networkChanged);
     emitter.on(HAPPY_HOUR_RETURN, this.handleHappyHour);
-    emitter.on(
-      DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED,
-      this.handleHappyHourCompleted
-    );
   }
 
   componentWillUnmount() {
