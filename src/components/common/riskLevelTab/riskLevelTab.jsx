@@ -3,6 +3,13 @@ import React, { Component } from "react";
 
 import { withRouter } from "react-router";
 import { withStyles } from "@material-ui/core/styles";
+import {
+    BASIC,
+    ADVANCE,
+    EXPERT,
+    DEGEN,
+    ALL,
+} from '../../../constants/constants';
 
 const styles = (theme) => ({
   typeTab: {
@@ -77,15 +84,15 @@ class RiskLevelTab extends Component {
     super();
 
     this.state = {
-      tabList: [
-        { label: "ALL", icon: "#iconmeau-sel", color: "#6D61EA" },
-        { label: BASIC, icon: "#iconbasic", color: "#15C73E" },
-        { label: ADVANCE, icon: "#iconAdvance", color: "#C77815" },
-        { label: EXPERT, icon: "#iconExpert", color: "#C715A7" },
-        { label: DEGEN, icon: "#iconDegen", color: "#DC0B0C" },
+      tabList : [
+          { label: ALL, icon: "#iconmeau-sel", color: "#6D61EA" },
+          { label: BASIC, icon: "#iconbasic", color: "#15C73E" },
+          { label: ADVANCE, icon: "#iconAdvance", color: "#C77815" },
+          { label: EXPERT, icon: "#iconExpert", color: "#C715A7" },
+          { label: DEGEN, icon: "#iconDegen", color: "#DC0B0C" }
       ],
       currentTab: 0,
-    };
+    }
   }
 
   render() {
