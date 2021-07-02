@@ -19,8 +19,7 @@ import {
   DEPOSIT_DAOMINE_RETURNED_COMPLETED,
   WITHDRAW_DAOMINE_RETURNED,
   WITHDRAW_DAOMINE_RETURNED_COMPLETED,
-  ERROR,
-  ALL
+  ERROR
 } from "../../constants/constants";
 
 import RiskLevelTab from "../common/riskLevelTab/riskLevelTab";
@@ -301,7 +300,7 @@ class Stake extends Component {
           )
         : null,
       pools: store.getStore("stakePools"),
-      currentTab: ALL,
+      currentTab: "All",
       expanded: "",
       loading: false,
     };
@@ -554,7 +553,7 @@ class Stake extends Component {
     return pools && pools.length > 0
       ? pools
           .filter((pool) => {
-            return currentTab === ALL || pool.category === currentTab
+            return currentTab === "All" || pool.category === currentTab
               ? true
               : false;
           })

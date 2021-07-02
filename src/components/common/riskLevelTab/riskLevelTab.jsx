@@ -6,7 +6,6 @@ import {
     ADVANCE,
     EXPERT,
     DEGEN,
-    ALL,
 } from '../../../constants/constants';
 
 const styles = (theme) => ({
@@ -84,7 +83,7 @@ class RiskLevelTab extends Component {
 
         this.state = {
             tabList : [
-                { label: ALL, icon: "#iconmeau-sel", color: "#6D61EA" },
+                { label: "All", icon: "#iconmeau-sel", color: "#6D61EA" },
                 { label: BASIC, icon: "#iconbasic", color: "#15C73E" },
                 { label: ADVANCE, icon: "#iconAdvance", color: "#C77815" },
                 { label: EXPERT, icon: "#iconExpert", color: "#C715A7" },
