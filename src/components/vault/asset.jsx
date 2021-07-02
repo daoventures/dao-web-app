@@ -2466,9 +2466,10 @@ class Asset extends Component {
       amount = (balance * percent) / 100;
     }
 
-    this.verifyInput(amount.toFixed(4));
-    amount = Math.floor(amount * 10000) / 10000;
-    this.setState({ amount: amount.toFixed(4), percent, amountError: false, errorMessage: "" });
+    amount = (Math.floor(amount * 10000) / 10000).toFixed(4);
+    this.verifyInput(amount);
+
+    this.setState({ amount, percent, amountError: false, errorMessage: "" });
   };
 
   setCurrency = (tokenIndex) => {
