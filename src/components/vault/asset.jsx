@@ -1089,7 +1089,7 @@ class Asset extends Component {
                       </Typography>
                     </div>
                     <div className={classes.rightLabelContainer}>
-                      {this.renderYearnRatio(true)}
+                      {this.renderYearnRatio(false)}
                     </div>
                   </div>
                   <Slider
