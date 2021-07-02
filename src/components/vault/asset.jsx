@@ -2464,10 +2464,10 @@ class Asset extends Component {
     } else {
       const balance = asset.balance;
       amount = (balance * percent) / 100;
-      amount = Math.floor(amount * 10000) / 10000;
     }
 
     this.verifyInput(amount.toFixed(4));
+    amount = Math.floor(amount * 10000) / 10000;
     this.setState({ amount: amount.toFixed(4), percent, amountError: false, errorMessage: "" });
   };
 
