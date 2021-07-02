@@ -6629,14 +6629,12 @@ class Store {
             asset.earnApr = data[6];
             asset.historicalAPY = data[7];
             asset.tvl = data[8][0].tvl;
-
-            // Balances for strategy support multiple token
             asset.balances =
               data[9] && data[9].balances ? data[9].balances : null;
             asset.priceInUSD =
-              data[10] && data[10].priceInUSD ? data[10].priceInUSD : null;
-            asset.sumBalances = data[10].sumBalances;
-            asset.daomineApy = data[11] ? data[11].daomineApy : 0;
+              data[9] && data[9].priceInUSD ? data[9].priceInUSD : null;
+            asset.sumBalances = data[9].sumBalances;
+            asset.daomineApy = data[10] ? data[10].daomineApy : 0;
             // asset.addressTransactions = data[7]
             // asset.vaultHoldings = data[3]
             
