@@ -22,6 +22,7 @@ import {
   WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
   WITHDRAW_VAULT_RETURNED,
   WITHDRAW_VAULT_RETURNED_COMPLETED,
+  ALL,
 } from "../../constants";
 import {
   Accordion,
@@ -46,39 +47,13 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import InfoIcon from "@material-ui/icons/Info";
 import Loader from "../loader";
 import RiskLevelLabel from "../common/riskLevelLabel/riskLevelLabel";
-
+import SearchIcon from "@material-ui/icons/Search";
+import Snackbar from "../snackbar";
 import RiskLevelTab from '../common/riskLevelTab/riskLevelTab';
 import queryString from 'query-string';
 
-import {
-  ERROR,
-  DEPOSIT_CONTRACT_RETURNED,
-  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-  WITHDRAW_VAULT_RETURNED,
-  WITHDRAW_VAULT_RETURNED_COMPLETED,
-  DEPOSIT_ALL_CONTRACT_RETURNED,
-  DEPOSIT_ALL_CONTRACT_RETURNED_COMPLETED,
-  WITHDRAW_BOTH_VAULT_RETURNED,
-  WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
-  CONNECTION_CONNECTED,
-  CONNECTION_DISCONNECTED,
-  GET_STRATEGY_BALANCES_FULL,
-  STRATEGY_BALANCES_FULL_RETURNED,
-  CHANGE_NETWORK,
-  VAULT_BALANCES_FULL_RETURNED,
-  BASIC,
-  ADVANCE,
-  EXPERT,
-  DEGEN,
-  APPROVE_TRANSACTING,
-  APPROVE_COMPLETED,
-  HAPPY_HOUR_RETURN,
-  ALL,
-} from "../../constants";
-
 import Store from "../../stores";
 import UnlockModal from "../unlock/unlockModal";
-import queryString from "query-string";
 import { withNamespaces } from "react-i18next";
 import { withRouter } from "react-router-dom";
 import { withStyles } from "@material-ui/core/styles";

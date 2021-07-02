@@ -1,15 +1,8 @@
-import { ADVANCE, BASIC, DEGEN, EXPERT } from "../../../constants/constants";
+import { ADVANCE, BASIC, DEGEN, EXPERT, ALL } from "../../../constants/constants";
 import React, { Component } from "react";
 
 import { withRouter } from "react-router";
 import { withStyles } from "@material-ui/core/styles";
-import {
-    BASIC,
-    ADVANCE,
-    EXPERT,
-    DEGEN,
-    ALL,
-} from '../../../constants/constants';
 
 const styles = (theme) => ({
   typeTab: {
