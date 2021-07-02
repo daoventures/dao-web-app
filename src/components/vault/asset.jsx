@@ -2064,7 +2064,7 @@ class Asset extends Component {
       this.setState({ amountError: false, errorMessage: "" });
     }
 
-    if (asset.strategyType === "citadel" && happyHour === true) {
+    if (asset.happyHourEnabled === true && happyHour === true) {
       if (parseFloat(amount) < parseFloat(happyHourThreshold)) {
         this.setState({
           // amountError: true,
@@ -2218,7 +2218,7 @@ class Asset extends Component {
 
     this.setState({ amountError: false, errorMessage: "" });
 
-    if (asset.strategyType === "citadel" && happyHour === true) {
+    if (asset.happyHourEnabled === true && happyHour === true) {
       if (parseFloat(amount) < parseFloat(happyHourThreshold)) {
         this.setState({
           // amountError: true,

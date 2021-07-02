@@ -1,5 +1,6 @@
 import {
   ADVANCE,
+  ALL,
   APPROVE_COMPLETED,
   APPROVE_TRANSACTING,
   BASIC,
@@ -22,7 +23,6 @@ import {
   WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
   WITHDRAW_VAULT_RETURNED,
   WITHDRAW_VAULT_RETURNED_COMPLETED,
-  ALL,
 } from "../../constants";
 import {
   Accordion,
@@ -47,13 +47,12 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import InfoIcon from "@material-ui/icons/Info";
 import Loader from "../loader";
 import RiskLevelLabel from "../common/riskLevelLabel/riskLevelLabel";
+import RiskLevelTab from '../common/riskLevelTab/riskLevelTab';
 import SearchIcon from "@material-ui/icons/Search";
 import Snackbar from "../snackbar";
-import RiskLevelTab from '../common/riskLevelTab/riskLevelTab';
-import queryString from 'query-string';
-
 import Store from "../../stores";
 import UnlockModal from "../unlock/unlockModal";
+import queryString from 'query-string';
 import { withNamespaces } from "react-i18next";
 import { withRouter } from "react-router-dom";
 import { withStyles } from "@material-ui/core/styles";
@@ -1171,7 +1170,7 @@ class Vault extends Component {
                   </svg>
                 </a>
                 {asset.isPopularItem || this.state.happyHour
-                  ? this.state.happyHour && asset.strategyType === "citadel"
+                  ? this.state.happyHour && asset.happyHourEnabled === true
                     ? this.renderHappyHourIcon(asset)
                     : this.renderPopularIcon(asset)
                   : null}
