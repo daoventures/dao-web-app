@@ -6021,15 +6021,19 @@ class Store {
         async.parallel(
           [
             (callbackInner) => {
+              // 0
               this._getERC20Balance(web3, asset, account, callbackInner);
             },
             (callbackInner) => {
+              // 1
               this._getBalances(web3, asset, account, callbackInner);
             },
             (callbackInner) => {
+              // 2
               this._getStatsAPY(vaultStatistics, asset, callbackInner);
             },
             (callbackInner) => {
+              // 3
               this._getAssetUSDPrices(
                 web3,
                 asset,
@@ -6039,15 +6043,19 @@ class Store {
               );
             },
             (callbackInner) => {
+              // 4
               this._getVaultAPY(web3, asset, account, callbackInner);
             },
             (callbackInner) => {
+              // 5
               this._getAddressStats(addressStatistics, asset, callbackInner);
             },
             (callbackInner) => {
+              // 6
               this._getMaxAPR(web3, asset, account, callbackInner);
             },
             (callbackInner) => {
+              // 7
               this._getHistoricalAPY(
                 web3,
                 asset,
@@ -6057,18 +6065,11 @@ class Store {
               );
             },
             (callbackInner) => {
-              this._getHistoricalAPY(
-                web3,
-                asset,
-                account,
-                interval,
-                callbackInner
-              );
-            },
-            (callbackInner) => {
+              // 8
               this._getTvl(asset.tvlKey, callbackInner);
             },
             (callbackInner) => {
+              // 9
               this._getERC20BalancesCitadel(
                 web3,
                 asset,
@@ -6107,13 +6108,13 @@ class Store {
             asset.addressStatistics = data[5];
             asset.earnApr = data[6];
             asset.historicalAPY = data[7];
-            asset.tvl = data[9][0].tvl;
+            asset.tvl = data[8][0].tvl;
             asset.balances =
-              data[10] && data[10].balances ? data[10].balances : null;
+              data[9] && data[9].balances ? data[9].balances : null;
             asset.priceInUSD =
-              data[10] && data[10].priceInUSD ? data[10].priceInUSD : null;
-            asset.sumBalances = data[10].sumBalances;
-            asset.daomineApy = data[11] ? data[11].daomineApy : 0;
+              data[9] && data[9].priceInUSD ? data[9].priceInUSD : null;
+            asset.sumBalances = data[9].sumBalances;
+            asset.daomineApy = data[10] ? data[10].daomineApy : 0;
             // asset.addressTransactions = data[7]
             // asset.vaultHoldings = data[3]
             
