@@ -6507,18 +6507,6 @@ class Store {
     }
   };
 
-  _getVaultDAOmineAPY = (asset, pools, callback) => {
-    if(pools.length <= 0) { 
-      return callback(null, null); 
-    } 
-    const pool = pools.find(pool => pool.contract_address.toLowerCase() === asset.vaultContractAddress.toLowerCase());
-    if(pool === undefined) {
-      return callback(null, null);
-    } else {
-      return callback(null, { daomineApy: pool.apr});
-    }
-  }
-
   getStrategyBalancesFull = async (payload) => {
     const network = store.getStore("network");
     const account = store.getStore("account");
@@ -6535,9 +6523,7 @@ class Store {
     }
     const vaultStatistics = await this._getStatistics();
     const addressStatistics = await this._getAddressStatistics(account.address);
-    const daoMinePools = await this._findDAOminePool();
-    const pools = daoMinePools.pools;
-   
+
     const usdPrices = await this._getUSDPrices();
     await this.getUSDPrices();
 
@@ -6598,10 +6584,6 @@ class Store {
               // 9
               this._getERC20Balances(web3, asset, account, callbackInner);
             },
-            (callbackInner) => {
-              // 10
-              this._getVaultDAOmineAPY(asset, pools, callbackInner);
-            }
 
             // (callbackInner) => { this._getVaultHoldings(web3, asset, account, callbackInner) },
             // (callbackInner) => { this._getAddressTransactions(addressTXHitory, asset, callbackInner) },
@@ -6646,10 +6628,11 @@ class Store {
               data[9] && data[9].priceInUSD ? data[9].priceInUSD : null;
             asset.sumBalances = data[9].sumBalances;
 
-            asset.daomineApy = data[10] ? data[10].daomineApy : 0;
-           
             // asset.addressTransactions = data[7]
             // asset.vaultHoldings = data[3]
+            if (asset.id === "daoSTO" || asset.id === "daoELO") {
+              console.log("Asset for STONK", asset);
+            }
             callback(null, asset);
           }
         );
