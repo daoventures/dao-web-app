@@ -10,6 +10,7 @@ import {
   ERROR
 } from "../../../../constants/constants";
 import Store from "../../../../stores/store";
+import { validateDigit, validateInputMoreThanBalance, validateAmountNotExist } from "../../helper/validation";
 
 const styles = (theme) => ({
   contentHeader: {
@@ -195,11 +196,34 @@ class StakeDeposit extends Component {
   }
 
   onChange = (event) => {
-    this.setState({ amountError: false, errorMessage: "", percent: 0 });
     let val = [];
     val[event.target.id] = event.target.value;
-    this.setState(val);
+    this.verifyInput(val[event.target.id]);
+    this.setState({amount: val[event.target.id]});
   };
+
+  verifyInput = (amount) => {
+    const { pool } = this.props;
+    const { userInfo } = pool;
+
+    if(!validateDigit(amount) || validateAmountNotExist(amount))  {
+      this.setInputErrorState("Invalid amount");
+      return;
+    }
+
+    const tokenBalance = Math.floor((userInfo.tokenBalance / 10 ** pool.decimal) * 10000) / 10000;
+
+    if(validateInputMoreThanBalance(amount, tokenBalance)){
+      this.setInputErrorState("Exceed available balance.");
+      return;
+    }
+
+    this.setState({ amountError: false, errorMessage: "" });
+  }
+
+  setInputErrorState = (message) => {
+    this.setState({ amountError: true, errorMessage: message });
+  }
 
   setAmount = (percent) => {
     const { pool } = this.props;
@@ -209,46 +233,32 @@ class StakeDeposit extends Component {
         Math.floor((userInfo.tokenBalance / 10 ** pool.decimal) * 10000) /
         10000,
       percent,
+      amountError: false,
+      errorMessage: "",
     });
   };
 
   onDeposit = () => {
-    this.setState({ amountError: false, errorMessage: "" });
-
     const { startLoading, pool } = this.props;
     const { amount } = this.state;
-    const { userInfo } = pool;
-
-    const digitRegex = /^[0-9]\d*(\.\d+)?$/;
-
-    if (!digitRegex.test(amount)) {
-      this.setState({ amountError: true, errorMessage: "Invalid amount" });
+    
+    if(validateAmountNotExist(amount)) {
+      this.setInputErrorState("Invalid amount");
       return;
     }
-
-    if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
-      this.setState({ amountError: true, errorMessage: "Invalid amount" });
-      return;
+ 
+    if(!this.state.amountError && this.state.errorMessage === "") {
+      this.setState({ loading: true });
+      startLoading();
+  
+      dispatcher.dispatch({
+        type: DEPOSIT_DAOMINE,
+        content: {
+          pool,
+          amount: amount.toString()
+        }
+      })
     }
-
-    const tokenBalance = Math.floor((userInfo.tokenBalance / 10 ** pool.decimal) * 10000) / 10000;
-
-    if (parseFloat(amount) > tokenBalance) {
-      this.setState({ amountError: true, errorMessage: "Exceed available balance" });
-      return;
-    }
-
-    this.setState({ loading: true });
-    startLoading();
-
-    dispatcher.dispatch({
-      type: DEPOSIT_DAOMINE,
-      content: {
-        pool,
-        amount: amount.toString()
-      }
-    })
-
   };
 
   navigate = (vaultName) => {

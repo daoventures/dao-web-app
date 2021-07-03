@@ -4731,10 +4731,11 @@ class Store {
       })
       .on("confirmation", function (confirmationNumber, receipt) {
         console.log("Confirmation", confirmationNumber, receipt);
-        callback(null, null, receipt);
+        // callback(null, null, receipt);
       })
       .on("receipt", function (receipt) {
         console.log(receipt);
+        callback(null, null, receipt);
       })
       .on("error", function (error) {
         if (!error.toString().includes("-32601")) {
@@ -4796,10 +4797,11 @@ class Store {
       })
       .on("confirmation", function (confirmationNumber, receipt) {
         console.log("Confirmation", confirmationNumber, receipt);
-        callback(null, null, receipt);
+        // callback(null, null, receipt);
       })
       .on("receipt", function (receipt) {
         console.log("Reciept", receipt);
+        callback(null, null, receipt);
       })
       .on("error", function (error) {
         if (!error.toString().includes("-32601")) {
@@ -6507,6 +6509,18 @@ class Store {
     }
   };
 
+  _getVaultDAOmineAPY = (asset, pools, callback) => {
+    if(pools.length <= 0) { 
+      return callback(null, null); 
+    } 
+    const pool = pools.find(pool => pool.contract_address.toLowerCase() === asset.vaultContractAddress.toLowerCase());
+    if(pool === undefined) {
+      return callback(null, null);
+    } else {
+      return callback(null, { daomineApy: pool.apr});
+    }
+  }
+
   getStrategyBalancesFull = async (payload) => {
     const network = store.getStore("network");
     const account = store.getStore("account");
@@ -6524,6 +6538,9 @@ class Store {
     const vaultStatistics = await this._getStatistics();
     const addressStatistics = await this._getAddressStatistics(account.address);
 
+    const daoMinePools = await this._findDAOminePool();
+    const pools = daoMinePools.pools;
+   
     const usdPrices = await this._getUSDPrices();
     await this.getUSDPrices();
 
@@ -6584,6 +6601,10 @@ class Store {
               // 9
               this._getERC20Balances(web3, asset, account, callbackInner);
             },
+            (callbackInner) => {
+              // 10
+              this._getVaultDAOmineAPY(asset, pools, callbackInner);
+            }
 
             // (callbackInner) => { this._getVaultHoldings(web3, asset, account, callbackInner) },
             // (callbackInner) => { this._getAddressTransactions(addressTXHitory, asset, callbackInner) },
@@ -6620,19 +6641,15 @@ class Store {
             asset.earnApr = data[6];
             asset.historicalAPY = data[7];
             asset.tvl = data[8][0].tvl;
-
-            // Balances for strategy support multiple token
             asset.balances =
               data[9] && data[9].balances ? data[9].balances : null;
             asset.priceInUSD =
               data[9] && data[9].priceInUSD ? data[9].priceInUSD : null;
             asset.sumBalances = data[9].sumBalances;
-
+            asset.daomineApy = data[10] ? data[10].daomineApy : 0;
             // asset.addressTransactions = data[7]
             // asset.vaultHoldings = data[3]
-            if (asset.id === "daoSTO" || asset.id === "daoELO") {
-              console.log("Asset for STONK", asset);
-            }
+            
             callback(null, asset);
           }
         );
@@ -6726,7 +6743,19 @@ class Store {
         );
 
         dvgDecimal = await dvgContract.methods.decimals().call();
-      } else if (network === 1) {
+
+      } else if (network === 1) { 
+        daoMineContract = new web3.eth.Contract(
+          config.daoStakeContractABI,
+          config.daoStakeMainnetContract
+        );
+
+        dvgContract = new web3.eth.Contract(
+          config.dvgTokenContractABI,
+          config.dvgTokenMainnetContract
+        );
+
+        dvgDecimal = await dvgContract.methods.decimals().call();
       }
 
       async.map(
@@ -6825,8 +6854,7 @@ class Store {
     if (network === 42) {
       daoMineContractAddress = config.daoStakeTestContract;
     } else if (network === 1) {
-      // TODO: Remember to update this to mainnet address
-      // daoMineContractAddress = config.daoStakeTestContract;
+      daoMineContractAddress = config.daoStakeMainnetContract; 
     }
 
     const daoMineContract = new web3.eth.Contract(
@@ -6834,57 +6862,56 @@ class Store {
       daoMineContractAddress
     );
 
-    this._checkLpTokenContractApproval(
-      account,
-      lpTokenContract,
-      daoMineContractAddress,
-      amount,
-      (err, txnHash, approvalResult) => {
-        if (err) {
-          return emitter.emit(ERROR, err);
+    const allowance = await lpTokenContract.methods
+      .allowance(account.address, daoMineContractAddress)
+      .call({ from: account.address });
+    const actualAllowance = allowance / (10 ** pool.decimal);
+
+    let approvalError;
+    if(parseFloat(amount) > parseFloat(actualAllowance)) {
+      await this._checkLpTokenContractApproval(
+        account,
+        lpTokenContract,
+        daoMineContractAddress,
+        amount,
+        (err, txnHash, approvalResult) => {
+          if (err) {
+            console.log(err);
+            approvalError = err;
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(APPROVE_TRANSACTING, txnHash);
+          }
+          if (approvalResult) {
+            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
+          }
         }
-
-        console.log(
-          "Callback _checkLpTokenContractApproval(), txnHash",
-          txnHash
-        );
-        if (txnHash) {
-          return emitter.emit(APPROVE_TRANSACTING, txnHash);
+      );
+    }
+    if(!approvalError) {
+      await this._callDepositAmountDAOmineContract(
+        account,
+        pool,
+        daoMineContract,
+        amount,
+        (err, txnHash, depositResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(DEPOSIT_DAOMINE_RETURNED, txnHash);
+          }
+          if (depositResult) {
+            return emitter.emit(
+              DEPOSIT_DAOMINE_RETURNED_COMPLETED,
+              depositResult.transactionHash
+            );
+          }
         }
-
-        console.log(
-          "Callback _checkLpTokenContractApproval(), approvalResult",
-          approvalResult
-        );
-        if (approvalResult) {
-          emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
-
-          this._callDepositAmountDAOmineContract(
-            account,
-            pool,
-            daoMineContract,
-            amount,
-            (err, txnHash, depositResult) => {
-              if (err) {
-                return emitter.emit(ERROR, err);
-              }
-
-              if (txnHash) {
-                return emitter.emit(DEPOSIT_DAOMINE_RETURNED, txnHash);
-              }
-
-              if (depositResult) {
-                return emitter.emit(
-                  DEPOSIT_DAOMINE_RETURNED_COMPLETED,
-                  depositResult.transactionHash
-                );
-              }
-            }
-          );
-        }
-      }
-    );
-  };
+      );
+    }
+  }
 
   _checkLpTokenContractApproval = async (
     account,
@@ -6894,21 +6921,7 @@ class Store {
     callback
   ) => {
     const web3 = await this._getWeb3Provider();
-
     try {
-      const allowance = await lpTokenContract.methods
-        .allowance(account.address, daoMineContractAddress)
-        .call({ from: account.address });
-
-      console.log("Allowance in _checkLpTokenContractApproval()", allowance);
-
-      const ethAllowance = web3.utils.fromWei(allowance, "ether");
-
-      console.log(
-        "ETH Allowance in _checkLpTokenContractApproval()",
-        ethAllowance
-      );
-
       await lpTokenContract.methods
         .approve(
           daoMineContractAddress,
@@ -6919,14 +6932,9 @@ class Store {
           gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
         })
         .on("transactionHash", function (txnHash) {
-          console.log(
-            "Transaction Hash in _checkLpTokenContractApproval()",
-            txnHash
-          );
           callback(null, txnHash, null);
         })
         .on("receipt", function (receipt) {
-          console.log("Receipt in _checkLpTokenContractApproval()", receipt);
           callback(null, null, receipt);
         })
         .on("error", function (error) {
@@ -6945,21 +6953,6 @@ class Store {
             callback(error);
           }
         });
-
-      // if (parseFloat(ethAllowance) < parseFloat(amount)) {
-      //   if (ethAllowance > 0) {
-      //     await lpTokenContract.methods
-      //       .approve(daoMineContractAddress, web3.utils.toWei("0", "ether"))
-      //       .send({
-      //         from: account.address,
-      //         gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-      //       });
-      //   }
-
-      //   callback();
-      // } else {
-      //   callback();
-      // }
     } catch (err) {
       if (err.message) {
         console.log("Err in _checkLpTokenContractApproval()", err.message);
@@ -6980,25 +6973,9 @@ class Store {
     const poolDecimal = pool.decimal;
     const poolIndex = pool.pid;
 
-    console.log(
-      "_callDepositAmountDAOmineContract() , poolDecimal:",
-      poolDecimal
-    );
-    console.log("_callDepositAmountDAOmineContract(), poolIndex: ", poolIndex);
-
     const amountInDecimal = amount * 10 ** poolDecimal;
 
-    console.log(
-      "_callDepositAmountDAOmineContract(), amountInDecimal: ",
-      amountInDecimal
-    );
-
     var amountToSend = web3.utils.toBN(amountInDecimal).toString();
-
-    console.log(
-      "_callDepositAmountDAOmineContract(), amountToSend: ",
-      amountToSend
-    );
 
     daoStakeContract.methods
       .deposit(poolIndex, amountToSend)
@@ -7007,18 +6984,11 @@ class Store {
         gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
       })
       .on("transactionHash", function (txnHash) {
-        console.log(
-          "_callDepositAmountDAOmineContract(), transactionHash: ",
-          txnHash
-        );
         callback(null, txnHash, null);
       })
       .on("receipt", function (receipt) {
-        console.log("_callDepositAmountDAOmineContract(), receipt: ", receipt);
         callback(null, null, receipt);
-      })
-      .on("error", function (error) {
-        console.log("_callDepositAmountDAOmineContract(), error: ", error);
+      }).on("error", function (error) {
         if (!error.toString().includes("-32601")) {
           if (error.message) {
             return callback(error.message);
@@ -7028,7 +6998,6 @@ class Store {
         }
       })
       .catch((error) => {
-        console.log("_callDepositAmountDAOmineContract(), error: ", error);
         if (!error.toString().includes("-32601")) {
           if (error.message) {
             return callback(error.message);
@@ -7057,8 +7026,7 @@ class Store {
     if (network === 42) {
       daoMineContractAddress = config.daoStakeTestContract;
     } else if (network === 1) {
-      // TODO: Remember to update this to mainnet address
-      // daoMineContractAddress = config.daoStakeTestContract;
+      daoMineContractAddress = config.daoStakeMainnetContract; 
     }
 
     try {
@@ -7191,7 +7159,7 @@ class Store {
     }
 
     //xdvg授权数量小于金额的话 需要重新授权
-    if (parseFloat(amount) > parseFloat(allowance)) {
+    if (parseFloat(_amount) > parseFloat(allowance)) {
       this._callDvgApproval(account, amount, (err) => {
         if (err) {
           return emitter.emit(ERROR, err);

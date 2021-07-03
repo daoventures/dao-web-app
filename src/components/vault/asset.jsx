@@ -1987,7 +1987,7 @@ class Asset extends Component {
     if(event.target.id === "redeemEarnAmount") { 
       this.setState({ redeemEarnAmount: val[event.target.id], earnPercent: 0 });
     } else {
-      this.setState({ redeemAmount: val[event.target.id], vaultPercent: 0 , redeemPercent: 0});
+      this.setState({ redeemAmount: val[event.target.id], vaultPercent: 0 , redeemAmountPercent: 0});
     }
   };
 
@@ -2414,7 +2414,7 @@ class Asset extends Component {
       amount = Math.floor((amount / 10 ** decimals) * 10000) / 10000;
     } else {
       amount = (balance * percent) / 100;
-      amount = Math.floor((amount * 10000) / 10000);
+      amount = Math.floor(amount * 10000) / 10000;
     }
 
     this.setState({
