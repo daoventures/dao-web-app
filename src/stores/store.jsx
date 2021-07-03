@@ -4436,10 +4436,11 @@ class Store {
       })
       .on("confirmation", function (confirmationNumber, receipt) {
         console.log("Confirmation", confirmationNumber, receipt);
-        callback(null, null, receipt);
+        // callback(null, null, receipt);
       })
       .on("receipt", function (receipt) {
         console.log(receipt);
+        callback(null, null, receipt);
       })
       .on("error", function (error) {
         if (!error.toString().includes("-32601")) {
@@ -4501,10 +4502,11 @@ class Store {
       })
       .on("confirmation", function (confirmationNumber, receipt) {
         console.log("Confirmation", confirmationNumber, receipt);
-        callback(null, null, receipt);
+        // callback(null, null, receipt);
       })
       .on("receipt", function (receipt) {
         console.log("Reciept", receipt);
+        callback(null, null, receipt);
       })
       .on("error", function (error) {
         if (!error.toString().includes("-32601")) {
