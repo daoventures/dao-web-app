@@ -13821,6 +13821,21 @@ const config = {
           "internalType": "address",
           "name": "_strategy",
           "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_biconomy",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_communityWallet",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_strategist",
+          "type": "address"
         }
       ],
       "stateMutability": "nonpayable",
@@ -13888,6 +13903,38 @@ const config = {
         {
           "indexed": false,
           "internalType": "address",
+          "name": "admin",
+          "type": "address"
+        }
+      ],
+      "name": "EmergencyWithdraw",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
           "name": "oldAdmin",
           "type": "address"
         },
@@ -13907,11 +13954,62 @@ const config = {
         {
           "indexed": false,
           "internalType": "address",
+          "name": "biconomy",
+          "type": "address"
+        }
+      ],
+      "name": "SetBiconomy",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "oldCommunityWallet",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "newcommunityWallet",
+          "type": "address"
+        }
+      ],
+      "name": "SetCommunityWallet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
           "name": "newStrategy",
           "type": "address"
         }
       ],
       "name": "SetPendingStrategy",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "oldStrategistWallet",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "newStrategistWallet",
+          "type": "address"
+        }
+      ],
+      "name": "SetStrategistWallet",
       "type": "event"
     },
     {
@@ -13937,6 +14035,19 @@ const config = {
       "anonymous": false,
       "inputs": [
         {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "fee",
+          "type": "uint256"
+        }
+      ],
+      "name": "SetWithdrawlFee",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
           "indexed": true,
           "internalType": "address",
           "name": "from",
@@ -13956,6 +14067,19 @@ const config = {
         }
       ],
       "name": "Transfer",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "unlockTime",
+          "type": "uint256"
+        }
+      ],
+      "name": "UnlockMigrateFunds",
       "type": "event"
     },
     {
@@ -14029,6 +14153,19 @@ const config = {
           "internalType": "uint256",
           "name": "",
           "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "Router",
+      "outputs": [
+        {
+          "internalType": "contract IUniswapV2Router02",
+          "name": "",
+          "type": "address"
         }
       ],
       "stateMutability": "view",
@@ -14148,6 +14285,45 @@ const config = {
           "internalType": "bool",
           "name": "",
           "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "communityWallet",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "customNetworkFeePerc",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "customNetworkFeeTier",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
         }
       ],
       "stateMutability": "view",
@@ -14298,6 +14474,38 @@ const config = {
       "type": "function"
     },
     {
+      "inputs": [],
+      "name": "isEmergency",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "forwarder",
+          "type": "address"
+        }
+      ],
+      "name": "isTrustedForwarder",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "contract IERC20",
@@ -14324,6 +14532,57 @@ const config = {
       "type": "function"
     },
     {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "networkFeePerc",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "networkFeeTier2",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [],
       "name": "pendingStrategy",
       "outputs": [
@@ -14338,7 +14597,27 @@ const config = {
     },
     {
       "inputs": [],
+      "name": "profitSharingFeePerc",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
       "name": "reInvest",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -14383,11 +14662,50 @@ const config = {
       "inputs": [
         {
           "internalType": "address",
+          "name": "_biconomy",
+          "type": "address"
+        }
+      ],
+      "name": "setBiconomy",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_newCommunityWallet",
+          "type": "address"
+        }
+      ],
+      "name": "setCommunityWallet",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
           "name": "_strategy",
           "type": "address"
         }
       ],
       "name": "setPendingStrategy",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_strategist",
+          "type": "address"
+        }
+      ],
+      "name": "setStrategistWallet",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -14416,6 +14734,19 @@ const config = {
       "name": "setWithdrawalFee",
       "outputs": [],
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "strategist",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -14511,8 +14842,34 @@ const config = {
       "type": "function"
     },
     {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
       "inputs": [],
       "name": "treasuryWallet",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "trustedForwarder",
       "outputs": [
         {
           "internalType": "address",
@@ -14544,6 +14901,19 @@ const config = {
       "type": "function"
     },
     {
+      "inputs": [],
+      "name": "versionRecipient",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "uint256",
@@ -14560,6 +14930,13 @@ const config = {
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "yield",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     }
   ],
   strategyDAOSTOContractABI: [
@@ -14573,11 +14950,6 @@ const config = {
         {
           "internalType": "address",
           "name": "_mirustPool",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "_admin",
           "type": "address"
         },
         {
@@ -14605,17 +14977,23 @@ const config = {
       "type": "constructor"
     },
     {
-      "inputs": [],
-      "name": "admin",
-      "outputs": [
+      "anonymous": false,
+      "inputs": [
         {
+          "indexed": true,
           "internalType": "address",
-          "name": "",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
           "type": "address"
         }
       ],
-      "stateMutability": "view",
-      "type": "function"
+      "name": "OwnershipTransferred",
+      "type": "event"
     },
     {
       "inputs": [
@@ -14738,6 +15116,19 @@ const config = {
       "type": "function"
     },
     {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "contract ILPPool",
@@ -14771,7 +15162,7 @@ const config = {
     },
     {
       "inputs": [],
-      "name": "reInvest",
+      "name": "renounceOwnership",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -14793,11 +15184,11 @@ const config = {
       "inputs": [
         {
           "internalType": "address",
-          "name": "_admin",
+          "name": "_vault",
           "type": "address"
         }
       ],
-      "name": "setAdmin",
+      "name": "setVault",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -14806,11 +15197,11 @@ const config = {
       "inputs": [
         {
           "internalType": "address",
-          "name": "_vault",
+          "name": "newOwner",
           "type": "address"
         }
       ],
-      "name": "setVault",
+      "name": "transferOwnership",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -14887,6 +15278,13 @@ const config = {
         }
       ],
       "name": "withdrawAllFunds",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "yield",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
