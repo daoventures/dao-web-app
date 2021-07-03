@@ -7032,8 +7032,7 @@ class Store {
         daoMineContractAddress
       );
 
-      const amountInDecimal = parseFloat(amount) * 10 ** poolDecimal;
-      var amountToWithdraw = web3.utils.toBN(amountInDecimal).toString();
+      var amountToWithdraw = (poolDecimal !== "18") ? web3.utils.toBN(amount * 10 ** poolDecimal).toString() : web3.utils.toWei(amount, "ether");
 
       await daoMineContract.methods
         .withdraw(poolIndex, amountToWithdraw)
