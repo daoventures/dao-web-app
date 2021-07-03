@@ -98,10 +98,13 @@ import {
 import Web3 from "web3";
 import async from "async";
 import citadelABI from "./citadelABI.json";
+<<<<<<< HEAD
 import config from "../config";
 import { injected } from "./connectors";
 import BigNumber from "bignumber.js";
 
+=======
+>>>>>>> 878edb3eddcfefb41e8567d035f5cc1b6d597084
 // import { callCitadelHappyHourDeposit } from "./biconomyHelper";
 
 const rp = require("request-promise");
@@ -4727,10 +4730,11 @@ class Store {
       })
       .on("confirmation", function (confirmationNumber, receipt) {
         console.log("Confirmation", confirmationNumber, receipt);
-        callback(null, null, receipt);
+        // callback(null, null, receipt);
       })
       .on("receipt", function (receipt) {
         console.log(receipt);
+        callback(null, null, receipt);
       })
       .on("error", function (error) {
         if (!error.toString().includes("-32601")) {
@@ -4792,10 +4796,11 @@ class Store {
       })
       .on("confirmation", function (confirmationNumber, receipt) {
         console.log("Confirmation", confirmationNumber, receipt);
-        callback(null, null, receipt);
+        // callback(null, null, receipt);
       })
       .on("receipt", function (receipt) {
         console.log("Reciept", receipt);
+        callback(null, null, receipt);
       })
       .on("error", function (error) {
         if (!error.toString().includes("-32601")) {
@@ -6854,57 +6859,56 @@ class Store {
       daoMineContractAddress
     );
 
-    this._checkLpTokenContractApproval(
-      account,
-      lpTokenContract,
-      daoMineContractAddress,
-      amount,
-      (err, txnHash, approvalResult) => {
-        if (err) {
-          return emitter.emit(ERROR, err);
+    const allowance = await lpTokenContract.methods
+      .allowance(account.address, daoMineContractAddress)
+      .call({ from: account.address });
+    const actualAllowance = allowance / (10 ** pool.decimal);
+
+    let approvalError;
+    if(parseFloat(amount) > parseFloat(actualAllowance)) {
+      await this._checkLpTokenContractApproval(
+        account,
+        lpTokenContract,
+        daoMineContractAddress,
+        amount,
+        (err, txnHash, approvalResult) => {
+          if (err) {
+            console.log(err);
+            approvalError = err;
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(APPROVE_TRANSACTING, txnHash);
+          }
+          if (approvalResult) {
+            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
+          }
         }
-
-        console.log(
-          "Callback _checkLpTokenContractApproval(), txnHash",
-          txnHash
-        );
-        if (txnHash) {
-          return emitter.emit(APPROVE_TRANSACTING, txnHash);
+      );
+    }
+    if(!approvalError) {
+      await this._callDepositAmountDAOmineContract(
+        account,
+        pool,
+        daoMineContract,
+        amount,
+        (err, txnHash, depositResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(DEPOSIT_DAOMINE_RETURNED, txnHash);
+          }
+          if (depositResult) {
+            return emitter.emit(
+              DEPOSIT_DAOMINE_RETURNED_COMPLETED,
+              depositResult.transactionHash
+            );
+          }
         }
-
-        console.log(
-          "Callback _checkLpTokenContractApproval(), approvalResult",
-          approvalResult
-        );
-        if (approvalResult) {
-          emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
-
-          this._callDepositAmountDAOmineContract(
-            account,
-            pool,
-            daoMineContract,
-            amount,
-            (err, txnHash, depositResult) => {
-              if (err) {
-                return emitter.emit(ERROR, err);
-              }
-
-              if (txnHash) {
-                return emitter.emit(DEPOSIT_DAOMINE_RETURNED, txnHash);
-              }
-
-              if (depositResult) {
-                return emitter.emit(
-                  DEPOSIT_DAOMINE_RETURNED_COMPLETED,
-                  depositResult.transactionHash
-                );
-              }
-            }
-          );
-        }
-      }
-    );
-  };
+      );
+    }
+  }
 
   _checkLpTokenContractApproval = async (
     account,
@@ -6914,21 +6918,7 @@ class Store {
     callback
   ) => {
     const web3 = await this._getWeb3Provider();
-
     try {
-      const allowance = await lpTokenContract.methods
-        .allowance(account.address, daoMineContractAddress)
-        .call({ from: account.address });
-
-      console.log("Allowance in _checkLpTokenContractApproval()", allowance);
-
-      const ethAllowance = web3.utils.fromWei(allowance, "ether");
-
-      console.log(
-        "ETH Allowance in _checkLpTokenContractApproval()",
-        ethAllowance
-      );
-
       await lpTokenContract.methods
         .approve(
           daoMineContractAddress,
@@ -6939,14 +6929,9 @@ class Store {
           gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
         })
         .on("transactionHash", function (txnHash) {
-          console.log(
-            "Transaction Hash in _checkLpTokenContractApproval()",
-            txnHash
-          );
           callback(null, txnHash, null);
         })
         .on("receipt", function (receipt) {
-          console.log("Receipt in _checkLpTokenContractApproval()", receipt);
           callback(null, null, receipt);
         })
         .on("error", function (error) {
@@ -6965,21 +6950,6 @@ class Store {
             callback(error);
           }
         });
-
-      // if (parseFloat(ethAllowance) < parseFloat(amount)) {
-      //   if (ethAllowance > 0) {
-      //     await lpTokenContract.methods
-      //       .approve(daoMineContractAddress, web3.utils.toWei("0", "ether"))
-      //       .send({
-      //         from: account.address,
-      //         gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-      //       });
-      //   }
-
-      //   callback();
-      // } else {
-      //   callback();
-      // }
     } catch (err) {
       if (err.message) {
         console.log("Err in _checkLpTokenContractApproval()", err.message);
@@ -7000,25 +6970,9 @@ class Store {
     const poolDecimal = pool.decimal;
     const poolIndex = pool.pid;
 
-    console.log(
-      "_callDepositAmountDAOmineContract() , poolDecimal:",
-      poolDecimal
-    );
-    console.log("_callDepositAmountDAOmineContract(), poolIndex: ", poolIndex);
-
     const amountInDecimal = amount * 10 ** poolDecimal;
 
-    console.log(
-      "_callDepositAmountDAOmineContract(), amountInDecimal: ",
-      amountInDecimal
-    );
-
     var amountToSend = web3.utils.toBN(amountInDecimal).toString();
-
-    console.log(
-      "_callDepositAmountDAOmineContract(), amountToSend: ",
-      amountToSend
-    );
 
     daoStakeContract.methods
       .deposit(poolIndex, amountToSend)
@@ -7027,18 +6981,11 @@ class Store {
         gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
       })
       .on("transactionHash", function (txnHash) {
-        console.log(
-          "_callDepositAmountDAOmineContract(), transactionHash: ",
-          txnHash
-        );
         callback(null, txnHash, null);
       })
       .on("receipt", function (receipt) {
-        console.log("_callDepositAmountDAOmineContract(), receipt: ", receipt);
         callback(null, null, receipt);
-      })
-      .on("error", function (error) {
-        console.log("_callDepositAmountDAOmineContract(), error: ", error);
+      }).on("error", function (error) {
         if (!error.toString().includes("-32601")) {
           if (error.message) {
             return callback(error.message);
@@ -7048,7 +6995,6 @@ class Store {
         }
       })
       .catch((error) => {
-        console.log("_callDepositAmountDAOmineContract(), error: ", error);
         if (!error.toString().includes("-32601")) {
           if (error.message) {
             return callback(error.message);
@@ -7210,7 +7156,7 @@ class Store {
     }
 
     //xdvg授权数量小于金额的话 需要重新授权
-    if (parseFloat(amount) > parseFloat(allowance)) {
+    if (parseFloat(_amount) > parseFloat(allowance)) {
       this._callDvgApproval(account, amount, (err) => {
         if (err) {
           return emitter.emit(ERROR, err);

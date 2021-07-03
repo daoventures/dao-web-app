@@ -2501,7 +2501,7 @@ class Asset extends Component {
       amount = Math.floor((amount / 10 ** decimals) * 10000) / 10000;
     } else {
       amount = (balance * percent) / 100;
-      amount = Math.floor((amount * 10000) / 10000);
+      amount = Math.floor(amount * 10000) / 10000;
     }
 
     this.setState({
