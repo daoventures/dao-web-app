@@ -1,19 +1,15 @@
 import {
-  ADVANCE,
   APPROVE_COMPLETED,
   APPROVE_TRANSACTING,
-  BASIC,
   CHANGE_NETWORK,
   CONNECTION_CONNECTED,
   CONNECTION_DISCONNECTED,
-  DEGEN,
   DEPOSIT_ALL_CONTRACT_RETURNED,
   DEPOSIT_ALL_CONTRACT_RETURNED_COMPLETED,
   DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED,
   DEPOSIT_CONTRACT_RETURNED,
   DEPOSIT_CONTRACT_RETURNED_COMPLETED,
   ERROR,
-  EXPERT,
   GET_STRATEGY_BALANCES_FULL,
   HAPPY_HOUR_RETURN,
   STRATEGY_BALANCES_FULL_RETURNED,
@@ -22,7 +18,7 @@ import {
   WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
   WITHDRAW_VAULT_RETURNED,
   WITHDRAW_VAULT_RETURNED_COMPLETED,
-  ALL,
+  ALL
 } from "../../constants";
 import {
   Accordion,
@@ -38,12 +34,11 @@ import {
   Typography,
 } from "@material-ui/core";
 import React, { Component } from "react";
-import { colors, drawerWidth } from "../../theme";
+import { colors } from "../../theme";
 
 import Asset from "./asset";
 import ConnectBiconomy from "../connectBiconomy";
 import ConnectWallet from "../common/connectWallet/connectWallet";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import InfoIcon from "@material-ui/icons/Info";
 import Loader from "../loader";
 import RiskLevelLabel from "../common/riskLevelLabel/riskLevelLabel";
@@ -51,7 +46,6 @@ import SearchIcon from "@material-ui/icons/Search";
 import Snackbar from "../snackbar";
 import RiskLevelTab from '../common/riskLevelTab/riskLevelTab';
 import queryString from 'query-string';
-
 import Store from "../../stores";
 import UnlockModal from "../unlock/unlockModal";
 import { withNamespaces } from "react-i18next";

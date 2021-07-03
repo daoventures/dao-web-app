@@ -2010,7 +2010,7 @@ class Asset extends Component {
     if(event.target.id === "redeemEarnAmount") { 
       this.setState({ redeemEarnAmount: val[event.target.id], earnPercent: 0 });
     } else {
-      this.setState({ redeemAmount: val[event.target.id], vaultPercent: 0 , redeemPercent: 0});
+      this.setState({ redeemAmount: val[event.target.id], vaultPercent: 0 , redeemAmountPercent: 0});
     }
   };
 
