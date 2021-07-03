@@ -6973,9 +6973,7 @@ class Store {
     const poolDecimal = pool.decimal;
     const poolIndex = pool.pid;
 
-    const amountInDecimal = amount * 10 ** poolDecimal;
-
-    var amountToSend = web3.utils.toBN(amountInDecimal).toString();
+    const amountToSend = (poolDecimal !== 18) ? web3.utils.toBN(amount * 10 ** poolDecimal).toString() : web3.utils.toWei(amount, "ether");
 
     daoStakeContract.methods
       .deposit(poolIndex, amountToSend)
