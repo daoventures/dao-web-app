@@ -726,9 +726,10 @@ class Store {
           withdrawAll: true,
           lastMeasurement: "", // TBC
           measurement: 1e18,
-          price_id: "harvest-usdt",
+          price_id: "harvest-finance",
           strategyName: "Harvest-Fighter: Harvest USDT",
           strategy: "Harvest USDT",
+          strategyAddress: "0x89541E3b8e8B73c108744909eA11D506B4a8E6c7",
           strategyContractABI: config.harvestStrategyCompoundABI,
           historicalPriceId: "hUSDT_price",
           logoFormat: "png",
@@ -760,9 +761,10 @@ class Store {
           withdrawAll: true,
           lastMeasurement: "", // TBC
           measurement: 1e18,
-          price_id: "harvest-usd-coin",
+          price_id: "harvest-finance",
           strategyName: "Harvest-Fighter: Harvest USDC",
           strategy: "Harvest USDC",
+          strategyAddress: "0x0AF9547974E056fca221F679DbBb7F8651407D7F",
           strategyContractABI: config.harvestStrategyCompoundABI,
           historicalPriceId: "hUSDC_price",
           logoFormat: "png",
@@ -784,7 +786,7 @@ class Store {
           vaultSymbol: "hDAI",
           erc20address: "0x6b175474e89094c44da98b954eedeac495271d0f",
           vaultContractAddress: "0xE4E6Ce7c1D9Ff44Db27f622aCcbB0753C2f48955",
-          vaultContractABI: config.harvestStrategyCompoundABI,
+          vaultContractABI: config.harvestVaultContractABI,
           balance: 0,
           vaultBalance: 0,
           decimals: 18,
@@ -794,9 +796,10 @@ class Store {
           withdrawAll: true,
           lastMeasurement: "", // TBC
           measurement: 1e18,
-          price_id: "hdai",
+          price_id: "harvest-finance",
           strategyName: "Harvest-Fighter: Harvest DAI",
           strategy: "Harvest DAI",
+          strategyAddress: "0xEf9A15025C2ED048a67c5C8019A1101172EEB51c",
           strategyContractABI: config.harvestStrategyCompundABI,
           historicalPriceId: "hDAI_price",
           logoFormat: "png",
@@ -1094,15 +1097,16 @@ class Store {
             "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
           isPopularItem: false,
         },
+        
         {
           id: "hUSDT",
           name: "USDT",
           symbol: "USDT",
           description: "Harvest USDT",
           vaultSymbol: "hUSDT",
-          erc20address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
+          erc20address: "0x07de306ff27a2b630b1141956844eb1552b956b5",
           vaultContractAddress: "0x35880615bb18DA592FF0fEb0940ADE2c02249715",
-          vaultContractABI: config.harvestVaultContractABI,
+          vaultContractABI: config.vaultUSDTContractABI,
           balance: 0,
           vaultBalance: 0,
           decimals: 6,
@@ -1112,10 +1116,11 @@ class Store {
           withdrawAll: true,
           lastMeasurement: "", // TBC
           measurement: 1e18,
-          price_id: "harvest-usdt",
+          price_id: "harvest-finance",
           strategyName: "Harvest-Fighter: Harvest USDT",
           strategy: "Harvest USDT",
-          strategyContractABI: config.harvestStrategyCompundABI,
+          strategyAddress: "0xAc783Dc15d2CF08D1e1c34e18e531a9b182277b0",
+          strategyContractABI: config.strategyUSDTContractABI,
           historicalPriceId: "hUSDT_price",
           logoFormat: "png",
           risk: BASIC,
@@ -1134,9 +1139,9 @@ class Store {
           symbol: "USDC",
           description: "Harvest USDC",
           vaultSymbol: "hUSDC",
-          erc20address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+          erc20address: "0xb7a4f3e9097c08da09517b5ab877f7a917224ede",
           vaultContractAddress: "0x68b1C860300c4f7d577f08D8B3c3AEe23887b280",
-          vaultContractABI: config.harvestVaultContractABI,
+          vaultContractABI: config.vaultUSDCContractABI,
           balance: 0,
           vaultBalance: 0,
           decimals: 6,
@@ -1146,10 +1151,11 @@ class Store {
           withdrawAll: true,
           lastMeasurement: "", // TBC
           measurement: 1e18,
-          price_id: "harvest-usd-coin",
+          price_id: "harvest-finance",
           strategyName: "Harvest-Fighter: Harvest USDC",
           strategy: "Harvest USDC",
-          strategyContractABI: config.harvestStrategyCompundABI,
+          strategyAddress: "0x7DA9e06545c4Fe6556FC0990F5AFD4955379E1D2",
+          strategyContractABI: config.strategyUSDCContractABI,
           historicalPriceId: "hUSDC_price",
           logoFormat: "png",
           risk: BASIC,
@@ -1167,10 +1173,10 @@ class Store {
           name: "DAI",
           symbol: "DAI",
           description: "Harvest DAI",
-          vaultSymbol: "hDAI",
-          erc20address: "0x6b175474e89094c44da98b954eedeac495271d0f",
+          vaultSymbol: "hDAI", // need to update logo/image?
+          erc20address: "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
           vaultContractAddress: "0x6D7e8fA90C1ffdC019d691BAFC18D6362FdEeCd7",
-          vaultContractABI: config.harvestVaultContractABI,
+          vaultContractABI: config.vaultDAIContractABI,
           balance: 0,
           vaultBalance: 0,
           decimals: 18,
@@ -1180,10 +1186,11 @@ class Store {
           withdrawAll: true,
           lastMeasurement: "", // TBC
           measurement: 1e18,
-          price_id: "hdai",
+          price_id: "harvest-finance",
           strategyName: "Harvest-Fighter: Harvest DAI",
           strategy: "Harvest DAI",
-          strategyContractABI: config.harvestStrategyCompundABI,
+          strategyAddress: "0xdfeB689aEa68F221EaAFeEEb91767003265968D6",
+          strategyContractABI: config.strategyDAIContractABI,
           historicalPriceId: "hDAI_price",
           logoFormat: "png",
           risk: BASIC,
@@ -1196,6 +1203,7 @@ class Store {
             "https://daoventures.gitbook.io/daoventures/products/strategies#harvest-fighter",
           isPopularItem: false,
         },
+        
       ],
     };
 
@@ -4134,8 +4142,19 @@ class Store {
         asset.vaultContractABI,
         asset.vaultContractAddress
       );
-      
-      // TBC
+      // let strategyAddress = await harvestContract.methods
+      //   .strategy()
+      //   .call({ from: account.address });
+      // let strategyContract = new web3.eth.Contract(
+      //   asset.strategyContractABI,
+      //   strategyAddress
+      // );
+
+      // let balance = await strategyContract.methods
+      //   .getCurrentBalance(account.address)
+      //   .call({ from: account.address });
+
+      // balance = parseFloat(balance) / 10 ** asset.decimals;
 
       callback(null, {
         earnBalance: 0,
@@ -5327,7 +5346,7 @@ class Store {
           earnPricePerFullShare: 0,
           vaultPricePerFullShare: 0,
           compoundExchangeRate: 0,
-          harvestPricePerFullShare: pricePerFullShare,
+          harvestPricePerFullShare:pricePerFullShare,
         };
         return callback(null, returnObj);
       }
@@ -5355,7 +5374,7 @@ class Store {
   _getUSDPrices = async () => {
     try {
       const url =
-        "https://api.coingecko.com/api/v3/simple/price?ids=usd-coin,dai,true-usd,tether,compound-usdt,compound-usd-coin,cdai,ethereum&vs_currencies=usd,eth";
+        "https://api.coingecko.com/api/v3/simple/price?ids=usd-coin,dai,true-usd,tether,compound-usdt,compound-usd-coin,cdai,bitcoin,ethereum,harvest-finance&vs_currencies=usd,eth";
       const priceString = await rp(url);
       const priceJSON = JSON.parse(priceString);
 
@@ -5444,7 +5463,7 @@ class Store {
               }
             } else if (farmer.strategyType === "compound") {
               apy = vaultStats[0].compoundApy;
-            }
+            } 
           }
 
           const price = prices[farmer.price_id];
@@ -5501,6 +5520,7 @@ class Store {
                 ]);
               });
             }
+            
           }
 
           return farmer;
@@ -5718,7 +5738,8 @@ class Store {
         vaultAddress = asset.vaultContractAddress;
       } else if (asset.strategyType === "citadel") {
         vaultAddress = asset.vaultContractAddress;
-      } else if (asset.strategyType === "harvest") {
+      } 
+      else if (asset.strategyType === "harvest") {
         vaultAddress = asset.vaultContractAddress;
       }
       const url = `${config.statsProvider}vaults/historical-apy/${vaultAddress}/${interval}`;
@@ -6170,19 +6191,19 @@ class Store {
             asset.citadelPricePerFullShare = data[4].citadelPricePerFullShare
               ? data[4].citadelPricePerFullShare
               : null;
-              asset.harvestPricePerFullShare = data[4].harvestPricePerFullShare
+            asset.harvestPricePerFullShare = data[4].harvestPricePerFullShare
               ? data[4].harvestPricePerFullShare
               : null;  
             asset.apy = data[4].apy; // Vault APY
             asset.addressStatistics = data[5];
             asset.earnApr = data[6];
             asset.historicalAPY = data[7];
-            asset.tvl = data[9][0].tvl;
+            asset.tvl = data[8][0].tvl;
             asset.balances =
-              data[10] && data[10].balances ? data[10].balances : null;
-            asset.priceInUSD =
-              data[10] && data[10].priceInUSD ? data[10].priceInUSD : null;
-            asset.sumBalances = data[10].sumBalances;
+            data[9] && data[9].balances ? data[9].balances : null;
+          asset.priceInUSD =
+            data[9] && data[9].priceInUSD ? data[9].priceInUSD : null;
+          asset.sumBalances = data[9].sumBalances;
             // asset.addressTransactions = data[7]
             // asset.vaultHoldings = data[3]
             callback(null, asset);
