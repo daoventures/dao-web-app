@@ -23794,7 +23794,7 @@ const config = {
       type: "function",
     },
   ],
-  harvestStrategyCompundABI: [
+  harvestStrategyCompoundABI: [
     {
       inputs: [
         {
