@@ -19,7 +19,8 @@ import {
   DEPOSIT_DAOMINE_RETURNED_COMPLETED,
   WITHDRAW_DAOMINE_RETURNED,
   WITHDRAW_DAOMINE_RETURNED_COMPLETED,
-  ERROR
+  ERROR,
+  ALL
 } from "../../constants/constants";
 
 import RiskLevelTab from "../common/riskLevelTab/riskLevelTab";
@@ -300,7 +301,7 @@ class Stake extends Component {
           )
         : null,
       pools: store.getStore("stakePools"),
-      currentTab: "All",
+      currentTab: ALL,
       expanded: "",
       loading: false,
     };
@@ -553,7 +554,7 @@ class Stake extends Component {
     return pools && pools.length > 0
       ? pools
           .filter((pool) => {
-            return currentTab === "All" || pool.category === currentTab
+            return (currentTab === ALL || pool.category === currentTab) && pool.status === "A"
               ? true
               : false;
           })
@@ -795,7 +796,8 @@ class Stake extends Component {
       vipDVG: { filename: "vipDVG", format: "png" },
       "ETH<->DVG": { filename: "ethDvg", format: "png" },
       daoCDV: { filename: "citadel", format: "svg" },
-      daoELO: { filename: "elon", format: "svg" },
+      daoELO: { filename: "citadel", format: "svg" },
+      daoSTO: { filename: "citadel", format: "svg" },
       hUSDT: { filename: "USDT", format: "png" },
       hUSDC: { filename: "USDC", format: "png" },
       hDAI: { filename: "DAI", format: "png" },

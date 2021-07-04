@@ -27,6 +27,8 @@ import {
   SWAP_PATH,
   SWAP,
   DAOMINE_PATH,
+  PORTFOLIO,
+  PORTFOLIO_PATH,
 } from "../../constants/page-constant";
 import { drawerWidth } from "../../theme/theme";
 import ToggleTheme from "../toggleTheme";
@@ -316,7 +318,7 @@ class SideDrawer extends Component {
         (store.getStore("account") && store.getStore("account").balance) || "",
       totalValue: "",
       listItem: [
-        // { key: PORTFOLIO, name:"portfolio", path: PORTFOLIO_PATH, icon: "#iconmenu_porftfolio_nor_day" },
+        { key: PORTFOLIO, name:"portfolio", path: PORTFOLIO_PATH, icon: "#iconmenu_porftfolio_nor_day" },
         {
           key: INVEST,
           name: "invest",
@@ -464,6 +466,10 @@ class SideDrawer extends Component {
 
   renderWalletInfo = () => {
     const { classes } = this.props;
+    const { currentAddress } = this.state;
+    const link = (this.state.currentNetwork === 1) 
+      ? "https://etherscan.io/address/" 
+      : "https://kovan.etherscan.io/address/";
 
     return (
       <div className={classes.accountInfoBlock}>
@@ -539,7 +545,7 @@ class SideDrawer extends Component {
 
                   <svg
                     onClick={() => {
-                      this.nav("https://twitter.com/VenturesDao");
+                      this.nav(`${link}${currentAddress}`);
                     }}
                     className={classes.addressIcon}
                     aria-hidden="true"
@@ -590,7 +596,7 @@ class SideDrawer extends Component {
               Total Value Locked
             </div>
             <div className={classes.totalValueRightNum}>
-              $ {this.state.totalValue}
+              $ {this.state.totalValue.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")}
             </div>
           </div>
         </div>

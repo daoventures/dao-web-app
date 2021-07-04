@@ -190,12 +190,12 @@ class App extends Component {
                 <MainContainer />
                 <InvestSimple />
               </Route> */}
-              {/* <Route path="/portfolio">
+              <Route path="/portfolio">
                 <Header />
                 <SideDrawer />
                 <MainContainer />
                 <Dashboard />
-              </Route> */}
+              </Route>
             
               <Route path="/invest">
                 <Header />
@@ -205,7 +205,8 @@ class App extends Component {
                   <Vaults />
                 </BrowserView>
                 <MobileView>
-                  <MobileViewWarning />
+                  {/* <MobileViewWarning /> */}
+                  <Vaults />
                 </MobileView>
               </Route>
 
