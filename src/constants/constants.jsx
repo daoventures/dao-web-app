@@ -118,6 +118,7 @@ export const BASIC = "Basic";
 export const ADVANCE = "Advance";
 export const EXPERT = "Expert";
 export const DEGEN = "Degen";
+export const ALL = "All";
 
 // Biconomy
 export const BICONOMY_CONNECTED = "BICONOMY_CONNECTED";

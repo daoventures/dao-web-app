@@ -464,6 +464,10 @@ class SideDrawer extends Component {
 
   renderWalletInfo = () => {
     const { classes } = this.props;
+    const { currentAddress } = this.state;
+    const link = (this.state.currentNetwork === 1) 
+      ? "https://etherscan.io/address/" 
+      : "https://kovan.etherscan.io/address/";
 
     return (
       <div className={classes.accountInfoBlock}>
@@ -539,7 +543,7 @@ class SideDrawer extends Component {
 
                   <svg
                     onClick={() => {
-                      this.nav("https://twitter.com/VenturesDao");
+                      this.nav(`${link}${currentAddress}`);
                     }}
                     className={classes.addressIcon}
                     aria-hidden="true"
@@ -590,7 +594,7 @@ class SideDrawer extends Component {
               Total Value Locked
             </div>
             <div className={classes.totalValueRightNum}>
-              $ {this.state.totalValue}
+              $ {this.state.totalValue.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")}
             </div>
           </div>
         </div>
