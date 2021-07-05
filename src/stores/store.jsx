@@ -4596,8 +4596,9 @@ class Store {
 
 
     let decimals = await erc20Contract.methods.decimals().call();
-    var amountToSend = (decimals !== "18") ? web3.utils.toBN(amount * 10 ** decimals).toString() : web3.utils.toWei(amount, "ether");
-
+  
+    var amountToSend = (decimals !== "18") ? web3.utils.toBN(Math.floor(amount * 10 ** decimals)).toString() : web3.utils.toWei(amount, "ether");
+   
     // Citadel and Elon pass token's index for deposit, while FAANG pass token address
     const tokenToSent = (asset.strategyType === "daoFaang") ? asset.erc20addresses[tokenIndex] : tokenIndex;
 
@@ -4709,7 +4710,7 @@ class Store {
 
     var amountToSend = web3.utils.toWei(amount, "ether");
     if (parseInt(asset.decimals) !== 18) {
-      amountToSend = web3.utils.toBN(amount * 10 ** asset.decimals).toString();
+      amountToSend = web3.utils.toBN(Math.floor(amount * 10 ** asset.decimals)).toString();
     }
 
     vaultContract.methods
@@ -4766,14 +4767,14 @@ class Store {
     var earnAmountToSend = web3.utils.toWei(earnAmount, "ether");
     if (parseInt(asset.decimals) !== 18) {
       earnAmountToSend = web3.utils
-        .toBN(earnAmount * 10 ** asset.decimals)
+        .toBN(Math.floor(earnAmount * 10 ** asset.decimals))
         .toString();
     }
 
     var vaultAmountToSend = web3.utils.toWei(vaultAmount, "ether");
     if (parseInt(asset.decimals) !== 18) {
       vaultAmountToSend = web3.utils
-        .toBN(vaultAmount * 10 ** asset.decimals)
+        .toBN(Math.floor(vaultAmount * 10 ** asset.decimals))
         .toString();
     }
 
@@ -6964,7 +6965,7 @@ class Store {
     const poolDecimal = pool.decimal;
     const poolIndex = pool.pid;
 
-    const amountToSend = (poolDecimal !== "18") ? web3.utils.toBN(amount * 10 ** poolDecimal).toString() : web3.utils.toWei(amount, "ether");
+    const amountToSend = (poolDecimal !== "18") ? web3.utils.toBN(Math.floor(amount * 10 ** poolDecimal)).toString() : web3.utils.toWei(amount, "ether");
 
     daoStakeContract.methods
       .deposit(poolIndex, amountToSend)
