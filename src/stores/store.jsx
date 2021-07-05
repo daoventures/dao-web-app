@@ -520,7 +520,7 @@ class Store {
             "0x6b175474e89094c44da98b954eedeac495271d0f",
           ],
           erc20address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
-          vaultContractAddress: "", // TODO: Update to mainnet vault contract address
+          vaultContractAddress: "0x742a85daf742ca0213b06fdae449434e0448691e",
           vaultContractABI: config.vaultDAOSTOContractABI,
           balance: 0,
           balances: [0, 0, 0],
@@ -530,13 +530,13 @@ class Store {
           depositAll: true,
           withdraw: true,
           withdrawAll: true,
-          lastMeasurement: "", // TODO: Update mainnet last measurement
+          lastMeasurement: 12766399,
           measurement: 1e18,
           price_id: ["tether", "usd-coin", "dai"],
           priceInUSD: [0, 0, 0],
           strategyName: "DAO FAANG Stonk: USDT USDC DAI",
           strategy: "DAO FAANG Stonk",
-          strategyAddress: "", // TODO: Update to mainnet strategy contract address
+          strategyAddress: "0x7f1cffb0e0a7351a72ef53cb51796221e2bac3a5",
           strategyContractABI: config.strategyDAOSTOContractABI,
           historicalPriceId: "daoSTO_price",
           logoFormat: "svg",
