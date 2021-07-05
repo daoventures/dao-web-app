@@ -398,6 +398,9 @@ class Store {
           case TOGGLE_THEME:
             this.toggleTheme(payload);
             break;
+          case FIND_DAOMINE_POOL:
+            this.findDAOminePool(payload);
+            break;
           case GET_VAULT_INFO:
             this.getVaultInfo(payload);
             break;
