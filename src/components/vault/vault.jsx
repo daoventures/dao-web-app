@@ -1156,7 +1156,7 @@ class Vault extends Component {
                 <Typography className={classes.itemTitleText} variant="h4">
                   {asset.strategyName}
                 </Typography>
-                <a href={asset.infoLink} target="_blank">
+                <a href={asset.infoLink} target="_blank" style={{display:"flex"}}>
                   <svg aria-hidden="true" className={classes.warnIcon}>
                     <use xlinkHref="#iconinformation-day"></use>
                   </svg>
@@ -1356,7 +1356,7 @@ class Vault extends Component {
   renderPopularIcon = (asset) => {
     return (
       asset.isPopularItem && (
-        <div>
+        <div style={{display: "flex"}}>
           <img
             alt="icon-popular"
             src={require("../../assets/img_new/icon_popular.svg")}
