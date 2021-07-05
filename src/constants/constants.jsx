@@ -118,6 +118,7 @@ export const BASIC = "Basic";
 export const ADVANCE = "Advance";
 export const EXPERT = "Expert";
 export const DEGEN = "Degen";
+export const ALL = "All";
 
 // Biconomy
 export const BICONOMY_CONNECTED = "BICONOMY_CONNECTED";
@@ -135,6 +136,16 @@ export const BLOCK_EXPLORERS = {
   56: "https://bscscan.com/tx/",
   97: "https://testnet.bscscan.com/tx/",
 };
+
+// Pools
+export const FIND_DAOMINE_POOL = "FIND_DAOMINE_POOL";
+export const DAOMINE_POOL_RETURNED = "DAOMINE_POOL_RETURNED";
+export const DEPOSIT_DAOMINE = "DEPOSIT_DAOMINE";
+export const DEPOSIT_DAOMINE_RETURNED = "DEPOSIT_DAOMINE_RETURNED";
+export const DEPOSIT_DAOMINE_RETURNED_COMPLETED = "DEPOSIT_DAOMINE_RETURNED_COMPLETED";
+export const WITHDRAW_DAOMINE = "WITHDRAW_DAOMINE";
+export const WITHDRAW_DAOMINE_RETURNED = "WITHDRAW_DAOMINE_RETURNED";
+export const WITHDRAW_DAOMINE_RETURNED_COMPLETED = "WITHDRAW_DAOMINE_RETURNED_COMPLETED";
 
 // 获取DVG信息
 export const GET_DVG_INFO = "GET_DVG_INFO";

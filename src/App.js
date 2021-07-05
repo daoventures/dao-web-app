@@ -223,6 +223,13 @@ class App extends Component {
                 <Swap />
               </Route>
 
+              <Route path="/daomine">
+                <Header />
+                <SideDrawer />
+                <MainContainer />
+                <Stake />
+              </Route>
+
               <Route path="/">
                 {/* <Home /> */}
                 <Redirect to="/invest" />
