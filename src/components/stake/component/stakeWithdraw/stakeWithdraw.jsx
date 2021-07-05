@@ -334,7 +334,7 @@ class StakeWithdraw extends Component {
                                 width: "100%",
                             }}
                             className={classes.withdrawalInput}
-                            id="amount"
+                            id={`${pool.pid}_withdraw`}
                             cursor={amount}
                             value={amount}
                             error={amountError}

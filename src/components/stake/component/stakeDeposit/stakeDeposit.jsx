@@ -315,7 +315,7 @@ class StakeDeposit extends Component {
                 width: "100%",
               }}
               className={classes.depositInput}
-              id="amount"
+              id={`${pool.pid}_amount`}
               cursor={amount}
               value={amount}
               error={amountError}
