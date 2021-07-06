@@ -509,7 +509,6 @@ const styles = (theme) => ({
   },
 });
 
-
 const HtmlTooltip = withStyles((theme) => ({
   tooltip: {
     backgroundColor: "#f5f5f9",
@@ -519,7 +518,6 @@ const HtmlTooltip = withStyles((theme) => ({
     border: "1px solid #dadde9",
   },
 }))(Tooltip);
-
 
 class Asset extends Component {
   constructor() {
@@ -798,18 +796,20 @@ class Asset extends Component {
                 return (
                   <Button
                     className={
-                      isDeposit 
+                      isDeposit
                         ? percent === percentage
                           ? classes.depositScaleActive
                           : classes.depositScale
-                        : redeemAmountPercent === percentage 
-                          ? classes.depositScaleActive
-                          : classes.depositScale
+                        : redeemAmountPercent === percentage
+                        ? classes.depositScaleActive
+                        : classes.depositScale
                     }
                     variant="text"
                     disabled={loading}
                     onClick={() => {
-                      isDeposit ? this.setAmount(percentage) :this.setRedeemAmount(percentage)
+                      isDeposit
+                        ? this.setAmount(percentage)
+                        : this.setRedeemAmount(percentage);
                     }}
                   >
                     <Typography variant={"h5"}>
@@ -827,18 +827,20 @@ class Asset extends Component {
             {this.state.errorMessage}
           </Typography>
         )}
-        {
-          isDeposit && this.state.errorMessage === "" && this.state.happyHourWarning !== "" && (
+        {isDeposit &&
+          this.state.errorMessage === "" &&
+          this.state.happyHourWarning !== "" && (
             <Typography variant={"h5"} className={classes.happyHourWarning}>
               {happyHourWarning}
             </Typography>
-        )}
-        {
-          isDeposit && this.state.errorMessage === "" && this.state.happyHourMessage  !== "" && (
+          )}
+        {isDeposit &&
+          this.state.errorMessage === "" &&
+          this.state.happyHourMessage !== "" && (
             <Typography variant={"h5"} className={classes.happyHourMessage}>
               {happyHourMessage}
             </Typography>
-        )}
+          )}
         {!isDeposit && this.state.withdrawErrorMessage !== "" && (
           <Typography variant={"h5"} className={classes.errorMessage}>
             {this.state.withdrawErrorMessage}
@@ -879,7 +881,11 @@ class Asset extends Component {
               </React.Fragment>
             }
             open={isYEarn ? openEarnInfo : openVaultInfo}
-            onClose={isYEarn ? this.handleTooltipEarnClose : this.handleTooltipVaultClose}
+            onClose={
+              isYEarn
+                ? this.handleTooltipEarnClose
+                : this.handleTooltipVaultClose
+            }
             PopperProps={{
               disablePortal: true,
               style: {
@@ -897,12 +903,16 @@ class Asset extends Component {
                 width: "16px",
                 height: "16px",
               }}
-              onClick={() => isYEarn ? this.handleTooltipEarnClose() : this.handleTooltipVaultClose() }
+              onClick={() =>
+                isYEarn
+                  ? this.handleTooltipEarnClose()
+                  : this.handleTooltipVaultClose()
+              }
             />
           </HtmlTooltip>
           &nbsp;
-          { isYEarn ? "yEarn: " + earnRatio : "yVault: " + vaultRatio }
-          { " %"}
+          {isYEarn ? "yEarn: " + earnRatio : "yVault: " + vaultRatio}
+          {" %"}
         </Typography>
       </React.Fragment>
     );
@@ -1156,7 +1166,11 @@ class Asset extends Component {
                     {this.isUsdVault(asset) && (
                       <div>
                         {asset.balances
-                          ? (Math.floor(asset.balances[this.state.tokenIndex] * 10000) / 10000).toFixed(4)
+                          ? (
+                              Math.floor(
+                                asset.balances[this.state.tokenIndex] * 10000
+                              ) / 10000
+                            ).toFixed(4)
                           : "0.0000"}{" "}
                         {asset.symbols
                           ? asset.symbols[this.state.tokenIndex]
@@ -1332,17 +1346,16 @@ class Asset extends Component {
                             );
                           })}
                       </div>
-                      {
-                        this.state.redeemEarnAmountError && 
-                          this.state.withdrawEarnErrorMessage !== "" && 
-                        (
-                          <Typography variant={"h5"} className={classes.errorMessage}>
+                      {this.state.redeemEarnAmountError &&
+                        this.state.withdrawEarnErrorMessage !== "" && (
+                          <Typography
+                            variant={"h5"}
+                            className={classes.errorMessage}
+                          >
                             {this.state.withdrawEarnErrorMessage}
                           </Typography>
-                        )
-                      }
+                        )}
                     </div>
-                    
 
                     <div className={classes.yearnEarnAndVaultItem}>
                       {/** Vault Balance */}
@@ -1418,15 +1431,15 @@ class Asset extends Component {
                             );
                           })}
                       </div>
-                      {
-                        this.state.redeemAmountError && 
-                          this.state.withdrawErrorMessage !== "" && 
-                        (
-                          <Typography variant={"h5"} className={classes.errorMessage}>
+                      {this.state.redeemAmountError &&
+                        this.state.withdrawErrorMessage !== "" && (
+                          <Typography
+                            variant={"h5"}
+                            className={classes.errorMessage}
+                          >
                             {this.state.withdrawErrorMessage}
                           </Typography>
-                        )
-                      }
+                        )}
                     </div>
                   </div>
                 )}
@@ -1492,7 +1505,7 @@ class Asset extends Component {
                             : "0.0000") +
                             " " +
                             asset.id}{" "}
-                          {asset.strategyBalance  && (
+                          {asset.strategyBalance && (
                             <span>
                               (
                               {asset.depositedSharesInUSD
@@ -1568,7 +1581,6 @@ class Asset extends Component {
     };
 
     if (asset.historicalAPY) {
-      
       // this gives an object with dates as keys
       const groups = asset.historicalAPY
         .sort(sortByTimestamp)
@@ -1650,8 +1662,7 @@ class Asset extends Component {
                 date,
                 parseFloat(groups[date][halfCount].elonApy.toFixed(4)),
               ]);
-            } 
-            else if (asset.strategyType === "daoFaang") {
+            } else if (asset.strategyType === "daoFaang") {
               faangAPY.push([
                 date,
                 parseFloat(groups[date][halfCount].faangApy.toFixed(4)),
@@ -2007,10 +2018,14 @@ class Asset extends Component {
     let val = [];
     val[event.target.id] = event.target.value;
     this.verifyWithdrawInput(val[event.target.id], event.target.id);
-    if(event.target.id === "redeemEarnAmount") { 
+    if (event.target.id === "redeemEarnAmount") {
       this.setState({ redeemEarnAmount: val[event.target.id], earnPercent: 0 });
     } else {
-      this.setState({ redeemAmount: val[event.target.id], vaultPercent: 0 , redeemAmountPercent: 0});
+      this.setState({
+        redeemAmount: val[event.target.id],
+        vaultPercent: 0,
+        redeemAmountPercent: 0,
+      });
     }
   };
 
@@ -2019,9 +2034,9 @@ class Asset extends Component {
     val[event.target.id] = event.target.value;
 
     this.verifyInput(val[event.target.id]);
-    if(event.target.id === "amount") { 
-      this.setState({ amount: val[event.target.id] , percent: 0 });
-    } 
+    if (event.target.id === "amount") {
+      this.setState({ amount: val[event.target.id], percent: 0 });
+    }
   };
 
   verifyInput = (amount) => {
@@ -2064,7 +2079,7 @@ class Asset extends Component {
       this.setState({ amountError: false, errorMessage: "" });
     }
 
-    if (asset.strategyType === "citadel" && happyHour === true) {
+    if (asset.happyHourEnabled === true && happyHour === true) {
       if (parseFloat(amount) < parseFloat(happyHourThreshold)) {
         this.setState({
           // amountError: true,
@@ -2111,73 +2126,97 @@ class Asset extends Component {
         Math.floor((asset.strategyBalance / 10 ** asset.decimals) * 10000) /
         10000
       ).toFixed(4);
-    }else if (asset.strategyType === "yearn") {
-      if(type === "earn") {
+    } else if (asset.strategyType === "yearn") {
+      if (type === "earn") {
         return (
           Math.floor(asset.earnBalance * asset.earnPricePerFullShare * 10000) /
           10000
         ).toFixed(4);
       } else {
         return (
-          Math.floor(asset.vaultBalance * asset.vaultPricePerFullShare * 10000) /
-          10000
+          Math.floor(
+            asset.vaultBalance * asset.vaultPricePerFullShare * 10000
+          ) / 10000
         ).toFixed(4);
       }
     } else {
       return 0;
     }
-  }
+  };
 
   setRedeemAmountError = (message) => {
     this.setState({ redeemAmountError: true, withdrawErrorMessage: message });
-  }
+  };
 
   verifyWithdrawInput = (amount, divId) => {
     const { asset } = this.props;
 
-
-    if(asset.strategyType === "yearn") {
+    if (asset.strategyType === "yearn") {
       if (!this.validateDigit(amount)) {
         const errorMessage = "Invalid amount";
-        (divId === "redeemEarnAmount") 
-          ? this.setState({redeemEarnAmountError: true, withdrawEarnErrorMessage: errorMessage}) 
-          : this.setState({redeemAmountError: true, withdrawErrorMessage: errorMessage});
-        return; 
+        divId === "redeemEarnAmount"
+          ? this.setState({
+              redeemEarnAmountError: true,
+              withdrawEarnErrorMessage: errorMessage,
+            })
+          : this.setState({
+              redeemAmountError: true,
+              withdrawErrorMessage: errorMessage,
+            });
+        return;
       }
 
       // No need to validate 0 input, as either one of them can be 0
-      if(!amount || isNaN(amount) || parseFloat(amount) < 0) {
+      if (!amount || isNaN(amount) || parseFloat(amount) < 0) {
         const errorMessage = "Invalid amount";
-        (divId === "redeemEarnAmount") 
-        ? this.setState({redeemEarnAmountError: true, withdrawEarnErrorMessage: errorMessage}) 
-        : this.setState({redeemAmountError: true, withdrawErrorMessage: errorMessage});
+        divId === "redeemEarnAmount"
+          ? this.setState({
+              redeemEarnAmountError: true,
+              withdrawEarnErrorMessage: errorMessage,
+            })
+          : this.setState({
+              redeemAmountError: true,
+              withdrawErrorMessage: errorMessage,
+            });
         return;
       }
 
-      const depositedShares = this.calculateDepositShare(asset, (divId === "redeemEarnAmount") ? "earn" : "vault");
-      
-      if(this.validateInputValMoreThanBalance(amount, depositedShares)) {
+      const depositedShares = this.calculateDepositShare(
+        asset,
+        divId === "redeemEarnAmount" ? "earn" : "vault"
+      );
+
+      if (this.validateInputValMoreThanBalance(amount, depositedShares)) {
         const errorMessage = "Exceed Available Balance";
-        (divId === "redeemEarnAmount") 
-        ? this.setState({redeemEarnAmountError: true, withdrawEarnErrorMessage: errorMessage}) 
-        : this.setState({redeemAmountError: true, withdrawErrorMessage: errorMessage});
+        divId === "redeemEarnAmount"
+          ? this.setState({
+              redeemEarnAmountError: true,
+              withdrawEarnErrorMessage: errorMessage,
+            })
+          : this.setState({
+              redeemAmountError: true,
+              withdrawErrorMessage: errorMessage,
+            });
         return;
       }
 
-      (divId === "redeemEarnAmount") 
-      ? this.setState({redeemEarnAmountError: false, withdrawEarnErrorMessage: ""}) 
-      : this.setState({redeemAmountError: false, withdrawErrorMessage: ""});
+      divId === "redeemEarnAmount"
+        ? this.setState({
+            redeemEarnAmountError: false,
+            withdrawEarnErrorMessage: "",
+          })
+        : this.setState({ redeemAmountError: false, withdrawErrorMessage: "" });
     } else {
       if (!this.validateDigit(amount)) {
         this.setRedeemAmountError("Invalid amount");
         return;
       }
-  
+
       if (this.validateAmount(amount)) {
         this.setRedeemAmountError("Invalid amount");
         return;
       }
-  
+
       const depositedShares = this.calculateDepositShare(asset, null);
 
       if (this.validateInputValMoreThanBalance(amount, depositedShares)) {
@@ -2246,21 +2285,28 @@ class Asset extends Component {
   };
 
   onDeposit = () => {
-    const { amount, earnRatio, vaultRatio, tokenIndex, amountError, errorMessage } = this.state;
+    const {
+      amount,
+      earnRatio,
+      vaultRatio,
+      tokenIndex,
+      amountError,
+      errorMessage,
+    } = this.state;
     const { asset, startLoading } = this.props;
 
-    if(this.validateAmount(amount)) {
+    if (this.validateAmount(amount)) {
       this.setState({
         amountError: true,
-        errorMessage: "Invalid amount"
-      })
+        errorMessage: "Invalid amount",
+      });
       return;
     }
 
-    if(!amountError && errorMessage === "") {
+    if (!amountError && errorMessage === "") {
       this.setState({ loading: true });
       startLoading();
-  
+
       if (asset.strategyType === "yearn") {
         dispatcher.dispatch({
           type: DEPOSIT_CONTRACT,
@@ -2347,16 +2393,18 @@ class Asset extends Component {
   };
 
   onWithdraw = () => {
-    let { redeemEarnAmount, redeemAmount, tokenIndex } =
-      this.state;
+    let { redeemEarnAmount, redeemAmount, tokenIndex } = this.state;
 
     const { asset, startLoading } = this.props;
 
     if (asset.strategyType === "yearn") {
       // Both input field are blank
-      if( (!redeemAmount || isNaN(redeemAmount)) && (!redeemEarnAmount || isNaN(redeemEarnAmount))) {
-        this.setState({ 
-          redeemAmountError: true ,
+      if (
+        (!redeemAmount || isNaN(redeemAmount)) &&
+        (!redeemEarnAmount || isNaN(redeemEarnAmount))
+      ) {
+        this.setState({
+          redeemAmountError: true,
           redeemEarnAmountError: true,
           withdrawErrorMessage: "Invalid amount",
           withdrawEarnErrorMessage: "Invalid amount",
@@ -2364,15 +2412,22 @@ class Asset extends Component {
         return;
       }
 
-      if ((!this.state.redeemAmountError && this.state.withdrawErrorMessage === "") &&
-        (!this.state.redeemEarnAmountError && this.state.withdrawEarnErrorMessage === "")) {
-        redeemAmount = redeemAmount ? (Math.floor(redeemAmount * 10000) / 10000).toFixed(4) : 0;
-        redeemEarnAmount = redeemEarnAmount ? (Math.floor(redeemEarnAmount * 10000) / 10000).toFixed(4) : 0;
+      if (
+        !this.state.redeemAmountError &&
+        this.state.withdrawErrorMessage === "" &&
+        !this.state.redeemEarnAmountError &&
+        this.state.withdrawEarnErrorMessage === ""
+      ) {
+        redeemAmount = redeemAmount
+          ? (Math.floor(redeemAmount * 10000) / 10000).toFixed(4)
+          : 0;
+        redeemEarnAmount = redeemEarnAmount
+          ? (Math.floor(redeemEarnAmount * 10000) / 10000).toFixed(4)
+          : 0;
 
         this.setState({ loading: true });
         startLoading();
 
-      
         dispatcher.dispatch({
           type: WITHDRAW_BOTH,
           content: {
@@ -2384,7 +2439,7 @@ class Asset extends Component {
         });
       }
     } else if (asset.strategyType === "compound") {
-      if(this.validateAmount(redeemAmount)) {
+      if (this.validateAmount(redeemAmount)) {
         this.setState({
           redeemAmountError: true,
           withdrawErrorMessage: "Invalid amount",
@@ -2397,7 +2452,7 @@ class Asset extends Component {
         startLoading();
 
         redeemAmount = (Math.floor(redeemAmount * 10000) / 10000).toFixed(4);
-  
+
         dispatcher.dispatch({
           type: WITHDRAW_BOTH,
           content: {
@@ -2409,7 +2464,7 @@ class Asset extends Component {
         });
       }
     } else if (this.isUsdVault(asset)) {
-      if(this.validateAmount(redeemAmount)) {
+      if (this.validateAmount(redeemAmount)) {
         this.setState({
           redeemAmountError: true,
           withdrawErrorMessage: "Invalid amount",
@@ -2423,7 +2478,7 @@ class Asset extends Component {
 
         this.setState({ loading: true });
         startLoading();
-  
+
         dispatcher.dispatch({
           type: WITHDRAW_BOTH,
           content: {
@@ -2507,7 +2562,7 @@ class Asset extends Component {
     this.setState({
       redeemAmount: amount.toFixed(4),
       redeemAmountPercent: percent,
-      redeemAmountError: false, 
+      redeemAmountError: false,
       withdrawErrorMessage: "",
     });
   };
