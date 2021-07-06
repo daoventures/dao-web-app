@@ -6083,7 +6083,7 @@ class Store {
     //   happyHourEndTime: Date.now() + 6000000,
     //   happyHourThreshold: 5,
     // };
-    // store.setStore(_result);
+    store.setStore(_result);
     emitter.emit(HAPPY_HOUR_RETURN, _result);
   };
 
