@@ -27,6 +27,8 @@ import {
   SWAP_PATH,
   SWAP,
   DAOMINE_PATH,
+  PORTFOLIO,
+  PORTFOLIO_PATH,
 } from "../../constants/page-constant";
 import { drawerWidth } from "../../theme/theme";
 import ToggleTheme from "../toggleTheme";

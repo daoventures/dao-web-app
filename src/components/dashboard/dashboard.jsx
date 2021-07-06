@@ -750,91 +750,91 @@ class Dashboard extends Component {
       // )
     }
 
-    // return (
-    //   <div className={classes.root}>
-    //     <div className={classes.contentContainer}>
-    //       <div className={classes.investedContainer}>
-
-    //         <Grid container>
-    //           <Grid item sm={8} xs={12}>
-    //             {this.renderChart(dashboard)}
-    //           </Grid>
-    //           <Grid item sm={4} xs={12}>
-    //             <Grid container spacing={1} className={classes.portfolioContainer}>
-    //               <Grid item sm={12} xs={12} className={classes.titleBalance}>
-    //                 <Typography variant={'h4'} className={classes.dataTop}>Portfolio Balance</Typography>
-    //                 <Typography variant={'h2'} className={classes.amountValue}>$ {parseFloat(dashboard.portfolio_balance_usd.toFixed(2)).toLocaleString()}</Typography>
-    //               </Grid>
-    //               {growth === 0 &&
-    //                 <Grid item sm={12} xs={12} className={classes.titleBalance} onClick={this.growthClicked}>
-    //                   <Typography variant={'h4'} className={classes.dataTop}>
-    //                     Daily Growth
-    //                   </Typography>
-    //                   <Typography variant={'h2'} className={classes.amountValue}>$ {parseFloat(dashboard.portfolio_growth_usd_daily.toFixed(2)).toLocaleString()}</Typography>
-    //                 </Grid>
-    //               }
-
-    //               {growth === 1 &&
-    //                 <Grid item sm={12} xs={12} className={classes.titleBalance} onClick={this.growthClicked}>
-    //                   <Typography variant={'h4'} className={classes.dataTop}>
-    //                     Weekly Growth
-    //                   </Typography>
-    //                   <Typography variant={'h2'} className={classes.amountValue}>$ {parseFloat(dashboard.portfolio_growth_usd_weekly.toFixed(2)).toLocaleString()}</Typography>
-    //                 </Grid>
-    //               }
-
-    //               {growth === 2 &&
-    //                 <Grid item sm={12} xs={12} className={classes.titleBalance} onClick={this.growthClicked}>
-    //                   <Typography variant={'h4'} className={classes.dataTop}>
-    //                     Yearly Growth
-    //                   </Typography>
-    //                   <Typography variant={'h2'} className={classes.amountValue}>$ {parseFloat(dashboard.portfolio_growth_usd_yearly.toFixed(2)).toLocaleString()}</Typography>
-    //                 </Grid>
-    //               }
-    //             </Grid>
-
-    //           </Grid>
-    //         </Grid>
-    //         {(true) &&
-    //           <div className={classes.vaultContainer}>
-    //             <div className={classes.inlineBlock}>
-    //               <div>
-    //                 <Typography variant={'h3'} className={classes.sectionHeading}>My Portfolio</Typography>
-    //               </div>
-
-    //             </div>
-    //             <div className={classes.myPortfolioSubTit}>
-    //               {this.renderBasedOn()}
-    //               <Typography variant={'caption'} className={classes.netWorth}>NET BALANCE</Typography>
-    //             </div>
-
-    //             {
-    //               this.state.dashboard ? this.renderVaults() :
-    //                <div className={classes.noData}>
-    //                 <img className={classes.noDataImg} src={require('../../assets/no_data_night@2x.png')} alt="" />
-    //                 <p className={classes.noDataText}>No Data
-                  
-    //                 </p>
-    //               </div>
-    //             }
-
-    //           </div>
-    //         }
-
-
-    //       </div>
-    //     </div>
-    //     { loading && <Loader />}
-    //   </div>
-    // )
     return (
-      <div className={ classes.root }>
-        <div className={ classes.comingSoon }>
-            <img src={this.state.currentTheme === 'light' ? require("../../assets/img_new/comingsoon_light@2x.png") : require("../../assets/img_new/comingsoon_dark@2x.png")}/>
-            <p>Coming Soon</p>
+      <div className={classes.root}>
+        <div className={classes.contentContainer}>
+          <div className={classes.investedContainer}>
+
+            <Grid container>
+              <Grid item sm={8} xs={12}>
+                {this.renderChart(dashboard)}
+              </Grid>
+              <Grid item sm={4} xs={12}>
+                <Grid container spacing={1} className={classes.portfolioContainer}>
+                  <Grid item sm={12} xs={12} className={classes.titleBalance}>
+                    <Typography variant={'h4'} className={classes.dataTop}>Portfolio Balance</Typography>
+                    <Typography variant={'h2'} className={classes.amountValue}>$ {parseFloat(dashboard.portfolio_balance_usd.toFixed(2)).toLocaleString()}</Typography>
+                  </Grid>
+                  {growth === 0 &&
+                    <Grid item sm={12} xs={12} className={classes.titleBalance} onClick={this.growthClicked}>
+                      <Typography variant={'h4'} className={classes.dataTop}>
+                        Daily Growth
+                      </Typography>
+                      <Typography variant={'h2'} className={classes.amountValue}>$ {parseFloat(dashboard.portfolio_growth_usd_daily.toFixed(2)).toLocaleString()}</Typography>
+                    </Grid>
+                  }
+
+                  {growth === 1 &&
+                    <Grid item sm={12} xs={12} className={classes.titleBalance} onClick={this.growthClicked}>
+                      <Typography variant={'h4'} className={classes.dataTop}>
+                        Weekly Growth
+                      </Typography>
+                      <Typography variant={'h2'} className={classes.amountValue}>$ {parseFloat(dashboard.portfolio_growth_usd_weekly.toFixed(2)).toLocaleString()}</Typography>
+                    </Grid>
+                  }
+
+                  {growth === 2 &&
+                    <Grid item sm={12} xs={12} className={classes.titleBalance} onClick={this.growthClicked}>
+                      <Typography variant={'h4'} className={classes.dataTop}>
+                        Yearly Growth
+                      </Typography>
+                      <Typography variant={'h2'} className={classes.amountValue}>$ {parseFloat(dashboard.portfolio_growth_usd_yearly.toFixed(2)).toLocaleString()}</Typography>
+                    </Grid>
+                  }
+                </Grid>
+
+              </Grid>
+            </Grid>
+            {(true) &&
+              <div className={classes.vaultContainer}>
+                <div className={classes.inlineBlock}>
+                  <div>
+                    <Typography variant={'h3'} className={classes.sectionHeading}>My Portfolio</Typography>
+                  </div>
+
+                </div>
+                <div className={classes.myPortfolioSubTit}>
+                  {this.renderBasedOn()}
+                  <Typography variant={'caption'} className={classes.netWorth}>NET BALANCE</Typography>
+                </div>
+
+                {
+                  this.state.dashboard ? this.renderVaults() :
+                   <div className={classes.noData}>
+                    <img className={classes.noDataImg} src={require('../../assets/no_data_night@2x.png')} alt="" />
+                    <p className={classes.noDataText}>No Data
+                  
+                    </p>
+                  </div>
+                }
+
+              </div>
+            }
+
+
+          </div>
         </div>
+        { loading && <Loader />}
       </div>
     )
+    // return (
+    //   <div className={ classes.root }>
+    //     <div className={ classes.comingSoon }>
+    //         <img src={this.state.currentTheme === 'light' ? require("../../assets/img_new/comingsoon_light@2x.png") : require("../../assets/img_new/comingsoon_dark@2x.png")}/>
+    //         <p>Coming Soon</p>
+    //     </div>
+    //   </div>
+    // )
   };
 
   renderBasedOn = () => {

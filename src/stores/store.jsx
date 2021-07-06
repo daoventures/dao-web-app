@@ -95,14 +95,13 @@ import {
   RESPONSE_CODES,
 } from "@biconomy/mexa";
 
+import BigNumber from "bignumber.js";
+import FAANGKovanABI from "./citadelABI.json";
 import Web3 from "web3";
 import async from "async";
 import citadelABI from "./citadelABI.json";
 import config from "../config";
 import { injected } from "./connectors";
-import BigNumber from "bignumber.js";
-
-// import { callCitadelHappyHourDeposit } from "./biconomyHelper";
 
 const rp = require("request-promise");
 const ethers = require("ethers");
@@ -506,6 +505,7 @@ class Store {
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-citadel-vault",
           isPopularItem: true, // use to render popular item icon
+          happyHourEnabled: true,
           // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
         },
         // {
@@ -550,6 +550,7 @@ class Store {
         //   infoLink:
         //     "https://daoventures.gitbook.io/daoventures/products/strategies#bf64", // TODO: Update
         //   isPopularItem: true, // use to render popular item icon
+        //   happyHourEnabled: true,
         // },
         {
           id: "daoELO",
@@ -878,6 +879,7 @@ class Store {
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-citadel-vault",
           isPopularItem: true,
+          happyHourEnabled: true,
           // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
         },
         // {
@@ -922,6 +924,7 @@ class Store {
         //   infoLink:
         //     "https://daoventures.gitbook.io/daoventures/products/strategies#bf64",
         //   isPopularItem: true, // use to render popular item icon
+        //   happyHourEnabled: true,
         // },
         {
           id: "daoELO",
@@ -1103,7 +1106,7 @@ class Store {
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
           isPopularItem: false,
-        },  
+        },
         {
           id: "cUSDT",
           name: "USDT",
@@ -2673,7 +2676,7 @@ class Store {
         return callback(ex);
       }
     }
-    
+
     const returnObj = {
       balances,
       priceInUSD,
@@ -4128,7 +4131,10 @@ class Store {
         vaultBalance: 0,
         strategyBalance: balance,
       });
-    } else if (asset.strategyType === "citadel" || asset.strategyType === "elon") {
+    } else if (
+      asset.strategyType === "citadel" ||
+      asset.strategyType === "elon"
+    ) {
       const vaultContract = new web3.eth.Contract(
         asset.vaultContractABI,
         asset.vaultContractAddress
@@ -4174,8 +4180,9 @@ class Store {
         .balanceOf(account.address)
         .call({ from: account.address });
 
-      const poolInUSD = (pool * usdtToUsdPrice) / (10 ** 20);
-      const depositedSharesInUSD = (depositedShares * poolInUSD) / totalSupply / 10 ** 6;
+      const poolInUSD = (pool * usdtToUsdPrice) / 10 ** 20;
+      const depositedSharesInUSD =
+        (depositedShares * poolInUSD) / totalSupply / 10 ** 6;
 
       callback(null, {
         earnBalance: 0,
@@ -4431,28 +4438,54 @@ class Store {
         }
       );
 
-      if(!approvalErr) {
-        await this._callDepositAmountContractCitadel(
-          asset,
-          account,
-          amount,
-          tokenIndex,
-          (err, txnHash, depositResult) => {
-            if (err) {
-              return emitter.emit(ERROR, err);
+      if (!approvalErr) {
+        const happyHour = await this._eventVerifyAmount(amount);
+        // const happyHour = true;
+
+        if (happyHour === true) {
+          await this._callDepositAmountContractCitadelHappyHour(
+            asset,
+            account,
+            amount,
+            tokenIndex,
+            (err, txnHash, depositResult) => {
+              if (err) {
+                return emitter.emit(ERROR, err);
+              }
+              if (txnHash) {
+                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+              }
+              if (depositResult) {
+                return emitter.emit(
+                  DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED,
+                  depositResult.transactionHash
+                );
+              }
             }
-            if (txnHash) {
-              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+          );
+        } else {
+          await this._callDepositAmountContractCitadel(
+            asset,
+            account,
+            amount,
+            tokenIndex,
+            (err, txnHash, depositResult) => {
+              if (err) {
+                return emitter.emit(ERROR, err);
+              }
+              if (txnHash) {
+                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+              }
+              if (depositResult) {
+                return emitter.emit(
+                  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                  depositResult.transactionHash
+                );
+              }
             }
-            if (depositResult) {
-              return emitter.emit(
-                DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                depositResult.transactionHash
-              );
-            }
-          }
-        );
-      }     
+          );
+        }
+      }
     }
   };
 
@@ -4596,13 +4629,18 @@ class Store {
       asset.erc20addresses[tokenIndex]
     );
 
-
     let decimals = await erc20Contract.methods.decimals().call();
-  
-    var amountToSend = (decimals !== "18") ? web3.utils.toBN(Math.floor(amount * 10 ** decimals)).toString() : web3.utils.toWei(amount, "ether");
-   
+
+    var amountToSend =
+      decimals !== "18"
+        ? web3.utils.toBN(Math.floor(amount * 10 ** decimals)).toString()
+        : web3.utils.toWei(amount, "ether");
+
     // Citadel and Elon pass token's index for deposit, while FAANG pass token address
-    const tokenToSent = (asset.strategyType === "daoFaang") ? asset.erc20addresses[tokenIndex] : tokenIndex;
+    const tokenToSent =
+      asset.strategyType === "daoFaang"
+        ? asset.erc20addresses[tokenIndex]
+        : tokenIndex;
 
     vaultContract.methods
       .deposit(amountToSend, tokenToSent)
@@ -4658,8 +4696,13 @@ class Store {
       }
       callback(error);
     }
+    let vaultContract;
+    if (asset.strategyType === "citadel") {
+      vaultContract = store.getStore("happyHourContract");
+    } else if (asset.strategyType === "daoFaang") {
+      vaultContract = store.getStore("happyHourContractFAANG");
+    }
 
-    const vaultContract = store.getStore("happyHourContract");
     const web3 = new Web3(store.getStore("web3context").library.provider);
 
     let erc20Contract = new web3.eth.Contract(
@@ -4668,9 +4711,21 @@ class Store {
     );
 
     let decimals = await erc20Contract.methods.decimals().call();
-    var amountToSend = (decimals !== "18") ? web3.utils.toBN(amount * 10 ** decimals).toString() : web3.utils.toWei(amount, "ether");
 
-    let tx = vaultContract.methods.deposit(amountToSend, tokenIndex).send({
+    var amountToSend =
+      decimals !== "18"
+        ? web3.utils.toBN(amount * 10 ** decimals).toString()
+        : web3.utils.toWei(amount, "ether");
+
+    console.log("🚀 | tx | account.address", account.address);
+
+    // Citadel and Elon pass token's index for deposit, while FAANG pass token address
+    const tokenToSent =
+      asset.strategyType === "daoFaang"
+        ? asset.erc20addresses[tokenIndex]
+        : tokenIndex;
+
+    let tx = vaultContract.methods.deposit(amountToSend, tokenToSent).send({
       from: account.address,
       signatureType: "EIP712_SIGN",
       //optionally you can add other options like gasLimit
@@ -4712,7 +4767,9 @@ class Store {
 
     var amountToSend = web3.utils.toWei(amount, "ether");
     if (parseInt(asset.decimals) !== 18) {
-      amountToSend = web3.utils.toBN(Math.floor(amount * 10 ** asset.decimals)).toString();
+      amountToSend = web3.utils
+        .toBN(Math.floor(amount * 10 ** asset.decimals))
+        .toString();
     }
 
     vaultContract.methods
@@ -5037,7 +5094,7 @@ class Store {
         }
       );
 
-      if(!approvalErr) {
+      if (!approvalErr) {
         await this._callDepositAmountContractCitadel(
           asset,
           account,
@@ -5548,7 +5605,9 @@ class Store {
 
         const pool = await elonContract.methods.getAllPoolInUSD().call(); // All pool in USD (6 decimals)
         const totalSupply = await elonContract.methods.totalSupply().call();
-        const pricePerFullShare = totalSupply ? (new BigNumber(pool)).shiftedBy(12).dividedBy(totalSupply).toNumber() : 0;
+        const pricePerFullShare = totalSupply
+          ? new BigNumber(pool).shiftedBy(12).dividedBy(totalSupply).toNumber()
+          : 0;
 
         const returnObj = {
           earnPricePerFullShare: 0,
@@ -5971,7 +6030,7 @@ class Store {
         vaultAddress = asset.vaultContractAddress;
       } else if (asset.strategyType === "daoFaang") {
         vaultAddress = asset.vaultContractAddress;
-      } 
+      }
       const url = `${config.statsProvider}vaults/historical-apy/${vaultAddress}/${interval}`;
       const resultString = await rp(url);
       const result = JSON.parse(resultString);
@@ -5983,7 +6042,6 @@ class Store {
   };
 
   _eventVerifyAmount = async (amount) => {
-
     const url = `${config.statsProvider}event/verify/${amount}`;
     const resultString = await rp(url);
     const result = JSON.parse(resultString);
@@ -6006,6 +6064,7 @@ class Store {
     const url = `${config.statsProvider}event/verify/`;
     const resultString = await rp(url);
     const result = JSON.parse(resultString);
+    console.log("🚀 | eventVerify= | result", result);
     let _result = {};
     if (result.body.happyHour === true) {
       _result = {
@@ -6022,6 +6081,7 @@ class Store {
     //   happyHour: true,
     //   happyHourStartTime: Date.now(),
     //   happyHourEndTime: Date.now() + 6000000,
+    //   happyHourThreshold: 5,
     // };
     store.setStore(_result);
     emitter.emit(HAPPY_HOUR_RETURN, _result);
@@ -6105,18 +6165,33 @@ class Store {
     const network = store.getStore("network");
     const assets = this._getDefaultValues(network).vaultAssets;
 
-    const allowed = ["daoCDV"];
-
-    const citadelAsset = assets.filter((el) => el.id == "daoCDV");
+    const citadelAsset = assets.filter((el) => el.id === "daoCDV");
+    const FAANGAsset = assets.filter((el) => el.id === "daoSTO");
 
     if (happyHourWeb3) {
       // Initialize Contract
       const happyHourContract = new happyHourWeb3.eth.Contract(
-        citadelABI,
+        citadelAsset[0].vaultContractABI,
         citadelAsset[0].vaultContractAddress
       );
+      console.log(
+        "🚀 | saveBiconomyProvider= | happyHourContract",
+        happyHourContract
+      );
 
-      store.setStore({ happyHourContract: happyHourContract });
+      const happyHourContractFAANG = new happyHourWeb3.eth.Contract(
+        FAANGAsset[0].vaultContractABI,
+        FAANGAsset[0].vaultContractAddress
+      );
+      console.log(
+        "🚀 | saveBiconomyProvider= | happyHourContractFAANG",
+        happyHourContractFAANG
+      );
+
+      store.setStore({
+        happyHourContract: happyHourContract,
+        happyHourContractFAANG: happyHourContractFAANG,
+      });
     }
 
     if (erc20PaymentWeb3) {
@@ -6231,13 +6306,13 @@ class Store {
     );
 
     let pool = 0;
-    if(asset.strategyType === "daoFaang") {
+    if (asset.strategyType === "daoFaang") {
       const network = store.getStore("network");
       const usdtUsdPriceFeedContract = new web3.eth.Contract(
-      config.eacAggregatoorProxyContract,
-      network === 1
-        ? config.USDTUSDPriceFeedMainnetContract
-        : config.USDTUSDPriceFeedKovanContract
+        config.eacAggregatoorProxyContract,
+        network === 1
+          ? config.USDTUSDPriceFeedMainnetContract
+          : config.USDTUSDPriceFeedKovanContract
       );
 
       // USDT / USD conversion result
@@ -6245,8 +6320,10 @@ class Store {
         .latestAnswer()
         .call();
 
-      const totalValueInPool = await vaultContract.methods.getTotalValueInPool().call(); 
-      pool = (totalValueInPool * usdtToUsdPrice) / (10 ** 20);
+      const totalValueInPool = await vaultContract.methods
+        .getTotalValueInPool()
+        .call();
+      pool = (totalValueInPool * usdtToUsdPrice) / 10 ** 20;
     } else {
       pool = await vaultContract.methods.getAllPoolInUSD().call();
     }
@@ -6453,7 +6530,10 @@ class Store {
         tokenIndex
       );
 
-      const token = (asset.strategyType === "daoFaang") ? asset.erc20addresses[tokenIndex] : tokenIndex;
+      const token =
+        asset.strategyType === "daoFaang"
+          ? asset.erc20addresses[tokenIndex]
+          : tokenIndex;
 
       await vaultContract.methods
         .withdraw(amount, token)
@@ -6477,7 +6557,7 @@ class Store {
         .on("error", function (error) {
           if (!error.toString().includes("-32601")) {
             if (error.message) {
-              console.log("Error in withdrawBoth" ,error);
+              console.log("Error in withdrawBoth", error);
               emitter.emit(ERROR, error.message);
               // return callback(error.message);
             }
@@ -6488,7 +6568,7 @@ class Store {
           if (!error.toString().includes("-32601")) {
             if (error.message) {
               // return callback(error.message);
-              console.log("Error in withdrawBoth" ,error);
+              console.log("Error in withdrawBoth", error);
               emitter.emit(ERROR, error.message);
             }
             // callback(error, null, null);
@@ -6501,16 +6581,20 @@ class Store {
   };
 
   _getVaultDAOmineAPY = (asset, pools, callback) => {
-    if(pools.length <= 0) { 
-      return callback(null, null); 
-    } 
-    const pool = pools.find(pool => pool.contract_address.toLowerCase() === asset.vaultContractAddress.toLowerCase());
-    if(pool === undefined) {
+    if (pools.length <= 0) {
+      return callback(null, null);
+    }
+    const pool = pools.find(
+      (pool) =>
+        pool.contract_address.toLowerCase() ===
+        asset.vaultContractAddress.toLowerCase()
+    );
+    if (pool === undefined) {
       return callback(null, null);
     } else {
-      return callback(null, { daomineApy: pool.apr});
+      return callback(null, { daomineApy: pool.apr });
     }
-  }
+  };
 
   getStrategyBalancesFull = async (payload) => {
     const network = store.getStore("network");
@@ -6528,10 +6612,9 @@ class Store {
     }
     const vaultStatistics = await this._getStatistics();
     const addressStatistics = await this._getAddressStatistics(account.address);
-
     const daoMinePools = await this._findDAOminePool();
     const pools = daoMinePools.pools;
-   
+
     const usdPrices = await this._getUSDPrices();
     await this.getUSDPrices();
 
@@ -6595,7 +6678,7 @@ class Store {
             (callbackInner) => {
               // 10
               this._getVaultDAOmineAPY(asset, pools, callbackInner);
-            }
+            },
 
             // (callbackInner) => { this._getVaultHoldings(web3, asset, account, callbackInner) },
             // (callbackInner) => { this._getAddressTransactions(addressTXHitory, asset, callbackInner) },
@@ -6640,7 +6723,7 @@ class Store {
             asset.daomineApy = data[10] ? data[10].daomineApy : 0;
             // asset.addressTransactions = data[7]
             // asset.vaultHoldings = data[3]
-            
+
             callback(null, asset);
           }
         );
@@ -6734,8 +6817,7 @@ class Store {
         );
 
         dvgDecimal = await dvgContract.methods.decimals().call();
-
-      } else if (network === 1) { 
+      } else if (network === 1) {
         daoMineContract = new web3.eth.Contract(
           config.daoStakeContractABI,
           config.daoStakeMainnetContract
@@ -6831,7 +6913,7 @@ class Store {
     if (network === 42) {
       daoMineContractAddress = config.daoStakeTestContract;
     } else if (network === 1) {
-      daoMineContractAddress = config.daoStakeMainnetContract; 
+      daoMineContractAddress = config.daoStakeMainnetContract;
     }
 
     const daoMineContract = new web3.eth.Contract(
@@ -6842,10 +6924,10 @@ class Store {
     const allowance = await lpTokenContract.methods
       .allowance(account.address, daoMineContractAddress)
       .call({ from: account.address });
-    const actualAllowance = allowance / (10 ** pool.decimal);
+    const actualAllowance = allowance / 10 ** pool.decimal;
 
     let approvalError;
-    if(parseFloat(amount) > parseFloat(actualAllowance)) {
+    if (parseFloat(amount) > parseFloat(actualAllowance)) {
       await this._checkLpTokenContractApproval(
         account,
         lpTokenContract,
@@ -6866,7 +6948,7 @@ class Store {
         }
       );
     }
-    if(!approvalError) {
+    if (!approvalError) {
       await this._callDepositAmountDAOmineContract(
         account,
         pool,
@@ -6888,7 +6970,7 @@ class Store {
         }
       );
     }
-  }
+  };
 
   _checkLpTokenContractApproval = async (
     account,
@@ -6950,7 +7032,10 @@ class Store {
     const poolDecimal = pool.decimal;
     const poolIndex = pool.pid;
 
-    const amountToSend = (poolDecimal !== "18") ? web3.utils.toBN(Math.floor(amount * 10 ** poolDecimal)).toString() : web3.utils.toWei(amount, "ether");
+    const amountToSend =
+      poolDecimal !== "18"
+        ? web3.utils.toBN(Math.floor(amount * 10 ** poolDecimal)).toString()
+        : web3.utils.toWei(amount, "ether");
 
     daoStakeContract.methods
       .deposit(poolIndex, amountToSend)
@@ -6963,7 +7048,8 @@ class Store {
       })
       .on("receipt", function (receipt) {
         callback(null, null, receipt);
-      }).on("error", function (error) {
+      })
+      .on("error", function (error) {
         if (!error.toString().includes("-32601")) {
           if (error.message) {
             return callback(error.message);
@@ -7001,7 +7087,7 @@ class Store {
     if (network === 42) {
       daoMineContractAddress = config.daoStakeTestContract;
     } else if (network === 1) {
-      daoMineContractAddress = config.daoStakeMainnetContract; 
+      daoMineContractAddress = config.daoStakeMainnetContract;
     }
 
     try {
@@ -7010,7 +7096,10 @@ class Store {
         daoMineContractAddress
       );
 
-      var amountToWithdraw = (poolDecimal !== "18") ? web3.utils.toBN(amount * 10 ** poolDecimal).toString() : web3.utils.toWei(amount, "ether");
+      var amountToWithdraw =
+        poolDecimal !== "18"
+          ? web3.utils.toBN(amount * 10 ** poolDecimal).toString()
+          : web3.utils.toWei(amount, "ether");
 
       await daoMineContract.methods
         .withdraw(poolIndex, amountToWithdraw)
