@@ -2032,6 +2032,7 @@ class Asset extends Component {
   onChangeDeposit = (event) => {
     let val = [];
     val[event.target.id] = event.target.value;
+    console.log("🚀 | Asset | val[event.target.id]", val[event.target.id]);
 
     this.verifyInput(val[event.target.id]);
     if (event.target.id === "amount") {
@@ -2040,6 +2041,7 @@ class Asset extends Component {
   };
 
   verifyInput = (amount) => {
+    console.log("🚀 | Asset | amount", amount);
     // const { amount } = this.state;
     const { asset, startLoading, happyHour, happyHourThreshold } = this.props;
 
@@ -2257,7 +2259,7 @@ class Asset extends Component {
 
     this.setState({ amountError: false, errorMessage: "" });
 
-    if (asset.strategyType === "citadel" && happyHour === true) {
+    if (asset.happyHourEnabled === true && happyHour === true) {
       if (parseFloat(amount) < parseFloat(happyHourThreshold)) {
         this.setState({
           // amountError: true,
