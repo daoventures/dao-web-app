@@ -4330,8 +4330,8 @@ class Store {
         }
       );
 
-      // const happyHour = await this._eventVerifyAmount(amount);
-      const happyHour = true;
+      const happyHour = await this._eventVerifyAmount(amount);
+      // const happyHour = true;
 
       if (happyHour === true) {
         await this._callDepositAmountContractCitadelHappyHour(
@@ -4439,8 +4439,8 @@ class Store {
       );
 
       if (!approvalErr) {
-        // const happyHour = await this._eventVerifyAmount(amount);
-        const happyHour = true;
+        const happyHour = await this._eventVerifyAmount(amount);
+        // const happyHour = true;
 
         if (happyHour === true) {
           await this._callDepositAmountContractCitadelHappyHour(
@@ -6077,13 +6077,13 @@ class Store {
       _result = { happyHour: result.body.happyHour };
     }
     // For testing
-    _result = {
-      happyHour: true,
-      happyHourStartTime: Date.now(),
-      happyHourEndTime: Date.now() + 6000000,
-      happyHourThreshold: 5,
-    };
-    store.setStore(_result);
+    // _result = {
+    //   happyHour: true,
+    //   happyHourStartTime: Date.now(),
+    //   happyHourEndTime: Date.now() + 6000000,
+    //   happyHourThreshold: 5,
+    // };
+    // store.setStore(_result);
     emitter.emit(HAPPY_HOUR_RETURN, _result);
   };
 
