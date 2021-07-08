@@ -964,6 +964,7 @@ class Vault extends Component {
   isLogoVault = (asset) => {
     return asset.strategyType === "citadel" ||
       asset.strategyType === "elon" ||
+      asset.strategyType === "cuban" ||
       asset.strategyType === "daoFaang"
       ? true
       : false;
@@ -1459,6 +1460,12 @@ class Vault extends Component {
       } else if (asset.strategyType === "elon") {
         if (asset.stats.elonApy) {
           return (asset.stats.elonApy / 1).toFixed(2) + "%";
+        } else {
+          return "0.00%";
+        }
+      } else if (asset.strategyType === "cuban") {
+        if (asset.stats.cubanApy) {
+          return (asset.stats.cubanApy / 1).toFixed(2) + "%";
         } else {
           return "0.00%";
         }
