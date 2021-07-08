@@ -6221,7 +6221,7 @@ class Store {
       } else if (asset.strategyType === "elon") {
         vaultAddress = asset.vaultContractAddress;
       } else if (asset.strategyType === "cuban") {
-        vaultAddress = asset.cubanContractAddress;
+        vaultAddress = asset.vaultContractAddress;
       } else if (asset.strategyType === "daoFaang") {
         vaultAddress = asset.vaultContractAddress;
       }

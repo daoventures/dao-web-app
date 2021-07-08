@@ -2003,8 +2003,6 @@ class Asset extends Component {
       if (asset.strategyType === "compound") {
         if (asset.stats.compoundApy) {
           return asset.stats.compoundApy;
-        } else {
-          return "0.00";
         }
       } else if (asset.strategyType === "yearn") {
         switch (basedOn) {
@@ -2033,21 +2031,16 @@ class Asset extends Component {
       } else if (asset.strategyType === "elon") {
         if (asset.stats.elonApy) {
           return asset.stats.elonApy;
-        } else {
-          return "0.00";
         }
       } else if (asset.strategyType === "cuban") {
         if (asset.stats.cubanApy) {
           return asset.stats.cubanApy;
-        } else {
-          return "0.00";
         }
       } else if (asset.strategyType === "daoFaang") {
         return asset.stats.faangApy;
       }
-    } else {
-      return "0.00";
     }
+    return 0;
   };
 
   _getEstimatedAPY = (asset) => {
