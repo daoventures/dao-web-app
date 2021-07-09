@@ -1555,6 +1555,7 @@ class Asset extends Component {
     var vaultAPY = [];
     var compoundAPY = [];
     var citadelAPY = [];
+    var harvestAPY = [];
     var elonAPY = [];
     var faangAPY = [];
     var labels = [];
@@ -1615,7 +1616,13 @@ class Asset extends Component {
               date,
               parseFloat(groups[date][0].faangApy.toFixed(4)),
             ]);
+          } else if (asset.strategyType === "harvest") {
+            harvestAPY.push([
+              date,
+              parseFloat(groups[date][0].harvestApy.toFixed(4)),
+            ]);
           }
+
 
           // second attempt
           var halfCount = Math.round(Number(groups[date].length / 2));
@@ -1656,7 +1663,13 @@ class Asset extends Component {
                 date,
                 parseFloat(groups[date][halfCount].faangApy.toFixed(4)),
               ]);
+            } else if (asset.strategyType === "harvest") {
+              harvestAPY.push([
+                date,
+                parseFloat(groups[date][halfCount].harvestApy.toFixed(4)),
+              ]);
             }
+
           }
         });
       } catch (ex) {}
@@ -1845,6 +1858,41 @@ class Asset extends Component {
           enabled: false,
         },
       };
+    } else if (asset.strategyType === "harvest") {
+      options = {
+        chart: {
+          width: hideNav ? 300 : 420,
+        },
+        title: {
+          text: "Historical Vault Performance",
+        },
+        xAxis: {
+          categories: labels,
+        },
+        series: [
+          {
+            name: "Harvest Fighter",
+            data: harvestAPY,
+          },
+        ],
+        responsive: {
+          rules: [
+            {
+              condition: {
+                maxWidth: 450,
+                chartOptions: {
+                  chart: {
+                    width: 300,
+                  },
+                },
+              },
+            },
+          ],
+        },
+        credits: {
+          enabled: false,
+        },
+      };
     }
 
     const chartTitle = {
@@ -1853,6 +1901,7 @@ class Asset extends Component {
       citadel: "Historical Vault Performance",
       elon: "Historical Vault Performance",
       daoFaang: "Historical Vault Performance",
+      harvest: "Historical Vault Performance",
     };
 
     // 调整折线图展示
@@ -1978,6 +2027,8 @@ class Asset extends Component {
         }
       } else if (asset.strategyType === "daoFaang") {
         return asset.stats.faangApy;
+      } else if (asset.strategyType === "harvest") {
+        return asset.stats.harvestApy;
       }
     } else {
       return "0.00";

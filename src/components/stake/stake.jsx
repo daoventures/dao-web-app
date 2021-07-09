@@ -798,6 +798,9 @@ class Stake extends Component {
       daoCDV: { filename: "citadel", format: "svg" },
       daoELO: { filename: "citadel", format: "svg" },
       daoSTO: { filename: "citadel", format: "svg" },
+      hfUSDT: { filename: "USDT", format: "png" },
+      hfUSDC: { filename: "USDC", format: "png" },
+      hfDAI: { filename: "DAI", format: "png" },
     };
 
     const poolImage = images[pool.name];
