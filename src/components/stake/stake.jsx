@@ -797,6 +797,7 @@ class Stake extends Component {
       "ETH<->DVG": { filename: "ethDvg", format: "png" },
       daoCDV: { filename: "citadel", format: "svg" },
       daoELO: { filename: "citadel", format: "svg" },
+      daoCUB: { filename: "citadel", format: "svg" },
       daoSTO: { filename: "citadel", format: "svg" },
       hfUSDT: { filename: "USDT", format: "png" },
       hfUSDC: { filename: "USDC", format: "png" },
