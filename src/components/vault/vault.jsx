@@ -801,6 +801,7 @@ class Vault extends Component {
   };
 
   balancesReturned = (balances) => {
+    console.log("Balances Returned");
     this.setState({
       assets: store.getStore("vaultAssets"),
       loading: false,
@@ -965,7 +966,8 @@ class Vault extends Component {
     return asset.strategyType === "citadel" ||
       asset.strategyType === "elon" ||
       asset.strategyType === "cuban" ||
-      asset.strategyType === "daoFaang"
+      asset.strategyType === "daoFaang" || 
+      asset.strategyType === "moneyPrinter"
       ? true
       : false;
   };

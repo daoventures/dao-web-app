@@ -102,6 +102,7 @@ import async from "async";
 import citadelABI from "./citadelABI.json";
 import config from "../config";
 import { injected } from "./connectors";
+import Mumbai from './config/mumbai';
 
 const rp = require("request-promise");
 const ethers = require("ethers");
@@ -1298,6 +1299,7 @@ class Store {
           isPopularItem: false,
         },
       ],
+      80001: Mumbai
     };
 
     const vaultAssets = network ? vaultAssetsObj[network] : vaultAssetsObj[1];
@@ -2706,6 +2708,7 @@ class Store {
         return callback(ex);
       }
     } else {
+      
       let erc20Contract = new web3.eth.Contract(
         config.erc20ABI,
         asset.erc20address
@@ -6795,6 +6798,8 @@ class Store {
     const account = store.getStore("account");
     // const assets = store.getStore('vaultAssets')
     const assets = this._getDefaultValues(network).vaultAssets;
+    store.setStore({vaultAssets: assets});
+    emitter.emit(STRATEGY_BALANCES_FULL_RETURNED, assets);
 
     const { interval } = payload.content;
     if (!account || !account.address) {
