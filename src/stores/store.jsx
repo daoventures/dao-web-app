@@ -1,18 +1,13 @@
 import {
-  ADVANCE,
   APPROVE_COMPLETED,
   APPROVE_TRANSACTING,
   BALANCES_LIGHT_RETURNED,
   BALANCES_RETURNED,
-  BASIC,
   BICONOMY_CONNECTED,
   CURRENT_THEME_RETURNED,
   DAOMINE_POOL_RETURNED,
   DASHBOARD_SNAPSHOT_RETURNED,
-  DEGEN,
   DEPOSIT_ALL_CONTRACT,
-  DEPOSIT_ALL_CONTRACT_RETURNED,
-  DEPOSIT_ALL_CONTRACT_RETURNED_COMPLETED,
   DEPOSIT_CONTRACT,
   DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED,
   DEPOSIT_CONTRACT_RETURNED,
@@ -26,7 +21,6 @@ import {
   DONATE_RETURNED,
   DRAWER_RETURNED,
   ERROR,
-  EXPERT,
   FIND_DAOMINE_POOL,
   GET_AGGREGATED_YIELD,
   GET_AGGREGATED_YIELD_RETURNED,
@@ -49,8 +43,6 @@ import {
   GET_VAULT_BALANCES_FULL,
   GET_VAULT_INFO,
   GET_XDVG_APR_SUCCESS,
-  GET_XDVG_BALANCE,
-  GET_XDVG_BALANCE_SUCCESS,
   HAPPY_HOUR_RETURN,
   HAPPY_HOUR_VERIFY,
   IDAI,
@@ -75,9 +67,7 @@ import {
   WIDTHDRAW_XDVG,
   WITHDRAW_BOTH,
   WITHDRAW_BOTH_VAULT,
-  WITHDRAW_BOTH_VAULT_FAIL_RETURNED,
   WITHDRAW_BOTH_VAULT_RETURNED,
-  WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
   WITHDRAW_DAOMINE,
   WITHDRAW_DAOMINE_RETURNED,
   WITHDRAW_DAOMINE_RETURNED_COMPLETED,
@@ -88,23 +78,19 @@ import {
   ZAP,
   ZAP_RETURNED,
 } from "../constants";
-import {
-  Biconomy,
-  HTTP_CODES,
-  PermitClient,
-  RESPONSE_CODES,
-} from "@biconomy/mexa";
 
 import BigNumber from "bignumber.js";
-import FAANGKovanABI from "./citadelABI.json";
 import Web3 from "web3";
 import async from "async";
 import citadelABI from "./citadelABI.json";
 import config from "../config";
 import { injected } from "./connectors";
+
 import Mumbai from './config/mumbai';
 import Kovan from './config/kovan';
 import Ethereum from './config/ethereum';
+
+import { getERC20AbiByNetwork } from './helper/contractHelper';
 
 const rp = require("request-promise");
 const ethers = require("ethers");
@@ -1875,29 +1861,31 @@ class Store {
         console.log(ex);
         return callback(ex);
       }
-    } else {
+      return;
+    } 
       
+    const network = store.getStore("network");
+    const erc20Abi =getERC20AbiByNetwork(network);
     let erc20Contract = new web3.eth.Contract(
-      config.erc20ABI,
+      erc20Abi,
       asset.erc20address
     );
-
+    
     try {
-        var balance = await erc20Contract.methods
-          .balanceOf(account.address)
-          .call({ from: account.address });
-        balance = parseFloat(balance) / 10 ** asset.decimals;
-        callback(null, parseFloat(balance));
-      } catch (ex) {
-        console.log(ex);
-        // return callback(ex);
-      }
+      var balance = await erc20Contract.methods
+        .balanceOf(account.address)
+        .call({ from: account.address });
+      balance = parseFloat(balance) / 10 ** asset.decimals;
+      callback(null, parseFloat(balance));
+    } catch (ex) {
+      console.log(ex);
+      // return callback(ex);
     }
   };
 
   _getERC20Balances = async (web3, asset, account, callback) => {
     // Strategy which required to get balances for multiple token
-    const strategyTypes = ["citadel", "daoFaang", "elon", "cuban"];
+    const strategyTypes = ["citadel", "daoFaang", "elon", "cuban", "moneyPrinter"];
     if (!strategyTypes.includes(asset.strategyType)) {
       return callback(null, {
         balances: [0, 0, 0],
@@ -3435,6 +3423,41 @@ class Store {
         .call();
 
       const pool = await vaultContract.methods.getTotalValueInPool().call();
+      const totalSupply = await vaultContract.methods.totalSupply().call();
+      const depositedShares = await vaultContract.methods
+        .balanceOf(account.address)
+        .call({ from: account.address });
+
+      const poolInUSD = (pool * usdtToUsdPrice) / 10 ** 20;
+      const depositedSharesInUSD =
+        (depositedShares * poolInUSD) / totalSupply / 10 ** 6;
+
+      callback(null, {
+        earnBalance: 0,
+        vaultBalance: 0,
+        strategyBalance: depositedShares,
+        depositedSharesInUSD: depositedSharesInUSD,
+      });
+    } else if (asset.strategyType === "moneyPrinter") {
+      const network = store.getStore("network");
+      const vaultContract = new web3.eth.Contract(
+        asset.vaultContractABI,
+        asset.vaultContractAddress
+      );
+      // USDT to USD price feed contract
+      const usdtUsdPriceFeedContract = new web3.eth.Contract(
+        config.polygonEacAggregatoorProxyContract,
+        network === 1
+          ? config.USDTUSDPriceFeedMaticContract
+          : config.USDTUSDPriceFeedMumbaiContract
+      );
+
+      // USDT / USD conversion result
+      const usdtToUsdPrice = await usdtUsdPriceFeedContract.methods
+        .latestAnswer()
+        .call();
+
+      const pool = await vaultContract.methods.getValueInPool().call();
       const totalSupply = await vaultContract.methods.totalSupply().call();
       const depositedShares = await vaultContract.methods
         .balanceOf(account.address)
@@ -5001,6 +5024,23 @@ class Store {
           faangPricePerFullShare: pricePerFullShare,
         };
         return callback(null, returnObj);
+      } else if (asset.strategyType === "moneyPrinter") {
+        const moneyPrinterContract = new web3.eth.Contract(
+          asset.vaultContractABI,
+          asset.vaultContractAddress
+        );
+        const pool = await moneyPrinterContract.methods.getValueInPool().call();
+        const totalSupply = await moneyPrinterContract.methods.totalSupply().call();
+        const pricePerFullShare = totalSupply
+          ? new BigNumber(pool).dividedBy(totalSupply).toNumber()
+          : 0;
+        const returnObj = {
+          earnPricePerFullShare: 0,
+          vaultPricePerFullShare: 0,
+          compoundExchangeRate: 0,
+          moneyPrinterPricePerFullShare: pricePerFullShare,
+        };
+        return callback(null, returnObj);
       }
     } catch (e) {
       console.log(e);
@@ -5394,6 +5434,8 @@ class Store {
       } else if (asset.strategyType === "cuban") {
         vaultAddress = asset.vaultContractAddress;
       } else if (asset.strategyType === "daoFaang") {
+        vaultAddress = asset.vaultContractAddress;
+      } else if (asset.strategyType === "moneyPrinter") {
         vaultAddress = asset.vaultContractAddress;
       }
       const url = `${config.statsProvider}vaults/historical-apy/${vaultAddress}/${interval}`;
@@ -6094,6 +6136,10 @@ class Store {
             asset.daomineApy = data[10] ? data[10].daomineApy : 0;
             // asset.addressTransactions = data[7]
             // asset.vaultHoldings = data[3]
+
+            if(asset.strategyType === "moneyPrinter") {
+              console.log("Money Printer here", asset);
+            }
 
             callback(null, asset);
           }
