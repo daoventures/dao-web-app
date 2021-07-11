@@ -81,7 +81,6 @@
     "react-dev-utils": "^10.2.1",
     "react-device-detect": "^1.17.0",
     "react-dom": "^16.13.1",
-    "react-hotjar": "^3.0.1",
     "react-i18next": "^9.0.10",
     "react-router-dom": "^5.2.0",
     "request-promise": "^4.2.6",

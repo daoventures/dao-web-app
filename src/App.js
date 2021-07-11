@@ -40,8 +40,6 @@ import {
 } from "./constants";
 
 import Store from "./stores";
-import { hotjar } from 'react-hotjar';
-
 const emitter = Store.emitter;
 const store = Store.store;
 const dispatcher = Store.dispatcher;
@@ -53,8 +51,6 @@ class App extends Component {
   };
 
   componentWillMount() {
-    hotjar.initialize(2496922, 6);
-
     dispatcher.dispatch({ type: GET_VAULT_INFO });
 
     // console.log('没到这里吗####');
@@ -209,7 +205,7 @@ class App extends Component {
                   <Vaults />
                 </BrowserView>
                 <MobileView>
-                  <MobileViewWarning />
+                  {/* <MobileViewWarning /> */}
                   <Vaults />
                 </MobileView>
               </Route>
@@ -221,18 +217,25 @@ class App extends Component {
                 <StakeDvgVip />
               </Route>
 
-              <Route path="/swap">
-                <Header />
-                <SideDrawer />
-                <MainContainer />
-                <Swap />
-              </Route>
-
               <Route path="/daomine">
                 <Header />
                 <SideDrawer />
                 <MainContainer />
                 <Stake />
+              </Route>
+
+              {/* <Route path="/stake">
+                <Header />
+                <SideDrawer />
+                <MainContainer />
+                <StakeDvgVip />
+              </Route> */}
+
+              <Route path="/swap">
+                <Header />
+                <SideDrawer />
+                <MainContainer />
+                <Swap />
               </Route>
 
               <Route path="/">
