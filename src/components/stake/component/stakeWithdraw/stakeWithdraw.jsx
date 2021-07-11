@@ -435,7 +435,7 @@ class StakeWithdraw extends Component {
                                 className={classes.emergencyWithdrawalActionButton}
                                 onClick={this.onEmergencyWithdrawal}
                             >
-                                <span>{"Confirm Withdraw " + pool.name + " only" }</span>
+                                <span>{"Confirm MAX withdrawal " + pool.name + " Only" }</span>
                             </Button>
                         </div>
                     }
