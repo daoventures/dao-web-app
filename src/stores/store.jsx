@@ -4865,7 +4865,6 @@ class Store {
         ? web3.utils.toBN(amount * 10 ** decimals).toString()
         : web3.utils.toWei(amount, "ether");
 
-    console.log("🚀 | tx | account.address", account.address);
 
     // Citadel, Elon, and Cuban pass token's index for deposit, while FAANG pass token address
     const tokenToSent =
@@ -6195,7 +6194,6 @@ class Store {
       const url = `${config.statsProvider}vaults/price/${price_id}/${interval}`;
       const resultString = await rp(url);
       const result = JSON.parse(resultString);
-      console.log("🚀 | _getHistoricalPrice= | result", result);
       callback(null, result.body);
     } catch (e) {
       console.log(e);
@@ -6213,7 +6211,6 @@ class Store {
         const url = `${config.statsProvider}vaults/performance/${performanceId}/${interval}`;
         const resultString = await rp(url);
         const result = JSON.parse(resultString);
-        console.log("🚀 | _getHistoricalPerformance= | result", result);
         callback(null, result.body);
       } catch (e) {
         console.log(e);
@@ -6960,7 +6957,6 @@ class Store {
             asset.sumBalances = data[9].sumBalances;
             asset.daomineApy = data[10] ? data[10].daomineApy : 0;
             asset.historicalPerformance = data[11];
-            console.log("🚀 | getStrategyBalancesFull= | asset", asset);
 
             // asset.addressTransactions = data[7]
             // asset.vaultHoldings = data[3]

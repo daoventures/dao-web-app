@@ -1589,10 +1589,7 @@ class Asset extends Component {
       // this gives an object with dates as keys
       let groups;
       if (asset.strategyType === "citadel") {
-        console.log(
-          "🚀 | Asset | sset.historicalPerformance",
-          asset.historicalPerformance
-        );
+
         groups = asset.historicalPerformance
           .sort(sortByTimestamp)
           .reduce((groups, apy) => {
@@ -1603,7 +1600,6 @@ class Asset extends Component {
             groups[date].push(apy);
             return groups;
           }, {});
-        console.log("🚀 | Asset | groups", groups);
       } else {
         groups = asset.historicalAPY
           .sort(sortByTimestamp)
@@ -2120,7 +2116,6 @@ class Asset extends Component {
   onChangeDeposit = (event) => {
     let val = [];
     val[event.target.id] = event.target.value;
-    console.log("🚀 | Asset | val[event.target.id]", val[event.target.id]);
 
     this.verifyInput(val[event.target.id]);
     if (event.target.id === "amount") {
@@ -2129,7 +2124,6 @@ class Asset extends Component {
   };
 
   verifyInput = (amount) => {
-    console.log("🚀 | Asset | amount", amount);
     // const { amount } = this.state;
     const { asset, startLoading, happyHour, happyHourThreshold } = this.props;
 
