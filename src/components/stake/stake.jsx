@@ -19,6 +19,8 @@ import {
   DEPOSIT_DAOMINE_RETURNED_COMPLETED,
   WITHDRAW_DAOMINE_RETURNED,
   WITHDRAW_DAOMINE_RETURNED_COMPLETED,
+  EMERGENCY_WITHDRAW_DAOMINE_RETURNED,
+  EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,
   ERROR,
   ALL
 } from "../../constants/constants";
@@ -327,6 +329,11 @@ class Stake extends Component {
     emitter.on(WITHDRAW_DAOMINE_RETURNED, this.showHash);
     emitter.on(
       WITHDRAW_DAOMINE_RETURNED_COMPLETED,
+      this.onDepositWithdrawalCompleted
+    );
+    emitter.on(EMERGENCY_WITHDRAW_DAOMINE_RETURNED, this.showHash);
+    emitter.on(
+      EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,
       this.onDepositWithdrawalCompleted
     );
   }
