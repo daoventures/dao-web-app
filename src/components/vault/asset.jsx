@@ -1570,6 +1570,8 @@ class Asset extends Component {
     var vaultAPY = [];
     var compoundAPY = [];
     var citadelAPY = [];
+    let ethAPY = [];
+    let btcAPY = [];
     var elonAPY = [];
     var cubanAPY = [];
     var faangAPY = [];
@@ -1583,18 +1585,37 @@ class Asset extends Component {
       return 0;
     };
 
-    if (asset.historicalAPY) {
+    if (asset.historicalAPY || asset.historicalPerformance) {
       // this gives an object with dates as keys
-      const groups = asset.historicalAPY
-        .sort(sortByTimestamp)
-        .reduce((groups, apy) => {
-          const date = moment.unix(apy.timestamp / 1000).format("DD-MM-YYYY");
-          if (!groups[date]) {
-            groups[date] = [];
-          }
-          groups[date].push(apy);
-          return groups;
-        }, {});
+      let groups;
+      if (asset.strategyType === "citadel") {
+        console.log(
+          "🚀 | Asset | sset.historicalPerformance",
+          asset.historicalPerformance
+        );
+        groups = asset.historicalPerformance
+          .sort(sortByTimestamp)
+          .reduce((groups, apy) => {
+            const date = moment.unix(apy["time_stamp"]).format("DD-MM-YYYY");
+            if (!groups[date]) {
+              groups[date] = [];
+            }
+            groups[date].push(apy);
+            return groups;
+          }, {});
+        console.log("🚀 | Asset | groups", groups);
+      } else {
+        groups = asset.historicalAPY
+          .sort(sortByTimestamp)
+          .reduce((groups, apy) => {
+            const date = moment.unix(apy.timestamp / 1000).format("DD-MM-YYYY");
+            if (!groups[date]) {
+              groups[date] = [];
+            }
+            groups[date].push(apy);
+            return groups;
+          }, {});
+      }
 
       try {
         Object.keys(groups).forEach((date) => {
@@ -1618,7 +1639,15 @@ class Asset extends Component {
           } else if (asset.strategyType === "citadel") {
             citadelAPY.push([
               date,
-              parseFloat(groups[date][0].citadelApy.toFixed(4)),
+              parseFloat((groups[date][0]["lp_performance"] * 100).toFixed(4)),
+            ]);
+            btcAPY.push([
+              date,
+              parseFloat((groups[date][0]["btc_performance"] * 100).toFixed(4)),
+            ]);
+            ethAPY.push([
+              date,
+              parseFloat((groups[date][0]["eth_performance"] * 100).toFixed(4)),
             ]);
           } else if (asset.strategyType === "elon") {
             elonAPY.push([
@@ -1779,6 +1808,17 @@ class Asset extends Component {
           {
             name: "Citadel",
             data: citadelAPY,
+            color: "#FFFFFF",
+          },
+          {
+            name: "BTC",
+            data: btcAPY,
+            color: "#f7931b",
+          },
+          {
+            name: "ETH",
+            data: ethAPY,
+            color: "#464a75",
           },
         ],
         responsive: {
