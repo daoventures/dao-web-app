@@ -617,7 +617,9 @@ class StakeDvgVip extends Component {
             },
             amountError: false,
             errorMessage: '',
-            network: 0
+            network: 0,
+            disableStake: false,
+            disableUnstake: false,
         }
         if (account && account.address) {
             dispatcher.dispatch({ type: GET_DVG_INFO })
@@ -708,6 +710,7 @@ class StakeDvgVip extends Component {
             dashboard: store.getStore('dashboard')
         })
     }
+
     connectionConnected = () => {
         const { period } = this.state;
         const account = store.getStore('account')
@@ -885,7 +888,9 @@ class StakeDvgVip extends Component {
             aprInfo,
             amountError,
             max,
-            errorMessage
+            errorMessage,
+            disableStake,
+            disableUnstake,
         } = this.state
 
         const dvgBalance = dvgInfoObj && dvgInfoObj[1].balance;
@@ -974,13 +979,33 @@ class StakeDvgVip extends Component {
 
                             {/** Button to trigger stake function */}
                             <div className={classes.depositButtonBox}>
-                                <Button
-                                    disabled={loading}
+                                {
+                                    (type === "stake") && 
+                                    <Button disabled={disableStake || (!disableStake && loading)}
+                                            className={classes.depositActionButton}
+                                            onClick={() => this.submitStake()}
+                                    >
+                                        <span>Approve Staking</span>
+                                    </Button>
+                                }
+                                {
+                                    (type !== "stake") && 
+                                    <Button disabled={disableUnstake || (!disableUnstake && loading)}
+                                            className={classes.depositActionButton}
+                                            onClick={() => this.submitStake()}
+                                    >
+                                        <span>Approve Unstaking</span>
+                                    </Button>
+                                }
+                                {/* <Button
+                                    disabled={(type === "stake" && disableStake) || 
+                                            (type !== "stake" && disableUnstake) ||
+                                            (!disableStake && !disableUnstake && loading)}
                                     className={classes.depositActionButton}
                                     onClick={() => this.submitStake()}
                                 >
                                     <span>{ (type === "stake") ? "Approve Staking" : "Approve Unstaking"}</span>
-                                </Button>
+                                </Button> */}
                             </div>
                         </div>
                     </div>

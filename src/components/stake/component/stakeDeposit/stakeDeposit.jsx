@@ -355,7 +355,7 @@ class StakeDeposit extends Component {
           {/** Deposit Button */}
           <div className={classes.depositButtonBox}>
             <Button
-              disabled={loading}
+              disabled={(pool.deposit && loading) || !pool.deposit}
               className={classes.depositActionButton}
               onClick={this.onDeposit}
             >
