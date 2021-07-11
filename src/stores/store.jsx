@@ -87,6 +87,9 @@ import {
   WITHDRAW_DAOMINE,
   WITHDRAW_DAOMINE_RETURNED,
   WITHDRAW_DAOMINE_RETURNED_COMPLETED,
+  EMERGENCY_WITHDRAW_DAOMINE,
+  EMERGENCY_WITHDRAW_DAOMINE_RETURNED,
+  EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,
 } from "../constants";
 import {
   Biconomy,
@@ -410,6 +413,8 @@ class Store {
             break;
           case WITHDRAW_DAOMINE:
             this.withdrawDAOmine(payload);
+          case EMERGENCY_WITHDRAW_DAOMINE:
+            this.emergencyWithdrawDAOmine(payload);
           case GET_DVG_INFO:
             this.getDvgbalance(payload);
             break;
@@ -6669,9 +6674,18 @@ class Store {
         .user(poolIndex, account.address)
         .call({ from: account.address });
 
-      let userPendingDVG = await daoMineContract.methods
-        .pendingDVG(poolIndex, account.address)
+      let pool = await daoMineContract.methods
+        .pool(poolIndex)
         .call({ from: account.address });
+
+    //  let userPendingDVG = await daoMineContract.methods
+    //     .pendingDVG(poolIndex, account.address)
+    //     .call({ from: account.address });
+        
+      let userPendingDVG = 0;
+      if (pool != null) {
+        userPendingDVG = (Number(userDepositInfo.lpAmount) * Number(pool.accDVGPerLP) / 10 ** 18) - Number(userDepositInfo.finishedDVG);
+      }
 
       const result = { userDepositInfo, userPendingDVG };
       callback(null, result);
@@ -6980,6 +6994,100 @@ class Store {
           callback(error);
         }
       });
+  }
+
+  _emergencyWithdrawSnapShot = async (userPoolInfo) => {
+    try {
+      const url = config.statsProvider + "staking/emergency-withdraw-snapshot";
+      const poolsString = await rp({
+        uri: url,
+        method: 'POST',
+        body: {
+          pid: userPoolInfo.pid,
+          userAddress: userPoolInfo.userAddress,
+          pendingDVG: userPoolInfo.pendingDVG,
+        },
+        json: true,
+      });
+      const pools = JSON.parse(poolsString);
+      return pools.body;
+    } catch (e) {
+      console.log(e);
+      return store.getStore("universalGasPrice");
+    }
+  }
+
+  emergencyWithdrawDAOmine = async (payload) => {
+    const account = store.getStore("account");
+    const network = store.getStore("network");
+   
+    const { pool } = payload.content;
+    const poolIndex = pool.pid;
+
+    // Get web3
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      return null;
+    }
+
+    // DAOMmine contract address by network
+    let daoMineContractAddress = "";
+    if (network === 42) {
+      daoMineContractAddress = config.daoStakeTestContract;
+    } else if (network === 1) {
+      daoMineContractAddress = config.daoStakeMainnetContract; 
+    }
+
+    try {
+      const daoMineContract = new web3.eth.Contract(
+        config.daoStakeContractABI,
+        daoMineContractAddress
+      );
+
+      const snapshot = async (_, result) => {
+        await this._emergencyWithdrawSnapShot({
+          pid: poolIndex,
+          userAddress: account.address.toLowerCase(),
+          pendingDVG: result.userPendingDVG,
+        })
+      }
+
+      await this._getUserDepositForDAOmine(daoMineContract, null, account, poolIndex, snapshot);      
+
+      await daoMineContract.methods
+        .emergencyWithdraw(poolIndex)
+        .send({
+          from: account.address,
+          gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+        })
+        .on("transactionHash", function (txnHash) {
+          return emitter.emit(EMERGENCY_WITHDRAW_DAOMINE_RETURNED, txnHash);
+        })
+        .on("receipt", function (receipt) {
+          emitter.emit(
+            EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,
+            receipt.transactionHash
+          );
+        })
+        .on("error", function (error) {
+          console.log("emergencyWithdrawDAOmine() Error: ", error);
+          if (!error.toString().includes("-32601")) {
+            if (error.message) {
+              emitter.emit(ERROR, error.message);
+            }
+          }
+        })
+        .catch((error) => {
+          console.log("emergencyWithdrawDAOmine() Error: ", error);
+          if (!error.toString().includes("-32601")) {
+            if (error.message) {
+              emitter.emit(ERROR, error.message);
+            }
+          }
+        });
+    } catch (err) {
+      console.log("emergencyWithdrawDAOmine() Error: ", err);
+    }  
   }
 
   withdrawDAOmine = async (payload) => {
