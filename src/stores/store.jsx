@@ -6691,6 +6691,7 @@ class Store {
       callback(null, result);
     } catch (err) {
       console.log("Error _getUserDepositForDAOmine", err);
+      callback(null, null);
     }
   };
 
