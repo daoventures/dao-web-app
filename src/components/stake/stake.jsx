@@ -696,7 +696,7 @@ class Stake extends Component {
                             }}
                             className={classes.assetLabel1}
                           >
-                            {pool.apr ? Number(pool.apr).toFixed(2) : "0.00"}
+                            {pool.apr ? Number(pool.apr).toFixed(2).toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",") : "0.00"}
                             {" %"}
                           </Typography>
                           <Typography

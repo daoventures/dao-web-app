@@ -334,7 +334,7 @@ class StakeWithdraw extends Component {
                                 width: "100%",
                             }}
                             className={classes.withdrawalInput}
-                            id="amount"
+                            id={`${pool.pid}_withdraw`}
                             cursor={amount}
                             value={amount}
                             error={amountError}
@@ -375,7 +375,7 @@ class StakeWithdraw extends Component {
                     {/** Withdrawal Button */}
                     <div className={classes.withdrawlButtonBox}>
                         <Button
-                            disabled={loading}
+                            disabled={(pool.withdraw && loading) || !pool.withdraw}
                             className={classes.withdrawalActionButton}
                             onClick={this.onWithdrawal}
                         >
