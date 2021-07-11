@@ -40,6 +40,8 @@ import {
 } from "./constants";
 
 import Store from "./stores";
+import { hotjar } from 'react-hotjar';
+
 const emitter = Store.emitter;
 const store = Store.store;
 const dispatcher = Store.dispatcher;
@@ -51,6 +53,8 @@ class App extends Component {
   };
 
   componentWillMount() {
+    hotjar.initialize(2496922, 6);
+
     dispatcher.dispatch({ type: GET_VAULT_INFO });
 
     // console.log('没到这里吗####');

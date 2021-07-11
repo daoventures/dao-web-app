@@ -7,6 +7,8 @@ import Store from "../../../../stores/store";
 import {
     WITHDRAW_DAOMINE,
     WITHDRAW_DAOMINE_RETURNED_COMPLETED,
+    EMERGENCY_WITHDRAW_DAOMINE,
+    EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,
     ERROR
 } from '../../../../constants/constants';
 import { validateDigit, validateInputMoreThanBalance, validateAmountNotExist } from "../../helper/validation";
@@ -133,6 +135,31 @@ const styles = (theme) => ({
         },
     },
 
+    emergencyWithdrawalActionButton: {
+        height: "42px",
+        margin: "auto",
+        background: "none",
+        borderColor: "#dc0b0c",
+        color: "#dc0b0c",
+        borderWidth: "1px",
+        borderStyle: "solid",
+        marginLeft: "20px",
+        borderRadius: "0px",
+        cursor: "pointer",
+        flex: "1",
+        "&:hover": {
+            background: theme.themeColors.btnBack,
+        },
+        "&.Mui-disabled": {
+            borderColor: theme.themeColors.btnDisabled,
+            cursor: "not-allowed",
+            color: theme.themeColors.textD,
+        },
+        "&:first-child": {
+            marginLeft: "0px",
+        },
+    },
+
     withdrawlButtonBox: {
         width: "100%",
         display: "flex",
@@ -175,11 +202,13 @@ class StakeWithdraw extends Component {
 
     componentWillMount() {
         emitter.on(WITHDRAW_DAOMINE_RETURNED_COMPLETED, this.onWithdrawCompleted);
+        emitter.on(EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED, this.onWithdrawCompleted);
         emitter.on(ERROR, this.errorReturned);
     }
 
     componentWillUnmount() {
         emitter.removeListener(WITHDRAW_DAOMINE_RETURNED_COMPLETED, this.onWithdrawCompleted);
+        emitter.removeListener(EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED, this.onWithdrawCompleted);
         emitter.removeListener(ERROR, this.errorReturned);
     }
 
@@ -293,6 +322,22 @@ class StakeWithdraw extends Component {
         }
     };
 
+    onEmergencyWithdrawal = () => {
+        this.setState({ amountError: false, errorMessage: "" });
+
+        const { startLoading, pool } = this.props;
+        
+        this.setState({ loading: true });
+        startLoading();
+
+        dispatcher.dispatch({
+            type: EMERGENCY_WITHDRAW_DAOMINE,
+            content: {
+                pool,
+            }
+        })
+    };
+
     render() {
         const { amount, loading, amountError, percent, errorMessage } = this.state;
         const { classes, pool } = this.props;
@@ -339,7 +384,7 @@ class StakeWithdraw extends Component {
                             value={amount}
                             error={amountError}
                             onChange={this.onChange}
-                            disabled={loading}
+                            disabled={(pool.withdraw && loading) || !pool.withdraw}
                             placeholder="0.00"
                             variant="outlined"
                             onKeyDown={this.inputKeyDown}
@@ -353,7 +398,7 @@ class StakeWithdraw extends Component {
                                         : classes.withdrawalScale
                                 }
                                 variant="text"
-                                disabled={loading}
+                                disabled={(pool.withdraw && loading) || !pool.withdraw}
                                 onClick={() => {
                                     this.setAmount(100);
                                 }}
@@ -382,6 +427,18 @@ class StakeWithdraw extends Component {
                             <span>Confirm Withdraw & Claim Rewards</span>
                         </Button>
                     </div>
+
+                    {pool.emergencyWithdraw && 
+                        <div className={classes.withdrawlButtonBox}>
+                            <Button
+                                disabled={(pool.emergencyWithdraw && loading)}
+                                className={classes.emergencyWithdrawalActionButton}
+                                onClick={this.onEmergencyWithdrawal}
+                            >
+                                <span>{"Confirm Withdraw " + pool.name + " only" }</span>
+                            </Button>
+                        </div>
+                    }
                 </div>
             </div>
         );
