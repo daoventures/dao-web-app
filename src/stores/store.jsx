@@ -100,6 +100,7 @@ import async from "async";
 import citadelABI from "./citadelABI.json";
 import config from "../config";
 import { injected } from "./connectors";
+import fromExponential from 'from-exponential';
 
 // import { callCitadelHappyHourDeposit } from "./biconomyHelper";
 
@@ -507,49 +508,49 @@ class Store {
           isPopularItem: true, // use to render popular item icon
           // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
         },
-        // {
-        //   id: "daoSTO",
-        //   name: "USDT/USDC/DAI",
-        //   symbol: "USDT",
-        //   symbols: ["USDT", "USDC", "DAI"],
-        //   description: "Stablecoins",
-        //   vaultSymbol: "daoSTO",
-        //   erc20addresses: [
-        //     "0xdac17f958d2ee523a2206206994597c13d831ec7",
-        //     "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-        //     "0x6b175474e89094c44da98b954eedeac495271d0f",
-        //   ],
-        //   erc20address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
-        //   vaultContractAddress: "0x742a85daf742ca0213b06fdae449434e0448691e",
-        //   vaultContractABI: config.vaultDAOSTOContractABI,
-        //   balance: 0,
-        //   balances: [0, 0, 0],
-        //   vaultBalance: 0,
-        //   decimals: 18,
-        //   deposit: true,
-        //   depositAll: true,
-        //   withdraw: true,
-        //   withdrawAll: true,
-        //   lastMeasurement: 12766399,
-        //   measurement: 1e18,
-        //   price_id: ["tether", "usd-coin", "dai"],
-        //   priceInUSD: [0, 0, 0],
-        //   strategyName: "DAO FAANG Stonk: USDT USDC DAI",
-        //   strategy: "DAO FAANG Stonk",
-        //   strategyAddress: "0x7f1cffb0e0a7351a72ef53cb51796221e2bac3a5",
-        //   strategyContractABI: config.strategyDAOSTOContractABI,
-        //   historicalPriceId: "daoSTO_price",
-        //   logoFormat: "svg",
-        //   risk: ADVANCE,
-        //   strategyType: "daoFaang",
-        //   cTokenAddress: "",
-        //   cAbi: "",
-        //   group: ADVANCE,
-        //   tvlKey: "daoSTO_tvl",
-        //   infoLink:
-        //     "https://daoventures.gitbook.io/daoventures/products/strategies#bf64", // TODO: Update
-        //   isPopularItem: true, // use to render popular item icon
-        // },
+        {
+          id: "daoSTO",
+          name: "USDT/USDC/DAI",
+          symbol: "USDT",
+          symbols: ["USDT", "USDC", "DAI"],
+          description: "Stablecoins",
+          vaultSymbol: "daoSTO",
+          erc20addresses: [
+            "0xdac17f958d2ee523a2206206994597c13d831ec7",
+            "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+            "0x6b175474e89094c44da98b954eedeac495271d0f",
+          ],
+          erc20address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
+          vaultContractAddress: "0x742a85daf742ca0213b06fdae449434e0448691e",
+          vaultContractABI: config.vaultDAOSTOContractABI,
+          balance: 0,
+          balances: [0, 0, 0],
+          vaultBalance: 0,
+          decimals: 18,
+          deposit: true,
+          depositAll: true,
+          withdraw: true,
+          withdrawAll: true,
+          lastMeasurement: 12766399,
+          measurement: 1e18,
+          price_id: ["tether", "usd-coin", "dai"],
+          priceInUSD: [0, 0, 0],
+          strategyName: "DAO FAANG Stonk: USDT USDC DAI",
+          strategy: "DAO FAANG Stonk",
+          strategyAddress: "0x7f1cffb0e0a7351a72ef53cb51796221e2bac3a5",
+          strategyContractABI: config.strategyDAOSTOContractABI,
+          historicalPriceId: "daoSTO_price",
+          logoFormat: "svg",
+          risk: ADVANCE,
+          strategyType: "daoFaang",
+          cTokenAddress: "",
+          cAbi: "",
+          group: ADVANCE,
+          tvlKey: "daoSTO_tvl",
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#bf64", // TODO: Update
+          isPopularItem: true, // use to render popular item icon
+        },
         {
           id: "daoELO",
           name: "USDT/USDC/DAI",
@@ -879,49 +880,49 @@ class Store {
           isPopularItem: true,
           // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
         },
-        // {
-        //   id: "daoSTO",
-        //   name: "USDT/USDC/DAI",
-        //   symbol: "USDT",
-        //   symbols: ["USDT", "USDC", "DAI"],
-        //   description: "Stablecoins",
-        //   vaultSymbol: "daoSTO",
-        //   erc20addresses: [
-        //     "0x07de306ff27a2b630b1141956844eb1552b956b5",
-        //     "0xb7a4f3e9097c08da09517b5ab877f7a917224ede",
-        //     "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
-        //   ],
-        //   erc20address: "0x07de306ff27a2b630b1141956844eb1552b956b5",
-        //   vaultContractAddress: "0xd6af81e5288be43137debf969d7f2c03482c8cc1",
-        //   vaultContractABI: config.vaultDAOSTOContractABI,
-        //   balance: 0,
-        //   balances: [0, 0, 0],
-        //   vaultBalance: 0,
-        //   decimals: 18,
-        //   deposit: true,
-        //   depositAll: true,
-        //   withdraw: true,
-        //   withdrawAll: true,
-        //   lastMeasurement: "25867823",
-        //   measurement: 1e18,
-        //   price_id: ["tether", "usd-coin", "dai"],
-        //   priceInUSD: [0, 0, 0],
-        //   strategyName: "DAO FAANG Stonk: USDT USDC DAI",
-        //   strategy: "DAO FAANG Stonk",
-        //   strategyAddress: "0xc0f43b6db13e5988c92aa8c7c286a51f493620d4",
-        //   strategyContractABI: config.strategyDAOSTOContractABI,
-        //   historicalPriceId: "daoSTO_price",
-        //   logoFormat: "svg",
-        //   risk: ADVANCE,
-        //   strategyType: "daoFaang",
-        //   cTokenAddress: "",
-        //   cAbi: "",
-        //   group: ADVANCE,
-        //   tvlKey: "daoSTO_tvl",
-        //   infoLink:
-        //     "https://daoventures.gitbook.io/daoventures/products/strategies#bf64",
-        //   isPopularItem: true, // use to render popular item icon
-        // },
+        {
+          id: "daoSTO",
+          name: "USDT/USDC/DAI",
+          symbol: "USDT",
+          symbols: ["USDT", "USDC", "DAI"],
+          description: "Stablecoins",
+          vaultSymbol: "daoSTO",
+          erc20addresses: [
+            "0x07de306ff27a2b630b1141956844eb1552b956b5",
+            "0xb7a4f3e9097c08da09517b5ab877f7a917224ede",
+            "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
+          ],
+          erc20address: "0x07de306ff27a2b630b1141956844eb1552b956b5",
+          vaultContractAddress: "0xd6af81e5288be43137debf969d7f2c03482c8cc1",
+          vaultContractABI: config.vaultDAOSTOContractABI,
+          balance: 0,
+          balances: [0, 0, 0],
+          vaultBalance: 0,
+          decimals: 18,
+          deposit: true,
+          depositAll: true,
+          withdraw: true,
+          withdrawAll: true,
+          lastMeasurement: "25867823",
+          measurement: 1e18,
+          price_id: ["tether", "usd-coin", "dai"],
+          priceInUSD: [0, 0, 0],
+          strategyName: "DAO FAANG Stonk: USDT USDC DAI",
+          strategy: "DAO FAANG Stonk",
+          strategyAddress: "0xc0f43b6db13e5988c92aa8c7c286a51f493620d4",
+          strategyContractABI: config.strategyDAOSTOContractABI,
+          historicalPriceId: "daoSTO_price",
+          logoFormat: "svg",
+          risk: ADVANCE,
+          strategyType: "daoFaang",
+          cTokenAddress: "",
+          cAbi: "",
+          group: ADVANCE,
+          tvlKey: "daoSTO_tvl",
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#bf64",
+          isPopularItem: true, // use to render popular item icon
+        },
         {
           id: "daoELO",
           name: "USDT/USDC/DAI",
@@ -6288,18 +6289,21 @@ class Store {
     );
 
     if (asset.strategyType === "yearn") {
-      var earnAmountSend = web3.utils.toWei(earnAmount, "ether");
+      let earnAmountSend,  vaultAmountSend;
+
       if (asset.decimals !== 18) {
         earnAmountSend = web3.utils
           .toBN(Math.floor(earnAmount * 10 ** asset.decimals))
           .toString();
-      }
-
-      var vaultAmountSend = web3.utils.toWei(vaultAmount, "ether");
-      if (asset.decimals !== 18) {
         vaultAmountSend = web3.utils
           .toBN(Math.floor(vaultAmount * 10 ** asset.decimals))
           .toString();
+      } else {
+        const earnAmt = fromExponential(parseFloat(earnAmount));
+        const vaultAmt = fromExponential(parseFloat(vaultAmount));
+
+        earnAmountSend = web3.utils.toWei(earnAmt, "ether");
+        vaultAmountSend = web3.utils.toWei(vaultAmt, "ether");
       }
 
       const functionCall = vaultContract.methods.withdraw([
@@ -6344,9 +6348,14 @@ class Store {
           }
         });
     } else if (asset.strategyType === "compound") {
-      var amountSend = web3.utils.toWei(amount, "ether");
+      let amountSend;
       if (asset.decimals !== 18) {
-        amountSend = web3.utils.toBN(amount * 10 ** asset.decimals).toString();
+        amountSend = web3.utils
+          .toBN(Math.floor(amount * 10 ** asset.decimals))
+          .toString();
+      } else {
+        const amt = fromExponential(parseFloat(amount));
+        amountSend = web3.utils.toWei(amt, "ether");
       }
 
       const functionCall = vaultContract.methods.withdraw(amountSend);
@@ -6463,9 +6472,10 @@ class Store {
       );
 
       const token = (asset.strategyType === "daoFaang") ? asset.erc20addresses[tokenIndex] : tokenIndex;
-
+      const amountToSend = fromExponential(parseFloat(amount));
+      
       await vaultContract.methods
-        .withdraw(amount, token)
+        .withdraw(amountToSend, token)
         .send({
           from: account.address,
           gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
