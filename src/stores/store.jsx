@@ -556,10 +556,7 @@ class Store {
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#bf64", // TODO: Update
           isPopularItem: true, // use to render popular item icon
-<<<<<<< HEAD
           happyHourEnabled: true,
-=======
->>>>>>> 01452a2ace2c5676755c02048fbe6a3ac8c1a52d
         },
         {
           id: "daoELO",
@@ -977,10 +974,6 @@ class Store {
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#bf64",
           isPopularItem: true, // use to render popular item icon
-<<<<<<< HEAD
-          happyHourEnabled: true,
-=======
->>>>>>> 01452a2ace2c5676755c02048fbe6a3ac8c1a52d
         },
         {
           id: "daoELO",
