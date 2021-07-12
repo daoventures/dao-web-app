@@ -3426,7 +3426,7 @@ class Store {
       const usdtToUsdPrice = await usdtUsdPriceFeedContract.methods
         .latestAnswer()
         .call();
-
+      
       const pool = await vaultContract.methods.getTotalValueInPool().call();
       const totalSupply = await vaultContract.methods.totalSupply().call();
       const depositedShares = await vaultContract.methods
@@ -3436,7 +3436,7 @@ class Store {
       const poolInUSD = (pool * usdtToUsdPrice) / 10 ** 20;
       const depositedSharesInUSD =
         (depositedShares * poolInUSD) / totalSupply / 10 ** 6;
-
+     
       callback(null, {
         earnBalance: 0,
         vaultBalance: 0,
@@ -3452,7 +3452,7 @@ class Store {
       // USDT to USD price feed contract
       const usdtUsdPriceFeedContract = new web3.eth.Contract(
         config.polygonEacAggregatoorProxyContract,
-        network === 1
+        network === NETWORK.MATIC
           ? config.USDTUSDPriceFeedMaticContract
           : config.USDTUSDPriceFeedMumbaiContract
       );
@@ -3471,7 +3471,7 @@ class Store {
       const poolInUSD = (pool * usdtToUsdPrice) / 10 ** 20;
       const depositedSharesInUSD =
         (depositedShares * poolInUSD) / totalSupply / 10 ** 6;
-
+   
       callback(null, {
         earnBalance: 0,
         vaultBalance: 0,
@@ -5755,7 +5755,7 @@ class Store {
     tokenIndex
   ) => {
     const web3 = new Web3(store.getStore("web3context").library.provider);
-
+      
     let erc20Contract = new web3.eth.Contract(
       config.erc20ABI,
       asset.erc20addresses[tokenIndex]
@@ -5990,15 +5990,16 @@ class Store {
       );
 
       // Soft Check for sufficient liquidity
-      // if (
-      await this._isSufficientLiquidityUsd(
-        asset,
-        vaultContract,
-        amount,
-        tokenIndex
-      );
-
-      const token = (asset.strategyType === "daoFaang") ? asset.erc20addresses[tokenIndex] : tokenIndex;
+      if(asset.strategyType !== "moneyPrinter") {
+        await this._isSufficientLiquidityUsd(
+          asset,
+          vaultContract,
+          amount,
+          tokenIndex
+        );
+      }
+      
+      const token = (asset.strategyType === "daoFaang" || asset.strategyType === "moneyPrinter") ? asset.erc20addresses[tokenIndex] : tokenIndex;
       const amountToSend = fromExponential(parseFloat(amount));
       
       await vaultContract.methods
