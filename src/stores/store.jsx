@@ -85,6 +85,7 @@ import async from "async";
 import citadelABI from "./citadelABI.json";
 import config from "../config";
 import { injected } from "./connectors";
+import fromExponential from 'from-exponential';
 
 import Mumbai from './config/mumbai';
 import Kovan from './config/kovan';
@@ -5764,18 +5765,21 @@ class Store {
     );
 
     if (asset.strategyType === "yearn") {
-      var earnAmountSend = web3.utils.toWei(earnAmount, "ether");
+      let earnAmountSend,  vaultAmountSend;
+
       if (asset.decimals !== 18) {
         earnAmountSend = web3.utils
           .toBN(Math.floor(earnAmount * 10 ** asset.decimals))
           .toString();
-      }
-
-      var vaultAmountSend = web3.utils.toWei(vaultAmount, "ether");
-      if (asset.decimals !== 18) {
         vaultAmountSend = web3.utils
           .toBN(Math.floor(vaultAmount * 10 ** asset.decimals))
           .toString();
+      } else {
+        const earnAmt = fromExponential(parseFloat(earnAmount));
+        const vaultAmt = fromExponential(parseFloat(vaultAmount));
+
+        earnAmountSend = web3.utils.toWei(earnAmt, "ether");
+        vaultAmountSend = web3.utils.toWei(vaultAmt, "ether");
       }
 
       const functionCall = vaultContract.methods.withdraw([
@@ -5820,9 +5824,14 @@ class Store {
           }
         });
     } else if (asset.strategyType === "compound") {
-      var amountSend = web3.utils.toWei(amount, "ether");
+      let amountSend;
       if (asset.decimals !== 18) {
-        amountSend = web3.utils.toBN(amount * 10 ** asset.decimals).toString();
+        amountSend = web3.utils
+          .toBN(Math.floor(amount * 10 ** asset.decimals))
+          .toString();
+      } else {
+        const amt = fromExponential(parseFloat(amount));
+        amountSend = web3.utils.toWei(amt, "ether");
       }
 
       const functionCall = vaultContract.methods.withdraw(amountSend);
@@ -5938,13 +5947,11 @@ class Store {
         tokenIndex
       );
 
-      const token =
-        asset.strategyType === "daoFaang"
-          ? asset.erc20addresses[tokenIndex]
-          : tokenIndex;
-
+      const token = (asset.strategyType === "daoFaang") ? asset.erc20addresses[tokenIndex] : tokenIndex;
+      const amountToSend = fromExponential(parseFloat(amount));
+      
       await vaultContract.methods
-        .withdraw(amount, token)
+        .withdraw(amountToSend, token)
         .send({
           from: account.address,
           gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
