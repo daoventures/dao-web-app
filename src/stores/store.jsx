@@ -91,6 +91,7 @@ import fromExponential from 'from-exponential';
 import Mumbai from './config/mumbai';
 import Kovan from './config/kovan';
 import Ethereum from './config/ethereum';
+import Matic from './config/matic';
 
 import { getERC20AbiByNetwork } from './helper/contractHelper';
 
@@ -455,7 +456,8 @@ class Store {
     const vaultAssetsObj = {
       1: Ethereum,
       42: Kovan,
-      80001: Mumbai
+      80001: Mumbai,
+      137: Matic,
     };
 
     const vaultAssets = network ? vaultAssetsObj[network] : vaultAssetsObj[1];
