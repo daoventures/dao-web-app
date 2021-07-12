@@ -598,9 +598,53 @@ class Store {
           group: DEGEN,
           tvlKey: "daoELO_tvl",
           infoLink:
-            "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-elo-vault",
+            "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-elon-vault",
           isPopularItem: false,
           // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
+        },
+        {
+          id: "daoCUB",
+          name: "USDT/USDC/DAI",
+          symbol: "USDT",
+          symbols: ["USDT", "USDC", "DAI"],
+          description: "Stablecoins",
+          vaultSymbol: "daoCUB",
+          erc20addresses: [
+            "0xdac17f958d2ee523a2206206994597c13d831ec7",
+            "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+            "0x6b175474e89094c44da98b954eedeac495271d0f",
+          ],
+          erc20address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
+          vaultContractAddress: "0x2ad9f8d4c24652ea9f8a954f7e1fdb50a3be1dfd", 
+          vaultContractABI: config.vaultDAOCUBContractABI,
+          balance: 0,
+          balances: [0, 0, 0],
+          vaultBalance: 0,
+          decimals: 18,
+          deposit: true,
+          depositAll: true,
+          withdraw: true,
+          withdrawAll: true,
+          lastMeasurement: 12799447, 
+          measurement: 1e18,
+          price_id: ["tether", "usd-coin", "dai"],
+          priceInUSD: [0, 0, 0],
+          strategyName: "Cuban's Ape: USDT USDC DAI",
+          strategy: "DAO Cuban",
+          strategyAddress: "0x7c0f84e9dc6f721de21d51a490de6e370fa01cd6", 
+          strategyContractABI: config.strategyDAOCUBContractABI,
+          historicalPriceId: "daoCUB_price",
+          logoFormat: "svg",
+          risk: DEGEN,
+          strategyType: "cuban",
+          cTokenAddress: "",
+          cAbi: "",
+          group: DEGEN,
+          tvlKey: "daoCUB_tvl",
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-cuban-vault",
+          isPopularItem: false,
+          isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
         },
         {
           id: "USDT",
@@ -973,6 +1017,50 @@ class Store {
           tvlKey: "daoELO_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-elon-vault",
+          isPopularItem: false,
+          // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
+        },
+        {
+          id: "daoCUB",
+          name: "USDT/USDC/DAI",
+          symbol: "USDT",
+          symbols: ["USDT", "USDC", "DAI"],
+          description: "Stablecoins",
+          vaultSymbol: "daoCUB",
+          erc20addresses: [
+            "0x07de306ff27a2b630b1141956844eb1552b956b5",
+            "0xb7a4f3e9097c08da09517b5ab877f7a917224ede",
+            "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
+          ],
+          erc20address: "0x07de306ff27a2b630b1141956844eb1552b956b5",
+          vaultContractAddress: "0x5c304A6cB105E1BFf9805cA5CF072F1d2C3bEAC5",
+          vaultContractABI: config.vaultDAOELOContractABI,
+          balance: 0, // Stores balance of selectedERC20Address
+          balances: [0, 0, 0],
+          vaultBalance: 0,
+          decimals: 18,
+          deposit: true,
+          depositAll: true,
+          withdraw: true,
+          withdrawAll: true,
+          lastMeasurement: 25536976,
+          measurement: 1e18,
+          price_id: ["tether", "usd-coin", "dai"],
+          priceInUSD: [0, 0, 0],
+          strategyName: "Cuban's Ape: USDT USDC DAI",
+          strategy: "DAO Cuban",
+          strategyAddress: "0x998372C8dC70833A7dC687020257302582FA5838",
+          strategyContractABI: config.strategyDAOCUBContractABI,
+          historicalPriceId: "daoCUB_price",
+          logoFormat: "svg",
+          risk: DEGEN,
+          strategyType: "cuban",
+          cTokenAddress: "",
+          cAbi: "",
+          group: DEGEN,
+          tvlKey: "daoCUB_tvl",
+          infoLink:
+            "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-cuban-vault",
           isPopularItem: false,
           // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
         },
@@ -2644,7 +2732,7 @@ class Store {
 
   _getERC20Balances = async (web3, asset, account, callback) => {
     // Strategy which required to get balances for multiple token
-    const strategyTypes = ["citadel", "daoFaang", "elon"];
+    const strategyTypes = ["citadel", "daoFaang", "elon", "cuban"];
     if (!strategyTypes.includes(asset.strategyType)) {
       return callback(null, {
         balances: [0, 0, 0],
@@ -4139,7 +4227,8 @@ class Store {
       });
     } else if (
       asset.strategyType === "citadel" ||
-      asset.strategyType === "elon"
+      asset.strategyType === "elon" ||
+      asset.strategyType === "cuban"
     ) {
       const vaultContract = new web3.eth.Contract(
         asset.vaultContractABI,
@@ -4422,6 +4511,46 @@ class Store {
           }
         }
       );
+    } else if (asset.strategyType === "cuban") {
+      await this._checkApprovalCitadel(
+        asset,
+        account,
+        amount,
+        asset.vaultContractAddress,
+        tokenIndex,
+        (err, txnHash, approvalResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(APPROVE_TRANSACTING, txnHash);
+          }
+          if (approvalResult) {
+            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
+          }
+        }
+      );
+
+      await this._callDepositAmountContractCitadel(
+        asset,
+        account,
+        amount,
+        tokenIndex,
+        (err, txnHash, depositResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+          }
+          if (depositResult) {
+            return emitter.emit(
+              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+              depositResult.transactionHash
+            );
+          }
+        }
+      );
     } else if (asset.strategyType === "daoFaang") {
       let approvalErr; // To prevent execution on deposit contract, after user denied for _checkApprovalCitadel()
       await this._checkApprovalCitadel(
@@ -4642,7 +4771,7 @@ class Store {
         ? web3.utils.toBN(Math.floor(amount * 10 ** decimals)).toString()
         : web3.utils.toWei(amount, "ether");
 
-    // Citadel and Elon pass token's index for deposit, while FAANG pass token address
+    // Citadel, Elon, and Cuban pass token's index for deposit, while FAANG pass token address
     const tokenToSent =
       asset.strategyType === "daoFaang"
         ? asset.erc20addresses[tokenIndex]
@@ -4725,7 +4854,7 @@ class Store {
 
     console.log("🚀 | tx | account.address", account.address);
 
-    // Citadel and Elon pass token's index for deposit, while FAANG pass token address
+    // Citadel, Elon, and Cuban pass token's index for deposit, while FAANG pass token address
     const tokenToSent =
       asset.strategyType === "daoFaang"
         ? asset.erc20addresses[tokenIndex]
@@ -5039,6 +5168,46 @@ class Store {
         );
       }
     } else if (asset.strategyType === "elon") {
+      await this._checkApprovalCitadel(
+        asset,
+        account,
+        amount,
+        asset.vaultContractAddress,
+        tokenIndex,
+        (err, txnHash, approvalResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(APPROVE_TRANSACTING, txnHash);
+          }
+          if (approvalResult) {
+            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
+          }
+        }
+      );
+
+      await this._callDepositAmountContractCitadel(
+        asset,
+        account,
+        amount,
+        tokenIndex,
+        (err, txnHash, depositResult) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+          }
+          if (depositResult) {
+            return emitter.emit(
+              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+              depositResult.transactionHash
+            );
+          }
+        }
+      );
+    } else if (asset.strategyType === "cuban") {
       await this._checkApprovalCitadel(
         asset,
         account,
@@ -5601,6 +5770,7 @@ class Store {
           compoundExchangeRate: 0,
           citadelPricePerFullShare: pricePerFullShare,
           elonPricePerFullShare: 0,
+          cubanPricePerFullShare: 0,
         };
         return callback(null, returnObj);
       } else if (asset.strategyType === "elon") {
@@ -5621,6 +5791,28 @@ class Store {
           compoundExchangeRate: 0,
           citadelPricePerFullShare: 0,
           elonPricePerFullShare: pricePerFullShare,
+          cubanPricePerFullShare: 0,
+        };
+        return callback(null, returnObj);
+      } else if (asset.strategyType === "cuban") {
+        const cubanContract = new web3.eth.Contract(
+          asset.vaultContractABI,
+          asset.vaultContractAddress
+        );
+
+        const pool = await cubanContract.methods.getAllPoolInUSD().call(); // All pool in USD (6 decimals)
+        const totalSupply = await cubanContract.methods.totalSupply().call();
+        const pricePerFullShare = totalSupply
+          ? new BigNumber(pool).shiftedBy(12).dividedBy(totalSupply).toNumber()
+          : 0;
+
+        const returnObj = {
+          earnPricePerFullShare: 0,
+          vaultPricePerFullShare: 0,
+          compoundExchangeRate: 0,
+          citadelPricePerFullShare: 0,
+          elonPricePerFullShare: 0,
+          cubanPricePerFullShare: pricePerFullShare,
         };
         return callback(null, returnObj);
       } else if (asset.strategyType === "daoFaang") {
@@ -6033,6 +6225,8 @@ class Store {
       } else if (asset.strategyType === "citadel") {
         vaultAddress = asset.vaultContractAddress;
       } else if (asset.strategyType === "elon") {
+        vaultAddress = asset.vaultContractAddress;
+      } else if (asset.strategyType === "cuban") {
         vaultAddress = asset.vaultContractAddress;
       } else if (asset.strategyType === "daoFaang") {
         vaultAddress = asset.vaultContractAddress;
@@ -6721,6 +6915,9 @@ class Store {
               : null;
             asset.elonPricePerFullShare = data[4].elonPricePerFullShare
               ? data[4].elonPricePerFullShare
+              : null;
+            asset.cubanPricePerFullShare = data[4].cubanPricePerFullShare
+              ? data[4].cubanPricePerFullShare
               : null;
             asset.apy = data[4].apy; // Vault APY
             asset.addressStatistics = data[5];
@@ -7523,8 +7720,13 @@ class Store {
   };
 
   isUsdVault = (asset) => {
-    return (asset.strategyType === "citadel" || asset.strategyType === "elon" || asset.strategyType === "daoFaang") ? true : false;
-  }
+    return asset.strategyType === "citadel" ||
+      asset.strategyType === "elon" ||
+      asset.strategyType === "cuban" ||
+      asset.strategyType === "daoFaang"
+      ? true
+      : false;
+  };
 }
 
 var store = new Store();

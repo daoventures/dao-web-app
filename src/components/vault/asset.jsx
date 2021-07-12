@@ -669,6 +669,7 @@ class Asset extends Component {
   isUsdVault = (asset) => {
     return asset.strategyType === "citadel" ||
       asset.strategyType === "elon" ||
+      asset.strategyType === "cuban" ||
       asset.strategyType === "daoFaang"
       ? true
       : false;
@@ -1478,9 +1479,10 @@ class Asset extends Component {
                     </div>
                   </div>
                 )}
-                {/** Citadel, Elon, DAO Faang Strategy*/}
+                {/** Citadel, Elon, Cuban, DAO Faang Strategy*/}
                 {(asset.strategyType === "citadel" ||
                   asset.strategyType === "elon" ||
+                  asset.strategyType === "cuban" ||
                   asset.strategyType === "daoFaang") && (
                   <div className={classes.withdrawContainer}>
                     <div className={classes.tradeContainer}>
@@ -1568,6 +1570,7 @@ class Asset extends Component {
     var compoundAPY = [];
     var citadelAPY = [];
     var elonAPY = [];
+    var cubanAPY = [];
     var faangAPY = [];
     var labels = [];
 
@@ -1621,6 +1624,11 @@ class Asset extends Component {
               date,
               parseFloat(groups[date][0].elonApy.toFixed(4)),
             ]);
+          } else if (asset.strategyType === "cuban") {
+            cubanAPY.push([
+              date,
+              parseFloat(groups[date][0].cubanApy.toFixed(4)),
+            ]);
           } else if (asset.strategyType === "daoFaang") {
             faangAPY.push([
               date,
@@ -1660,6 +1668,11 @@ class Asset extends Component {
               elonAPY.push([
                 date,
                 parseFloat(groups[date][halfCount].elonApy.toFixed(4)),
+              ]);
+            } else if (asset.strategyType === "cuban") {
+              cubanAPY.push([
+                date,
+                parseFloat(groups[date][halfCount].cubanApy.toFixed(4)),
               ]);
             } else if (asset.strategyType === "daoFaang") {
               faangAPY.push([
@@ -1820,6 +1833,41 @@ class Asset extends Component {
           enabled: false,
         },
       };
+    } else if (asset.strategyType === "cuban") {
+      options = {
+        chart: {
+          width: hideNav ? 300 : 420,
+        },
+        title: {
+          text: "Historical Vault Performance",
+        },
+        xAxis: {
+          categories: labels,
+        },
+        series: [
+          {
+            name: "Cuban",
+            data: cubanAPY,
+          },
+        ],
+        responsive: {
+          rules: [
+            {
+              condition: {
+                maxWidth: 450,
+                chartOptions: {
+                  chart: {
+                    width: 300,
+                  },
+                },
+              },
+            },
+          ],
+        },
+        credits: {
+          enabled: false,
+        },
+      };
     } else if (asset.strategyType === "daoFaang") {
       options = {
         chart: {
@@ -1862,6 +1910,7 @@ class Asset extends Component {
       compound: "Historical Vault Performance",
       citadel: "Historical Vault Performance",
       elon: "Historical Vault Performance",
+      cuban: "Historical Vault Performance",
       daoFaang: "Historical Vault Performance",
     };
 
@@ -1953,8 +2002,6 @@ class Asset extends Component {
       if (asset.strategyType === "compound") {
         if (asset.stats.compoundApy) {
           return asset.stats.compoundApy;
-        } else {
-          return "0.00";
         }
       } else if (asset.strategyType === "yearn") {
         switch (basedOn) {
@@ -1983,15 +2030,16 @@ class Asset extends Component {
       } else if (asset.strategyType === "elon") {
         if (asset.stats.elonApy) {
           return asset.stats.elonApy;
-        } else {
-          return "0.00";
+        }
+      } else if (asset.strategyType === "cuban") {
+        if (asset.stats.cubanApy) {
+          return asset.stats.cubanApy;
         }
       } else if (asset.strategyType === "daoFaang") {
         return asset.stats.faangApy;
       }
-    } else {
-      return "0.00";
     }
+    return 0;
   };
 
   _getEstimatedAPY = (asset) => {
