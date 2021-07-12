@@ -1475,6 +1475,10 @@ class Vault extends Component {
         return asset.stats.faangApy
           ? (asset.stats.faangApy / 1).toFixed(2) + "%"
           : "0.00%";
+      } else if (asset.strategyType === "moneyPrinter") {
+        return asset.stats.moneyPrinterApy
+          ? (asset.stats.moneyPrinterApy / 1).toFixed(2) + "%"
+          : "0.00%";
       }
     } else {
       return "0.00%";

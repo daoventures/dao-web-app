@@ -27,7 +27,6 @@ import {
   WITHDRAW_BOTH,
   WITHDRAW_BOTH_VAULT,
   WITHDRAW_BOTH_VAULT_FAIL_RETURNED,
-  WITHDRAW_BOTH_VAULT_RETURNED,
   WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
   WITHDRAW_VAULT_RETURNED,
   WITHDRAW_VAULT_RETURNED_COMPLETED,
@@ -671,7 +670,8 @@ class Asset extends Component {
     return asset.strategyType === "citadel" ||
       asset.strategyType === "elon" ||
       asset.strategyType === "cuban" ||
-      asset.strategyType === "daoFaang"
+      asset.strategyType === "daoFaang" || 
+      asset.strategyType === "moneyPrinter"
       ? true
       : false;
   };
@@ -1484,7 +1484,8 @@ class Asset extends Component {
                 {(asset.strategyType === "citadel" ||
                   asset.strategyType === "elon" ||
                   asset.strategyType === "cuban" ||
-                  asset.strategyType === "daoFaang") && (
+                  asset.strategyType === "daoFaang" || 
+                  asset.strategyType === "moneyPrinter") && (
                   <div className={classes.withdrawContainer}>
                     <div className={classes.tradeContainer}>
                       <div className={classes.balances}>
@@ -1573,6 +1574,7 @@ class Asset extends Component {
     var elonAPY = [];
     var cubanAPY = [];
     var faangAPY = [];
+    var moneyPrinterAPY = [];
     var labels = [];
 
     const { hideNav } = this.state;
@@ -1635,7 +1637,13 @@ class Asset extends Component {
               date,
               parseFloat(groups[date][0].faangApy.toFixed(4)),
             ]);
+          } else if (asset.strategyType === "moneyPrinter") {
+            moneyPrinterAPY.push([
+              date,
+              parseFloat(groups[date][0].moneyPrinterApy.toFixed(4)),
+            ]);
           }
+
 
           // second attempt
           var halfCount = Math.round(Number(groups[date].length / 2));
@@ -1679,6 +1687,11 @@ class Asset extends Component {
               faangAPY.push([
                 date,
                 parseFloat(groups[date][halfCount].faangApy.toFixed(4)),
+              ]);
+            } else if (asset.strategyType === "moneyPrinter") {
+              moneyPrinterAPY.push([
+                date,
+                parseFloat(groups[date][0].moneyPrinterApy.toFixed(4)),
               ]);
             }
           }
@@ -1904,6 +1917,41 @@ class Asset extends Component {
           enabled: false,
         },
       };
+    } else if (asset.strategyType === "moneyPrinter") {
+      options = {
+        chart: {
+          width: hideNav ? 300 : 420,
+        },
+        title: {
+          text: "Historical Vault Performance",
+        },
+        xAxis: {
+          categories: labels,
+        },
+        series: [
+          {
+            name: "Money Printer",
+            data: moneyPrinterAPY,
+          },
+        ],
+        responsive: {
+          rules: [
+            {
+              condition: {
+                maxWidth: 450,
+                chartOptions: {
+                  chart: {
+                    width: 300,
+                  },
+                },
+              },
+            },
+          ],
+        },
+        credits: {
+          enabled: false,
+        },
+      };
     }
 
     const chartTitle = {
@@ -1913,6 +1961,7 @@ class Asset extends Component {
       elon: "Historical Vault Performance",
       cuban: "Historical Vault Performance",
       daoFaang: "Historical Vault Performance",
+      moneyPrinter: "Historical Vault Performance",
     };
 
     // 调整折线图展示
@@ -2038,6 +2087,8 @@ class Asset extends Component {
         }
       } else if (asset.strategyType === "daoFaang") {
         return asset.stats.faangApy;
+      } else if (asset.strategyType === "moneyPrinter") {
+        return asset.stats.moneyPrinterApy;
       }
     }
     return 0;
