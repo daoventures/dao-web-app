@@ -49,6 +49,7 @@ import {
   IDAI_RETURNED,
   INVEST,
   INVEST_RETURNED,
+  NETWORK,
   REBALANCE,
   REBALANCE_RETURNED,
   REDEEM,
@@ -1279,8 +1280,11 @@ class Store {
       }
     }
 
+    const network = store.getStore("network");
+    const erc20ABI =getERC20AbiByNetwork(network);
+
     let erc20Contract = new web3.eth.Contract(
-      config.erc20ABI,
+      erc20ABI,
       asset.erc20address
     );
 
@@ -3810,6 +3814,50 @@ class Store {
           );
         }
       }
+    } else if (asset.strategyType === "moneyPrinter") {
+      let approvalErr;
+      await this._checkApprovalCitadel(
+        asset,
+        account,
+        amount,
+        asset.vaultContractAddress,
+        tokenIndex,
+        (err, txnHash, approvalResult) => {
+          if (err) {
+            approvalErr = err;
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(APPROVE_TRANSACTING, txnHash);
+          }
+          if (approvalResult) {
+            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
+          }
+        }
+      );
+
+      if(!approvalErr) {
+        await this._callDepositAmountContractCitadel(
+          asset,
+          account,
+          amount,
+          tokenIndex,
+          (err, txnHash, depositResult) => {
+            if (err) {
+              return emitter.emit(ERROR, err);
+            }
+            if (txnHash) {
+              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+            }
+            if (depositResult) {
+              return emitter.emit(
+                DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                depositResult.transactionHash
+              );
+            }
+          }
+        );
+      }
     }
   };
 
@@ -3948,8 +3996,11 @@ class Store {
       asset.vaultContractAddress
     );
 
+    const network = store.getStore("network");
+    const erc20ABI = getERC20AbiByNetwork(network);
+
     let erc20Contract = new web3.eth.Contract(
-      config.erc20ABI,
+      erc20ABI,
       asset.erc20addresses[tokenIndex]
     );
 
@@ -3962,7 +4013,7 @@ class Store {
 
     // Citadel, Elon, and Cuban pass token's index for deposit, while FAANG pass token address
     const tokenToSent =
-      asset.strategyType === "daoFaang"
+      (asset.strategyType === "daoFaang" || asset.strategyType === "moneyPrinter")
         ? asset.erc20addresses[tokenIndex]
         : tokenIndex;
 
