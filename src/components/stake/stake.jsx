@@ -19,6 +19,8 @@ import {
   DEPOSIT_DAOMINE_RETURNED_COMPLETED,
   WITHDRAW_DAOMINE_RETURNED,
   WITHDRAW_DAOMINE_RETURNED_COMPLETED,
+  EMERGENCY_WITHDRAW_DAOMINE_RETURNED,
+  EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,
   ERROR,
   ALL
 } from "../../constants/constants";
@@ -327,6 +329,11 @@ class Stake extends Component {
     emitter.on(WITHDRAW_DAOMINE_RETURNED, this.showHash);
     emitter.on(
       WITHDRAW_DAOMINE_RETURNED_COMPLETED,
+      this.onDepositWithdrawalCompleted
+    );
+    emitter.on(EMERGENCY_WITHDRAW_DAOMINE_RETURNED, this.showHash);
+    emitter.on(
+      EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,
       this.onDepositWithdrawalCompleted
     );
   }
@@ -696,7 +703,7 @@ class Stake extends Component {
                             }}
                             className={classes.assetLabel1}
                           >
-                            {pool.apr ? Number(pool.apr).toFixed(2) : "0.00"}
+                            {pool.apr ? Number(pool.apr).toFixed(2).toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",") : "0.00"}
                             {" %"}
                           </Typography>
                           <Typography
@@ -797,6 +804,7 @@ class Stake extends Component {
       "ETH<->DVG": { filename: "ethDvg", format: "png" },
       daoCDV: { filename: "citadel", format: "svg" },
       daoELO: { filename: "citadel", format: "svg" },
+      daoCUB: { filename: "citadel", format: "svg" },
       daoSTO: { filename: "citadel", format: "svg" },
       hfUSDT: { filename: "USDT", format: "png" },
       hfUSDC: { filename: "USDC", format: "png" },
