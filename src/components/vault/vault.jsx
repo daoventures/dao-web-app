@@ -1471,9 +1471,10 @@ class Vault extends Component {
         }
       } else if (asset.strategyType === "daoFaang") {
 
-       return asset.stats.faangApy
-          ? (asset.stats.faangApy / 1).toFixed(2) + "%"
-          : "0.00%";
+        return asset.stats.faangApy
+        ? (asset.stats.faangApy / 1).toFixed(2) + "%"
+        : "0.00%";
+
       } else if (asset.strategyType === "harvest") {
         return (asset.stats.harvestApy) ? (asset.stats.harvestApy / 1).toFixed(2) + "%" : "0.00%";
       }

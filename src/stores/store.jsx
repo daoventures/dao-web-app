@@ -1,14 +1,11 @@
 import {
   ADVANCE,
-  APPROVE_COMPLETED,
-  APPROVE_TRANSACTING,
   BALANCES_LIGHT_RETURNED,
   BALANCES_RETURNED,
   BASIC,
   BICONOMY_CONNECTED,
   CURRENT_THEME_RETURNED,
   DAOMINE_POOL_RETURNED,
-  DASHBOARD_SNAPSHOT_RETURNED,
   DEGEN,
   DEPOSIT_ALL_CONTRACT,
   DEPOSIT_ALL_CONTRACT_RETURNED,
@@ -24,7 +21,6 @@ import {
   DEPOSIT_XDVG,
   DONATE,
   DONATE_RETURNED,
-  DRAWER_RETURNED,
   ERROR,
   EXPERT,
   FIND_DAOMINE_POOL,
@@ -38,13 +34,10 @@ import {
   GET_CONTRACT_EVENTS_RETURNED,
   GET_CURV_BALANCE,
   GET_CURV_BALANCE_RETURNED,
-  GET_DASHBOARD_SNAPSHOT,
   GET_DVG_APR,
   GET_DVG_BALANCE_SUCCESS,
   GET_DVG_INFO,
   GET_HAPPY_HOUR_STATUS,
-  GET_STATISTICS,
-  GET_STRATEGY_BALANCES_FULL,
   GET_VAULT_BALANCES,
   GET_VAULT_BALANCES_FULL,
   GET_VAULT_INFO,
@@ -61,32 +54,42 @@ import {
   REBALANCE_RETURNED,
   REDEEM,
   REDEEM_RETURNED,
-  STATISTICS_RETURNED,
-  STRATEGY_BALANCES_FULL_RETURNED,
   SWAP,
   SWAP_RETURNED,
-  TOGGLE_DRAWER,
-  TOGGLE_THEME,
   TRADE,
   TRADE_RETURNED,
-  USD_PRICE_RETURNED,
   VAULT_BALANCES_FULL_RETURNED,
   VAULT_BALANCES_RETURNED,
   WIDTHDRAW_XDVG,
-  WITHDRAW_BOTH,
   WITHDRAW_BOTH_VAULT,
   WITHDRAW_BOTH_VAULT_FAIL_RETURNED,
   WITHDRAW_BOTH_VAULT_RETURNED,
   WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
+  APPROVE_TRANSACTING,
+  APPROVE_COMPLETED,
+  GET_DASHBOARD_SNAPSHOT,
+  DASHBOARD_SNAPSHOT_RETURNED,
+  USD_PRICE_RETURNED,
+  GET_STATISTICS,
+  STATISTICS_RETURNED,
+  TOGGLE_DRAWER,
+  DRAWER_RETURNED,
+  WITHDRAW_BOTH,
+  GET_STRATEGY_BALANCES_FULL,
+  STRATEGY_BALANCES_FULL_RETURNED,
+  TOGGLE_THEME, // 切换主题
+  ZAP,
+  WITHDRAW_VAULT,
+  ZAP_RETURNED,
+  WITHDRAW_VAULT_RETURNED,
+  WITHDRAW_DVG_RETURNED,
+  WITHDRAW_VAULT_RETURNED_COMPLETED,
   WITHDRAW_DAOMINE,
   WITHDRAW_DAOMINE_RETURNED,
   WITHDRAW_DAOMINE_RETURNED_COMPLETED,
-  WITHDRAW_DVG_RETURNED,
-  WITHDRAW_VAULT,
-  WITHDRAW_VAULT_RETURNED,
-  WITHDRAW_VAULT_RETURNED_COMPLETED,
-  ZAP,
-  ZAP_RETURNED,
+  EMERGENCY_WITHDRAW_DAOMINE,
+  EMERGENCY_WITHDRAW_DAOMINE_RETURNED,
+  EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,
 } from "../constants";
 import {
   Biconomy,
@@ -102,6 +105,7 @@ import async from "async";
 import citadelABI from "./citadelABI.json";
 import config from "../config";
 import { injected } from "./connectors";
+import fromExponential from 'from-exponential';
 
 const rp = require("request-promise");
 const ethers = require("ethers");
@@ -409,6 +413,8 @@ class Store {
             break;
           case WITHDRAW_DAOMINE:
             this.withdrawDAOmine(payload);
+          case EMERGENCY_WITHDRAW_DAOMINE:
+            this.emergencyWithdrawDAOmine(payload);
           case GET_DVG_INFO:
             this.getDvgbalance(payload);
             break;
@@ -1073,7 +1079,6 @@ class Store {
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#bf64",
           isPopularItem: true, // use to render popular item icon
-          happyHourEnabled: true,
         },
         {
           id: "daoELO",
@@ -2122,7 +2127,7 @@ class Store {
           name: "VIPDVG",
           symbol: "xDVG",
           decimals: 18,
-          erc20address: "0x3aa8e8B6D3562a1E7aCB0dddD02b27896C00c424",
+          erc20address: '0xD6Ce913C3e81b5e67a6b94d705d9E7cDdf073A7e',
           abi: config.xDvgAbi,
           balance: 1,
         },
@@ -2131,7 +2136,7 @@ class Store {
           name: "DVGToken",
           symbol: "DVG",
           decimals: 18,
-          erc20address: "0xea9726eFc9831EF0499fD4Db4Ab143F15a797673",
+          erc20address: '0x51e00a95748DBd2a3F47bC5c3b3E7B3F0fea666c',
           abi: config.DvgAbi,
           balance: 0,
         },
@@ -4740,12 +4745,13 @@ class Store {
       );
 
     } else if (asset.strategyType === "harvest") {
-    await this._checkApprovalCitadel(
+
+      await this._checkApproval(
         asset,
         account,
         amount,
-        asset.vaultContractAddress,
-        tokenIndex,
+        strategyAddress,
+
         (err, txnHash, approvalResult) => {
           if (err) {
             return emitter.emit(ERROR, err);
@@ -4759,11 +4765,12 @@ class Store {
         }
       );
 
-      await this._callDepositAmountContractCitadel(
+
+      await this._callDepositAmountContract(
         asset,
         account,
         amount,
-        tokenIndex,
+
         (err, txnHash, depositResult) => {
           if (err) {
             return emitter.emit(ERROR, err);
@@ -4780,6 +4787,7 @@ class Store {
         }
       );
     } else if (asset.strategyType === "cuban") {
+
       await this._checkApprovalCitadel(
         asset,
         account,
@@ -6522,8 +6530,9 @@ class Store {
 
       } else if (asset.strategyType === "harvest") {
         vaultAddress = asset.vaultContractAddress;
-      } 
-      }
+
+      }  
+
 
       const url = `${config.statsProvider}vaults/historical-apy/${vaultAddress}/${interval}`;
       const resultString = await rp(url);
@@ -6850,18 +6859,21 @@ class Store {
     );
 
     if (asset.strategyType === "yearn") {
-      var earnAmountSend = web3.utils.toWei(earnAmount, "ether");
+      let earnAmountSend,  vaultAmountSend;
+
       if (asset.decimals !== 18) {
         earnAmountSend = web3.utils
           .toBN(Math.floor(earnAmount * 10 ** asset.decimals))
           .toString();
-      }
-
-      var vaultAmountSend = web3.utils.toWei(vaultAmount, "ether");
-      if (asset.decimals !== 18) {
         vaultAmountSend = web3.utils
           .toBN(Math.floor(vaultAmount * 10 ** asset.decimals))
           .toString();
+      } else {
+        const earnAmt = fromExponential(parseFloat(earnAmount));
+        const vaultAmt = fromExponential(parseFloat(vaultAmount));
+
+        earnAmountSend = web3.utils.toWei(earnAmt, "ether");
+        vaultAmountSend = web3.utils.toWei(vaultAmt, "ether");
       }
 
       const functionCall = vaultContract.methods.withdraw([
@@ -6906,9 +6918,14 @@ class Store {
           }
         });
     } else if (asset.strategyType === "compound") {
-      var amountSend = web3.utils.toWei(amount, "ether");
+      let amountSend;
       if (asset.decimals !== 18) {
-        amountSend = web3.utils.toBN(amount * 10 ** asset.decimals).toString();
+        amountSend = web3.utils
+          .toBN(Math.floor(amount * 10 ** asset.decimals))
+          .toString();
+      } else {
+        const amt = fromExponential(parseFloat(amount));
+        amountSend = web3.utils.toWei(amt, "ether");
       }
 
       const functionCall = vaultContract.methods.withdraw(amountSend);
@@ -7024,13 +7041,11 @@ class Store {
         tokenIndex
       );
 
-      const token =
-        asset.strategyType === "daoFaang"
-          ? asset.erc20addresses[tokenIndex]
-          : tokenIndex;
-
+      const token = (asset.strategyType === "daoFaang") ? asset.erc20addresses[tokenIndex] : tokenIndex;
+      const amountToSend = fromExponential(parseFloat(amount));
+      
       await vaultContract.methods
-        .withdraw(amount, token)
+        .withdraw(amountToSend, token)
         .send({
           from: account.address,
           gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
@@ -7205,8 +7220,13 @@ class Store {
               ? data[4].elonPricePerFullShare
               : null;
 
+
             asset.harvestPricePerFullShare = data[4].harvestPricePerFullShare
-              ? data[4].harvestPricePerFullShare
+              ? data[4].harvestPricePerFullShare: null;
+
+
+            asset.harvestPricePerFullShare = data[4].harvestPricePerFullShare
+              ? data[4].harvestPricePerFullShare: null;
 
             asset.cubanPricePerFullShare = data[4].cubanPricePerFullShare
               ? data[4].cubanPricePerFullShare
@@ -7254,14 +7274,24 @@ class Store {
         .user(poolIndex, account.address)
         .call({ from: account.address });
 
-      let userPendingDVG = await daoMineContract.methods
-        .pendingDVG(poolIndex, account.address)
+      let pool = await daoMineContract.methods
+        .pool(poolIndex)
         .call({ from: account.address });
+
+    //  let userPendingDVG = await daoMineContract.methods
+    //     .pendingDVG(poolIndex, account.address)
+    //     .call({ from: account.address });
+        
+      let userPendingDVG = 0;
+      if (pool != null) {
+        userPendingDVG = (Number(userDepositInfo.lpAmount) * Number(pool.accDVGPerLP) / 10 ** 18) - Number(userDepositInfo.finishedDVG);
+      }
 
       const result = { userDepositInfo, userPendingDVG };
       callback(null, result);
     } catch (err) {
       console.log("Error _getUserDepositForDAOmine", err);
+      callback(null, null);
     }
   };
 
@@ -7344,25 +7374,11 @@ class Store {
           async.parallel(
             [
               (callbackInner) => {
-                this._getUserBalanceForLpToken(
-                  poolContract,
-                  account,
-                  callbackInner
-                );
+                this._getUserBalanceForLpToken(poolContract, account, callbackInner);
               },
               (callbackInner) => {
-                this._getUserDepositForDAOmine(
-                  daoMineContract,
-                  dvgDecimal,
-                  account,
-                  pool.pid,
-                  callbackInner
-                );
-              },
-              (callbackInner) => {
-                // Get pool decimal
-                this._getContractDecimal(poolContract, callbackInner);
-              },
+                this._getUserDepositForDAOmine(daoMineContract, dvgDecimal, account, pool.pid, callbackInner);
+              }
             ],
             (err, data) => {
               if (err) {
@@ -7372,12 +7388,8 @@ class Store {
               const userInfo = {};
 
               userInfo.tokenBalance = data[0];
-              userInfo.finishedDVG = data[1]
-                ? data[1].userDepositInfo.finishedDVG
-                : null;
-              userInfo.depositedLPAmount = data[1]
-                ? parseInt(data[1].userDepositInfo.lpAmount)
-                : null;
+              userInfo.finishedDVG = data[1] ? data[1].userDepositInfo.finishedDVG : null;
+              userInfo.depositedLPAmount = data[1] ? parseInt(data[1].userDepositInfo.lpAmount) : null;
               userInfo.pendingDVG = data[1] ? data[1].userPendingDVG : null;
 
               pool.userInfo = userInfo;
@@ -7394,11 +7406,11 @@ class Store {
           store.setStore({ stakePools: pools });
           return emitter.emit(DAOMINE_POOL_RETURNED, pools);
         }
-      );
+      )
     } catch (err) {
       console.log(err);
     }
-  };
+  }
 
   _findDAOminePool = async () => {
     try {
@@ -7410,7 +7422,7 @@ class Store {
       console.log(e);
       return store.getStore("universalGasPrice");
     }
-  };
+  }
 
   depositDAOmine = async (payload) => {
     const account = store.getStore("account");
@@ -7586,12 +7598,106 @@ class Store {
           callback(error);
         }
       });
-  };
+  }
+
+  _emergencyWithdrawSnapShot = async (userPoolInfo) => {
+    try {
+      const url = config.statsProvider + "staking/emergency-withdraw-snapshot";
+      const poolsString = await rp({
+        uri: url,
+        method: 'POST',
+        body: {
+          pid: userPoolInfo.pid,
+          userAddress: userPoolInfo.userAddress,
+          pendingDVG: userPoolInfo.pendingDVG,
+        },
+        json: true,
+      });
+      const pools = JSON.parse(poolsString);
+      return pools.body;
+    } catch (e) {
+      console.log(e);
+      return store.getStore("universalGasPrice");
+    }
+  }
+
+  emergencyWithdrawDAOmine = async (payload) => {
+    const account = store.getStore("account");
+    const network = store.getStore("network");
+   
+    const { pool } = payload.content;
+    const poolIndex = pool.pid;
+
+    // Get web3
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      return null;
+    }
+
+    // DAOMmine contract address by network
+    let daoMineContractAddress = "";
+    if (network === 42) {
+      daoMineContractAddress = config.daoStakeTestContract;
+    } else if (network === 1) {
+      daoMineContractAddress = config.daoStakeMainnetContract; 
+    }
+
+    try {
+      const daoMineContract = new web3.eth.Contract(
+        config.daoStakeContractABI,
+        daoMineContractAddress
+      );
+
+      const snapshot = async (_, result) => {
+        await this._emergencyWithdrawSnapShot({
+          pid: poolIndex,
+          userAddress: account.address.toLowerCase(),
+          pendingDVG: result.userPendingDVG,
+        })
+      }
+
+      await this._getUserDepositForDAOmine(daoMineContract, null, account, poolIndex, snapshot);      
+
+      await daoMineContract.methods
+        .emergencyWithdraw(poolIndex)
+        .send({
+          from: account.address,
+          gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+        })
+        .on("transactionHash", function (txnHash) {
+          return emitter.emit(EMERGENCY_WITHDRAW_DAOMINE_RETURNED, txnHash);
+        })
+        .on("receipt", function (receipt) {
+          emitter.emit(
+            EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,
+            receipt.transactionHash
+          );
+        })
+        .on("error", function (error) {
+          console.log("emergencyWithdrawDAOmine() Error: ", error);
+          if (!error.toString().includes("-32601")) {
+            if (error.message) {
+              emitter.emit(ERROR, error.message);
+            }
+          }
+        })
+        .catch((error) => {
+          console.log("emergencyWithdrawDAOmine() Error: ", error);
+          if (!error.toString().includes("-32601")) {
+            if (error.message) {
+              emitter.emit(ERROR, error.message);
+            }
+          }
+        });
+    } catch (err) {
+      console.log("emergencyWithdrawDAOmine() Error: ", err);
+    }  
+  }
 
   withdrawDAOmine = async (payload) => {
     const account = store.getStore("account");
     const network = store.getStore("network");
-
+   
     const { pool, amount } = payload.content;
     const poolDecimal = pool.decimal;
     const poolIndex = pool.pid;
@@ -7654,9 +7760,8 @@ class Store {
         });
     } catch (err) {
       console.log("withdrawDAOmine() Error: ", err);
-      emitter.emit(ERROR, err);
-    }
-  };
+    }  
+  }
 
   //stake开始
   //获取vipdvg
