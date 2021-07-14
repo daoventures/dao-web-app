@@ -801,7 +801,6 @@ class Vault extends Component {
   };
 
   balancesReturned = (balances) => {
-    console.log("Balances Returned");
     this.setState({
       assets: store.getStore("vaultAssets"),
       loading: false,

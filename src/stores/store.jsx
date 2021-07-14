@@ -1926,7 +1926,7 @@ class Store {
 
         balances.push(parseFloat(balance));
       } catch (ex) {
-        console.log(ex);
+        console.log("Asset: " + asset.id, ex);
         return callback(ex);
       }
     }
@@ -5690,7 +5690,6 @@ class Store {
       return null;
     }
 
-    console.log("provider in _getWeb3Provider", provider);
     const web3 = new Web3(provider);
 
     // const web3 = createAlchemyWeb3(config.infuraProvider, { writeProvider: provider });
@@ -6199,7 +6198,7 @@ class Store {
             // asset.vaultHoldings = data[3]
 
             if(asset.strategyType === "moneyPrinter") {
-              console.log("Money Printer here", asset);
+              console.log("Money Printer:", asset);
             }
 
             callback(null, asset);
