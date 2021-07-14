@@ -169,3 +169,7 @@ export const GET_XDVG_APR_SUCCESS = "GET_XDVG_APR_SUCCESS";
 export const DEPOSIT_DVG_RETURNED = "DEPOSIT_DVG_RETURNED";
 //提现DVG成功
 export const WITHDRAW_DVG_RETURNED = "WITHDRAW_DVG_RETURNED";
+
+// To get list of strategies with their status, deposit / withdrawal enabled
+export const GET_STRATEGY_STATUS = "GET_STRATEGY_STATUS";
+export const GET_STRATEGY_STATUS_RETURNED = "GET_STRATEGY_STATUS_RETURNED";

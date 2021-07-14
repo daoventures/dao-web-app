@@ -87,6 +87,8 @@ import {
   WITHDRAW_VAULT_RETURNED_COMPLETED,
   ZAP,
   ZAP_RETURNED,
+  GET_STRATEGY_STATUS,
+  GET_STRATEGY_STATUS_RETURNED,
 } from "../constants";
 import {
   Biconomy,
@@ -315,6 +317,7 @@ class Store {
       openDrawer: false,
       stakePools: [],
       dvgApr: "",
+      products: []
     };
 
     dispatcher.register(
@@ -410,6 +413,7 @@ class Store {
             break;
           case WITHDRAW_DAOMINE:
             this.withdrawDAOmine(payload);
+            break;
           case GET_DVG_INFO:
             this.getDvgbalance(payload);
             break;
@@ -427,6 +431,9 @@ class Store {
             break;
           case GET_HAPPY_HOUR_STATUS:
             this.eventVerify(payload);
+            break;
+          case GET_STRATEGY_STATUS: 
+            this.findVaultCategory();
             break;
           default: {
           }
@@ -6037,6 +6044,45 @@ class Store {
     emitter.emit(HAPPY_HOUR_RETURN, _result);
   };
 
+  findVaultCategory =  async () => {
+    try {
+      const url = config.statsProvider + "vaults/category";
+      const result = await rp(url);
+      const products = JSON.parse(result)["body"];
+      store.setStore({products});
+      emitter.emit(GET_STRATEGY_STATUS_RETURNED);
+    } catch (e) {
+      console.log(e);
+      return null;
+    }
+  }
+
+  _checkProductStatus = async(vaultAddress, products, callback) => {
+    let returnObj = { deposit: false, withdraw: false, message: "" };
+    try {
+      if(products.length <= 0) {
+        callback(null, returnObj);
+        return;
+      }
+
+      const product = products.find(p => p.contract_address.toLowerCase() === vaultAddress.toLowerCase());
+      if(!product) {
+        callback(null, returnObj);
+        return;
+      }
+
+      returnObj.deposit = product.deposit;
+      returnObj.withdraw = product.withdraw;
+      returnObj.depositMessage = product.depositMessage;
+      returnObj.withdrawMessage = product.withdrawMessage;
+
+      callback(null, returnObj);
+    } catch (err) {
+      console.error("Error in _checkProductStatus(): ", err);
+      callback(null, returnObj);
+    }
+  }
+
   _getAddressStatistics = async (address) => {
     try {
       const url =
@@ -6545,6 +6591,13 @@ class Store {
     if (!web3) {
       return null;
     }
+
+    let products = store.getStore("products");
+    if(0 <= products.length) {
+      await this.findVaultCategory();
+      products = store.getStore("products");
+    }
+    
     const vaultStatistics = await this._getStatistics();
     const addressStatistics = await this._getAddressStatistics(account.address);
 
@@ -6614,6 +6667,10 @@ class Store {
             (callbackInner) => {
               // 10
               this._getVaultDAOmineAPY(asset, pools, callbackInner);
+            },
+            (callbackInner) => {
+              // 11
+              this._checkProductStatus(asset.vaultContractAddress, products, callbackInner);
             }
 
             // (callbackInner) => { this._getVaultHoldings(web3, asset, account, callbackInner) },
@@ -6659,6 +6716,13 @@ class Store {
             asset.daomineApy = data[10] ? data[10].daomineApy : 0;
             // asset.addressTransactions = data[7]
             // asset.vaultHoldings = data[3]
+            const productInfo = data[11];
+            if(productInfo) {
+              asset.depositMessage = productInfo.depositMessage;
+              asset.withdrawMessage = productInfo.withdrawMessage;
+              asset.deposit = productInfo.deposit;
+              asset.withdraw = productInfo.withdraw;
+            }
             
             callback(null, asset);
           }
