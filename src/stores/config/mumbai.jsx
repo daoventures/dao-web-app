@@ -15,7 +15,7 @@ const mumbai = [
             "0x001b3b4d0f3714ca98ba10f6042daebf0b1b7b6f",
         ],
         erc20address: "0xbd21a10f619be90d6066c941b04e340841f1f989",
-        vaultContractAddress: "0xdc2f0e17702f9083adc057893b2b1e273c11e09a",
+        vaultContractAddress: "0x4f0bc6bd6beb231087781336bacd5613527ac63c",
         vaultContractABI: config.vaultDAOMPTContractABI,
         balance: 0, // Stores balance of selectedERC20Address
         balances: [0, 0, 0],
@@ -31,7 +31,7 @@ const mumbai = [
         priceInUSD: [0, 0, 0],
         strategyName: "DAO Money Printer: USDT USDC DAI",
         strategy: "DAO Money Printer",
-        strategyAddress: "0x9fbbfc353772672b58a9ee1ad55265a5a09640a1",
+        strategyAddress: "0x8894da48bb8b7f7751ac4e2c37ed31b68d0c587f",
         strategyContractABI: config.vaultDAOMPTStrategyABI,
         historicalPriceId: "daoMPT_price",
         logoFormat: "svg",
