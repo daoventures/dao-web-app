@@ -8,6 +8,7 @@ import {
     TextField,
     Typography,
     Button,
+    Tooltip
 } from '@material-ui/core';
 import {
     GET_DVG_INFO,
@@ -25,7 +26,9 @@ import {
     GET_XDVG_APR_SUCCESS,
     WITHDRAW_DVG_RETURNED,
     DEPOSIT_DVG_RETURNED,
-    ERROR
+    ERROR,
+    GET_STRATEGY_STATUS_RETURNED,
+    GET_STRATEGY_STATUS,
 } from '../../constants'
 import Store from "../../stores";
 import ConnectWallet from "../common/connectWallet/connectWallet";
@@ -618,12 +621,18 @@ class StakeDvgVip extends Component {
             amountError: false,
             errorMessage: '',
             network: 0,
-            disableStake: false,
-            disableUnstake: false,
+            allowStake: true,
+            allowUnstake: true,
+            disableStakeMessage: "",
+            disableUnstakeMessage: "",
+            products: store.getStore("products"),
         }
         if (account && account.address) {
             dispatcher.dispatch({ type: GET_DVG_INFO })
             dispatcher.dispatch({ type: GET_XDVG_BALANCE })
+        }
+        if(!this.state.products || this.state.products.length <= 0) {
+            dispatcher.dispatch({ type: GET_STRATEGY_STATUS })
         }
         // dispatcher.dispatch({ type: GET_VAULT_BALANCES_FULL })
         dispatcher.dispatch({ type: GET_DVG_APR })
@@ -667,6 +676,7 @@ class StakeDvgVip extends Component {
         emitter.on(WITHDRAW_DVG_RETURNED, this.withdrawReturned)
         emitter.on(DEPOSIT_DVG_RETURNED, this.depositReturned)
         emitter.on(ERROR, this.errorReturned)
+        emitter.on(GET_STRATEGY_STATUS_RETURNED, this.onStrategyReturned);
     }
 
     componentWillUnmount() {
@@ -679,6 +689,24 @@ class StakeDvgVip extends Component {
         emitter.removeListener(WITHDRAW_DVG_RETURNED, this.withdrawReturned)
         emitter.removeListener(DEPOSIT_DVG_RETURNED, this.depositReturned)
         emitter.removeListener(ERROR, this.errorReturned)
+    }
+
+    onStrategyReturned = () => {
+        const products = store.getStore("products");
+        const dvgInfo = store.getStore("dvg");
+
+        const xDVG = dvgInfo.find(i => i.id === "xDVG");
+        if(xDVG && products.length > 0) {
+            const xDVGObject = products.find(p => p.contract_address.toLowerCase() === xDVG.erc20address.toLowerCase());
+            if(xDVGObject) {
+                this.setState({
+                    allowStake: xDVGObject.deposit,
+                    allowUnstake: xDVGObject.withdraw,
+                    disableStakeMessage: xDVGObject.depositMessage,
+                    disableUnstakeMessage: xDVGObject.withdrawMessage,
+                })
+            }
+        }
     }
 
     errorReturned = (error) => {
@@ -874,6 +902,37 @@ class StakeDvgVip extends Component {
         );
     }
 
+    renderButton = () => {
+        const { classes } = this.props;
+        const { type, loading, allowStake, allowUnstake, disableStakeMessage, disableUnstakeMessage } = this.state;
+
+        const disableButton = (type === "stake") 
+            ? (!allowStake || loading) 
+            : (!allowUnstake || loading);
+        
+        const button = (
+            <div className={classes.depositButtonBox}>
+                <Button disabled={disableButton}
+                    className={classes.depositActionButton}
+                    onClick={() => this.submitStake()}
+                >
+                    <span>Approve {(type === "stake") ? "Staking" : "Unstaking"}</span>
+                </Button>
+            </div>
+        );
+
+        if((type ==="stake" && !allowStake && disableStakeMessage !== "") || 
+            (type !=="stake" && !allowUnstake && disableUnstakeMessage != "")) {
+            return (
+                <Tooltip title={(type ==="stake") ? disableStakeMessage : disableUnstakeMessage}>
+                    {button}
+                </Tooltip>
+            )
+        }
+    
+        return button;
+    }
+
     render() {
         const {
             classes
@@ -889,8 +948,8 @@ class StakeDvgVip extends Component {
             amountError,
             max,
             errorMessage,
-            disableStake,
-            disableUnstake,
+            allowStake,
+            allowUnstake,
         } = this.state
 
         const dvgBalance = dvgInfoObj && dvgInfoObj[1].balance;
@@ -978,35 +1037,7 @@ class StakeDvgVip extends Component {
                             }
 
                             {/** Button to trigger stake function */}
-                            <div className={classes.depositButtonBox}>
-                                {
-                                    (type === "stake") && 
-                                    <Button disabled={disableStake || (!disableStake && loading)}
-                                            className={classes.depositActionButton}
-                                            onClick={() => this.submitStake()}
-                                    >
-                                        <span>Approve Staking</span>
-                                    </Button>
-                                }
-                                {
-                                    (type !== "stake") && 
-                                    <Button disabled={disableUnstake || (!disableUnstake && loading)}
-                                            className={classes.depositActionButton}
-                                            onClick={() => this.submitStake()}
-                                    >
-                                        <span>Approve Unstaking</span>
-                                    </Button>
-                                }
-                                {/* <Button
-                                    disabled={(type === "stake" && disableStake) || 
-                                            (type !== "stake" && disableUnstake) ||
-                                            (!disableStake && !disableUnstake && loading)}
-                                    className={classes.depositActionButton}
-                                    onClick={() => this.submitStake()}
-                                >
-                                    <span>{ (type === "stake") ? "Approve Staking" : "Approve Unstaking"}</span>
-                                </Button> */}
-                            </div>
+                            {this.renderButton()}
                         </div>
                     </div>
 
