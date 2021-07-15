@@ -1480,11 +1480,12 @@ class Asset extends Component {
                     </div>
                   </div>
                 )}
+                
                 {/** Citadel, Elon, Cuban, DAO Faang Strategy*/}
                 {(asset.strategyType === "citadel" ||
                   asset.strategyType === "elon" ||
                   asset.strategyType === "cuban" ||
-                  asset.strategyType === "daoFaang") && (
+                  asset.strategyType === "daoFaang" ) && (
                   <div className={classes.withdrawContainer}>
                     <div className={classes.tradeContainer}>
                       <div className={classes.balances}>
@@ -2088,7 +2089,9 @@ class Asset extends Component {
       } else if (asset.strategyType === "daoFaang") {
         return asset.stats.faangApy;
       } else if (asset.strategyType === "harvest") {
-        return asset.stats.harvestApy;
+        if (asset.stats.harvestApy) {
+          return asset.stats.harvestApy;
+        }
       }
     }
     return 0;

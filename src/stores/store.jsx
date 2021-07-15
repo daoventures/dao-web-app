@@ -901,7 +901,7 @@ class Store {
           depositAll: true,
           withdraw: true,
           withdrawAll: true,
-          lastMeasurement: "", // TBC
+          lastMeasurement: 12822513, // TBC
           measurement: 1e18,
           price_id: "harvest-finance",
           strategyName: "Harvest-Fighter: Harvest USDT",
@@ -936,7 +936,7 @@ class Store {
           depositAll: true,
           withdraw: true,
           withdrawAll: true,
-          lastMeasurement: "", // TBC
+          lastMeasurement: 12822513, // TBC
           measurement: 1e18,
           price_id: "harvest-finance",
           strategyName: "Harvest-Fighter: Harvest USDC",
@@ -971,7 +971,7 @@ class Store {
           depositAll: true,
           withdraw: true,
           withdrawAll: true,
-          lastMeasurement: "", // TBC
+          lastMeasurement: 12822513, // TBC
           measurement: 1e18,
           price_id: "harvest-finance",
           strategyName: "Harvest-Fighter: Harvest DAI",
@@ -1266,7 +1266,7 @@ class Store {
           risk: ADVANCE,
           strategyType: "yearn",
           group: ADVANCE,
-          tvlKey: "cUSDC_tvl",
+          tvlKey: "yUSDC_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
           isPopularItem: false,
@@ -1402,7 +1402,7 @@ class Store {
           cTokenAddress: "0x4a92e71227d294f041bd82dd8f78591b75140d63",
           cAbi: config.cUSDCContract,
           group: BASIC,
-          tvlKey: "cUSDT_tvl",
+          tvlKey: "cUSDC_tvl",
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
           isPopularItem: false,
@@ -1423,9 +1423,9 @@ class Store {
           depositAll: true,
           withdraw: true,
           withdrawAll: true,
-          lastMeasurement: "", // TBC
+          lastMeasurement: 12822513, // TBC
           measurement: 1e18,
-          price_id: "harvest-finance",
+          price_id: "tether",
           strategyName: "Harvest-Fighter: Harvest USDT",
           strategy: "Harvest USDT",
           strategyAddress: "0xac783dc15d2cf08d1e1c34e18e531a9b182277b0",
@@ -1458,9 +1458,9 @@ class Store {
           depositAll: true,
           withdraw: true,
           withdrawAll: true,
-          lastMeasurement: "", // TBC
+          lastMeasurement: 12822513, // TBC
           measurement: 1e18,
-          price_id: "harvest-finance",
+          price_id: "usd-coin",
           strategyName: "Harvest-Fighter: Harvest USDC",
           strategy: "Harvest USDC",
           strategyAddress: "0x7da9e06545c4fe6556fc0990f5afd4955379e1d2",
@@ -1493,7 +1493,7 @@ class Store {
           depositAll: true,
           withdraw: true,
           withdrawAll: true,
-          lastMeasurement: "", // TBC
+          lastMeasurement: 12822513, // TBC
           measurement: 1e18,
           price_id: "dai",
           strategyName: "Harvest-Fighter: Harvest DAI",
@@ -4164,7 +4164,8 @@ class Store {
             asset.vaultContractAddress.toLowerCase()
           );
         });
-      } else if (asset.strategyType === "yearn") {
+      } else if (asset.strategyType === "yearn" ||
+      asset.strategyType === "harvest" ) {
         vault = vaultStatistics.filter((stats) => {
           if (typeof stats.tokenAddress == "string") {
             return (
@@ -6117,10 +6118,17 @@ class Store {
           asset.vaultContractABI,
           asset.vaultContractAddress
         );
-
-        const pool = await harvestContract.methods
-          .getTotalValueInPool()
-          .call();
+        const strategyAddress = await harvestContract.methods
+          .strategy()
+          .call({ from: account.address });    
+        let strategyContract = new web3.eth.Contract(
+          asset.strategyContractABI,
+          strategyAddress
+        );
+    
+        let pool = await strategyContract.methods
+          .pool()
+          .call({ from: account.address });
 
         const totalSupply = await harvestContract.methods.totalSupply().call();
 
@@ -6527,7 +6535,7 @@ class Store {
         vaultAddress = asset.vaultContractAddress;
       } else if (asset.strategyType === "daoFaang") {
         vaultAddress = asset.vaultContractAddress;
-
+        
       } else if (asset.strategyType === "harvest") {
         vaultAddress = asset.vaultContractAddress;
 
@@ -7219,15 +7227,8 @@ class Store {
             asset.elonPricePerFullShare = data[4].elonPricePerFullShare
               ? data[4].elonPricePerFullShare
               : null;
-
-
             asset.harvestPricePerFullShare = data[4].harvestPricePerFullShare
               ? data[4].harvestPricePerFullShare: null;
-
-
-            asset.harvestPricePerFullShare = data[4].harvestPricePerFullShare
-              ? data[4].harvestPricePerFullShare: null;
-
             asset.cubanPricePerFullShare = data[4].cubanPricePerFullShare
               ? data[4].cubanPricePerFullShare
 
