@@ -666,7 +666,7 @@ class StakeDvgVip extends Component {
         // this.setState({
         //     onboard: onboard
         // });
-        store.setStore({ 'onboard': onboard });
+        // store.setStore({ 'onboard': onboard });
         emitter.on(CHANGE_NETWORK, this.networkChanged);
         emitter.on(DASHBOARD_SNAPSHOT_RETURNED, this.dashboardSnapshotReturned);
         emitter.on(CONNECTION_CONNECTED, this.connectionConnected);
