@@ -634,7 +634,6 @@ class StakeDvgVip extends Component {
             dispatcher.dispatch({ type: GET_DVG_INFO })
             dispatcher.dispatch({ type: GET_XDVG_BALANCE })
         }
-        // dispatcher.dispatch({ type: GET_VAULT_BALANCES_FULL })
         dispatcher.dispatch({ type: GET_DVG_APR })
     }
     componentWillMount() {
@@ -970,7 +969,7 @@ class StakeDvgVip extends Component {
                 <Grid>
                     <div className={classes.banner}>
                         <div className={classes.bannerLeft}>
-                            <div className={classes.text}>Buy DVG on DEX Liquidity Pools</div>
+                            <div className={classes.text}>Buy DVD on DEX Liquidity Pools</div>
                         </div>
                         <div className={classes.bannerRight}>
                             <div className={classes.toTrade}>
