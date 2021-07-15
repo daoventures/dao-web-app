@@ -4865,7 +4865,6 @@ class Store {
         ? web3.utils.toBN(amount * 10 ** decimals).toString()
         : web3.utils.toWei(amount, "ether");
 
-
     // Citadel, Elon, and Cuban pass token's index for deposit, while FAANG pass token address
     const tokenToSent =
       asset.strategyType === "daoFaang"
@@ -6221,6 +6220,43 @@ class Store {
     }
   };
 
+  _getPNL = async (performanceId, callback) => {
+    console.log(
+      "🚀 | _getHistoricalPerformance= | performanceId",
+      performanceId
+    );
+    let output = {};
+    let url;
+    let resultString;
+    let result;
+    const intervals = ["30d", "7d"];
+    if (performanceId) {
+      for (const interval of intervals) {
+        try {
+          let url = `${config.statsProvider}vaults/pnl/${performanceId}/${interval}`;
+          resultString = await rp(url);
+          result = JSON.parse(resultString);
+          output[interval] = result.body;
+        } catch (e) {
+          console.log(e);
+          callback(null, []);
+        }
+      }
+      try {
+        url = `${config.statsProvider}vaults/pnl/${performanceId}`;
+        resultString = await rp(url);
+        result = JSON.parse(resultString);
+        output["inception"] = result.body;
+      } catch (e) {
+        console.log(e);
+        callback(null, []);
+      }
+      callback(null, output);
+    } else {
+      callback(null, []);
+    }
+  };
+
   _getTvl = async (tvl_id, callback) => {
     try {
       const url = `${config.statsProvider}vaults/tvl/${tvl_id}`;
@@ -6910,6 +6946,10 @@ class Store {
                 callbackInner
               );
             },
+            (callbackInner) => {
+              // 12
+              this._getPNL(asset.id, callbackInner);
+            },
 
             // (callbackInner) => { this._getVaultHoldings(web3, asset, account, callbackInner) },
             // (callbackInner) => { this._getAddressTransactions(addressTXHitory, asset, callbackInner) },
@@ -6956,7 +6996,8 @@ class Store {
               data[9] && data[9].priceInUSD ? data[9].priceInUSD : null;
             asset.sumBalances = data[9].sumBalances;
             asset.daomineApy = data[10] ? data[10].daomineApy : 0;
-            asset.historicalPerformance = data[11];
+            asset.historicalPerformance = data[11]
+            asset.stats.pnl = data[12];
 
             // asset.addressTransactions = data[7]
             // asset.vaultHoldings = data[3]

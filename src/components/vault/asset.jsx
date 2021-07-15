@@ -919,6 +919,126 @@ class Asset extends Component {
     );
   };
 
+  renderStrategy() {
+    const { classes, asset } = this.props;
+    const {
+      redeemEarnAmount,
+      redeemEarnAmountError,
+      redeemAmount,
+      redeemAmountError,
+      loading,
+      ratio,
+      earnPercent,
+      vaultPercent,
+      scales,
+    } = this.state;
+    if (asset.strategyType === "citadel") {
+      return (
+        <div>
+          <Typography variant={"h4"} className={classes.subtitle} noWrap>
+            STRATEGY
+          </Typography>
+          <Grid container style={{ marginTop: "1rem" }}>
+            <Grid item sm={3} xs={6}>
+              <Typography variant={"h5"} className={classes.grey}>
+                Currently Active:
+              </Typography>
+              <div className={classes.flexy}>
+                <Typography variant={"h4"} styles={{ wordWrap: "break-word" }}>
+                  {asset.strategy}
+                </Typography>
+              </div>
+            </Grid>
+            <Grid item sm={3} xs={6}>
+              <Typography variant={"h5"} className={classes.grey}>
+                Inception PnL:
+              </Typography>
+              <div className={classes.flexy}>
+                <Typography variant={"h4"} noWrap>
+                  {(this._getPNL(asset)["inception"] * 100).toFixed(2)}%{" "}
+                </Typography>
+              </div>
+            </Grid>
+            <Grid item sm={3} xs={6}>
+              <Typography variant={"h5"} className={classes.grey}>
+                Monthly PnL:
+              </Typography>
+              <div className={classes.flexy}>
+                <Typography variant={"h4"} noWrap>
+                  {(this._getPNL(asset)["30d"] * 100).toFixed(2)}%{" "}
+                </Typography>
+              </div>
+            </Grid>
+            <Grid item sm={3} xs={6}>
+              <Typography variant={"h5"} className={classes.grey}>
+                Weekly PnL:
+              </Typography>
+              <div className={classes.flexy}>
+                <Typography variant={"h4"} noWrap>
+                  {(this._getPNL(asset)["7d"] * 100).toFixed(2)}%{" "}
+                </Typography>
+              </div>
+            </Grid>
+          </Grid>
+
+          <div className={classes.fullWidth}></div>
+        </div>
+      );
+    } else {
+      return (
+        <div>
+          <Typography variant={"h4"} className={classes.subtitle} noWrap>
+            STRATEGY
+          </Typography>
+          <Grid container style={{ marginTop: "1rem" }}>
+            <Grid item sm={3} xs={6}>
+              <Typography variant={"h5"} className={classes.grey}>
+                Currently Active:
+              </Typography>
+              <div className={classes.flexy}>
+                <Typography variant={"h4"} styles={{ wordWrap: "break-word" }}>
+                  {asset.strategy}
+                </Typography>
+              </div>
+            </Grid>
+            <Grid item sm={3} xs={6}>
+              <Typography variant={"h5"} className={classes.grey}>
+                Yearly Growth:
+              </Typography>
+              <div className={classes.flexy}>
+                <Typography variant={"h4"} noWrap>
+                  {(this._getAPY(asset) / 1).toFixed(2)}%{" "}
+                </Typography>
+              </div>
+            </Grid>
+            <Grid item sm={3} xs={6}>
+              <Typography variant={"h5"} className={classes.grey}>
+                Monthly Growth:
+              </Typography>
+              <div className={classes.flexy}>
+                <Typography variant={"h4"} noWrap>
+                  {(this._getAPY(asset) / 12).toFixed(2)}%{" "}
+                </Typography>
+              </div>
+            </Grid>
+            <Grid item sm={3} xs={6}>
+              <Typography variant={"h5"} className={classes.grey}>
+                Weekly Growth:
+              </Typography>
+              <div className={classes.flexy}>
+                <Typography variant={"h4"} noWrap>
+                  {(this._getAPY(asset) / 52).toFixed(2)}%{" "}
+                </Typography>
+              </div>
+            </Grid>
+          </Grid>
+
+          <div className={classes.fullWidth}></div>
+        </div>
+      );
+    }
+  }
+
   render() {
     const { classes, asset } = this.props;
     const {
@@ -941,56 +1061,7 @@ class Asset extends Component {
 
             <Grid item sm={12} xs={12} className={classes.assetDetails}>
               {/* STRATEGY */}
-              <Typography variant={"h4"} className={classes.subtitle} noWrap>
-                STRATEGY
-              </Typography>
-              <Grid container style={{ marginTop: "1rem" }}>
-                <Grid item sm={3} xs={6}>
-                  <Typography variant={"h5"} className={classes.grey}>
-                    Currently Active:
-                  </Typography>
-                  <div className={classes.flexy}>
-                    <Typography
-                      variant={"h4"}
-                      styles={{ wordWrap: "break-word" }}
-                    >
-                      {asset.strategy}
-                    </Typography>
-                  </div>
-                </Grid>
-                <Grid item sm={3} xs={6}>
-                  <Typography variant={"h5"} className={classes.grey}>
-                    Yearly Growth:
-                  </Typography>
-                  <div className={classes.flexy}>
-                    <Typography variant={"h4"} noWrap>
-                      {(this._getAPY(asset) / 1).toFixed(2)}%{" "}
-                    </Typography>
-                  </div>
-                </Grid>
-                <Grid item sm={3} xs={6}>
-                  <Typography variant={"h5"} className={classes.grey}>
-                    Monthly Growth:
-                  </Typography>
-                  <div className={classes.flexy}>
-                    <Typography variant={"h4"} noWrap>
-                      {(this._getAPY(asset) / 12).toFixed(2)}%{" "}
-                    </Typography>
-                  </div>
-                </Grid>
-                <Grid item sm={3} xs={6}>
-                  <Typography variant={"h5"} className={classes.grey}>
-                    Weekly Growth:
-                  </Typography>
-                  <div className={classes.flexy}>
-                    <Typography variant={"h4"} noWrap>
-                      {(this._getAPY(asset) / 52).toFixed(2)}%{" "}
-                    </Typography>
-                  </div>
-                </Grid>
-              </Grid>
-
-              <div className={classes.fullWidth}></div>
+              {this.renderStrategy()}
 
               {/** STATISTICS */}
               <Typography variant={"h4"} className={classes.subtitle} noWrap>
@@ -1589,7 +1660,6 @@ class Asset extends Component {
       // this gives an object with dates as keys
       let groups;
       if (asset.strategyType === "citadel") {
-
         groups = asset.historicalPerformance
           .sort(sortByTimestamp)
           .reduce((groups, apy) => {
@@ -2075,6 +2145,58 @@ class Asset extends Component {
       } else if (asset.strategyType === "daoFaang") {
         return asset.stats.faangApy;
       }
+    }
+    return 0;
+  };
+
+  _getPNL = (asset) => {
+    const { basedOn } = this.props;
+    // To calculate APY (Vault + Earn divide by 2 : Estimated)
+    // Compound APY is using compoundApy
+    if (asset && asset.stats) {
+      // if (asset.strategyType === "compound") {
+      //   if (asset.stats.compoundApy) {
+      //     return asset.stats.compoundApy;
+      //   }
+      // } else if (asset.strategyType === "yearn") {
+      //   switch (basedOn) {
+      //     case 1:
+      //       return (
+      //         (asset.stats.apyOneWeekSample + parseFloat(asset.earnApr) * 100) /
+      //         2
+      //       );
+      //     case 2:
+      //       return (
+      //         (asset.stats.apyOneMonthSample +
+      //           parseFloat(asset.earnApr) * 100) /
+      //         2
+      //       );
+      //     case 3:
+      //       return (
+      //         (asset.stats.apyInceptionSample +
+      //           parseFloat(asset.earnApr) * 100) /
+      //         2
+      //       );
+      //     default:
+      //       return (asset.apy + parseFloat(asset.earnApr) * 100) / 2;
+      //   }
+      // } else if (asset.strategyType === "citadel") {
+      if (asset.strategyType === "citadel") {
+        console.log("🚀 | Asset | asset.stats.pnl", asset.stats.pnl);
+
+        return asset.stats.pnl;
+      }
+      // else if (asset.strategyType === "elon") {
+      //   if (asset.stats.elonApy) {
+      //     return asset.stats.elonApy;
+      //   }
+      // } else if (asset.strategyType === "cuban") {
+      //   if (asset.stats.cubanApy) {
+      //     return asset.stats.cubanApy;
+      //   }
+      // } else if (asset.strategyType === "daoFaang") {
+      //   return asset.stats.faangApy;
+      // }
     }
     return 0;
   };
