@@ -6058,7 +6058,7 @@ class Store {
   }
 
   _checkProductStatus = async(vaultAddress, products, callback) => {
-    let returnObj = { deposit: false, withdraw: false, message: "" };
+    let returnObj = { deposit: false, withdraw: false, depositMessage: "", withdrawMessage: "" };
     try {
       if(products.length <= 0) {
         callback(null, returnObj);
