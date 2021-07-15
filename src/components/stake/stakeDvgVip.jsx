@@ -939,7 +939,7 @@ class StakeDvgVip extends Component {
             { range: ">1000 - 10000", multiplier: "1.2"},
             { range: ">10000 - 50000", multiplier: "1.3"},
             { range: ">10000 - 100000", multiplier: "1.4"},
-            { range: ">100000", multiplier: "1.1"},
+            { range: ">100000", multiplier: "1.5"},
         ]
         
         const modalContent = (
