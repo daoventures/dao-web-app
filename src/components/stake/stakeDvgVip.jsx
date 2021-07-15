@@ -970,7 +970,7 @@ class StakeDvgVip extends Component {
                 <Grid>
                     <div className={classes.banner}>
                         <div className={classes.bannerLeft}>
-                            <div className={classes.text}>Buy DVG on DEX Liquidity Pools</div>
+                            <div className={classes.text}>Buy DVD on DEX Liquidity Pools</div>
                         </div>
                         <div className={classes.bannerRight}>
                             <div className={classes.toTrade}>
