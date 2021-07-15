@@ -638,34 +638,34 @@ class StakeDvgVip extends Component {
         dispatcher.dispatch({ type: GET_DVG_APR })
     }
     componentWillMount() {
-        const onboard = initOnboard({
-            address: (address) => {
-                // console.log('onboard#####address####', address);
-                store.setStore({ account: { address: address } });
-                emitter.emit(CONNECTION_CONNECTED);
-            },
-            network: (network) => {
-                // console.log('onboard###network#####', network);
-                store.setStore({ network: network });
-                emitter.emit('CHANGE_NETWORK', { network: network });
-            },
-            balance: (balance) => {
-                let account = store.getStore('account');
-                // console.log('onboard#####balance#####', balance);
-                store.setStore({ account: { ...account, balance: balance } });
-                emitter.emit(CONNECTION_CONNECTED);
-            },
-            wallet: (wallet) => {
-                // console.log('onboard#####wallet#####', wallet);
-                store.setStore({
-                    web3context: { library: { provider: wallet.provider } },
-                })
-                window.localStorage.setItem('selectedWallet', wallet.name);
-            }
-        });
-        this.setState({
-            onboard: onboard
-        });
+        // const onboard = initOnboard({
+        //     address: (address) => {
+        //         // console.log('onboard#####address####', address);
+        //         store.setStore({ account: { address: address } });
+        //         emitter.emit(CONNECTION_CONNECTED);
+        //     },
+        //     network: (network) => {
+        //         // console.log('onboard###network#####', network);
+        //         store.setStore({ network: network });
+        //         emitter.emit('CHANGE_NETWORK', { network: network });
+        //     },
+        //     balance: (balance) => {
+        //         let account = store.getStore('account');
+        //         // console.log('onboard#####balance#####', balance);
+        //         store.setStore({ account: { ...account, balance: balance } });
+        //         emitter.emit(CONNECTION_CONNECTED);
+        //     },
+        //     wallet: (wallet) => {
+        //         // console.log('onboard#####wallet#####', wallet);
+        //         store.setStore({
+        //             web3context: { library: { provider: wallet.provider } },
+        //         })
+        //         window.localStorage.setItem('selectedWallet', wallet.name);
+        //     }
+        // });
+        // this.setState({
+        //     onboard: onboard
+        // });
         store.setStore({ 'onboard': onboard });
         emitter.on(CHANGE_NETWORK, this.networkChanged);
         emitter.on(DASHBOARD_SNAPSHOT_RETURNED, this.dashboardSnapshotReturned);
@@ -970,7 +970,7 @@ class StakeDvgVip extends Component {
                 <Grid>
                     <div className={classes.banner}>
                         <div className={classes.bannerLeft}>
-                            <div className={classes.text}>Buy DVD on DEX Liquidity Pools</div>
+                            <div className={classes.text}>Buy DVG on DEX Liquidity Pools</div>
                         </div>
                         <div className={classes.bannerRight}>
                             <div className={classes.toTrade}>
