@@ -333,7 +333,7 @@ class SideDrawer extends Component {
           open: false,
           childrens: [
             { key: "DAOmine", name: "daomine", path: DAOMINE_PATH },
-            { key: "DAOvip", name: "stake", path: STAKE_PATH },
+            { key: "DAOvvip", name: "stake", path: STAKE_PATH },
           ],
         },
         {

@@ -413,8 +413,10 @@ class Store {
             break;
           case WITHDRAW_DAOMINE:
             this.withdrawDAOmine(payload);
+            break;
           case EMERGENCY_WITHDRAW_DAOMINE:
             this.emergencyWithdrawDAOmine(payload);
+            break;
           case GET_DVG_INFO:
             this.getDvgbalance(payload);
             break;
@@ -1307,6 +1309,16 @@ class Store {
 
     const vaultAssets = network ? vaultAssetsObj[network] : vaultAssetsObj[1];
 
+    let xDVG = "";
+    let dvg = "";
+    if(network === 1) {
+      xDVG = config.xdvgMainnetContract;
+      dvg = config.dvgTokenMainnetContract;
+    } else if (network === 42) {
+      xDVG = config.xdvgTestContract;
+      dvg = config.dvgTokenTestContract;
+    }
+
     return {
       assets: [
         {
@@ -1917,7 +1929,7 @@ class Store {
           name: "VIPDVG",
           symbol: "xDVG",
           decimals: 18,
-          erc20address: '0xD6Ce913C3e81b5e67a6b94d705d9E7cDdf073A7e',
+          erc20address: xDVG,
           abi: config.xDvgAbi,
           balance: 1,
         },
@@ -1926,7 +1938,7 @@ class Store {
           name: "DVGToken",
           symbol: "DVG",
           decimals: 18,
-          erc20address: '0x51e00a95748DBd2a3F47bC5c3b3E7B3F0fea666c',
+          erc20address: dvg,
           abi: config.DvgAbi,
           balance: 0,
         },
@@ -7462,6 +7474,7 @@ class Store {
     if (!web3) {
       return null;
     }
+
     async.map(
       assets,
       (asset, callback) => {
@@ -7485,6 +7498,7 @@ class Store {
           console.log(err);
           return emitter.emit(ERROR, err);
         }
+
         store.setStore({ dvg: assets });
         return emitter.emit(GET_DVG_BALANCE_SUCCESS, assets);
       }
