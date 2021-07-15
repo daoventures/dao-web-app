@@ -45,6 +45,8 @@ import { getTheme } from "../../theme";
 import { withRouter } from "react-router-dom";
 import { withStyles } from "@material-ui/core/styles";
 
+import CurrencyToggle from './component/currencyToggle/currencyToggle';
+
 const emitter = Store.emitter;
 const dispatcher = Store.dispatcher;
 const store = Store.store;
@@ -545,8 +547,8 @@ class Asset extends Component {
       openEarnInfo: false,
       openVaultInfo: false,
       interestTheme: {}, // 当前主题数据,
-      selectedCurrency: "USDT",
       tokenIndex: 0,
+      withdrawTokenIndex: 0,
       errorMessage: "",
       amountAboveThreshold: false,
       scales: [25, 50, 75, 100],
@@ -615,34 +617,29 @@ class Asset extends Component {
     });
   };
 
-  handleModalDisplay = (open) => {
-    this.setState({ displayCurrencyModal: open });
-  };
-
-  handleSelectedCurrency = (currencyType) => {
-    if (this.state.loading) {
-      return;
-    }
-
+  handleSelectedCurrency = (tokenIndex) => {
     const { asset } = this.props;
-
-    const tokenMap = { USDT: "0", USDC: "1", DAI: "2" };
-    const tokenIndex = tokenMap[currencyType];
 
     asset.symbol = asset.symbols[tokenIndex];
     asset.balance = asset.balances[tokenIndex];
     asset.erc20address = asset.erc20addresses[tokenIndex];
 
     this.setState({
-      selectedCurrency: currencyType,
       tokenIndex: tokenIndex,
       amount: "",
       percent: 0,
       errorMessage: "",
     });
-
-    this.handleModalDisplay(false);
   };
+
+  handleSelectedWithdrawCurrency = (withdrawTokenIndex) => {
+    this.setState({
+      withdrawTokenIndex,
+      redeemAmount: "",
+      redeemAmountPercent: 0,
+      withdrawErrorMessage: "",
+    });
+  }
 
   depositReturned = () => {
     this.setState({ loading: false, amount: "" });
@@ -690,55 +687,6 @@ class Asset extends Component {
     } else {
       return null;
     }
-  };
-
-  renderCurrencyModal = (currencies) => {
-    const { classes } = this.props;
-    const { displayCurrencyModal } = this.state;
-
-    return (
-      <Dialog
-        onClose={() => this.handleModalDisplay(false)}
-        fullWidth={true}
-        maxWidth={"sm"}
-        classes={{ paper: classes.dialogRoot }}
-        aria-labelledby="customized-dialog-title"
-        open={displayCurrencyModal}
-      >
-        <MuiDialogTitle disableTypography className={classes.dialogTitle}>
-          <Typography variant="h6">Select a Currency</Typography>
-          <IconButton
-            aria-label="close"
-            className={classes.closeButton}
-            onClick={() => this.handleModalDisplay(false)}
-          >
-            <CloseIcon />
-          </IconButton>
-        </MuiDialogTitle>
-        <DialogContent dividers className={classes.dialogContent}>
-          <List component="nav" aria-label="main mailbox folders">
-            {currencies.length > 0 &&
-              currencies.map((currency) => {
-                return (
-                  <ListItem
-                    button
-                    onClick={() => this.handleSelectedCurrency(currency)}
-                    className={classes.modalListItem}
-                  >
-                    <ListItemAvatar>
-                      <Avatar
-                        alt=""
-                        src={require("../../assets/" + currency + "-logo.png")}
-                      />
-                    </ListItemAvatar>
-                    <ListItemText primary={currency} />
-                  </ListItem>
-                );
-              })}
-          </List>
-        </DialogContent>
-      </Dialog>
-    );
   };
 
   renderDepositWithdrawInput = (isDeposit) => {
@@ -1233,36 +1181,7 @@ class Asset extends Component {
 
                   {/** Change Currency  */}
                   {this.isUsdVault(asset) && (
-                    <React.Fragment>
-                      <div className={classes.accountInfoBlock}>
-                        <div
-                          className={classes.accountInfo}
-                          onClick={() => {
-                            this.handleModalDisplay(true);
-                          }}
-                        >
-                          <img
-                            alt=""
-                            src={require("../../assets/" +
-                              this.state.selectedCurrency +
-                              "-logo.png")}
-                            className={classes.assetIconImg}
-                            style={
-                              asset.disabled
-                                ? { filter: "grayscale(100%)" }
-                                : {}
-                            }
-                          />
-                          <span className={classes.addressSpan}>
-                            {this.state.selectedCurrency}
-                          </span>
-                          <ArrowDropDownCircleIcon
-                            className={classes.arrowDropdownIcon}
-                          />
-                        </div>
-                      </div>
-                      {this.renderCurrencyModal(asset.symbols)}
-                    </React.Fragment>
+                    <CurrencyToggle currencies={asset.symbols} selectedCurrency={this.handleSelectedCurrency}></CurrencyToggle>
                   )}
                 </div>
 
@@ -1527,13 +1446,15 @@ class Asset extends Component {
                                 {asset.depositedSharesInUSD
                                   ? (
                                     asset.depositedSharesInUSD /
-                                    asset.priceInUSD[this.state.tokenIndex]
+                                    asset.priceInUSD[this.state.withdrawTokenIndex]
                                   ).toFixed(4)
                                   : "0.0000"}{" "}
-                                {asset.symbols[this.state.tokenIndex]})
+                                {asset.symbols[this.state.withdrawTokenIndex]})
                               </span>
                             )}
                           </Typography>
+                          {/** Change Currency  */}
+                          <CurrencyToggle currencies={asset.symbols} selectedCurrency={this.handleSelectedWithdrawCurrency}></CurrencyToggle>
                         </div>
                         {this.renderDepositWithdrawInput(false)}
                       </div>
@@ -2279,7 +2200,7 @@ class Asset extends Component {
   };
 
   onWithdraw = () => {
-    let { redeemEarnAmount, redeemAmount, tokenIndex } =
+    let { redeemEarnAmount, redeemAmount, withdrawTokenIndex } =
       this.state;
 
     const { asset, startLoading } = this.props;
@@ -2363,7 +2284,7 @@ class Asset extends Component {
             vaultAmount: "0",
             amount: shares,
             asset: asset,
-            tokenIndex: tokenIndex,
+            tokenIndex: withdrawTokenIndex,
           },
         });
       }
@@ -2402,20 +2323,6 @@ class Asset extends Component {
     this.verifyInput(amount);
 
     this.setState({ amount, percent, amountError: false, errorMessage: "" });
-  };
-
-  setCurrency = (tokenIndex) => {
-    if (this.state.loading) {
-      return;
-    }
-
-    const { asset } = this.props;
-
-    asset.symbol = asset.symbols[tokenIndex];
-    asset.balance = asset.balances[tokenIndex];
-    asset.erc20address = asset.erc20addresses[tokenIndex];
-
-    this.setState({ tokenIndex: tokenIndex });
   };
 
   setRedeemAmount = (percent) => {
