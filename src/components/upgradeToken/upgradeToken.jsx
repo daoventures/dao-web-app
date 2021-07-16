@@ -585,7 +585,7 @@ class UpgradeToken extends Component {
             return (
                 <div className={classes.dvgBalanceRow}>
                     <div className={classes.balanceLeft}>
-                        <img className={classes.balanceLogo} src={require('../../assets/DAO-logo-2.png')} alt="" />
+                        <img className={classes.balanceLogo} src={require('../../assets/DAO-logo.png')} alt="" />
                     </div>
                     <div className={classes.balanceRight}>
                         <div className={classes.balanceAmount}>{dvgBalance
@@ -601,7 +601,7 @@ class UpgradeToken extends Component {
             return (
                 <div className={classes.dvdBalanceRow}>
                     <div className={classes.balanceLeft}>
-                        <img className={classes.balanceLogo} src={require('../../assets/DAO-logo-2.png')} alt="" />
+                        <img className={classes.balanceLogo} src={require('../../assets/DAO-logo.png')} alt="" />
                     </div>
                     <div className={classes.balanceRight}>
                         <div className={classes.balanceAmount}>{dvdBalance
