@@ -83,6 +83,7 @@ import {
   ZAP_RETURNED,
   WITHDRAW_VAULT_RETURNED,
   WITHDRAW_DVG_RETURNED,
+  WITHDRAW_DVG_RETURNED_COMPLETED,
   WITHDRAW_VAULT_RETURNED_COMPLETED,
   WITHDRAW_DAOMINE,
   WITHDRAW_DAOMINE_RETURNED,
@@ -90,6 +91,7 @@ import {
   EMERGENCY_WITHDRAW_DAOMINE,
   EMERGENCY_WITHDRAW_DAOMINE_RETURNED,
   EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,
+  DEPOSIT_DVG_RETURNED_COMPLETED,
 } from "../constants";
 import {
   Biconomy,
@@ -7520,11 +7522,17 @@ class Store {
 
     const { asset, amount, max } = payload.content;
     //asset 是dvg
-    this._callDepositDvg(asset, amount, max, (err, withdrawResult) => {
+    this._callDepositDvg(asset, amount, max, (err, txnHash, receipt) => {
       if (err) {
         return emitter.emit(ERROR, err);
       }
-      return emitter.emit(DEPOSIT_DVG_RETURNED, withdrawResult);
+      if(txnHash) {
+        return emitter.emit(DEPOSIT_DVG_RETURNED, txnHash);
+      }
+      if(receipt) {
+        return emitter.emit(DEPOSIT_DVG_RETURNED_COMPLETED, receipt.transactionHash);
+      }
+      
       // dispatcher.dispatch({ type: GET_DVG_INFO })
       // return emitter.emit(WITHDRAW_VAULT_RETURNED, withdrawResult);
     });
@@ -7567,16 +7575,16 @@ class Store {
           .send({
             from: account.address,
           })
-          .on("transactionHash", function (hash) {
-            console.log(hash, "hash###");
-            callback(null, hash);
+          .on("transactionHash", function (txnHash) {
+            console.log(txnHash, "hash###");
+            callback(null, txnHash, null);
           })
           .on("confirmation", function (confirmationNumber, receipt) {
             console.log(confirmationNumber, receipt);
           })
           .on("receipt", function (receipt) {
+            callback(null, null, receipt);
             dispatcher.dispatch({ type: GET_DVG_INFO });
-            console.log(receipt);
           })
           .on("error", function (error) {
             if (!error.toString().includes("-32601")) {
@@ -7610,7 +7618,7 @@ class Store {
           console.log(confirmationNumber, receipt);
         })
         .on("receipt", function (receipt) {
-          console.log(receipt);
+          callback(null, null, receipt);
           dispatcher.dispatch({ type: GET_DVG_INFO });
         })
         .on("error", function (error) {
@@ -7662,12 +7670,18 @@ class Store {
     const account = store.getStore("account");
     const { asset, amount, max } = payload.content;
     //asset 是dvd
-    this._callWithdrawXdvg(asset, amount, max, (err, withdrawResult) => {
+    this._callWithdrawXdvg(asset, amount, max, (err, txnHash, withdrawResult) => {
       if (err) {
         return emitter.emit(ERROR, err);
       }
+      if (txnHash) {
+        return emitter.emit(WITHDRAW_DVG_RETURNED, txnHash);
+      }
+      if(withdrawResult) {
+        return emitter.emit(WITHDRAW_DVG_RETURNED_COMPLETED, withdrawResult.transactionHash);
+      }
       // dispatcher.dispatch({ type: GET_DVG_INFO })
-      return emitter.emit(WITHDRAW_DVG_RETURNED, withdrawResult);
+      // return emitter.emit(WITHDRAW_DVG_RETURNED, withdrawResult);
     });
   };
 
@@ -7696,13 +7710,14 @@ class Store {
       })
       .on("transactionHash", function (hash) {
         console.log(hash, "hash###");
-        callback(null, hash);
+        callback(null, hash, null);
       })
       .on("confirmation", function (confirmationNumber, receipt) {
         console.log(confirmationNumber, receipt);
       })
       .on("receipt", function (receipt) {
         console.log(receipt);
+        callback(null, null, receipt);
         dispatcher.dispatch({ type: GET_DVG_INFO });
       })
       .on("error", function (error) {

@@ -22,7 +22,9 @@ import {
     GET_DVG_APR,
     GET_XDVG_APR_SUCCESS,
     WITHDRAW_DVG_RETURNED,
+    WITHDRAW_DVG_RETURNED_COMPLETED,
     DEPOSIT_DVG_RETURNED,
+    DEPOSIT_DVG_RETURNED_COMPLETED,
     ERROR
 } from '../../constants'
 import Store from "../../stores";
@@ -669,11 +671,13 @@ class StakeDvgVip extends Component {
         emitter.on(CHANGE_NETWORK, this.networkChanged);
         emitter.on(DASHBOARD_SNAPSHOT_RETURNED, this.dashboardSnapshotReturned);
         emitter.on(CONNECTION_CONNECTED, this.connectionConnected);
-        emitter.on(GET_DVG_BALANCE_SUCCESS, this.dvgBalance)
-        emitter.on(GET_XDVG_BALANCE_SUCCESS, this.xdvgBalance)
-        emitter.on(GET_XDVG_APR_SUCCESS, this.getAprInfo)
-        emitter.on(WITHDRAW_DVG_RETURNED, this.withdrawReturned)
-        emitter.on(DEPOSIT_DVG_RETURNED, this.depositReturned)
+        emitter.on(GET_DVG_BALANCE_SUCCESS, this.dvgBalance);
+        emitter.on(GET_XDVG_BALANCE_SUCCESS, this.xdvgBalance);
+        emitter.on(GET_XDVG_APR_SUCCESS, this.getAprInfo);
+        emitter.on(WITHDRAW_DVG_RETURNED, this.showHash);
+        emitter.on(WITHDRAW_DVG_RETURNED_COMPLETED, this.withdrawReturned);
+        emitter.on(DEPOSIT_DVG_RETURNED, this.showHash);
+        emitter.on(DEPOSIT_DVG_RETURNED_COMPLETED, this.depositReturned);
         emitter.on(ERROR, this.errorReturned)
     }
 
@@ -688,6 +692,18 @@ class StakeDvgVip extends Component {
         emitter.removeListener(DEPOSIT_DVG_RETURNED, this.depositReturned)
         emitter.removeListener(ERROR, this.errorReturned)
     }
+
+    showHash = (txHash) => {
+        const snackbarObj = { snackbarMessage: null, snackbarType: "Hash" };
+        this.setState(snackbarObj);
+        this.setState({ loading: false });
+        const that = this;
+        setTimeout(() => {
+          const snackbarObj = { snackbarMessage: txHash, snackbarType: "Hash" };
+          that.setState(snackbarObj);
+        });
+      };
+    
 
     errorReturned = (error) => {
         const snackbarObj = { snackbarMessage: null, snackbarType: null };
@@ -808,11 +824,33 @@ class StakeDvgVip extends Component {
         }
     }
 
-    depositReturned = () => {
+    depositReturned = (txHash) => {
+        const snackbarObj = { snackbarMessage: null, snackbarType: null };
+        this.setState(snackbarObj);
+        this.setState({ loading: false });
+        const that = this;
+        setTimeout(() => {
+          const snackbarObj = {
+            snackbarMessage: txHash,
+            snackbarType: "Transaction Success",
+          };
+          that.setState(snackbarObj);
+        });
         this.setState({ loading: false, amount: "" });
     };
 
-    withdrawReturned = () => {
+    withdrawReturned = (txHash) => {
+        const snackbarObj = { snackbarMessage: null, snackbarType: null };
+        this.setState(snackbarObj);
+        this.setState({ loading: false });
+        const that = this;
+        setTimeout(() => {
+          const snackbarObj = {
+            snackbarMessage: txHash,
+            snackbarType: "Transaction Success",
+          };
+          that.setState(snackbarObj);
+        });
         this.setState({ loading: false, amount: "" });
     };
 
