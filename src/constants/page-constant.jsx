@@ -17,5 +17,5 @@ export const DAOMINE_PATH = '/daomine';
 export const SWAP_PATH = '/swap';
 export const SWAP = 'SWAP';
 export const UPGPRADE_PATH = '/upgrade';
-export const UPGPRADE = 'UPGPRADE';
+export const UPGPRADE = 'UPGRADE';
 
