@@ -919,7 +919,7 @@ class StakeDvgVip extends Component {
             { range: ">10000 - 50000", multiplier: "1.3"},
             { range: ">50000 - 100000", multiplier: "1.4"},
             { range: ">100000", multiplier: "1.5"},
-        ]
+        ];
         
         const modalContent = (
             <div className={classes.modalInfo}>
@@ -998,6 +998,8 @@ class StakeDvgVip extends Component {
 
         const dvgBalance = dvgInfoObj && dvgInfoObj[1].balance;
         const xdvgBalance = dvgInfoObj && dvgInfoObj[0].balance;
+
+        const xDVGObj =  dvgInfoObj[0];
 
         if (!account || !account.address) {
             return <ConnectWallet></ConnectWallet>
@@ -1138,7 +1140,9 @@ class StakeDvgVip extends Component {
                                        {this.renderMultiplierInfo()}
                                     </p>
                                     <p className={classes.totalTextNum}>
-                                       1x
+                                       {xDVGObj && (
+                                           <span>1.{Number(xDVGObj.tier) + 1}x</span>
+                                       )}
                                     </p>
                                 </div>
                             </div>

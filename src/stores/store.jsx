@@ -7495,12 +7495,19 @@ class Store {
             (callbackInner) => {
               this._getERC20Balance(web3, asset, account, callbackInner);
             },
+            (callbackInner) => {
+              this._getXDvgTier(web3, asset, account, callbackInner);
+            },
           ],
           (err, data) => {
             if (err) {
               return callback(err);
             }
             asset.balance = data[0];
+            if(data[1]) {
+              asset.tier = data[1]._tier;
+              asset.depositedAmount = data[1]._depositedAmount;
+            }
             callback(null, asset);
           }
         );
@@ -7511,11 +7518,22 @@ class Store {
           return emitter.emit(ERROR, err);
         }
 
+        console.log("Asset", assets);
         store.setStore({ dvg: assets });
         return emitter.emit(GET_DVG_BALANCE_SUCCESS, assets);
       }
     );
   };
+
+  _getXDvgTier = async (web3, asset, account, callback) => {
+    if(asset.id !== "xDVG") {
+      return callback(null, null);
+    }
+    const xDVGContract = new web3.eth.Contract(asset.abi, asset.erc20address);
+    const tier = await xDVGContract.methods.getTier(account.address).call();
+    return callback(null, tier);
+  }
+
   //stake 充值dvg
   depositXdvg = async (payload) => {
     const account = store.getStore("account");
