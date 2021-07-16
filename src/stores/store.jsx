@@ -1309,14 +1309,15 @@ class Store {
 
     const vaultAssets = network ? vaultAssetsObj[network] : vaultAssetsObj[1];
 
-    let xDVG = "";
-    let dvg = "";
+    let xDVG, dvg, dvd;
     if(network === 1) {
       xDVG = config.xdvgMainnetContract;
       dvg = config.dvgTokenMainnetContract;
+      dvd = config.dvdTokenMainnetContract;
     } else if (network === 42) {
       xDVG = config.xdvgTestContract;
       dvg = config.dvgTokenTestContract;
+      dvd = config.dvdTokenTestContract;
     }
 
     return {
@@ -1932,6 +1933,15 @@ class Store {
           erc20address: xDVG,
           abi: config.xDvgAbi,
           balance: 1,
+        },
+        {
+          id: "DVD", 
+          name: "DVDToken",
+          symbol: "DVD",
+          decimals: 18,
+          erc20address: dvd,
+          abi: config.dvdTokenContractABI,
+          balance: 0,
         },
         {
           id: "DVG",
@@ -7624,7 +7634,7 @@ class Store {
 
   _callDvgApproval = async (account, amount, callback) => {
     const web3 = new Web3(store.getStore("web3context").library.provider);
-    let asset = store.getStore("dvg")[1]; //dvg
+    let asset = store.getStore("dvg")[1]; //dvd
     let xdvg = store.getStore("dvg")[0]; //xdvg
     let dvgContract = new web3.eth.Contract(asset.abi, asset.erc20address);
     dvgContract.methods
@@ -7651,7 +7661,7 @@ class Store {
   withdrawXdvg = async (payload) => {
     const account = store.getStore("account");
     const { asset, amount, max } = payload.content;
-    //asset 是dvg
+    //asset 是dvd
     this._callWithdrawXdvg(asset, amount, max, (err, withdrawResult) => {
       if (err) {
         return emitter.emit(ERROR, err);
