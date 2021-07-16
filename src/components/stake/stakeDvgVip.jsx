@@ -22,7 +22,9 @@ import {
     GET_DVG_APR,
     GET_XDVG_APR_SUCCESS,
     WITHDRAW_DVG_RETURNED,
+    WITHDRAW_DVG_RETURNED_COMPLETED,
     DEPOSIT_DVG_RETURNED,
+    DEPOSIT_DVG_RETURNED_COMPLETED,
     ERROR
 } from '../../constants'
 import Store from "../../stores";
@@ -539,6 +541,7 @@ const styles = theme => ({
         textDecoration: "underline",
         cursor: "pointer",
         color: theme.themeColors.textT,
+        marginTop: "2px",
     },
     depositScaleContainer: {
         display: "flex",
@@ -669,11 +672,13 @@ class StakeDvgVip extends Component {
         emitter.on(CHANGE_NETWORK, this.networkChanged);
         emitter.on(DASHBOARD_SNAPSHOT_RETURNED, this.dashboardSnapshotReturned);
         emitter.on(CONNECTION_CONNECTED, this.connectionConnected);
-        emitter.on(GET_DVG_BALANCE_SUCCESS, this.dvgBalance)
-        emitter.on(GET_XDVG_BALANCE_SUCCESS, this.xdvgBalance)
-        emitter.on(GET_XDVG_APR_SUCCESS, this.getAprInfo)
-        emitter.on(WITHDRAW_DVG_RETURNED, this.withdrawReturned)
-        emitter.on(DEPOSIT_DVG_RETURNED, this.depositReturned)
+        emitter.on(GET_DVG_BALANCE_SUCCESS, this.dvgBalance);
+        emitter.on(GET_XDVG_BALANCE_SUCCESS, this.xdvgBalance);
+        emitter.on(GET_XDVG_APR_SUCCESS, this.getAprInfo);
+        emitter.on(WITHDRAW_DVG_RETURNED, this.showHash);
+        emitter.on(WITHDRAW_DVG_RETURNED_COMPLETED, this.withdrawReturned);
+        emitter.on(DEPOSIT_DVG_RETURNED, this.showHash);
+        emitter.on(DEPOSIT_DVG_RETURNED_COMPLETED, this.depositReturned);
         emitter.on(ERROR, this.errorReturned)
     }
 
@@ -688,6 +693,18 @@ class StakeDvgVip extends Component {
         emitter.removeListener(DEPOSIT_DVG_RETURNED, this.depositReturned)
         emitter.removeListener(ERROR, this.errorReturned)
     }
+
+    showHash = (txHash) => {
+        const snackbarObj = { snackbarMessage: null, snackbarType: "Hash" };
+        this.setState(snackbarObj);
+        this.setState({ loading: false });
+        const that = this;
+        setTimeout(() => {
+          const snackbarObj = { snackbarMessage: txHash, snackbarType: "Hash" };
+          that.setState(snackbarObj);
+        });
+      };
+    
 
     errorReturned = (error) => {
         const snackbarObj = { snackbarMessage: null, snackbarType: null };
@@ -808,11 +825,33 @@ class StakeDvgVip extends Component {
         }
     }
 
-    depositReturned = () => {
+    depositReturned = (txHash) => {
+        const snackbarObj = { snackbarMessage: null, snackbarType: null };
+        this.setState(snackbarObj);
+        this.setState({ loading: false });
+        const that = this;
+        setTimeout(() => {
+          const snackbarObj = {
+            snackbarMessage: txHash,
+            snackbarType: "Transaction Success",
+          };
+          that.setState(snackbarObj);
+        });
         this.setState({ loading: false, amount: "" });
     };
 
-    withdrawReturned = () => {
+    withdrawReturned = (txHash) => {
+        const snackbarObj = { snackbarMessage: null, snackbarType: null };
+        this.setState(snackbarObj);
+        this.setState({ loading: false });
+        const that = this;
+        setTimeout(() => {
+          const snackbarObj = {
+            snackbarMessage: txHash,
+            snackbarType: "Transaction Success",
+          };
+          that.setState(snackbarObj);
+        });
         this.setState({ loading: false, amount: "" });
     };
 
@@ -880,7 +919,7 @@ class StakeDvgVip extends Component {
             { range: ">10000 - 50000", multiplier: "1.3"},
             { range: ">50000 - 100000", multiplier: "1.4"},
             { range: ">100000", multiplier: "1.5"},
-        ]
+        ];
         
         const modalContent = (
             <div className={classes.modalInfo}>
@@ -914,11 +953,11 @@ class StakeDvgVip extends Component {
         const modalContent = (
             <div className={classes.modalInfo}>
                 <Typography variant={"h5"}>
-                    Stake before 5th July 2021 14.00 UTC to receive early bird reward.
+                    Stake before 23th July 2021 14.00 UTC to receive early bird reward.
                 </Typography>
 
-                <Typography variant={"h5"}>
-                    <a href="https://daoventuresco.medium.com/daoventures-launches-dvg-staking-program-daovip-dacde7986814" 
+                <Typography variant={"h5"} style={{marginTop: "5px"}}>
+                    <a href="https://daoventuresco.medium.com/" 
                         target="_blank" 
                         className={classes.seeMore}>
                             See more here.
@@ -929,7 +968,7 @@ class StakeDvgVip extends Component {
                     {
                         info.map(i => {
                             return <li>
-                                Stake {i.amount} DVG for {i.day} days to receive {i.receive} DVG ({i.apr}% APR)
+                                Stake {i.amount} DVD for {i.day} days to receive {i.receive} vipDVD ({i.apr}% APR)
                             </li>
                         })
                     }
@@ -959,6 +998,8 @@ class StakeDvgVip extends Component {
 
         const dvgBalance = dvgInfoObj && dvgInfoObj[1].balance;
         const xdvgBalance = dvgInfoObj && dvgInfoObj[0].balance;
+
+        const xDVGObj =  dvgInfoObj[0];
 
         if (!account || !account.address) {
             return <ConnectWallet></ConnectWallet>
@@ -1099,7 +1140,9 @@ class StakeDvgVip extends Component {
                                        {this.renderMultiplierInfo()}
                                     </p>
                                     <p className={classes.totalTextNum}>
-                                       1x
+                                       {xDVGObj && (
+                                           <span>1.{Number(xDVGObj.tier) + 1}x</span>
+                                       )}
                                     </p>
                                 </div>
                             </div>
