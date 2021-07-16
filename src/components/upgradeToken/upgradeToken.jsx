@@ -9,7 +9,6 @@ import {
 import {
     CONNECTION_CONNECTED,
     CHANGE_NETWORK,
-    DEPOSIT_DVG_RETURNED,
     ERROR,
     GET_UPGRADE_TOKEN,
     GET_UPGRADE_TOKEN_RETURN,
@@ -392,7 +391,6 @@ class UpgradeToken extends Component {
         this.state = {
             assets: store.getStore('account'),
             account: account,
-            onboard: '',
             amount: '',
             type: 'stake',
             isPopUp: false,
@@ -410,35 +408,6 @@ class UpgradeToken extends Component {
         }
     }
     componentWillMount() {
-        const onboard = initOnboard({
-            address: (address) => {
-                // console.log('onboard#####address####', address);
-                store.setStore({ account: { address: address } });
-                emitter.emit(CONNECTION_CONNECTED);
-            },
-            network: (network) => {
-                // console.log('onboard###network#####', network);
-                store.setStore({ network: network });
-                emitter.emit('CHANGE_NETWORK', { network: network });
-            },
-            balance: (balance) => {
-                let account = store.getStore('account');
-                // console.log('onboard#####balance#####', balance);
-                store.setStore({ account: { ...account, balance: balance } });
-                emitter.emit(CONNECTION_CONNECTED);
-            },
-            wallet: (wallet) => {
-                // console.log('onboard#####wallet#####', wallet);
-                store.setStore({
-                    web3context: { library: { provider: wallet.provider } },
-                })
-                window.localStorage.setItem('selectedWallet', wallet.name);
-            }
-        });
-        this.setState({
-            onboard: onboard
-        });
-        store.setStore({ 'onboard': onboard });
         emitter.on(CHANGE_NETWORK, this.networkChanged);
         emitter.on(CONNECTION_CONNECTED, this.connectionConnected);
         emitter.on(GET_UPGRADE_TOKEN_RETURN, this.getBalances)
