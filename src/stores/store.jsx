@@ -83,6 +83,7 @@ import {
   ZAP_RETURNED,
   WITHDRAW_VAULT_RETURNED,
   WITHDRAW_DVG_RETURNED,
+  WITHDRAW_DVG_RETURNED_COMPLETED,
   WITHDRAW_VAULT_RETURNED_COMPLETED,
   WITHDRAW_DAOMINE,
   WITHDRAW_DAOMINE_RETURNED,
@@ -95,6 +96,7 @@ import {
   UPGRADE_TOKEN,
   UPGRADE_TOKEN_SUCCESS,
   UPGRADE_TOKEN_RETURN,
+  DEPOSIT_DVG_RETURNED_COMPLETED,
 } from "../constants";
 import {
   Biconomy,
@@ -1353,6 +1355,17 @@ class Store {
     const vaultAssets = network ? vaultAssetsObj[network] : vaultAssetsObj[1];
     const upgradeToken = network ? upgradeTokenObj[network] : upgradeTokenObj[1];
 
+    let xDVG, dvg, dvd;
+    if(network === 1) {
+      xDVG = config.xdvgMainnetContract;
+      dvg = config.dvgTokenMainnetContract;
+      dvd = config.dvdTokenMainnetContract;
+    } else if (network === 42) {
+      xDVG = config.xdvgTestContract;
+      dvg = config.dvgTokenTestContract;
+      dvd = config.dvdTokenTestContract;
+    }
+
     return {
       assets: [
         {
@@ -1963,16 +1976,25 @@ class Store {
           name: "VIPDVG",
           symbol: "xDVG",
           decimals: 18,
-          erc20address: '0xD6Ce913C3e81b5e67a6b94d705d9E7cDdf073A7e',
+          erc20address: xDVG,
           abi: config.xDvgAbi,
           balance: 1,
+        },
+        {
+          id: "DVD", 
+          name: "DVDToken",
+          symbol: "DVD",
+          decimals: 18,
+          erc20address: dvd,
+          abi: config.dvdTokenContractABI,
+          balance: 0,
         },
         {
           id: "DVG",
           name: "DVGToken",
           symbol: "DVG",
           decimals: 18,
-          erc20address: '0x51e00a95748DBd2a3F47bC5c3b3E7B3F0fea666c',
+          erc20address: dvg,
           abi: config.DvgAbi,
           balance: 0,
         },
@@ -7509,6 +7531,7 @@ class Store {
     if (!web3) {
       return null;
     }
+
     async.map(
       assets,
       (asset, callback) => {
@@ -7517,12 +7540,19 @@ class Store {
             (callbackInner) => {
               this._getERC20Balance(web3, asset, account, callbackInner);
             },
+            (callbackInner) => {
+              this._getXDvgTier(web3, asset, account, callbackInner);
+            },
           ],
           (err, data) => {
             if (err) {
               return callback(err);
             }
             asset.balance = data[0];
+            if(data[1]) {
+              asset.tier = data[1]._tier;
+              asset.depositedAmount = data[1]._depositedAmount;
+            }
             callback(null, asset);
           }
         );
@@ -7532,22 +7562,39 @@ class Store {
           console.log(err);
           return emitter.emit(ERROR, err);
         }
+
         store.setStore({ dvg: assets });
         return emitter.emit(GET_DVG_BALANCE_SUCCESS, assets);
       }
     );
   };
+
+  _getXDvgTier = async (web3, asset, account, callback) => {
+    if(asset.id !== "xDVG") {
+      return callback(null, null);
+    }
+    const xDVGContract = new web3.eth.Contract(asset.abi, asset.erc20address);
+    const tier = await xDVGContract.methods.getTier(account.address).call();
+    return callback(null, tier);
+  }
+
   //stake 充值dvg
   depositXdvg = async (payload) => {
     const account = store.getStore("account");
 
     const { asset, amount, max } = payload.content;
     //asset 是dvg
-    this._callDepositDvg(asset, amount, max, (err, withdrawResult) => {
+    this._callDepositDvg(asset, amount, max, (err, txnHash, receipt) => {
       if (err) {
         return emitter.emit(ERROR, err);
       }
-      return emitter.emit(DEPOSIT_DVG_RETURNED, withdrawResult);
+      if(txnHash) {
+        return emitter.emit(DEPOSIT_DVG_RETURNED, txnHash);
+      }
+      if(receipt) {
+        return emitter.emit(DEPOSIT_DVG_RETURNED_COMPLETED, receipt.transactionHash);
+      }
+      
       // dispatcher.dispatch({ type: GET_DVG_INFO })
       // return emitter.emit(WITHDRAW_VAULT_RETURNED, withdrawResult);
     });
@@ -7590,16 +7637,16 @@ class Store {
           .send({
             from: account.address,
           })
-          .on("transactionHash", function (hash) {
-            console.log(hash, "hash###");
-            callback(null, hash);
+          .on("transactionHash", function (txnHash) {
+            console.log(txnHash, "hash###");
+            callback(null, txnHash, null);
           })
           .on("confirmation", function (confirmationNumber, receipt) {
             console.log(confirmationNumber, receipt);
           })
           .on("receipt", function (receipt) {
+            callback(null, null, receipt);
             dispatcher.dispatch({ type: GET_DVG_INFO });
-            console.log(receipt);
           })
           .on("error", function (error) {
             if (!error.toString().includes("-32601")) {
@@ -7633,7 +7680,7 @@ class Store {
           console.log(confirmationNumber, receipt);
         })
         .on("receipt", function (receipt) {
-          console.log(receipt);
+          callback(null, null, receipt);
           dispatcher.dispatch({ type: GET_DVG_INFO });
         })
         .on("error", function (error) {
@@ -7657,7 +7704,7 @@ class Store {
 
   _callDvgApproval = async (account, amount, callback) => {
     const web3 = new Web3(store.getStore("web3context").library.provider);
-    let asset = store.getStore("dvg")[1]; //dvg
+    let asset = store.getStore("dvg")[1]; //dvd
     let xdvg = store.getStore("dvg")[0]; //xdvg
     let dvgContract = new web3.eth.Contract(asset.abi, asset.erc20address);
     dvgContract.methods
@@ -7684,13 +7731,19 @@ class Store {
   withdrawXdvg = async (payload) => {
     const account = store.getStore("account");
     const { asset, amount, max } = payload.content;
-    //asset 是dvg
-    this._callWithdrawXdvg(asset, amount, max, (err, withdrawResult) => {
+    //asset 是dvd
+    this._callWithdrawXdvg(asset, amount, max, (err, txnHash, withdrawResult) => {
       if (err) {
         return emitter.emit(ERROR, err);
       }
+      if (txnHash) {
+        return emitter.emit(WITHDRAW_DVG_RETURNED, txnHash);
+      }
+      if(withdrawResult) {
+        return emitter.emit(WITHDRAW_DVG_RETURNED_COMPLETED, withdrawResult.transactionHash);
+      }
       // dispatcher.dispatch({ type: GET_DVG_INFO })
-      return emitter.emit(WITHDRAW_DVG_RETURNED, withdrawResult);
+      // return emitter.emit(WITHDRAW_DVG_RETURNED, withdrawResult);
     });
   };
 
@@ -7719,13 +7772,14 @@ class Store {
       })
       .on("transactionHash", function (hash) {
         console.log(hash, "hash###");
-        callback(null, hash);
+        callback(null, hash, null);
       })
       .on("confirmation", function (confirmationNumber, receipt) {
         console.log(confirmationNumber, receipt);
       })
       .on("receipt", function (receipt) {
         console.log(receipt);
+        callback(null, null, receipt);
         dispatcher.dispatch({ type: GET_DVG_INFO });
       })
       .on("error", function (error) {

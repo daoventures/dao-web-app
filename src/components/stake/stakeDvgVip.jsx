@@ -4,7 +4,6 @@ import { withStyles } from '@material-ui/core/styles';
 import { withNamespaces } from 'react-i18next';
 import {
     Grid,
-    Popover,
     TextField,
     Typography,
     Button,
@@ -15,7 +14,6 @@ import {
     CHANGE_NETWORK,
     GET_DASHBOARD_SNAPSHOT,
     DASHBOARD_SNAPSHOT_RETURNED,
-    GET_VAULT_BALANCES_FULL,
     GET_DVG_BALANCE_SUCCESS,
     DEPOSIT_XDVG,
     GET_XDVG_BALANCE,
@@ -24,13 +22,17 @@ import {
     GET_DVG_APR,
     GET_XDVG_APR_SUCCESS,
     WITHDRAW_DVG_RETURNED,
+    WITHDRAW_DVG_RETURNED_COMPLETED,
     DEPOSIT_DVG_RETURNED,
+    DEPOSIT_DVG_RETURNED_COMPLETED,
     ERROR
 } from '../../constants'
 import Store from "../../stores";
 import ConnectWallet from "../common/connectWallet/connectWallet";
 import { initOnboard } from '../../walletsServices.js';
 import Snackbar from "../snackbar/snackbar";
+import InfoModal from "../common/infoModal/infoModal";
+import { validateDigit, validateInputMoreThanBalance, validateAmountNotExist } from "./helper/validation";
 
 const emitter = Store.emitter
 const dispatcher = Store.dispatcher
@@ -87,6 +89,8 @@ const styles = theme => ({
         }
     },
     bannerRight: {
+        display: 'flex',
+        alignItems: "center",
         [theme.breakpoints.down('sm')]: {
             width: '100%',
             display: 'flex',
@@ -404,14 +408,17 @@ const styles = theme => ({
         }
     },
     myAssets: {
-        padding: '49px 40px',
-        display: 'flex',
-        marginTop: '21px',
-        background: theme.themeColors.modelBack,
-        // padding:'0 19px',
-        // boxShadow: '0px 2px 10px 0px rgba(23, 18, 43, 0.85)',
-        border: ' 1px solid #7367F7',
-        alignItems: 'center'
+        // padding: '49px 40px',
+        // display: 'flex',
+        // marginTop: '21px',
+        // background: theme.themeColors.modelBack,
+        // // padding:'0 19px',
+        // // boxShadow: '0px 2px 10px 0px rgba(23, 18, 43, 0.85)',
+        // border: ' 1px solid #7367F7',
+        // alignItems: 'center'
+        display: "flex",
+        justifyContent: "space-between",
+        marginTop: "10px",
     },
     myAssetsTitle: {
         fontSize: '24px',
@@ -534,6 +541,7 @@ const styles = theme => ({
         textDecoration: "underline",
         cursor: "pointer",
         color: theme.themeColors.textT,
+        marginTop: "2px",
     },
     depositScaleContainer: {
         display: "flex",
@@ -594,13 +602,17 @@ const styles = theme => ({
         "&:first-child": {
             marginLeft: "0px",
         },
+    },
+
+    modalInfo: {
+        color: theme.themeColors.textT,
     }
 });
 
 
 class StakeDvgVip extends Component {
     constructor(props) {
-        super()
+        super();
         const dashboard = store.getStore('dashboard')
         const account = store.getStore('account')
         this.state = {
@@ -625,47 +637,48 @@ class StakeDvgVip extends Component {
             dispatcher.dispatch({ type: GET_DVG_INFO })
             dispatcher.dispatch({ type: GET_XDVG_BALANCE })
         }
-        // dispatcher.dispatch({ type: GET_VAULT_BALANCES_FULL })
         dispatcher.dispatch({ type: GET_DVG_APR })
     }
     componentWillMount() {
-        const onboard = initOnboard({
-            address: (address) => {
-                // console.log('onboard#####address####', address);
-                store.setStore({ account: { address: address } });
-                emitter.emit(CONNECTION_CONNECTED);
-            },
-            network: (network) => {
-                // console.log('onboard###network#####', network);
-                store.setStore({ network: network });
-                emitter.emit('CHANGE_NETWORK', { network: network });
-            },
-            balance: (balance) => {
-                let account = store.getStore('account');
-                // console.log('onboard#####balance#####', balance);
-                store.setStore({ account: { ...account, balance: balance } });
-                emitter.emit(CONNECTION_CONNECTED);
-            },
-            wallet: (wallet) => {
-                // console.log('onboard#####wallet#####', wallet);
-                store.setStore({
-                    web3context: { library: { provider: wallet.provider } },
-                })
-                window.localStorage.setItem('selectedWallet', wallet.name);
-            }
-        });
-        this.setState({
-            onboard: onboard
-        });
-        store.setStore({ 'onboard': onboard });
+        // const onboard = initOnboard({
+        //     address: (address) => {
+        //         // console.log('onboard#####address####', address);
+        //         store.setStore({ account: { address: address } });
+        //         emitter.emit(CONNECTION_CONNECTED);
+        //     },
+        //     network: (network) => {
+        //         // console.log('onboard###network#####', network);
+        //         store.setStore({ network: network });
+        //         emitter.emit('CHANGE_NETWORK', { network: network });
+        //     },
+        //     balance: (balance) => {
+        //         let account = store.getStore('account');
+        //         // console.log('onboard#####balance#####', balance);
+        //         store.setStore({ account: { ...account, balance: balance } });
+        //         emitter.emit(CONNECTION_CONNECTED);
+        //     },
+        //     wallet: (wallet) => {
+        //         // console.log('onboard#####wallet#####', wallet);
+        //         store.setStore({
+        //             web3context: { library: { provider: wallet.provider } },
+        //         })
+        //         window.localStorage.setItem('selectedWallet', wallet.name);
+        //     }
+        // });
+        // this.setState({
+        //     onboard: onboard
+        // });
+        // store.setStore({ 'onboard': onboard });
         emitter.on(CHANGE_NETWORK, this.networkChanged);
         emitter.on(DASHBOARD_SNAPSHOT_RETURNED, this.dashboardSnapshotReturned);
         emitter.on(CONNECTION_CONNECTED, this.connectionConnected);
-        emitter.on(GET_DVG_BALANCE_SUCCESS, this.dvgBalance)
-        emitter.on(GET_XDVG_BALANCE_SUCCESS, this.xdvgBalance)
-        emitter.on(GET_XDVG_APR_SUCCESS, this.getAprInfo)
-        emitter.on(WITHDRAW_DVG_RETURNED, this.withdrawReturned)
-        emitter.on(DEPOSIT_DVG_RETURNED, this.depositReturned)
+        emitter.on(GET_DVG_BALANCE_SUCCESS, this.dvgBalance);
+        emitter.on(GET_XDVG_BALANCE_SUCCESS, this.xdvgBalance);
+        emitter.on(GET_XDVG_APR_SUCCESS, this.getAprInfo);
+        emitter.on(WITHDRAW_DVG_RETURNED, this.showHash);
+        emitter.on(WITHDRAW_DVG_RETURNED_COMPLETED, this.withdrawReturned);
+        emitter.on(DEPOSIT_DVG_RETURNED, this.showHash);
+        emitter.on(DEPOSIT_DVG_RETURNED_COMPLETED, this.depositReturned);
         emitter.on(ERROR, this.errorReturned)
     }
 
@@ -681,6 +694,18 @@ class StakeDvgVip extends Component {
         emitter.removeListener(ERROR, this.errorReturned)
     }
 
+    showHash = (txHash) => {
+        const snackbarObj = { snackbarMessage: null, snackbarType: "Hash" };
+        this.setState(snackbarObj);
+        this.setState({ loading: false });
+        const that = this;
+        setTimeout(() => {
+          const snackbarObj = { snackbarMessage: txHash, snackbarType: "Hash" };
+          that.setState(snackbarObj);
+        });
+      };
+    
+
     errorReturned = (error) => {
         const snackbarObj = { snackbarMessage: null, snackbarType: null };
         this.setState(snackbarObj);
@@ -694,7 +719,6 @@ class StakeDvgVip extends Component {
             that.setState(snackbarObj);
         });
     };
-
 
     networkChanged = (obj) => {
         this.setState({ networkId: obj.network });
@@ -727,7 +751,6 @@ class StakeDvgVip extends Component {
         })
     }
 
-
     xdvgBalance = (asset) => {
         this.setState({
             dvgInfoObj: asset
@@ -735,68 +758,59 @@ class StakeDvgVip extends Component {
     }
 
     submitStake = () => {
-        const { amount } = this.state;
+        const { amount, type } = this.state;
         this.setState({ amountError: false, errorMessage: "" })
 
-        // Validate "amount" must be number
-        const digitRegex = /^[0-9]\d*(\.\d+)?$/;
-        if (!digitRegex.test(amount)) {
-            this.setState({
-                amountError: true,
-                errorMessage: "Invalid amount"
-            });
+        if(validateAmountNotExist(amount)) {
+            this.setInputErrorState("Invalid amount");
             return;
         }
 
-        let action = "";
-        let balance = 0;
-
-        if (this.state.type === "stake") {
-            action = DEPOSIT_XDVG;
-            balance = this.state.dvgInfoObj[1].balance
-        } else {
-            action = WIDTHDRAW_XDVG;
-            balance = this.state.dvgInfoObj[0].balance
+        let action = (type === "stake") ? DEPOSIT_XDVG : WIDTHDRAW_XDVG;
+       
+        if(!this.state.amountError && this.state.errorMessage === "") {
+            this.setState({ loading: true });
+            dispatcher.dispatch({
+                type: action,
+                content: {
+                    amount: amount.toString(),
+                    asset: this.state.dvgInfoObj[1],
+                }
+            })
         }
-
-        // Validate balance must not be 0.
-        if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
-            this.setState({
-                amountError: true,
-                errorMessage: "Invalid Amount"
-            });
-            return;
-        }
-
-        balance = (Math.floor(balance * 10000) / 10000).toFixed(4);
-
-        // Validate balance must be less than or equal to available balance displayed on UI
-        if (parseFloat(amount) > parseFloat(balance)) {
-            this.setState({
-                amountError: true,
-                errorMessage: "Exceed available balance"
-            });
-            return;
-        }
-
-        this.setState({ loading: true });
-
-        dispatcher.dispatch({
-            type: action,
-            content: {
-                amount: amount.toString(),
-                asset: this.state.dvgInfoObj[1],
-            }
-        })
     }
 
     onChange = (event) => {
+        let val = [];
+        val[event.target.id] = event.target.value;
+        this.verifyInput(val[event.target.id]);
         this.setState({
             amount: event.target.value,
             max: false,
-            amountError: false,
-            errorMessage: ""
         })
+    }
+
+    setInputErrorState = (message) => {
+        this.setState({ amountError: true, errorMessage: message });
+    }
+
+    verifyInput = (amount) => {
+        const { type } = this.state;
+
+        if(!validateDigit(amount) || validateAmountNotExist(amount)) {
+            this.setInputErrorState("Invalid amount");
+            return;
+        }
+
+        let balance = (type === "stake") ? this.state.dvgInfoObj[1].balance : this.state.dvgInfoObj[0].balance;
+        balance = (Math.floor(balance * 10000) / 10000).toFixed(4);
+
+        if(validateInputMoreThanBalance(amount, balance)){
+            this.setInputErrorState("Exceed available balance.");
+            return;
+        }
+
+        this.setState({ amountError: false, errorMessage: "" });
     }
 
     stakeTab = (type) => {
@@ -811,11 +825,33 @@ class StakeDvgVip extends Component {
         }
     }
 
-    depositReturned = () => {
+    depositReturned = (txHash) => {
+        const snackbarObj = { snackbarMessage: null, snackbarType: null };
+        this.setState(snackbarObj);
+        this.setState({ loading: false });
+        const that = this;
+        setTimeout(() => {
+          const snackbarObj = {
+            snackbarMessage: txHash,
+            snackbarType: "Transaction Success",
+          };
+          that.setState(snackbarObj);
+        });
         this.setState({ loading: false, amount: "" });
     };
 
     withdrawReturned = (txHash) => {
+        const snackbarObj = { snackbarMessage: null, snackbarType: null };
+        this.setState(snackbarObj);
+        this.setState({ loading: false });
+        const that = this;
+        setTimeout(() => {
+          const snackbarObj = {
+            snackbarMessage: txHash,
+            snackbarType: "Transaction Success",
+          };
+          that.setState(snackbarObj);
+        });
         this.setState({ loading: false, amount: "" });
     };
 
@@ -874,6 +910,74 @@ class StakeDvgVip extends Component {
         );
     }
 
+    renderMultiplierInfo = () => {
+        const { classes } = this.props;
+
+        const rewards = [
+            { range: ">0 - 1000", multiplier: "1.1"},
+            { range: ">1000 - 10000", multiplier: "1.2"},
+            { range: ">10000 - 50000", multiplier: "1.3"},
+            { range: ">50000 - 100000", multiplier: "1.4"},
+            { range: ">100000", multiplier: "1.5"},
+        ];
+        
+        const modalContent = (
+            <div className={classes.modalInfo}>
+                 <Typography variant={"h5"}>
+                    Stake more DVD tokens to receive more rewards with DAOmine:
+                </Typography>
+                <div>
+                    <ul>
+                        {
+                           rewards.map(r => {
+                               return <li>{r.range} DVD = {r.multiplier}x</li>
+                           }) 
+                        }
+                    </ul>
+                </div>
+            </div>
+        );
+
+        return <InfoModal content={modalContent} ></InfoModal>
+    }
+
+    renderAPRInfo = () => {
+        const { classes } = this.props;
+
+        const info = [
+            { amount: 1000, day: 30, receive: 33, apr: 40 },
+            { amount: 10000, day: 45, receive: 740, apr: 60 },
+            { amount: 100000, day: 60 , receive: 13151 , apr: 80 },
+        ];
+
+        const modalContent = (
+            <div className={classes.modalInfo}>
+                <Typography variant={"h5"}>
+                    Stake before 23th July 2021 14.00 UTC to receive early bird reward.
+                </Typography>
+
+                <Typography variant={"h5"} style={{marginTop: "5px"}}>
+                    <a href="https://daoventuresco.medium.com/" 
+                        target="_blank" 
+                        className={classes.seeMore}>
+                            See more here.
+                    </a>
+                </Typography>
+
+                <ul>
+                    {
+                        info.map(i => {
+                            return <li>
+                                Stake {i.amount} DVD for {i.day} days to receive {i.receive} vipDVD ({i.apr}% APR)
+                            </li>
+                        })
+                    }
+                </ul>
+            </div>
+        );
+        return <InfoModal content={modalContent} ></InfoModal>
+    }
+
     render() {
         const {
             classes
@@ -884,7 +988,6 @@ class StakeDvgVip extends Component {
             amount,
             type,
             dvgInfoObj,
-            isShowApr,
             aprInfo,
             amountError,
             max,
@@ -895,6 +998,9 @@ class StakeDvgVip extends Component {
 
         const dvgBalance = dvgInfoObj && dvgInfoObj[1].balance;
         const xdvgBalance = dvgInfoObj && dvgInfoObj[0].balance;
+
+        const xDVGObj =  dvgInfoObj[0];
+
         if (!account || !account.address) {
             return <ConnectWallet></ConnectWallet>
         } else {
@@ -904,12 +1010,12 @@ class StakeDvgVip extends Component {
                 <Grid>
                     <div className={classes.banner}>
                         <div className={classes.bannerLeft}>
-                            <div className={classes.text}>Buy DVG on DEX Liquidity Pools</div>
+                            <div className={classes.text}>Buy DVD on DEX Liquidity Pools</div>
                         </div>
                         <div className={classes.bannerRight}>
                             <div className={classes.toTrade}>
-                                <div className={classes.toTradeUniswap} onClick={() => this.goUrl('https://app.uniswap.org/#/swap?outputCurrency=0x51e00a95748dbd2a3f47bc5c3b3e7b3f0fea666c')}>Buy on Uniswap</div>
-                                <div className={classes.toTradePancakeswap} onClick={() => this.goUrl('https://exchange.pancakeswap.finance/#/swap?outputCurrency=0x51e00a95748dbd2a3f47bc5c3b3e7b3f0fea666c')}>Buy on Pancakeswap</div>
+                                <div className={classes.toTradeUniswap} onClick={() => this.goUrl('https://app.uniswap.org/#/swap?outputCurrency=0x77dce26c03a9b833fc2d7c31c22da4f42e9d9582')}>Buy on Uniswap</div>
+                                {/* <div className={classes.toTradePancakeswap} onClick={() => this.goUrl('https://exchange.pancakeswap.finance/#/swap?outputCurrency=0x51e00a95748dbd2a3f47bc5c3b3e7b3f0fea666c')}>Buy on Pancakeswap</div> */}
                             </div>
                         </div>
 
@@ -921,7 +1027,7 @@ class StakeDvgVip extends Component {
                         <div className={classes.contentLeftTitle}>
                             <div className={classes.titleText}>Stake Pool</div>
                             <div className={classes.titleRate}>
-                                1 vipDVG = {aprInfo.xDVGPrice && aprInfo.xDVGPrice.toFixed(2)}DVG
+                                1 vipDVD = {aprInfo.xDVGPrice && aprInfo.xDVGPrice.toFixed(2)}DVD
 
                             </div>
                         </div>
@@ -936,8 +1042,8 @@ class StakeDvgVip extends Component {
                                 {/** Available Amount in Wallet */}
                                 {
                                     (type === "stake")
-                                        ? this.renderAvailableAmount(dvgBalance, "DVG")
-                                        : this.renderAvailableAmount(xdvgBalance, "vipDVG")
+                                        ? this.renderAvailableAmount(dvgBalance, "DVD")
+                                        : this.renderAvailableAmount(xdvgBalance, "vipDVD")
                                 }
                             </div>
 
@@ -1012,24 +1118,12 @@ class StakeDvgVip extends Component {
 
                     <div className={classes.contentRight}>
                         <div className={classes.totalApr}>
+                             {/** APR */}
                             <div className={classes.total}>
-                                <img className={classes.smallImg} src={require("../../assets/stakeImg/lock-icon@2x.png")} alt="" />
-                                <div className={classes.totalText}>
-                                    <p className={classes.totalTextTile}>Total Value Locked</p>
-                                    <p className={classes.totalTextNum}>$ {Number(aprInfo.tvl).toFixed(2)}</p>
-                                </div>
-                            </div>
-                            <div className={classes.apr}>
                                 <img className={classes.smallImg} src={require("../../assets/stakeImg/apy-icon@2x.png")} alt="" />
                                 <div className={classes.aprText}>
                                     <p className={classes.totalTextTile}>APR
-                                        {/** TODO: Undo comment after DAOmine launched */}
-                                        {/* <svg className={classes.calculator} aria-hidden="true" onClick={()=>{this.showAprDetail()}}>
-                                            <use xlinkHref="#iconcalculator-line"></use>
-                                        </svg> */}
-                                        <svg aria-hidden="true" className={classes.calculator} aria-hidden="true" onClick={this.showAprDetail}>
-                                            <use xlinkHref="#iconinformation-day"></use>
-                                        </svg>
+                                    {this.renderAPRInfo()}
                                     </p>
                                     <p className={classes.totalTextNum}>
                                         {/* {aprInfo.apr && Number(aprInfo.apr).toFixed(2)} % */}
@@ -1038,13 +1132,40 @@ class StakeDvgVip extends Component {
                                     </p>
                                 </div>
                             </div>
+                            {/** Multiplier */}
+                            <div className={classes.apr}>
+                                <img className={classes.smallImg} src={require("../../assets/stakeImg/multiplier.png")} alt="" />
+                                <div className={classes.aprText}>
+                                    <p className={classes.totalTextTile}>Multiplier
+                                       {this.renderMultiplierInfo()}
+                                    </p>
+                                    <p className={classes.totalTextNum}>
+                                       {xDVGObj && (
+                                           <span>1.{(Number(xDVGObj._depositedAmount) <= 0 ) ? "0" : Number(xDVGObj.tier) + 1}x</span>
+                                       )}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
+                        
                         <div className={classes.myAssets}>
-                            <img className={classes.bigImg} src={require("../../assets/stakeImg/liquidity-icon@2x.png")} alt="" />
-                            <div className={classes.myAssetstext}>
-                                <p className={classes.myAssetsTitle}>My vipDVG</p>
-                                <p className={classes.myAssetsNum}>{xdvgBalance && Number(xdvgBalance).toFixed(2)}</p>
-                                <p className={classes.myAssetsRate}>≈ ${xdvgBalance && aprInfo.xDVGPrice && aprInfo.dvgPrice && Number(xdvgBalance * aprInfo.xDVGPrice * aprInfo.dvgPrice).toFixed(2)}</p>
+                            {/** Wallet Balance */}
+                            <div className={classes.total}>
+                                <img className={classes.smallImg} src={require("../../assets/stakeImg/liquidity-icon@2x.png")} alt="" />
+                                <div className={classes.totalText}>
+                                    <p className={classes.totalTextTile}>My vipDVD</p>
+                                    <p className={classes.totalTextNum}>{xdvgBalance && Number(xdvgBalance).toFixed(2)}</p>
+                                    <p className={classes.myAssetsRate}>≈ ${xdvgBalance && aprInfo.xDVGPrice && aprInfo.dvgPrice && Number(xdvgBalance * aprInfo.xDVGPrice * aprInfo.dvgPrice).toFixed(2)}</p>
+                                </div>
+                            </div>
+
+                            {/** Total Value Locked */}
+                            <div className={classes.apr}>
+                                <img className={classes.smallImg} src={require("../../assets/stakeImg/lock-icon@2x.png")} alt="" />
+                                <div className={classes.totalText}>
+                                    <p className={classes.totalTextTile}>Total Value Locked</p>
+                                    <p className={classes.totalTextNum}>$ {Number(aprInfo.tvl).toFixed(2)}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1091,46 +1212,6 @@ class StakeDvgVip extends Component {
                             </div>
                         </div>
                     </div> : null} */}
-                {isShowApr ?
-                    <div className={classes.share}>
-                        <div className={classes.shareBox}>
-                            <div className={classes.shareTitle}>
-                                <p className={classes.shareTitleText}></p>
-                                <svg className={classes.closeIcon} aria-hidden="true" onClick={() => { this.showAprDetail() }}>
-                                    <use xlinkHref="#iconclose"></use>
-                                </svg>
-                            </div>
-                            <div className={classes.shareContent}>
-                                <div className={classes.aprIntroduction}>
-                                    <h3>
-                                        Stake before 5th July 2021 14.00 UTC to receive early bird reward.
-                                    </h3>
-
-                                    <h4>
-                                        <a href="https://daoventuresco.medium.com/daoventures-launches-dvg-staking-program-daovip-dacde7986814" target="_blank" className={classes.seeMore}>See more here.</a>
-                                    </h4>
-
-                                    <ul>
-                                        <li>
-                                            <h3>
-                                                Stake 1000 DVG for 30 days to receive 33 DVG (40% APR)
-                                            </h3>
-                                        </li>
-                                        <li>
-                                            <h3>
-                                                Stake 10000 DVG for 45 days to receive 740 DVG (60% APR)
-                                            </h3>
-                                        </li>
-                                        <li>
-                                            <h3>
-                                                Stake 100000 DVG for 60 days to receive 13151 DVG (80% APR)
-                                            </h3>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div> : null}
                 {/** Snackbar */}
                 {this.state.snackbarMessage && this.renderSnackbar()}
             </div>
