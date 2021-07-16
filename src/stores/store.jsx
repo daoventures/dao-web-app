@@ -1344,7 +1344,7 @@ class Store {
           erc20ABI: config.dvdContractAbi,
           decimals: 18,
         },
-        swapAddress: '0xeFF29F60615413E42B4C0e1d74861DC003C216b2',
+        swapAddress: '0xC314f6527DAC85AcdfE222Cb410133aB6fc09009',
         swapContractAbi: config.upgradeContractAbi,
       }
     }
@@ -2745,7 +2745,6 @@ class Store {
   };
 
   _getERC20Balance = async (web3, asset, account, callback) => {
-    console.log('asset', asset);
     if (asset.erc20address === "Ethereum") {
       try {
         const eth_balance = web3.utils.fromWei(
@@ -7809,6 +7808,17 @@ class Store {
     );
   };
 
+  _getReimburseInfo = async (address) => {
+    try {
+      const url = config.statsProvider + "user/reimburse-address/" + address;
+      const reimburseInfo = await rp(url);
+      return JSON.parse(reimburseInfo).body;
+    } catch (e) {
+      console.log(e);
+      return store.getStore("universalGasPrice");
+    }
+  }
+
   upgradeToken = async (payload) => {
     const network = store.getStore("network");
     const account = store.getStore("account");
@@ -7822,114 +7832,118 @@ class Store {
       return null;
     }
 
-    const dvgContract = new web3.eth.Contract(
-      asset.dvg.erc20ABI,
-      asset.dvg.erc20address
-    );
-
-    const dvdContract = new web3.eth.Contract(
-      asset.dvd.erc20ABI,
-      asset.dvd.erc20address
-    );
-
-    const dvgAllowance = await dvgContract.methods
-      .allowance(account.address, asset.swapAddress)
-      .call({ from: account.address });
-    const dvgActualAllowance = dvgAllowance / 10 ** asset.dvg.decimal; 
-
-    const dvdAllowance = await dvdContract.methods
-      .allowance(account.address, asset.swapAddress)
-      .call({ from: account.address });
-    const dvdActualAllowance = dvdAllowance / 10 ** asset.dvd.decimal; 
-
-    // Approval
-    let dvgApprovalError;
-    let dvdApprovalError;
-    if (parseFloat(upgradeInfo.balance) > parseFloat(dvgActualAllowance)) {
-      await this._checkLpTokenContractApproval(
-        account,
-        dvgContract,
-        asset.swapAddress,
-        0,
-        (err, txnHash, approvalResult) => {
-          if (err) {
-            console.log(err);
-            dvgApprovalError = err;
-            return emitter.emit(ERROR, err);
-          }
-          if (txnHash) {
-            return emitter.emit(APPROVE_TRANSACTING, txnHash);
-          }
-          if (approvalResult) {
-            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
-          }
-        }
+    const reimburse = await this._getReimburseInfo(account.address.toLowerCase());
+    if (reimburse == null) {
+      return emitter.emit(ERROR, 'You have not entitled to get reimburse DVG tokens.');
+    } else {
+      const dvgContract = new web3.eth.Contract(
+        asset.dvg.erc20ABI,
+        asset.dvg.erc20address
       );
-    }
-
-    if (parseFloat(upgradeInfo.balance) > parseFloat(dvdActualAllowance)) {
-      await this._checkLpTokenContractApproval(
-        account,
-        dvdContract,
-        asset.swapAddress,
-        0,
-        (err, txnHash, approvalResult) => {
-          if (err) {
-            console.log(err);
-            dvdApprovalError = err;
-            return emitter.emit(ERROR, err);
-          }
-          if (txnHash) {
-            return emitter.emit(APPROVE_TRANSACTING, txnHash);
-          }
-          if (approvalResult) {
-            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
-          }
-        }
+  
+      const dvdContract = new web3.eth.Contract(
+        asset.dvd.erc20ABI,
+        asset.dvd.erc20address
       );
-    }
+  
+      const dvgAllowance = await dvgContract.methods
+        .allowance(account.address, asset.swapAddress)
+        .call({ from: account.address });
+      const dvgActualAllowance = dvgAllowance / 10 ** asset.dvg.decimals; 
+  
+      const dvdAllowance = await dvdContract.methods
+        .allowance(account.address, asset.swapAddress)
+        .call({ from: account.address });
+      const dvdActualAllowance = dvdAllowance / 10 ** asset.dvd.decimals; 
+  
+      // Approval
+      let dvgApprovalError;
+      let dvdApprovalError;
 
-    if (!dvgApprovalError && !dvdApprovalError) {
-      // TODO Get backend database
-
-      const swapContract = new web3.eth.Contract(
-        asset.swapContractAbi,
-        asset.swapAddress
-      );
-
-      await swapContract.methods.upgradeToken(
-        upgradeInfo.balance, 
-        upgradeInfo.balance, 
-        ""
-      ).send({
-        from: account.address,
-        gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-      })
-      .on("transactionHash", function (txnHash) {
-        return emitter.emit(UPGRADE_TOKEN_SUCCESS, txnHash);
-      })
-      .on("receipt", function (receipt) {
-        return emitter.emit(
-          UPGRADE_TOKEN_RETURN,
-          receipt.transactionHash
+      if (parseFloat(upgradeInfo.balance) > parseFloat(dvgActualAllowance)) {
+        await this._checkLpTokenContractApproval(
+          account,
+          dvgContract,
+          asset.swapAddress,
+          0,
+          (err, txnHash, approvalResult) => {
+            if (err) {
+              console.log(err);
+              dvgApprovalError = err;
+              return emitter.emit(ERROR, err);
+            }
+            if (txnHash) {
+              return emitter.emit(APPROVE_TRANSACTING, txnHash);
+            }
+            if (approvalResult) {
+              emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
+            }
+          }
         );
-      })
-      .on("error", function (error) {
-        if (!error.toString().includes("-32601")) {
-          if (error.message) {
-            return emitter.emit(ERROR, error.message);
+      }
+  
+      if (parseFloat(upgradeInfo.balance) > parseFloat(dvdActualAllowance)) {
+        await this._checkLpTokenContractApproval(
+          account,
+          dvdContract,
+          asset.swapAddress,
+          0,
+          (err, txnHash, approvalResult) => {
+            if (err) {
+              console.log(err);
+              dvdApprovalError = err;
+              return emitter.emit(ERROR, err);
+            }
+            if (txnHash) {
+              return emitter.emit(APPROVE_TRANSACTING, txnHash);
+            }
+            if (approvalResult) {
+              emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
+            }
           }
-          return emitter.emit(ERROR, error);
-        }
-      })
-      .catch((error) => {
-        if (!error.toString().includes("-32601")) {
-          if (error.message) {
-            return emitter.emit(ERROR, error.message);
+        );
+      }
+  
+      if (!dvgApprovalError && !dvdApprovalError) {
+        const swapContract = new web3.eth.Contract(
+          asset.swapContractAbi,
+          asset.swapAddress
+        );
+  
+        await swapContract.methods.upgradeDVG(
+          upgradeInfo.balance, 
+          reimburse.amount, 
+          reimburse.signatureMessage,
+        ).send({
+          from: account.address,
+          gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+        })
+        .on("transactionHash", function (txnHash) {
+          return emitter.emit(UPGRADE_TOKEN_RETURN, txnHash);
+        })
+        .on("receipt", function (receipt) {
+          return emitter.emit(
+            UPGRADE_TOKEN_SUCCESS,
+            receipt.transactionHash
+          );
+        })
+        .on("error", function (error) {
+          if (!error.toString().includes("-32601")) {
+            if (error.message) {
+              return emitter.emit(ERROR, error.message);
+            }
+            return emitter.emit(ERROR, error);
           }
-          return emitter.emit(ERROR, error);
-        }
-      });
+        })
+        .catch((error) => {
+          if (!error.toString().includes("-32601")) {
+            if (error.message) {
+              return emitter.emit(ERROR, error.message);
+            }
+            return emitter.emit(ERROR, error);
+          }
+        });
+      } 
     }
   };
 }

@@ -9,12 +9,15 @@ import {
 import {
     CONNECTION_CONNECTED,
     CHANGE_NETWORK,
-    WITHDRAW_DVG_RETURNED,
     DEPOSIT_DVG_RETURNED,
     ERROR,
     GET_UPGRADE_TOKEN,
     GET_UPGRADE_TOKEN_RETURN,
     UPGRADE_TOKEN,
+    UPGRADE_TOKEN_SUCCESS,
+    UPGRADE_TOKEN_RETURN,
+    APPROVE_TRANSACTING,
+    APPROVE_COMPLETED,
 } from '../../constants'
 import Store from "../../stores";
 import ConnectWallet from "../common/connectWallet/connectWallet";
@@ -439,18 +442,22 @@ class UpgradeToken extends Component {
         emitter.on(CHANGE_NETWORK, this.networkChanged);
         emitter.on(CONNECTION_CONNECTED, this.connectionConnected);
         emitter.on(GET_UPGRADE_TOKEN_RETURN, this.getBalances)
-        emitter.on(WITHDRAW_DVG_RETURNED, this.withdrawReturned)
-        emitter.on(DEPOSIT_DVG_RETURNED, this.depositReturned)
+        emitter.on(UPGRADE_TOKEN_SUCCESS, this.upgradeReturned)
+        emitter.on(UPGRADE_TOKEN_RETURN, this.showHash)
         emitter.on(ERROR, this.errorReturned)
+        emitter.on(APPROVE_TRANSACTING, this.showHashApproval);
+        emitter.on(APPROVE_COMPLETED, this.onApprovalCompleted);
     }
 
     componentWillUnmount() {
         emitter.removeListener(CHANGE_NETWORK, this.networkChanged);
         emitter.removeListener(CONNECTION_CONNECTED, this.connectionConnected);
         emitter.removeListener(GET_UPGRADE_TOKEN_RETURN, this.getBalances)
-        emitter.removeListener(WITHDRAW_DVG_RETURNED, this.withdrawReturned)
-        emitter.removeListener(DEPOSIT_DVG_RETURNED, this.depositReturned)
+        emitter.removeListener(UPGRADE_TOKEN_SUCCESS, this.upgradeReturned)
+        emitter.removeListener(UPGRADE_TOKEN_RETURN, this.showHash)
         emitter.removeListener(ERROR, this.errorReturned)
+        emitter.removeListener(APPROVE_TRANSACTING, this.showHashApproval)
+        emitter.removeListener(APPROVE_COMPLETED, this.onApprovalCompleted)
     }
 
     errorReturned = (error) => {
@@ -483,6 +490,34 @@ class UpgradeToken extends Component {
         }
     };
 
+    showHashApproval = (txHash) => {
+        const snackbarObj = { snackbarMessage: null, snackbarType: null };
+        this.setState(snackbarObj);
+        this.setState({ loading: false });
+        const that = this;
+        setTimeout(() => {
+          const snackbarObj = {
+            snackbarMessage: "Approving...",
+            snackbarType: "Hash",
+          };
+          that.setState(snackbarObj);
+        });
+    };
+
+    onApprovalCompleted = (txHash) => {
+        const snackbarObj = { snackbarMessage: null, snackbarType: null };
+        this.setState(snackbarObj);
+        this.setState({ loading: false });
+        const that = this;
+        setTimeout(() => {
+          const snackbarObj = {
+            snackbarMessage: "Approved.",
+            snackbarType: "Transaction Success",
+          };
+          that.setState(snackbarObj);
+        });
+    };
+    
     getBalances = (asset) => {
         this.setState({
             loading: false,
@@ -499,21 +534,40 @@ class UpgradeToken extends Component {
         })
     }
 
-    onChange = (event) => {
-        this.setState({
-            amount: event.target.value,
-            max: false,
-            amountError: false,
-            errorMessage: ""
-        })
-    }
-
     depositReturned = () => {
-        this.setState({ loading: false, amount: "" });
+        this.setState({ loading: false, amount: "", });
     };
 
-    withdrawReturned = (txHash) => {
-        this.setState({ loading: false, amount: "" });
+    showHash = (txHash) => {
+        this.setState({
+            snackbarMessage: null,
+            snackbarType: null,
+        });
+
+        setTimeout(() => {
+            this.setState({ 
+                loading: false, 
+                snackbarMessage: txHash, 
+                snackbarType: 'Hash' 
+            });
+        });
+    };
+
+    upgradeReturned = (txHash) => {
+        this.setState({
+            snackbarMessage: null,
+            snackbarType: null,
+        });
+
+        setTimeout(() => {
+            this.setState({ 
+                loading: false, 
+                snackbarMessage: txHash, 
+                snackbarType: 'Transaction Success' 
+            });
+        })
+        
+        dispatcher.dispatch({ type: GET_UPGRADE_TOKEN });
     };
 
     goUrl = (url) => {
