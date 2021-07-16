@@ -618,8 +618,8 @@ class StakeDvgVip extends Component {
             amountError: false,
             errorMessage: '',
             network: 0,
-            disableStake: true,
-            disableUnstake: true,
+            disableStake: false,
+            disableUnstake: false,
         }
         if (account && account.address) {
             dispatcher.dispatch({ type: GET_DVG_INFO })

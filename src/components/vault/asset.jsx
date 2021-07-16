@@ -502,6 +502,7 @@ const styles = (theme) => ({
     marginTop: "3px",
   },
   happyHourMessage: {
+    fontSize: "12px",
     align: "left",
     color: theme.themeColors.formHappyHour,
     marginTop: "3px",
@@ -661,7 +662,7 @@ class Asset extends Component {
     ) {
       this.setState({
         amountAboveThreshold: payload.body.amountAboveThreshold,
-        // errorMessage: payload.body.message,
+        // happyHourWarning: payload.body.message,
       });
     }
   };
@@ -1506,7 +1507,7 @@ class Asset extends Component {
                             : "0.0000") +
                             " " +
                             asset.id}{" "}
-                          {asset.strategyBalance  && (
+                          {asset.strategyBalance && (
                             <span>
                               (
                               {asset.depositedSharesInUSD
@@ -2079,10 +2080,76 @@ class Asset extends Component {
   onChangeDeposit = (event) => {
     let val = [];
     val[event.target.id] = event.target.value;
+    console.log("🚀 | Asset | val[event.target.id]", val[event.target.id]);
+
     this.verifyInput(val[event.target.id]);
-    if(event.target.id === "amount") { 
-      this.setState({ amount: val[event.target.id] , percent: 0 });
-    } 
+    if (event.target.id === "amount") {
+      this.setState({ amount: val[event.target.id], percent: 0 });
+    }
+  };
+
+  verifyInput = (amount) => {
+    console.log("🚀 | Asset | amount", amount);
+    // const { amount } = this.state;
+    const { asset, startLoading, happyHour, happyHourThreshold } = this.props;
+
+    let assetBalance = !this.isUsdVault(asset)
+      ? asset.balance
+      : asset.balances[this.state.tokenIndex];
+
+    assetBalance = (Math.floor(assetBalance * 10000) / 10000).toFixed(4);
+
+    const digitRegex = /^[0-9]\d*(\.\d+)?$/;
+
+    if (!digitRegex.test(amount)) {
+      this.setState({ amountError: true, errorMessage: "Invalid amount" });
+      return;
+    }
+
+    if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+      this.setState({ amountError: true, errorMessage: "Invalid amount" });
+      return;
+    }
+
+    if (parseFloat(amount) > assetBalance) {
+      this.setState({
+        amountError: true,
+        errorMessage: "Exceed available balance",
+      });
+      return;
+    }
+
+    if (
+      parseFloat(amount) <= parseFloat("0.0") ||
+      parseFloat(amount) > assetBalance
+    ) {
+      this.setState({ amountError: true });
+      // return false;
+    } else {
+      this.setState({ amountError: false, errorMessage: "" });
+    }
+
+    if (asset.happyHourEnabled === true && happyHour === true) {
+      if (parseFloat(amount) < parseFloat(happyHourThreshold)) {
+        this.setState({
+          // amountError: true,
+          happyHourWarning: `Below required deposit ${happyHourThreshold} USD for Happy Hour. Gas fee will be required.`,
+          happyHourMessage: "",
+        });
+      } else {
+        this.setState({
+          // amountError: true,
+          happyHourWarning: "",
+          happyHourMessage: "Gas fee is on us!",
+        });
+      }
+    }
+  };
+
+  inputKeyDown = (event) => {
+    if (event.which === 13) {
+      this.onInvest();
+    }
   };
 
   validateDigit = (amount) => {

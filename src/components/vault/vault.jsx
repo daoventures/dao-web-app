@@ -1358,7 +1358,7 @@ class Vault extends Component {
   };
 
   renderRiskLabel = (asset) => {
-    return <RiskLevelLabel risk={asset.risk}></RiskLevelLabel>
+    return <RiskLevelLabel risk={asset.risk}></RiskLevelLabel>;
   };
 
   renderPopularIcon = (asset) => {

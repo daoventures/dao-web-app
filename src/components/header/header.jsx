@@ -13,6 +13,7 @@ import {
   HEADER_TITLE_INVEST,
   HEADER_TITLE_PORTFOLIO,
   HEADER_TITLE_SWAP,
+  HEADER_TITLE_UPGRADE,
 } from "../../constants/page-constant";
 import { IconButton, Typography } from "@material-ui/core";
 import React, { Component } from "react";
@@ -243,6 +244,7 @@ class Header extends Component {
         "/stake": HEADER_TITLE_DAOVIP,
         "/daomine": HEADER_TITLE_DAOMINE,
         "/swap": HEADER_TITLE_SWAP,
+        "/upgrade": HEADER_TITLE_UPGRADE,
       },
       currentTheme: store.getStore("currentTheme"),
       currentNetwork: 0,
@@ -507,8 +509,13 @@ class Header extends Component {
           {!hideNav && <ToggleTheme></ToggleTheme>}
           {this.renderHappyHourTimer()}
         </div>
-        
-        { modalOpen && this.renderModal()}
+        {hideNav ? (
+          <div className={classes.pathname}>
+            {this.state.menuObj[this.props.history.location.pathname]}
+          </div>
+        ) : null}
+
+        {modalOpen && this.renderModal()}
       </div>
     );
   }
