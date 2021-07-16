@@ -1330,7 +1330,7 @@ class Store {
           erc20ABI: config.dvdContractAbi,
           decimals: 18,
         },
-        swapAddress: '',
+        swapAddress: '0x61FfA596ABBbA47fE6014bDa91F894B2Dae6dE05',
         swapContractAbi: config.upgradeContractAbi,
       },
       42: {
