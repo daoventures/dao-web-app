@@ -541,6 +541,7 @@ const styles = theme => ({
         textDecoration: "underline",
         cursor: "pointer",
         color: theme.themeColors.textT,
+        marginTop: "2px",
     },
     depositScaleContainer: {
         display: "flex",
@@ -952,11 +953,11 @@ class StakeDvgVip extends Component {
         const modalContent = (
             <div className={classes.modalInfo}>
                 <Typography variant={"h5"}>
-                    Stake before 5th July 2021 14.00 UTC to receive early bird reward.
+                    Stake before 23th July 2021 14.00 UTC to receive early bird reward.
                 </Typography>
 
-                <Typography variant={"h5"}>
-                    <a href="https://daoventuresco.medium.com/daoventures-launches-dvg-staking-program-daovip-dacde7986814" 
+                <Typography variant={"h5"} style={{marginTop: "5px"}}>
+                    <a href="https://daoventuresco.medium.com/" 
                         target="_blank" 
                         className={classes.seeMore}>
                             See more here.
@@ -967,7 +968,7 @@ class StakeDvgVip extends Component {
                     {
                         info.map(i => {
                             return <li>
-                                Stake {i.amount} DVG for {i.day} days to receive {i.receive} DVG ({i.apr}% APR)
+                                Stake {i.amount} DVD for {i.day} days to receive {i.receive} vipDVD ({i.apr}% APR)
                             </li>
                         })
                     }
