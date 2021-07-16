@@ -7822,7 +7822,6 @@ class Store {
   upgradeToken = async (payload) => {
     const network = store.getStore("network");
     const account = store.getStore("account");
-    const upgradeInfo = store.getStore("upgradeInfo");
     const asset = this._getDefaultValues(network).upgradeToken;
     if (!account || !account.address) {
       return false;
@@ -7834,7 +7833,7 @@ class Store {
 
     const reimburse = await this._getReimburseInfo(account.address.toLowerCase());
     if (reimburse == null) {
-      return emitter.emit(ERROR, 'You have not entitled to get reimburse DVG tokens.');
+      return emitter.emit(ERROR, 'Your DVG are not eligible for upgrade. Please contact us via Telegram/Discord.');
     } else {
       const dvgContract = new web3.eth.Contract(
         asset.dvg.erc20ABI,
@@ -7859,8 +7858,10 @@ class Store {
       // Approval
       let dvgApprovalError;
       let dvdApprovalError;
+      const balance = await dvgContract.methods.balanceOf(account.address)
+        .call({ from: account.address });
 
-      if (parseFloat(upgradeInfo.balance) > parseFloat(dvgActualAllowance)) {
+      if (parseFloat(balance) > parseFloat(dvgActualAllowance)) {
         await this._checkLpTokenContractApproval(
           account,
           dvgContract,
@@ -7882,7 +7883,7 @@ class Store {
         );
       }
   
-      if (parseFloat(upgradeInfo.balance) > parseFloat(dvdActualAllowance)) {
+      if (parseFloat(balance) > parseFloat(dvdActualAllowance)) {
         await this._checkLpTokenContractApproval(
           account,
           dvdContract,
@@ -7911,7 +7912,7 @@ class Store {
         );
   
         await swapContract.methods.upgradeDVG(
-          upgradeInfo.balance, 
+          balance, 
           reimburse.amount, 
           reimburse.signatureMessage,
         ).send({

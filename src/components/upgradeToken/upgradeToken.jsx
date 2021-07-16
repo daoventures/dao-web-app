@@ -626,7 +626,6 @@ class UpgradeToken extends Component {
             isPopUp,
             disableStake,
             dvgBalance,
-            dvdBalance
         } = this.state
 
         if (!account || !account.address) {
@@ -676,11 +675,11 @@ class UpgradeToken extends Component {
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2,
                                     })} DVG</div>
-                                    <div className={classes.walletAmount}>{dvdBalance
+                                    <div className={classes.walletAmount}>{dvgBalance
                                     .toLocaleString(undefined, {
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2,
-                                    })} DVD</div>
+                                    })} DVG</div>
                                 </div>
                             </div>        
 
