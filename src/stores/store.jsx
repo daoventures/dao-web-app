@@ -1352,6 +1352,17 @@ class Store {
     const vaultAssets = network ? vaultAssetsObj[network] : vaultAssetsObj[1];
     const upgradeToken = network ? upgradeTokenObj[network] : upgradeTokenObj[1];
 
+    let xDVG, dvg, dvd;
+    if(network === 1) {
+      xDVG = config.xdvgMainnetContract;
+      dvg = config.dvgTokenMainnetContract;
+      dvd = config.dvdTokenMainnetContract;
+    } else if (network === 42) {
+      xDVG = config.xdvgTestContract;
+      dvg = config.dvgTokenTestContract;
+      dvd = config.dvdTokenTestContract;
+    }
+
     return {
       assets: [
         {
@@ -1962,16 +1973,25 @@ class Store {
           name: "VIPDVG",
           symbol: "xDVG",
           decimals: 18,
-          erc20address: '0xD6Ce913C3e81b5e67a6b94d705d9E7cDdf073A7e',
+          erc20address: xDVG,
           abi: config.xDvgAbi,
           balance: 1,
+        },
+        {
+          id: "DVD", 
+          name: "DVDToken",
+          symbol: "DVD",
+          decimals: 18,
+          erc20address: dvd,
+          abi: config.dvdTokenContractABI,
+          balance: 0,
         },
         {
           id: "DVG",
           name: "DVGToken",
           symbol: "DVG",
           decimals: 18,
-          erc20address: '0x51e00a95748DBd2a3F47bC5c3b3E7B3F0fea666c',
+          erc20address: dvg,
           abi: config.DvgAbi,
           balance: 0,
         },
@@ -7508,6 +7528,7 @@ class Store {
     if (!web3) {
       return null;
     }
+
     async.map(
       assets,
       (asset, callback) => {
@@ -7531,6 +7552,7 @@ class Store {
           console.log(err);
           return emitter.emit(ERROR, err);
         }
+
         store.setStore({ dvg: assets });
         return emitter.emit(GET_DVG_BALANCE_SUCCESS, assets);
       }
@@ -7656,7 +7678,7 @@ class Store {
 
   _callDvgApproval = async (account, amount, callback) => {
     const web3 = new Web3(store.getStore("web3context").library.provider);
-    let asset = store.getStore("dvg")[1]; //dvg
+    let asset = store.getStore("dvg")[1]; //dvd
     let xdvg = store.getStore("dvg")[0]; //xdvg
     let dvgContract = new web3.eth.Contract(asset.abi, asset.erc20address);
     dvgContract.methods
@@ -7683,7 +7705,7 @@ class Store {
   withdrawXdvg = async (payload) => {
     const account = store.getStore("account");
     const { asset, amount, max } = payload.content;
-    //asset 是dvg
+    //asset 是dvd
     this._callWithdrawXdvg(asset, amount, max, (err, withdrawResult) => {
       if (err) {
         return emitter.emit(ERROR, err);
