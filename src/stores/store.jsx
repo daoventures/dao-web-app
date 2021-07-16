@@ -90,6 +90,11 @@ import {
   EMERGENCY_WITHDRAW_DAOMINE,
   EMERGENCY_WITHDRAW_DAOMINE_RETURNED,
   EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,
+  GET_UPGRADE_TOKEN,
+  GET_UPGRADE_TOKEN_RETURN,
+  UPGRADE_TOKEN,
+  UPGRADE_TOKEN_SUCCESS,
+  UPGRADE_TOKEN_RETURN,
 } from "../constants";
 import {
   Biconomy,
@@ -413,8 +418,10 @@ class Store {
             break;
           case WITHDRAW_DAOMINE:
             this.withdrawDAOmine(payload);
+            break;
           case EMERGENCY_WITHDRAW_DAOMINE:
             this.emergencyWithdrawDAOmine(payload);
+            break;
           case GET_DVG_INFO:
             this.getDvgbalance(payload);
             break;
@@ -432,6 +439,12 @@ class Store {
             break;
           case GET_HAPPY_HOUR_STATUS:
             this.eventVerify(payload);
+            break;
+          case GET_UPGRADE_TOKEN:
+            this.getUpgradeToken();
+            break;
+          case UPGRADE_TOKEN:
+            this.upgradeToken();
             break;
           default: {
           }
@@ -1305,7 +1318,39 @@ class Store {
       ],
     };
 
+    const upgradeTokenObj = {
+      1: {
+        dvg: {
+          erc20address: '0x51e00a95748DBd2a3F47bC5c3b3E7B3F0fea666c',
+          erc20ABI: config.DvgAbi,
+          decimals: 18,
+        },
+        dvd: {
+          erc20address: '',
+          erc20ABI: config.dvdContractAbi,
+          decimals: 18,
+        },
+        swapAddress: '',
+        swapContractAbi: config.upgradeContractAbi,
+      },
+      42: {
+        dvg: {
+          erc20address: '0xea9726eFc9831EF0499fD4Db4Ab143F15a797673',
+          erc20ABI: config.DvgAbi,
+          decimals: 18,
+        },
+        dvd: {
+          erc20address: '0x6639c554A299D58284e36663f609a7d94526fEC0',
+          erc20ABI: config.dvdContractAbi,
+          decimals: 18,
+        },
+        swapAddress: '0xeFF29F60615413E42B4C0e1d74861DC003C216b2',
+        swapContractAbi: config.upgradeContractAbi,
+      }
+    }
+
     const vaultAssets = network ? vaultAssetsObj[network] : vaultAssetsObj[1];
+    const upgradeToken = network ? upgradeTokenObj[network] : upgradeTokenObj[1];
 
     return {
       assets: [
@@ -1931,6 +1976,7 @@ class Store {
           balance: 0,
         },
       ],
+      upgradeToken,
     };
   };
 
@@ -2699,6 +2745,7 @@ class Store {
   };
 
   _getERC20Balance = async (web3, asset, account, callback) => {
+    console.log('asset', asset);
     if (asset.erc20address === "Ethereum") {
       try {
         const eth_balance = web3.utils.fromWei(
@@ -7725,6 +7772,165 @@ class Store {
       asset.strategyType === "daoFaang"
       ? true
       : false;
+  };
+
+  getUpgradeToken = async () => {
+    const network = store.getStore("network");
+    const account = store.getStore("account");
+    const asset = this._getDefaultValues(network).upgradeToken;
+    if (!account || !account.address) {
+      return false;
+    }
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      return null;
+    }
+    async.parallel(
+      [
+        (callbackInner) => {
+          this._getERC20Balance(web3, asset.dvg, account, callbackInner);
+        },
+        (callbackInner) => {
+          this._getERC20Balance(web3, asset.dvd, account, callbackInner);
+        },
+      ],
+      (err, data) => {
+        if (err) {
+          console.log(err);
+          return emitter.emit(ERROR, err);
+        }
+        asset.balance = data[0];
+        asset.upgradeBalance = data[1];
+        store.setStore({
+          upgradeInfo: asset,
+        });
+        return emitter.emit(GET_UPGRADE_TOKEN_RETURN, asset);
+      }
+    );
+  };
+
+  upgradeToken = async (payload) => {
+    const network = store.getStore("network");
+    const account = store.getStore("account");
+    const upgradeInfo = store.getStore("upgradeInfo");
+    const asset = this._getDefaultValues(network).upgradeToken;
+    if (!account || !account.address) {
+      return false;
+    }
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      return null;
+    }
+
+    const dvgContract = new web3.eth.Contract(
+      asset.dvg.erc20ABI,
+      asset.dvg.erc20address
+    );
+
+    const dvdContract = new web3.eth.Contract(
+      asset.dvd.erc20ABI,
+      asset.dvd.erc20address
+    );
+
+    const dvgAllowance = await dvgContract.methods
+      .allowance(account.address, asset.swapAddress)
+      .call({ from: account.address });
+    const dvgActualAllowance = dvgAllowance / 10 ** asset.dvg.decimal; 
+
+    const dvdAllowance = await dvdContract.methods
+      .allowance(account.address, asset.swapAddress)
+      .call({ from: account.address });
+    const dvdActualAllowance = dvdAllowance / 10 ** asset.dvd.decimal; 
+
+    // Approval
+    let dvgApprovalError;
+    let dvdApprovalError;
+    if (parseFloat(upgradeInfo.balance) > parseFloat(dvgActualAllowance)) {
+      await this._checkLpTokenContractApproval(
+        account,
+        dvgContract,
+        asset.swapAddress,
+        0,
+        (err, txnHash, approvalResult) => {
+          if (err) {
+            console.log(err);
+            dvgApprovalError = err;
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(APPROVE_TRANSACTING, txnHash);
+          }
+          if (approvalResult) {
+            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
+          }
+        }
+      );
+    }
+
+    if (parseFloat(upgradeInfo.balance) > parseFloat(dvdActualAllowance)) {
+      await this._checkLpTokenContractApproval(
+        account,
+        dvdContract,
+        asset.swapAddress,
+        0,
+        (err, txnHash, approvalResult) => {
+          if (err) {
+            console.log(err);
+            dvdApprovalError = err;
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(APPROVE_TRANSACTING, txnHash);
+          }
+          if (approvalResult) {
+            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
+          }
+        }
+      );
+    }
+
+    if (!dvgApprovalError && !dvdApprovalError) {
+      // TODO Get backend database
+
+      const swapContract = new web3.eth.Contract(
+        asset.swapContractAbi,
+        asset.swapAddress
+      );
+
+      await swapContract.methods.upgradeToken(
+        upgradeInfo.balance, 
+        upgradeInfo.balance, 
+        ""
+      ).send({
+        from: account.address,
+        gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+      })
+      .on("transactionHash", function (txnHash) {
+        return emitter.emit(UPGRADE_TOKEN_SUCCESS, txnHash);
+      })
+      .on("receipt", function (receipt) {
+        return emitter.emit(
+          UPGRADE_TOKEN_RETURN,
+          receipt.transactionHash
+        );
+      })
+      .on("error", function (error) {
+        if (!error.toString().includes("-32601")) {
+          if (error.message) {
+            return emitter.emit(ERROR, error.message);
+          }
+          return emitter.emit(ERROR, error);
+        }
+      })
+      .catch((error) => {
+        if (!error.toString().includes("-32601")) {
+          if (error.message) {
+            return emitter.emit(ERROR, error.message);
+          }
+          return emitter.emit(ERROR, error);
+        }
+      });
+    }
   };
 }
 

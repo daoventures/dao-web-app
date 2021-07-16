@@ -29,6 +29,7 @@ import StakeDvgVip from './components/stake/stakeDvgVip';
 import Stake from './components/stake';
 
 import Swap from './components/swap';
+import UpgradeToken from './components/upgradeToken/upgradeToken';
 
 import { injected } from "./stores/connectors";
 import { initOnboard } from "./walletsServices.js";
@@ -222,6 +223,13 @@ class App extends Component {
                 <SideDrawer />
                 <MainContainer />
                 <Stake />
+              </Route>
+
+              <Route path="/upgrade">
+                <Header />
+                <SideDrawer />
+                <MainContainer />
+                <UpgradeToken />
               </Route>
 
               {/* <Route path="/stake">
