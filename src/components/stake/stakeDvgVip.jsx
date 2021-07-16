@@ -1014,7 +1014,7 @@ class StakeDvgVip extends Component {
                         </div>
                         <div className={classes.bannerRight}>
                             <div className={classes.toTrade}>
-                                <div className={classes.toTradeUniswap} onClick={() => this.goUrl('https://app.uniswap.org/#/add/v2/ETH/0x77dcE26c03a9B833fc2D7C31C22Da4f42e9d9582')}>Buy on Uniswap</div>
+                                <div className={classes.toTradeUniswap} onClick={() => this.goUrl('https://app.uniswap.org/#/swap?outputCurrency=0x77dce26c03a9b833fc2d7c31c22da4f42e9d9582')}>Buy on Uniswap</div>
                                 {/* <div className={classes.toTradePancakeswap} onClick={() => this.goUrl('https://exchange.pancakeswap.finance/#/swap?outputCurrency=0x51e00a95748dbd2a3f47bc5c3b3e7b3f0fea666c')}>Buy on Pancakeswap</div> */}
                             </div>
                         </div>
