@@ -1326,7 +1326,7 @@ class Store {
           decimals: 18,
         },
         dvd: {
-          erc20address: '',
+          erc20address: '0x77dcE26c03a9B833fc2D7C31C22Da4f42e9d9582',
           erc20ABI: config.dvdContractAbi,
           decimals: 18,
         },
