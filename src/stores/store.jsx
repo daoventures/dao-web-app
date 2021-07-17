@@ -7576,10 +7576,11 @@ class Store {
     //判断dvg质押金额是否大于dvg授权数量
     let xdvg;
     if(asset.id === "xDVD"){
-      let xdvg = this.getStore("dvg")[0];
+      xdvg = this.getStore("dvg")[0]; // xDVD
+    } else {
+      xdvg = this.getStore("dvg")[2]; // xDVG
     }
-    console.log("get store", this.getStore("dvg"));
-    
+   
     //创建xdvg合约对象
     const xDVGCOntract = new web3.eth.Contract(xdvg.abi, xdvg.erc20address);
     //查询xdvg授权数量
@@ -7702,7 +7703,7 @@ class Store {
   withdrawXdvg = async (payload) => {
     const account = store.getStore("account");
     const { asset, amount, max } = payload.content;
-    //asset 是dvd
+
     this._callWithdrawXdvg(asset, amount, max, (err, txnHash, withdrawResult) => {
       if (err) {
         return emitter.emit(ERROR, err);
@@ -7724,9 +7725,9 @@ class Store {
     if (!web3) {
       return null;
     }
-    let xdvg = this.getStore("dvg")[0];
+    
     //创建xdvg合约对象
-    const xDVGCOntract = new web3.eth.Contract(xdvg.abi, xdvg.erc20address);
+    const xDVGCOntract = new web3.eth.Contract(asset.abi, asset.erc20address);
     let _amount = "";
     if (max) {
       _amount = await xDVGCOntract.methods

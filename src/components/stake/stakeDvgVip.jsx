@@ -345,9 +345,6 @@ const styles = theme => ({
         }
 
     },
-    totalText: {
-
-    },
     apr: {
         display: 'flex',
         background: theme.themeColors.modelBack,
@@ -405,17 +402,17 @@ const styles = theme => ({
         }
     },
     myAssets: {
-        // padding: '49px 40px',
-        // display: 'flex',
-        // marginTop: '21px',
-        // background: theme.themeColors.modelBack,
-        // // padding:'0 19px',
-        // // boxShadow: '0px 2px 10px 0px rgba(23, 18, 43, 0.85)',
-        // border: ' 1px solid #7367F7',
-        // alignItems: 'center'
-        display: "flex",
-        justifyContent: "space-between",
-        marginTop: "10px",
+        padding: '49px 40px',
+        display: 'flex',
+        marginTop: '21px',
+        background: theme.themeColors.modelBack,
+        // padding:'0 19px',
+        // boxShadow: '0px 2px 10px 0px rgba(23, 18, 43, 0.85)',
+        border: ' 1px solid #7367F7',
+        alignItems: 'center'
+        // display: "flex",
+        // justifyContent: "space-between",
+        // marginTop: "10px",
     },
     myAssetsTitle: {
         fontSize: '24px',
@@ -730,7 +727,14 @@ class StakeDvgVip extends Component {
             return;
         }
 
-        let action = (type === "stake") ? DEPOSIT_XDVG : WIDTHDRAW_XDVG;
+        let action, asset;
+        if(type === "stake") {
+            action = DEPOSIT_XDVG;
+            asset = this.state.dvgInfoObj[3]; // DVG Token
+        } else {
+            action = WIDTHDRAW_XDVG;
+            asset = this.state.dvgInfoObj[2]; // xDVG Token
+        }
        
         if(!this.state.amountError && this.state.errorMessage === "") {
             this.setState({ loading: true });
@@ -738,7 +742,7 @@ class StakeDvgVip extends Component {
                 type: action,
                 content: {
                     amount: amount.toString(),
-                    asset: this.state.dvgInfoObj[1],
+                    asset: asset, 
                 }
             })
         }
@@ -900,7 +904,7 @@ class StakeDvgVip extends Component {
                     {
                         info.map(i => {
                             return <li>
-                                Stake {i.amount} DVD for {i.day} days to receive {i.receive} vipDVD ({i.apr}% APR)
+                                Stake {i.amount} DVD for {i.day} days to receive {i.receive} vipDVG ({i.apr}% APR)
                             </li>
                         })
                     }
@@ -964,7 +968,7 @@ class StakeDvgVip extends Component {
                         <div className={classes.contentLeftTitle}>
                             <div className={classes.titleText}>Stake Pool</div>
                             <div className={classes.titleRate}>
-                                1 vipDVD = {aprInfo.xDVGPrice && aprInfo.xDVGPrice.toFixed(2)}DVD
+                                1 vipDVG = {aprInfo.xDVGPrice && aprInfo.xDVGPrice.toFixed(2)}DVG
 
                             </div>
                         </div>
@@ -1046,12 +1050,24 @@ class StakeDvgVip extends Component {
 
                     <div className={classes.contentRight}>
                         <div className={classes.totalApr}>
-                             {/** APR */}
                             <div className={classes.total}>
+                                <img className={classes.smallImg} src={require("../../assets/stakeImg/lock-icon@2x.png")} alt="" />
+                                <div className={classes.totalText}>
+                                    <p className={classes.totalTextTile}>Total Value Locked</p>
+                                    <p className={classes.totalTextNum}>$ {Number(aprInfo.tvl).toFixed(2)}</p>
+                                </div>
+                            </div>
+                            <div className={classes.apr}>
                                 <img className={classes.smallImg} src={require("../../assets/stakeImg/apy-icon@2x.png")} alt="" />
                                 <div className={classes.aprText}>
                                     <p className={classes.totalTextTile}>APR
-                                    {this.renderAPRInfo()}
+                                        {/** TODO: Undo comment after DAOmine launched */}
+                                        {/* <svg className={classes.calculator} aria-hidden="true" onClick={()=>{this.showAprDetail()}}>
+                                            <use xlinkHref="#iconcalculator-line"></use>
+                                        </svg> */}
+                                        <svg aria-hidden="true" className={classes.calculator} aria-hidden="true" onClick={this.showAprDetail}>
+                                            <use xlinkHref="#iconinformation-day"></use>
+                                        </svg>
                                     </p>
                                     <p className={classes.totalTextNum}>
                                         {/* {aprInfo.apr && Number(aprInfo.apr).toFixed(2)} % */}
@@ -1061,28 +1077,15 @@ class StakeDvgVip extends Component {
                                 </div>
                             </div>
                         </div>
-                        
                         <div className={classes.myAssets}>
-                            {/** Wallet Balance */}
-                            <div className={classes.total}>
-                                <img className={classes.smallImg} src={require("../../assets/stakeImg/liquidity-icon@2x.png")} alt="" />
-                                <div className={classes.totalText}>
-                                    <p className={classes.totalTextTile}>My vipDVD</p>
-                                    <p className={classes.totalTextNum}>{xdvgBalance && Number(xdvgBalance).toFixed(2)}</p>
-                                    <p className={classes.myAssetsRate}>≈ ${xdvgBalance && aprInfo.xDVGPrice && aprInfo.dvgPrice && Number(xdvgBalance * aprInfo.xDVGPrice * aprInfo.dvgPrice).toFixed(2)}</p>
-                                </div>
-                            </div>
-
-                            {/** Total Value Locked */}
-                            <div className={classes.apr}>
-                                <img className={classes.smallImg} src={require("../../assets/stakeImg/lock-icon@2x.png")} alt="" />
-                                <div className={classes.totalText}>
-                                    <p className={classes.totalTextTile}>Total Value Locked</p>
-                                    <p className={classes.totalTextNum}>$ {Number(aprInfo.tvl).toFixed(2)}</p>
-                                </div>
+                            <img className={classes.bigImg} src={require("../../assets/stakeImg/liquidity-icon@2x.png")} alt="" />
+                            <div className={classes.myAssetstext}>
+                                <p className={classes.myAssetsTitle}>My vipDVG</p>
+                                <p className={classes.myAssetsNum}>{xdvgBalance && Number(xdvgBalance).toFixed(2)}</p>
+                                <p className={classes.myAssetsRate}>≈ ${xdvgBalance && aprInfo.xDVGPrice && aprInfo.dvgPrice && Number(xdvgBalance * aprInfo.xDVGPrice * aprInfo.dvgPrice).toFixed(2)}</p>
                             </div>
                         </div>
-                    </div>
+                    </div>         
                 </div>
                 {/** Snackbar */}
                 {this.state.snackbarMessage && this.renderSnackbar()}
