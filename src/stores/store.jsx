@@ -7570,12 +7570,13 @@ class Store {
     if (!web3) {
       return null;
     }
+
     //创建dvg合约对象
     const dvgContract = new web3.eth.Contract(asset.abi, asset.erc20address);
 
     //判断dvg质押金额是否大于dvg授权数量
     let xdvg;
-    if(asset.id === "xDVD"){
+    if(asset.id === "DVD"){
       xdvg = this.getStore("dvg")[0]; // xDVD
     } else {
       xdvg = this.getStore("dvg")[2]; // xDVG

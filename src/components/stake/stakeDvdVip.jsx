@@ -762,7 +762,14 @@ class StakeDvdVip extends Component {
             return;
         }
 
-        let action = (type === "stake") ? DEPOSIT_XDVG : WIDTHDRAW_XDVG;
+        let action, asset;
+        if(type === "stake") {
+            action = DEPOSIT_XDVG;
+            asset = this.state.dvgInfoObj[1]; // DVD Token
+        } else {
+            action = WIDTHDRAW_XDVG;
+            asset = this.state.dvgInfoObj[0]; // xDVD Token
+        }
        
         if(!this.state.amountError && this.state.errorMessage === "") {
             this.setState({ loading: true });
@@ -770,7 +777,7 @@ class StakeDvdVip extends Component {
                 type: action,
                 content: {
                     amount: amount.toString(),
-                    asset: this.state.dvgInfoObj[1],
+                    asset: asset,
                 }
             })
         }
@@ -1022,8 +1029,7 @@ class StakeDvdVip extends Component {
                         <div className={classes.contentLeftTitle}>
                             <div className={classes.titleText}>Stake Pool</div>
                             <div className={classes.titleRate}>
-                                1 vipDVD = {aprInfo.xDVGPrice && aprInfo.xDVGPrice.toFixed(2)}DVD
-
+                                1 vipDVD = {aprInfo && aprInfo.xDVDPrice && aprInfo.xDVDPrice.toFixed(2)}DVD
                             </div>
                         </div>
                         <div className={classes.contentCenter}>
@@ -1150,7 +1156,7 @@ class StakeDvdVip extends Component {
                                 <div className={classes.totalText}>
                                     <p className={classes.totalTextTile}>My vipDVD</p>
                                     <p className={classes.totalTextNum}>{xdvgBalance && Number(xdvgBalance).toFixed(2)}</p>
-                                    <p className={classes.myAssetsRate}>≈ ${xdvgBalance && aprInfo.xDVGPrice && aprInfo.dvgPrice && Number(xdvgBalance * aprInfo.xDVGPrice * aprInfo.dvgPrice).toFixed(2)}</p>
+                                    <p className={classes.myAssetsRate}>≈ ${xdvgBalance && aprInfo.xDVDPrice && aprInfo.dvdPrice && Number(xdvgBalance * aprInfo.xDVDPrice * aprInfo.dvdPrice).toFixed(2)}</p>
                                 </div>
                             </div>
 
