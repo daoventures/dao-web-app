@@ -1311,15 +1311,17 @@ class Store {
 
     const vaultAssets = network ? vaultAssetsObj[network] : vaultAssetsObj[1];
 
-    let xDVG, dvg, dvd;
+    let dvgObj = { xDVG: "", xDVD: "", dvg: "", dvd: ""};
     if(network === 1) {
-      xDVG = config.xdvgMainnetContract;
-      dvg = config.dvgTokenMainnetContract;
-      dvd = config.dvdTokenMainnetContract;
+      dvgObj.xDVD = config.xdvdMainnetContract;
+      dvgObj.xDVG = config.xdvgMainnetContract;
+      dvgObj.dvg = config.dvgTokenMainnetContract;
+      dvgObj.dvd = config.dvdTokenMainnetContract;
     } else if (network === 42) {
-      xDVG = config.xdvgTestContract;
-      dvg = config.dvgTokenTestContract;
-      dvd = config.dvdTokenTestContract;
+      dvgObj.xDVD = config.xdvdTestContract;
+      dvgObj.xDVG = config.xdvgTestContract;
+      dvgObj.dvg = config.dvgTokenTestContract;
+      dvgObj.dvd = config.dvdTokenTestContract;
     }
 
     return {
@@ -1928,12 +1930,12 @@ class Store {
       },
       dvg: [
         {
-          id: "xDVG",
-          name: "VIPDVG",
-          symbol: "xDVG",
+          id: "xDVD",
+          name: "VIPDVD",
+          symbol: "XDVD",
           decimals: 18,
-          erc20address: xDVG,
-          abi: config.xDvgAbi,
+          erc20address: dvgObj.xDVD,
+          abi: config.xDvdAbi,
           balance: 1,
         },
         {
@@ -1941,17 +1943,26 @@ class Store {
           name: "DVDToken",
           symbol: "DVD",
           decimals: 18,
-          erc20address: dvd,
+          erc20address: dvgObj.dvd,
           abi: config.dvdTokenContractABI,
           balance: 0,
+        },
+        {
+          id: "xDVG",
+          name: "VIPDVG",
+          symbol: "XDVG",
+          decimals: 18,
+          erc20address: dvgObj.xDVG,
+          abi: config.xdvgAbi,
+          balance: 1,
         },
         {
           id: "DVG",
           name: "DVGToken",
           symbol: "DVG",
           decimals: 18,
-          erc20address: dvg,
-          abi: config.DvgAbi,
+          erc20address: dvgObj.dvg,
+          abi: config.dvgTokenContractABI,
           balance: 0,
         },
       ],
@@ -7518,6 +7529,7 @@ class Store {
           return emitter.emit(ERROR, err);
         }
 
+        console.log("Assets", assets);
         store.setStore({ dvg: assets });
         return emitter.emit(GET_DVG_BALANCE_SUCCESS, assets);
       }
@@ -7525,11 +7537,11 @@ class Store {
   };
 
   _getXDvgTier = async (web3, asset, account, callback) => {
-    if(asset.id !== "xDVG") {
+    if(asset.id !== "xDVD") {
       return callback(null, null);
     }
-    const xDVGContract = new web3.eth.Contract(asset.abi, asset.erc20address);
-    const tier = await xDVGContract.methods.getTier(account.address).call();
+    const xDVDContract = new web3.eth.Contract(asset.abi, asset.erc20address);
+    const tier = await xDVDContract.methods.getTier(account.address).call();
     return callback(null, tier);
   }
 
@@ -7560,6 +7572,8 @@ class Store {
     if (!web3) {
       return null;
     }
+    console.log(`ERC20 ${asset.erc20address}`);
+    console.log(`abi`, asset.abi);
     //创建dvg合约对象
     const dvgContract = new web3.eth.Contract(asset.abi, asset.erc20address);
     //判断dvg质押金额是否大于dvg授权数量

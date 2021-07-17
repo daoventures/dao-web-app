@@ -608,7 +608,7 @@ const styles = theme => ({
     }
 });
 
-class StakeDvgVip extends Component {
+class StakeDvdVip extends Component {
     constructor(props) {
         super();
         const dashboard = store.getStore('dashboard')
@@ -638,6 +638,35 @@ class StakeDvgVip extends Component {
         dispatcher.dispatch({ type: GET_DVG_APR })
     }
     componentWillMount() {
+        // const onboard = initOnboard({
+        //     address: (address) => {
+        //         // console.log('onboard#####address####', address);
+        //         store.setStore({ account: { address: address } });
+        //         emitter.emit(CONNECTION_CONNECTED);
+        //     },
+        //     network: (network) => {
+        //         // console.log('onboard###network#####', network);
+        //         store.setStore({ network: network });
+        //         emitter.emit('CHANGE_NETWORK', { network: network });
+        //     },
+        //     balance: (balance) => {
+        //         let account = store.getStore('account');
+        //         // console.log('onboard#####balance#####', balance);
+        //         store.setStore({ account: { ...account, balance: balance } });
+        //         emitter.emit(CONNECTION_CONNECTED);
+        //     },
+        //     wallet: (wallet) => {
+        //         // console.log('onboard#####wallet#####', wallet);
+        //         store.setStore({
+        //             web3context: { library: { provider: wallet.provider } },
+        //         })
+        //         window.localStorage.setItem('selectedWallet', wallet.name);
+        //     }
+        // });
+        // this.setState({
+        //     onboard: onboard
+        // });
+        // store.setStore({ 'onboard': onboard });
         emitter.on(CHANGE_NETWORK, this.networkChanged);
         emitter.on(DASHBOARD_SNAPSHOT_RETURNED, this.dashboardSnapshotReturned);
         emitter.on(CONNECTION_CONNECTED, this.connectionConnected);
@@ -879,6 +908,37 @@ class StakeDvgVip extends Component {
         );
     }
 
+    renderMultiplierInfo = () => {
+        const { classes } = this.props;
+
+        const rewards = [
+            { range: ">0 - 1000", multiplier: "1.1"},
+            { range: ">1000 - 10000", multiplier: "1.2"},
+            { range: ">10000 - 50000", multiplier: "1.3"},
+            { range: ">50000 - 100000", multiplier: "1.4"},
+            { range: ">100000", multiplier: "1.5"},
+        ];
+        
+        const modalContent = (
+            <div className={classes.modalInfo}>
+                 <Typography variant={"h5"}>
+                    Stake more DVD tokens to receive more rewards with DAOmine:
+                </Typography>
+                <div>
+                    <ul>
+                        {
+                           rewards.map(r => {
+                               return <li>{r.range} DVD = {r.multiplier}x</li>
+                           }) 
+                        }
+                    </ul>
+                </div>
+            </div>
+        );
+
+        return <InfoModal content={modalContent} ></InfoModal>
+    }
+
     renderAPRInfo = () => {
         const { classes } = this.props;
 
@@ -980,8 +1040,8 @@ class StakeDvgVip extends Component {
                                 {/** Available Amount in Wallet */}
                                 {
                                     (type === "stake")
-                                        ? this.renderAvailableAmount(dvgBalance, "DVG")
-                                        : this.renderAvailableAmount(xdvgBalance, "vipDVG")
+                                        ? this.renderAvailableAmount(dvgBalance, "DVD")
+                                        : this.renderAvailableAmount(xdvgBalance, "vipDVD")
                                 }
                             </div>
 
@@ -1041,6 +1101,15 @@ class StakeDvgVip extends Component {
                                         <span>Approve Unstaking</span>
                                     </Button>
                                 }
+                                {/* <Button
+                                    disabled={(type === "stake" && disableStake) || 
+                                            (type !== "stake" && disableUnstake) ||
+                                            (!disableStake && !disableUnstake && loading)}
+                                    className={classes.depositActionButton}
+                                    onClick={() => this.submitStake()}
+                                >
+                                    <span>{ (type === "stake") ? "Approve Staking" : "Approve Unstaking"}</span>
+                                </Button> */}
                             </div>
                         </div>
                     </div>
@@ -1058,6 +1127,20 @@ class StakeDvgVip extends Component {
                                         {/* {aprInfo.apr && Number(aprInfo.apr).toFixed(2)} % */}
                                         {/** TODO: Remove this after DAOmine launched */}
                                         40% - 80%
+                                    </p>
+                                </div>
+                            </div>
+                            {/** Multiplier */}
+                            <div className={classes.apr}>
+                                <img className={classes.smallImg} src={require("../../assets/stakeImg/multiplier.png")} alt="" />
+                                <div className={classes.aprText}>
+                                    <p className={classes.totalTextTile}>Multiplier
+                                       {this.renderMultiplierInfo()}
+                                    </p>
+                                    <p className={classes.totalTextNum}>
+                                       {xDVGObj && (
+                                           <span>1.{(Number(xDVGObj._depositedAmount) <= 0 ) ? "0" : Number(xDVGObj.tier) + 1}x</span>
+                                       )}
                                     </p>
                                 </div>
                             </div>
@@ -1085,6 +1168,48 @@ class StakeDvgVip extends Component {
                         </div>
                     </div>
                 </div>
+                {/* {isShowApr ?
+                    <div className={classes.share}>
+                        <div className={classes.shareBox}>
+                            <div className={classes.shareTitle}>
+                                <p className={classes.shareTitleText}>Est. ROI</p>
+                                <svg className={classes.closeIcon} aria-hidden="true" onClick={()=>{this.showAprDetail()}}>
+                                    <use xlinkHref="#iconclose"></use>
+                                </svg>
+                            </div>
+                            <div className={classes.shareContent}>
+                                <div className={classes.shareTextTitle}>
+                                    <p className={classes.aprTitle}>TIMEFRAME</p>
+                                    <p className={classes.aprTitle}>Est. ROI</p>
+                                </div>
+                                <div className={classes.shareText}>
+                                    <p className={classes.aprText}>1d</p>
+                                    <p className={classes.aprText}>{aprInfo.aprOneDay.toFixed(2)}%</p>
+                                </div>
+                                <div className={classes.shareText}>
+                                    <p className={classes.aprText}>7d</p>
+                                    <p className={classes.aprText}>{aprInfo.aprOneWeek.toFixed(2)}%</p>
+                                </div>
+                                <div className={classes.shareText}>
+                                    <p className={classes.aprText}>30d</p>
+                                    <p className={classes.aprText}>{aprInfo.aprOneMonth.toFixed(2)}%</p>
+                                </div>
+                                <div className={classes.shareText}>
+                                    <p className={classes.aprText}>365d(APY)</p>
+                                    <p className={classes.aprText}>{aprInfo.aprOneYear.toFixed(2)}%</p>
+                                </div>
+                                <div className={classes.aprIntroduction}>
+                                    Calculated based on current rates. Rates are estimates provided for your convenience and reference only, which does not represent any guaranteed returns.
+                        </div>
+                                <div className={classes.shareBtn}>
+                                    <span onClick={()=>{this.goUrl('https://app.uniswap.org/#/swap?outputCurrency=0x51e00a95748dbd2a3f47bc5c3b3e7b3f0fea666c')}}>Get DVG</span>
+                                    <svg className={classes.shareIcon} aria-hidden="true">
+                                        <use xlinkHref="#iconshare"></use>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div> : null} */}
                 {/** Snackbar */}
                 {this.state.snackbarMessage && this.renderSnackbar()}
             </div>
@@ -1092,4 +1217,4 @@ class StakeDvgVip extends Component {
 
     }
 }
-export default withNamespaces()(withRouter(withStyles(styles)(StakeDvgVip)));
+export default withNamespaces()(withRouter(withStyles(styles)(StakeDvdVip)));
