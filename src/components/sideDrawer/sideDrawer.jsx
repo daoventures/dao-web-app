@@ -334,8 +334,8 @@ class SideDrawer extends Component {
           open: false,
           childrens: [
             { key: "DAOmine", name: "daomine", path: DAOMINE_PATH },
-            { key: "DAOvip (DVD)", name: "stake-dvd", path: STAKE_PATH_DVD },
             { key: "DAOvip (DVG)", name: "stake-dvg", path: STAKE_PATH_DVG },
+            { key: "DAOvip (DVD)", name: "stake-dvd", path: STAKE_PATH_DVD },
           ],
         },
         {

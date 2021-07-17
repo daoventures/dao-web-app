@@ -623,7 +623,7 @@ class StakeDvgVip extends Component {
             amountError: false,
             errorMessage: '',
             network: 0,
-            disableStake: false,
+            disableStake: true,
             disableUnstake: false,
         }
         if (account && account.address) {
@@ -961,7 +961,7 @@ class StakeDvgVip extends Component {
         } else {
             return <div className={classes.root}>
                 {/** Banner */}
-                {this.renderBanner()}
+                {/* {this.renderBanner()} */}
 
                 <div className={classes.content}>
                     <div className={classes.contentLeft}>
@@ -1065,9 +1065,9 @@ class StakeDvgVip extends Component {
                                         {/* <svg className={classes.calculator} aria-hidden="true" onClick={()=>{this.showAprDetail()}}>
                                             <use xlinkHref="#iconcalculator-line"></use>
                                         </svg> */}
-                                        <svg aria-hidden="true" className={classes.calculator} aria-hidden="true" onClick={this.showAprDetail}>
+                                        {/* <svg aria-hidden="true" className={classes.calculator} aria-hidden="true" onClick={this.showAprDetail}>
                                             <use xlinkHref="#iconinformation-day"></use>
-                                        </svg>
+                                        </svg> */}
                                     </p>
                                     <p className={classes.totalTextNum}>
                                         {/* {aprInfo.apr && Number(aprInfo.apr).toFixed(2)} % */}
