@@ -16,8 +16,6 @@ import {
     DASHBOARD_SNAPSHOT_RETURNED,
     GET_DVG_BALANCE_SUCCESS,
     DEPOSIT_XDVG,
-    GET_XDVG_BALANCE,
-    GET_XDVG_BALANCE_SUCCESS,
     WIDTHDRAW_XDVG,
     GET_DVG_APR,
     GET_XDVG_APR_SUCCESS,
@@ -633,16 +631,14 @@ class StakeDvgVip extends Component {
         }
         if (account && account.address) {
             dispatcher.dispatch({ type: GET_DVG_INFO })
-            dispatcher.dispatch({ type: GET_XDVG_BALANCE })
         }
-        dispatcher.dispatch({ type: GET_DVG_APR })
+        dispatcher.dispatch({ type: GET_DVG_APR, content: { type: "xdvg"} });
     }
     componentWillMount() {
         emitter.on(CHANGE_NETWORK, this.networkChanged);
         emitter.on(DASHBOARD_SNAPSHOT_RETURNED, this.dashboardSnapshotReturned);
         emitter.on(CONNECTION_CONNECTED, this.connectionConnected);
         emitter.on(GET_DVG_BALANCE_SUCCESS, this.dvgBalance);
-        emitter.on(GET_XDVG_BALANCE_SUCCESS, this.xdvgBalance);
         emitter.on(GET_XDVG_APR_SUCCESS, this.getAprInfo);
         emitter.on(WITHDRAW_DVG_RETURNED, this.showHash);
         emitter.on(WITHDRAW_DVG_RETURNED_COMPLETED, this.withdrawReturned);
@@ -656,7 +652,6 @@ class StakeDvgVip extends Component {
         emitter.removeListener(DASHBOARD_SNAPSHOT_RETURNED, this.dashboardSnapshotReturned);
         emitter.removeListener(CONNECTION_CONNECTED, this.connectionConnected);
         emitter.removeListener(GET_DVG_BALANCE_SUCCESS, this.dvgBalance)
-        emitter.removeListener(GET_XDVG_BALANCE_SUCCESS, this.xdvgBalance)
         emitter.removeListener(GET_XDVG_APR_SUCCESS, this.getAprInfo)
         emitter.removeListener(WITHDRAW_DVG_RETURNED, this.withdrawReturned)
         emitter.removeListener(DEPOSIT_DVG_RETURNED, this.depositReturned)
@@ -839,9 +834,8 @@ class StakeDvgVip extends Component {
 
     getAprInfo = () => {
         const aprInfo = store.getStore('dvgApr');
-        this.setState({
-            aprInfo: aprInfo
-        })
+        console.log("xdvg apr info", aprInfo["xdvg"]);
+        this.setState({ aprInfo: aprInfo["xdvg"]});
     }
 
     goUrl = (url) => {
@@ -916,6 +910,26 @@ class StakeDvgVip extends Component {
         return <InfoModal content={modalContent} ></InfoModal>
     }
 
+    renderBanner = () => {
+        const { classes } = this.props;
+        return (
+            <Grid>
+                <div className={classes.banner}>
+                    <div className={classes.bannerLeft}>
+                        <div className={classes.text}>Buy DVG on DEX Liquidity Pools</div>
+                    </div>
+                    <div className={classes.bannerRight}>
+                        <div className={classes.toTrade}>
+                            <div className={classes.toTradeUniswap} onClick={() => this.goUrl('https://app.uniswap.org/#/swap?outputCurrency=0x51e00a95748dbd2a3f47bc5c3b3e7b3f0fea666c')}>Buy on Uniswap</div>
+                            <div className={classes.toTradePancakeswap} onClick={() => this.goUrl('https://exchange.pancakeswap.finance/#/swap?outputCurrency=0x51e00a95748dbd2a3f47bc5c3b3e7b3f0fea666c')}>Buy on Pancakeswap</div>
+                        </div>
+                    </div>
+
+                </div>
+            </Grid>
+        );
+    }
+
     render() {
         const {
             classes
@@ -934,31 +948,16 @@ class StakeDvgVip extends Component {
             disableUnstake,
         } = this.state
 
-        const dvgBalance = dvgInfoObj && dvgInfoObj[1].balance;
-        const xdvgBalance = dvgInfoObj && dvgInfoObj[0].balance;
+        const dvgBalance = dvgInfoObj && dvgInfoObj[3].balance;
+        const xdvgBalance = dvgInfoObj && dvgInfoObj[2].balance;
 
-        const xDVGObj =  dvgInfoObj[0];
-
+     
         if (!account || !account.address) {
             return <ConnectWallet></ConnectWallet>
         } else {
-
             return <div className={classes.root}>
-
-                <Grid>
-                    <div className={classes.banner}>
-                        <div className={classes.bannerLeft}>
-                            <div className={classes.text}>Buy DVD on DEX Liquidity Pools</div>
-                        </div>
-                        <div className={classes.bannerRight}>
-                            <div className={classes.toTrade}>
-                                <div className={classes.toTradeUniswap} onClick={() => this.goUrl('https://app.uniswap.org/#/swap?outputCurrency=0x77dce26c03a9b833fc2d7c31c22da4f42e9d9582')}>Buy on Uniswap</div>
-                                {/* <div className={classes.toTradePancakeswap} onClick={() => this.goUrl('https://exchange.pancakeswap.finance/#/swap?outputCurrency=0x51e00a95748dbd2a3f47bc5c3b3e7b3f0fea666c')}>Buy on Pancakeswap</div> */}
-                            </div>
-                        </div>
-
-                    </div>
-                </Grid>
+                {/** Banner */}
+                {this.renderBanner()}
 
                 <div className={classes.content}>
                     <div className={classes.contentLeft}>

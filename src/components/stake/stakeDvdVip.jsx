@@ -16,7 +16,6 @@ import {
     DASHBOARD_SNAPSHOT_RETURNED,
     GET_DVG_BALANCE_SUCCESS,
     DEPOSIT_XDVG,
-    GET_XDVG_BALANCE,
     GET_XDVG_BALANCE_SUCCESS,
     WIDTHDRAW_XDVG,
     GET_DVG_APR,
@@ -633,9 +632,8 @@ class StakeDvdVip extends Component {
         }
         if (account && account.address) {
             dispatcher.dispatch({ type: GET_DVG_INFO })
-            dispatcher.dispatch({ type: GET_XDVG_BALANCE })
         }
-        dispatcher.dispatch({ type: GET_DVG_APR })
+        dispatcher.dispatch({ type: GET_DVG_APR , content: { type: "xdvd"}});
     }
     componentWillMount() {
         // const onboard = initOnboard({
@@ -868,9 +866,8 @@ class StakeDvdVip extends Component {
 
     getAprInfo = () => {
         const aprInfo = store.getStore('dvgApr');
-        this.setState({
-            aprInfo: aprInfo
-        })
+        console.log("xdvd apr info", aprInfo["xdvd"]);
+        this.setState({ aprInfo: aprInfo["xdvd"]});
     }
 
     goUrl = (url) => {

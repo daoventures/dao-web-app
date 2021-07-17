@@ -42,8 +42,6 @@ import {
   GET_VAULT_BALANCES_FULL,
   GET_VAULT_INFO,
   GET_XDVG_APR_SUCCESS,
-  GET_XDVG_BALANCE,
-  GET_XDVG_BALANCE_SUCCESS,
   HAPPY_HOUR_RETURN,
   HAPPY_HOUR_VERIFY,
   IDAI,
@@ -319,7 +317,7 @@ class Store {
       sCrvBalance: 0,
       openDrawer: false,
       stakePools: [],
-      dvgApr: "",
+      dvgApr: {},
     };
 
     dispatcher.register(
@@ -7529,7 +7527,7 @@ class Store {
           return emitter.emit(ERROR, err);
         }
 
-        console.log("Assets", assets);
+        console.log("Assets in getDvgbalance()", assets);
         store.setStore({ dvg: assets });
         return emitter.emit(GET_DVG_BALANCE_SUCCESS, assets);
       }
@@ -7572,12 +7570,16 @@ class Store {
     if (!web3) {
       return null;
     }
-    console.log(`ERC20 ${asset.erc20address}`);
-    console.log(`abi`, asset.abi);
     //创建dvg合约对象
     const dvgContract = new web3.eth.Contract(asset.abi, asset.erc20address);
+
     //判断dvg质押金额是否大于dvg授权数量
-    let xdvg = this.getStore("dvg")[0];
+    let xdvg;
+    if(asset.id === "xDVD"){
+      let xdvg = this.getStore("dvg")[0];
+    }
+    console.log("get store", this.getStore("dvg"));
+    
     //创建xdvg合约对象
     const xDVGCOntract = new web3.eth.Contract(xdvg.abi, xdvg.erc20address);
     //查询xdvg授权数量
@@ -7768,17 +7770,26 @@ class Store {
         }
       });
   };
-  getDvgApr = async () => {
-    const apr = await this._getDvgApr();
-    const aprInfo = apr.xdvg;
-    store.setStore({
-      dvgApr: apr.xdvg,
-    });
-    return emitter.emit(GET_XDVG_APR_SUCCESS, aprInfo);
+
+  getDvgApr = async (payload) => {
+    const { type } = payload.content;
+
+    if(type === "") { 
+      console.err("type is missing in payload content of getDvgApr()");
+      return;
+    }
+    const apr = await this._getDvgApr(type);
+
+    let dvgApr = store.getStore("dvgApr");
+    dvgApr[type] = apr; 
+    store.setStore({ dvgApr});
+
+    return emitter.emit(GET_XDVG_APR_SUCCESS);
   };
-  _getDvgApr = async () => {
+
+  _getDvgApr = async (type) => {
     try {
-      const url = config.statsProvider + "staking/get-xdvg-stake";
+      const url = config.statsProvider + `staking/get-${type}-stake`;
       const statisticsString = await rp(url);
       const statistics = JSON.parse(statisticsString);
       return statistics.body;
