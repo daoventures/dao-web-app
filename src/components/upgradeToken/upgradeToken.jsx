@@ -22,6 +22,7 @@ import Store from "../../stores";
 import ConnectWallet from "../common/connectWallet/connectWallet";
 import { initOnboard } from '../../walletsServices.js';
 import Snackbar from "../snackbar/snackbar";
+import StakeDvdVip from '../stake/stakeDvdVip';
 
 const emitter = Store.emitter
 const dispatcher = Store.dispatcher

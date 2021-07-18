@@ -22,7 +22,8 @@ import {
 } from "../../constants/constants";
 import {
   INVEST_PATH,
-  STAKE_PATH,
+  STAKE_PATH_DVD,
+  STAKE_PATH_DVG,
   INVEST,
   SWAP_PATH,
   SWAP,
@@ -334,7 +335,8 @@ class SideDrawer extends Component {
           open: false,
           childrens: [
             { key: "DAOmine", name: "daomine", path: DAOMINE_PATH },
-            { key: "DAOvip", name: "stake", path: STAKE_PATH },
+            { key: "DAOvip (DVG)", name: "stake-dvg", path: STAKE_PATH_DVG },
+            { key: "DAOvip (DVD)", name: "stake-dvd", path: STAKE_PATH_DVD },
           ],
         },
         {

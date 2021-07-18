@@ -9,7 +9,8 @@ import {
 } from "../../constants";
 import {
   HEADER_TITLE_DAOMINE,
-  HEADER_TITLE_DAOVIP,
+  HEADER_TITLE_DAOVIP_DVD,
+  HEADER_TITLE_DAOVIP_DVG,
   HEADER_TITLE_INVEST,
   HEADER_TITLE_PORTFOLIO,
   HEADER_TITLE_SWAP,
@@ -241,7 +242,8 @@ class Header extends Component {
       menuObj: {
         "/portfolio": HEADER_TITLE_PORTFOLIO,
         "/invest": HEADER_TITLE_INVEST,
-        "/stake": HEADER_TITLE_DAOVIP,
+        "/stake-dvg": HEADER_TITLE_DAOVIP_DVG,
+        "/stake-dvd": HEADER_TITLE_DAOVIP_DVD,
         "/daomine": HEADER_TITLE_DAOMINE,
         "/swap": HEADER_TITLE_SWAP,
         "/upgrade": HEADER_TITLE_UPGRADE,

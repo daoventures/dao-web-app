@@ -42,8 +42,6 @@ import {
   GET_VAULT_BALANCES_FULL,
   GET_VAULT_INFO,
   GET_XDVG_APR_SUCCESS,
-  GET_XDVG_BALANCE,
-  GET_XDVG_BALANCE_SUCCESS,
   HAPPY_HOUR_RETURN,
   HAPPY_HOUR_VERIFY,
   IDAI,
@@ -91,12 +89,12 @@ import {
   EMERGENCY_WITHDRAW_DAOMINE,
   EMERGENCY_WITHDRAW_DAOMINE_RETURNED,
   EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,
+  DEPOSIT_DVG_RETURNED_COMPLETED,
   GET_UPGRADE_TOKEN,
   GET_UPGRADE_TOKEN_RETURN,
   UPGRADE_TOKEN,
   UPGRADE_TOKEN_SUCCESS,
   UPGRADE_TOKEN_RETURN,
-  DEPOSIT_DVG_RETURNED_COMPLETED,
 } from "../constants";
 import {
   Biconomy,
@@ -324,7 +322,7 @@ class Store {
       sCrvBalance: 0,
       openDrawer: false,
       stakePools: [],
-      dvgApr: "",
+      dvgApr: {},
     };
 
     dispatcher.register(
@@ -1354,15 +1352,17 @@ class Store {
     const vaultAssets = network ? vaultAssetsObj[network] : vaultAssetsObj[1];
     const upgradeToken = network ? upgradeTokenObj[network] : upgradeTokenObj[1];
 
-    let xDVG, dvg, dvd;
+    let dvgObj = { xDVG: "", xDVD: "", dvg: "", dvd: ""};
     if(network === 1) {
-      xDVG = config.xdvgMainnetContract;
-      dvg = config.dvgTokenMainnetContract;
-      dvd = config.dvdTokenMainnetContract;
+      dvgObj.xDVD = config.xdvdMainnetContract;
+      dvgObj.xDVG = config.xdvgMainnetContract;
+      dvgObj.dvg = config.dvgTokenMainnetContract;
+      dvgObj.dvd = config.dvdTokenMainnetContract;
     } else if (network === 42) {
-      xDVG = config.xdvgTestContract;
-      dvg = config.dvgTokenTestContract;
-      dvd = config.dvdTokenTestContract;
+      dvgObj.xDVD = config.xdvdTestContract;
+      dvgObj.xDVG = config.xdvgTestContract;
+      dvgObj.dvg = config.dvgTokenTestContract;
+      dvgObj.dvd = config.dvdTokenTestContract;
     }
 
     return {
@@ -1971,12 +1971,12 @@ class Store {
       },
       dvg: [
         {
-          id: "xDVG",
-          name: "VIPDVG",
-          symbol: "xDVG",
+          id: "xDVD",
+          name: "VIPDVD",
+          symbol: "XDVD",
           decimals: 18,
-          erc20address: xDVG,
-          abi: config.xDvgAbi,
+          erc20address: dvgObj.xDVD,
+          abi: config.xDvdAbi,
           balance: 1,
         },
         {
@@ -1984,17 +1984,26 @@ class Store {
           name: "DVDToken",
           symbol: "DVD",
           decimals: 18,
-          erc20address: dvd,
+          erc20address: dvgObj.dvd,
           abi: config.dvdTokenContractABI,
           balance: 0,
+        },
+        {
+          id: "xDVG",
+          name: "VIPDVG",
+          symbol: "XDVG",
+          decimals: 18,
+          erc20address: dvgObj.xDVG,
+          abi: config.xdvgAbi,
+          balance: 1,
         },
         {
           id: "DVG",
           name: "DVGToken",
           symbol: "DVG",
           decimals: 18,
-          erc20address: dvg,
-          abi: config.DvgAbi,
+          erc20address: dvgObj.dvg,
+          abi: config.dvgTokenContractABI,
           balance: 0,
         },
       ],
@@ -7562,6 +7571,7 @@ class Store {
           return emitter.emit(ERROR, err);
         }
 
+        console.log("Assets in getDvgbalance()", assets);
         store.setStore({ dvg: assets });
         return emitter.emit(GET_DVG_BALANCE_SUCCESS, assets);
       }
@@ -7569,11 +7579,11 @@ class Store {
   };
 
   _getXDvgTier = async (web3, asset, account, callback) => {
-    if(asset.id !== "xDVG") {
+    if(asset.id !== "xDVD") {
       return callback(null, null);
     }
-    const xDVGContract = new web3.eth.Contract(asset.abi, asset.erc20address);
-    const tier = await xDVGContract.methods.getTier(account.address).call();
+    const xDVDContract = new web3.eth.Contract(asset.abi, asset.erc20address);
+    const tier = await xDVDContract.methods.getTier(account.address).call();
     return callback(null, tier);
   }
 
@@ -7604,10 +7614,18 @@ class Store {
     if (!web3) {
       return null;
     }
+
     //创建dvg合约对象
     const dvgContract = new web3.eth.Contract(asset.abi, asset.erc20address);
+
     //判断dvg质押金额是否大于dvg授权数量
-    let xdvg = this.getStore("dvg")[0];
+    let xdvg;
+    if(asset.id === "DVD"){
+      xdvg = this.getStore("dvg")[0]; // xDVD
+    } else {
+      xdvg = this.getStore("dvg")[2]; // xDVG
+    }
+   
     //创建xdvg合约对象
     const xDVGCOntract = new web3.eth.Contract(xdvg.abi, xdvg.erc20address);
     //查询xdvg授权数量
@@ -7730,7 +7748,7 @@ class Store {
   withdrawXdvg = async (payload) => {
     const account = store.getStore("account");
     const { asset, amount, max } = payload.content;
-    //asset 是dvd
+
     this._callWithdrawXdvg(asset, amount, max, (err, txnHash, withdrawResult) => {
       if (err) {
         return emitter.emit(ERROR, err);
@@ -7752,9 +7770,9 @@ class Store {
     if (!web3) {
       return null;
     }
-    let xdvg = this.getStore("dvg")[0];
+    
     //创建xdvg合约对象
-    const xDVGCOntract = new web3.eth.Contract(xdvg.abi, xdvg.erc20address);
+    const xDVGCOntract = new web3.eth.Contract(asset.abi, asset.erc20address);
     let _amount = "";
     if (max) {
       _amount = await xDVGCOntract.methods
@@ -7798,17 +7816,26 @@ class Store {
         }
       });
   };
-  getDvgApr = async () => {
-    const apr = await this._getDvgApr();
-    const aprInfo = apr.xdvg;
-    store.setStore({
-      dvgApr: apr.xdvg,
-    });
-    return emitter.emit(GET_XDVG_APR_SUCCESS, aprInfo);
+
+  getDvgApr = async (payload) => {
+    const { type } = payload.content;
+
+    if(type === "") { 
+      console.err("type is missing in payload content of getDvgApr()");
+      return;
+    }
+    const apr = await this._getDvgApr(type);
+
+    let dvgApr = store.getStore("dvgApr");
+    dvgApr[type] = apr; 
+    store.setStore({ dvgApr});
+
+    return emitter.emit(GET_XDVG_APR_SUCCESS);
   };
-  _getDvgApr = async () => {
+
+  _getDvgApr = async (type) => {
     try {
-      const url = config.statsProvider + "staking/get-xdvg-stake";
+      const url = config.statsProvider + `staking/get-${type}-stake`;
       const statisticsString = await rp(url);
       const statistics = JSON.parse(statisticsString);
       return statistics.body;
