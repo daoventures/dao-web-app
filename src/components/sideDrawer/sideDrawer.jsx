@@ -30,6 +30,8 @@ import {
   DAOMINE_PATH,
   PORTFOLIO,
   PORTFOLIO_PATH,
+  UPGPRADE,
+  UPGPRADE_PATH,
 } from "../../constants/page-constant";
 import { drawerWidth } from "../../theme/theme";
 import ToggleTheme from "../toggleTheme";
@@ -301,7 +303,6 @@ const styles = (theme) => ({
     flexDirection: "column",
   },
 });
-
 class SideDrawer extends Component {
   constructor(props) {
     super();
@@ -343,6 +344,12 @@ class SideDrawer extends Component {
           name: "swap",
           path: SWAP_PATH,
           icon: "#iconmenu_features_nor_night",
+        },
+        {
+          key: UPGPRADE,
+          name: "upgrade",
+          path: UPGPRADE_PATH,
+          icon: "#iconmenu_revert",
         },
       ],
       open: false,

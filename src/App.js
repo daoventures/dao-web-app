@@ -29,6 +29,7 @@ import StakeDvgVip from './components/stake/stakeDvgVip';
 import Stake from './components/stake';
 
 import Swap from './components/swap';
+import UpgradeToken from './components/upgradeToken/upgradeToken';
 
 import {
   CONNECTION_CONNECTED,
@@ -227,6 +228,20 @@ class App extends Component {
                 <MainContainer />
                 <Stake />
               </Route>
+
+              <Route path="/upgrade">
+                <Header />
+                <SideDrawer />
+                <MainContainer />
+                <UpgradeToken />
+              </Route>
+
+              {/* <Route path="/stake">
+                <Header />
+                <SideDrawer />
+                <MainContainer />
+                <Stake />
+              </Route> */}
 
               <Route path="/swap">
                 <Header />

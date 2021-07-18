@@ -14,6 +14,7 @@ import {
   HEADER_TITLE_INVEST,
   HEADER_TITLE_PORTFOLIO,
   HEADER_TITLE_SWAP,
+  HEADER_TITLE_UPGRADE,
 } from "../../constants/page-constant";
 import { IconButton, Typography } from "@material-ui/core";
 import React, { Component } from "react";
@@ -245,6 +246,7 @@ class Header extends Component {
         "/stake-dvd": HEADER_TITLE_DAOVIP_DVD,
         "/daomine": HEADER_TITLE_DAOMINE,
         "/swap": HEADER_TITLE_SWAP,
+        "/upgrade": HEADER_TITLE_UPGRADE,
       },
       currentTheme: store.getStore("currentTheme"),
       currentNetwork: 0,

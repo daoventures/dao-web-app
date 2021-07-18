@@ -4,7 +4,8 @@ export const HEADER_TITLE_DAOVIP_DVG = 'DAOvip (DVG)';
 export const HEADER_TITLE_DAOVIP_DVD = 'DAOvip (DVD)';
 export const HEADER_TITLE_INVEST = 'Invest';
 export const HEADER_TITLE_PORTFOLIO = 'Portfolio';
-export const HEADER_TITLE_SWAP = 'Swap'
+export const HEADER_TITLE_SWAP = 'Swap';
+export const HEADER_TITLE_UPGRADE = 'Upgrade'
 
 // Path
 export const INVEST_PATH = '/invest';
@@ -17,3 +18,6 @@ export const STAKE = 'STAKE';
 export const DAOMINE_PATH = '/daomine';
 export const SWAP_PATH = '/swap';
 export const SWAP = 'SWAP';
+export const UPGPRADE_PATH = '/upgrade';
+export const UPGPRADE = 'UPGRADE';
+
