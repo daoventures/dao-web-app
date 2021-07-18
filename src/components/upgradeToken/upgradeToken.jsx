@@ -19,11 +19,11 @@ import {
     APPROVE_COMPLETED,
     DEPOSIT_DVG_RETURNED,
     UPGRADE_STAKE_TOKEN,
+    DEPOSIT_DVG_RETURNED_COMPLETED,
 } from '../../constants'
 import Store from "../../stores";
 import ConnectWallet from "../common/connectWallet/connectWallet";
 import Snackbar from "../snackbar/snackbar";
-import StakeDvdVip from '../stake/stakeDvdVip';
 
 const emitter = Store.emitter
 const dispatcher = Store.dispatcher
@@ -432,7 +432,8 @@ class UpgradeToken extends Component {
         emitter.on(ERROR, this.errorReturned)
         emitter.on(APPROVE_TRANSACTING, this.showHashApproval);
         emitter.on(APPROVE_COMPLETED, this.onApprovalCompleted);
-        emitter.on(DEPOSIT_DVG_RETURNED, this.upgradeReturned)
+        emitter.on(DEPOSIT_DVG_RETURNED, this.showHash)
+        emitter.on(DEPOSIT_DVG_RETURNED_COMPLETED, this.upgradeReturned)
     }
 
     componentWillUnmount() {
@@ -444,7 +445,8 @@ class UpgradeToken extends Component {
         emitter.removeListener(ERROR, this.errorReturned)
         emitter.removeListener(APPROVE_TRANSACTING, this.showHashApproval)
         emitter.removeListener(APPROVE_COMPLETED, this.onApprovalCompleted)
-        emitter.removeListener(DEPOSIT_DVG_RETURNED, this.upgradeReturned)
+        emitter.removeListener(DEPOSIT_DVG_RETURNED, this.showHash)
+        emitter.removeListener(DEPOSIT_DVG_RETURNED_COMPLETED, this.upgradeReturned)
     }
 
     errorReturned = (error) => {
@@ -724,7 +726,7 @@ class UpgradeToken extends Component {
                                         className={classes.depositActionButton}
                                         onClick={() => this.upgradeStake()}
                                     >
-                                        <span>Upgrade and Stake in DVDvip</span>
+                                        <span>Upgrade and Stake in DAOvip (DVD)</span>
                                     </Button>
                             </div>
                         </div>
