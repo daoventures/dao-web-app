@@ -17,10 +17,11 @@ import {
     UPGRADE_TOKEN_RETURN,
     APPROVE_TRANSACTING,
     APPROVE_COMPLETED,
+    DEPOSIT_DVG_RETURNED,
+    UPGRADE_STAKE_TOKEN,
 } from '../../constants'
 import Store from "../../stores";
 import ConnectWallet from "../common/connectWallet/connectWallet";
-import { initOnboard } from '../../walletsServices.js';
 import Snackbar from "../snackbar/snackbar";
 
 const emitter = Store.emitter
@@ -63,8 +64,8 @@ const styles = theme => ({
     text: {
         fontSize: '30px',
         fontWeight: '500',
-        color: '#FFFFFF',
         lineHeight: '96px',
+        color: theme.themeColors.textT,
         [theme.breakpoints.down('sm')]: {
             width: '100%',
             lineHeight: 1,
@@ -76,8 +77,8 @@ const styles = theme => ({
     contentText: {
         fontSize: '16px',
         fontWeight: '500',
-        color: '#FFFFFF',
         lineHeight: '20px',
+        color: theme.themeColors.textT,
         [theme.breakpoints.down('sm')]: {
             width: '100%',
             lineHeight: 1,
@@ -122,7 +123,6 @@ const styles = theme => ({
     contentHeader: {
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'center',
         marginTop: '25px',
         [theme.breakpoints.down('sm')]: {
             display: 'block'
@@ -144,12 +144,24 @@ const styles = theme => ({
             textAlign: 'right'
         },
     },
+    availableAmount: {
+        fontSize: '16px',
+        fontWeight: '400',
+        lineHeight: '16px',
+        color: theme.themeColors.textT,
+        textAlign: 'right',
+        [theme.breakpoints.down('sm')]: {
+            marginTop: '23px',
+            textAlign: 'right'
+        },
+    },
     walletAmount: {
         fontSize: '16px',
         fontWeight: '400',
         display: 'flex',
         marginTop: '7px',
         color: theme.themeColors.textP,
+        justifyContent: 'flex-end',
         [theme.breakpoints.down('sm')]: {
             marginTop: '23px',
             textAlign: 'right'
@@ -354,7 +366,6 @@ const styles = theme => ({
     depositButtonBox: {
         width: "100%",
         display: "flex",
-        marginTop: "4rem",
         marginBottom: "15px",
         justifyContent: "space-between",
     },
@@ -381,6 +392,9 @@ const styles = theme => ({
         "&:first-child": {
             marginLeft: "0px",
         },
+    },
+    upgradeBalances: {
+        marginBottom: '3rem',
     }
 });
 
@@ -402,6 +416,7 @@ class UpgradeToken extends Component {
             disableUnstake: false,
             dvgBalance: 0,
             dvdBalance: 0,
+            eligibleAmount: "0.00",
         }
         if (account && account.address) {
             dispatcher.dispatch({ type: GET_UPGRADE_TOKEN })
@@ -416,6 +431,7 @@ class UpgradeToken extends Component {
         emitter.on(ERROR, this.errorReturned)
         emitter.on(APPROVE_TRANSACTING, this.showHashApproval);
         emitter.on(APPROVE_COMPLETED, this.onApprovalCompleted);
+        emitter.on(DEPOSIT_DVG_RETURNED, this.upgradeReturned)
     }
 
     componentWillUnmount() {
@@ -427,6 +443,7 @@ class UpgradeToken extends Component {
         emitter.removeListener(ERROR, this.errorReturned)
         emitter.removeListener(APPROVE_TRANSACTING, this.showHashApproval)
         emitter.removeListener(APPROVE_COMPLETED, this.onApprovalCompleted)
+        emitter.removeListener(DEPOSIT_DVG_RETURNED, this.upgradeReturned)
     }
 
     errorReturned = (error) => {
@@ -492,6 +509,7 @@ class UpgradeToken extends Component {
             loading: false,
             dvgBalance: asset.balance,
             dvdBalance: asset.upgradeBalance,
+            eligibleAmount: asset.eligibleAmount,
         })
     }
 
@@ -500,6 +518,14 @@ class UpgradeToken extends Component {
 
         dispatcher.dispatch({
             type: UPGRADE_TOKEN,
+        })
+    }
+
+    upgradeStake = () => {
+        this.setState({ errorMessage: "", loading: true });
+
+        dispatcher.dispatch({
+            type: UPGRADE_STAKE_TOKEN,
         })
     }
 
@@ -578,7 +604,7 @@ class UpgradeToken extends Component {
         const { classes } = this.props;
         const {
             dvgBalance,
-            dvdBalance
+            dvdBalance,
         } = this.state;
 
         if (symbol === 'DVG') {
@@ -624,8 +650,8 @@ class UpgradeToken extends Component {
             loading,
             account,
             isPopUp,
-            disableStake,
             dvgBalance,
+            eligibleAmount,
         } = this.state
 
         if (!account || !account.address) {
@@ -669,27 +695,35 @@ class UpgradeToken extends Component {
                                 </div>
 
                                 {/** Available Amount in Wallet */}
-                                <div>
-                                    <div className={classes.available}>{dvgBalance
+                                <div className={classes.upgradeBalances}>
+                                    <div className={classes.availableAmount}>{dvgBalance
                                     .toLocaleString(undefined, {
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2,
                                     })} DVG</div>
-                                    <div className={classes.walletAmount}>{dvgBalance
+                                    <div className={classes.walletAmount}>{eligibleAmount !== '0.00' ? eligibleAmount
                                     .toLocaleString(undefined, {
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2,
-                                    })} DVG</div>
+                                    }) : eligibleAmount} DVG</div>
                                 </div>
                             </div>        
 
                             {/** Button to trigger stake function */}
                             <div className={classes.depositButtonBox}>
-                                <Button disabled={disableStake || (!disableStake && loading)}
+                                <Button disabled={eligibleAmount === "0.00" || (eligibleAmount !== '0.00' && loading)}
                                         className={classes.depositActionButton}
                                         onClick={() => this.upgrade()}
                                     >
                                         <span>Upgrade</span>
+                                    </Button>
+                            </div>
+                            <div className={classes.depositButtonBox}>
+                                <Button disabled={eligibleAmount === "0.00" || (eligibleAmount !== '0.00' && loading)}
+                                        className={classes.depositActionButton}
+                                        onClick={() => this.upgradeStake()}
+                                    >
+                                        <span>Upgrade and Stake in DVDvip</span>
                                     </Button>
                             </div>
                         </div>

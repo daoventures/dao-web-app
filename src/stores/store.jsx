@@ -95,6 +95,7 @@ import {
   UPGRADE_TOKEN,
   UPGRADE_TOKEN_SUCCESS,
   UPGRADE_TOKEN_RETURN,
+  UPGRADE_STAKE_TOKEN,
 } from "../constants";
 import {
   Biconomy,
@@ -445,6 +446,9 @@ class Store {
             break;
           case UPGRADE_TOKEN:
             this.upgradeToken();
+            break;
+          case UPGRADE_STAKE_TOKEN:
+            this.upgradeAndStakeToken();
             break;
           default: {
           }
@@ -7580,7 +7584,7 @@ class Store {
 
     //xdvg授权数量小于金额的话 需要重新授权
     if (parseFloat(_amount) > parseFloat(allowance)) {
-      this._callDvgApproval(account, amount, (err) => {
+      this._callDvgApproval(account, _amount, (err) => {
         if (err) {
           return emitter.emit(ERROR, err);
         }
@@ -7792,6 +7796,9 @@ class Store {
         (callbackInner) => {
           this._getERC20Balance(web3, asset.dvd, account, callbackInner);
         },
+        (callbackInner) => {
+          this._getReimburseInfo(account.address.toLowerCase(), callbackInner);
+        },
       ],
       (err, data) => {
         if (err) {
@@ -7800,6 +7807,7 @@ class Store {
         }
         asset.balance = data[0];
         asset.upgradeBalance = data[1];
+        asset.eligibleAmount = data[2] != null ? data[2].amount / 10 ** asset.dvg.decimals : "0.00";
         store.setStore({
           upgradeInfo: asset,
         });
@@ -7808,11 +7816,15 @@ class Store {
     );
   };
 
-  _getReimburseInfo = async (address) => {
+  _getReimburseInfo = async (address, callback) => {
     try {
       const url = config.statsProvider + "user/reimburse-address/" + address;
       const reimburseInfo = await rp(url);
-      return JSON.parse(reimburseInfo).body;
+      if (callback) {
+        return callback(null, JSON.parse(reimburseInfo).body);
+      } else {
+        return JSON.parse(reimburseInfo).body;
+      }
     } catch (e) {
       console.log(e);
       return store.getStore("universalGasPrice");
@@ -7848,12 +7860,12 @@ class Store {
       const dvgAllowance = await dvgContract.methods
         .allowance(account.address, asset.swapAddress)
         .call({ from: account.address });
-      const dvgActualAllowance = dvgAllowance / 10 ** asset.dvg.decimals; 
+      const dvgActualAllowance = dvgAllowance; 
   
       const dvdAllowance = await dvdContract.methods
         .allowance(account.address, asset.swapAddress)
         .call({ from: account.address });
-      const dvdActualAllowance = dvdAllowance / 10 ** asset.dvd.decimals; 
+      const dvdActualAllowance = dvdAllowance; 
   
       // Approval
       let dvgApprovalError;
@@ -7947,6 +7959,27 @@ class Store {
       } 
     }
   };
+
+  upgradeAndStakeToken = async (payload) => {
+    const network = store.getStore("network");
+    const account = store.getStore("account");
+    const asset = this._getDefaultValues(network).upgradeToken;
+    if (!account || !account.address) {
+      return false;
+    }
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      return null;
+    }
+
+    await this.upgradeToken();
+    await this._callDepositDvg(asset.dvd, 0, true, (err, result) => {
+      if (err) {
+        return emitter.emit(ERROR, err);
+      }
+      return emitter.emit(DEPOSIT_DVG_RETURNED, result);
+    });
+  }
 }
 
 var store = new Store();
