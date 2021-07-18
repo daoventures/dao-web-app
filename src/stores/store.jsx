@@ -8053,12 +8053,23 @@ class Store {
       return null;
     }
 
+    store.setStore({ dvg: this._getDefaultValues(network).dvg });
+
     await this.upgradeToken();
-    await this._callDepositDvg(asset.dvd, 0, true, (err, result) => {
+    await this._callDepositDvg({
+      id: "DVD",
+      abi: asset.dvd.erc20ABI,
+      ...asset.dvd,
+    }, 0, true, (err, txnHash, receipt) => {
       if (err) {
         return emitter.emit(ERROR, err);
       }
-      return emitter.emit(DEPOSIT_DVG_RETURNED, result);
+      if(txnHash) {
+        return emitter.emit(DEPOSIT_DVG_RETURNED, txnHash);
+      }
+      if(receipt) {
+        return emitter.emit(DEPOSIT_DVG_RETURNED_COMPLETED, receipt.transactionHash);
+      }
     });
   }
 }
