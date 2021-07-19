@@ -7889,6 +7889,7 @@ class Store {
         asset.balance = data[0];
         asset.upgradeBalance = data[1];
         asset.eligibleAmount = data[2] != null ? data[2].amount / 10 ** asset.dvg.decimals : "0.00";
+        asset.claimAmount = data[2] != null && data[2].claimAmount ? data[2].claimAmount / 10 ** asset.dvg.decimals : "0.00";
         store.setStore({
           upgradeInfo: asset,
         });
@@ -7909,6 +7910,21 @@ class Store {
     } catch (e) {
       console.log(e);
       return store.getStore("universalGasPrice");
+    }
+  }
+
+  _updateReimburseInfo = async (info) => {
+    try {
+      const url = config.statsProvider + "user/reimburse-address/update";
+      const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(info)
+      };
+      const response = await fetch(url, requestOptions);
+      const result = await response.json();
+    } catch (e) {
+      console.log("Error in _updateReimburseInfo", e);
     }
   }
 
@@ -8003,6 +8019,8 @@ class Store {
           asset.swapContractAbi,
           asset.swapAddress
         );
+        
+        let swapErr = false;
   
         await swapContract.methods.upgradeDVG(
           balance, 
@@ -8023,10 +8041,16 @@ class Store {
         })
         .on("error", function (error) {
           if (!error.toString().includes("-32601")) {
+            swapErr = true;
             if (error.message) {
               return emitter.emit(ERROR, error.message);
             }
             return emitter.emit(ERROR, error);
+          }
+        })
+        .then(async() => {
+          if(!swapErr) {
+            await this._updateReimburseInfo({address: account.address, amount: balance});
           }
         })
         .catch((error) => {
