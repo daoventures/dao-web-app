@@ -447,6 +447,7 @@ class UpgradeToken extends Component {
             dvgBalance: 0,
             dvdBalance: 0,
             eligibleAmount: "0.00",
+            claimAmount: "0.00",
         }
         if (account && account.address) {
             dispatcher.dispatch({ type: GET_UPGRADE_TOKEN })
@@ -542,6 +543,7 @@ class UpgradeToken extends Component {
             dvgBalance: asset.balance,
             dvdBalance: asset.upgradeBalance,
             eligibleAmount: asset.eligibleAmount,
+            claimAmount: asset.claimAmount,
         })
     }
 
@@ -684,6 +686,7 @@ class UpgradeToken extends Component {
             isPopUp,
             dvgBalance,
             eligibleAmount,
+            claimAmount,
         } = this.state
 
         if (!account || !account.address) {
@@ -733,11 +736,18 @@ class UpgradeToken extends Component {
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2,
                                     })} DVG</div>
-                                    <div className={classes.walletAmount}>{eligibleAmount !== '0.00' ? eligibleAmount
-                                    .toLocaleString(undefined, {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2,
-                                    }) : eligibleAmount} DVG</div>
+                                    {
+                                        (claimAmount === "0.00" &&
+                                            <div className={classes.walletAmount}>{eligibleAmount !== '0.00' ? eligibleAmount
+                                            .toLocaleString(undefined, {
+                                                minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2,
+                                            }) : eligibleAmount} DVG</div>
+                                        )
+                                    }
+                                    {
+                                        claimAmount !== "0.00" && <div className={classes.walletAmount}>0 DVG</div>
+                                    }
                                 </div>
                             </div>        
 

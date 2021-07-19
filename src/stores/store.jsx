@@ -7889,6 +7889,7 @@ class Store {
         asset.balance = data[0];
         asset.upgradeBalance = data[1];
         asset.eligibleAmount = data[2] != null ? data[2].amount / 10 ** asset.dvg.decimals : "0.00";
+        asset.claimAmount = data[2] != null && data[2].claimAmount ? data[2].claimAmount / 10 ** asset.dvg.decimals : "0.00";
         store.setStore({
           upgradeInfo: asset,
         });
