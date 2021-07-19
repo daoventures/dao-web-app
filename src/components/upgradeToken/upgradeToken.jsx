@@ -425,6 +425,11 @@ const styles = theme => ({
     },
     upgradeBalances: {
         marginBottom: '3rem',
+    },
+    reminder: {
+        marginTop: '10px',
+        marginBottom: "10px",
+        color: theme.themeColors.textT,
     }
 });
 
@@ -711,7 +716,6 @@ class UpgradeToken extends Component {
                     </div>
                 </Grid>
                 
-
                 <div className={classes.content}>
                     <div className={classes.contentLeft}>
                         <div className={classes.contentLeftTitle}>
@@ -750,6 +754,11 @@ class UpgradeToken extends Component {
                                     }
                                 </div>
                             </div>        
+
+                            <div className={classes.reminder}>
+                                <small>Please ensure all liquidity are removed and all DVG are unstaked from all platforms before performing the upgrade.</small>
+                            </div>
+
 
                             {/** Button to trigger stake function */}
                             <div className={classes.depositButtonBox}>
