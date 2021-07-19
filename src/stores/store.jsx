@@ -7912,6 +7912,21 @@ class Store {
     }
   }
 
+  _updateReimburseInfo = async (info) => {
+    try {
+      const url = config.statsProvider + "user/reimburse-address/update";
+      const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(info)
+      };
+      const response = await fetch(url, requestOptions);
+      const result = await response.json();
+    } catch (e) {
+      console.log("Error in _updateReimburseInfo", e);
+    }
+  }
+
   upgradeToken = async (payload) => {
     const network = store.getStore("network");
     const account = store.getStore("account");
@@ -8003,6 +8018,8 @@ class Store {
           asset.swapContractAbi,
           asset.swapAddress
         );
+        
+        let swapErr = false;
   
         await swapContract.methods.upgradeDVG(
           balance, 
@@ -8023,10 +8040,16 @@ class Store {
         })
         .on("error", function (error) {
           if (!error.toString().includes("-32601")) {
+            swapErr = true;
             if (error.message) {
               return emitter.emit(ERROR, error.message);
             }
             return emitter.emit(ERROR, error);
+          }
+        })
+        .then(async() => {
+          if(!swapErr) {
+            await this._updateReimburseInfo({address: account.address, amount: balance});
           }
         })
         .catch((error) => {
