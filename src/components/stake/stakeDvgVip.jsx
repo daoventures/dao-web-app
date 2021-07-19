@@ -826,7 +826,7 @@ class StakeDvgVip extends Component {
     maxAmount() {
         const { type, dvgInfoObj } = this.state;
         if (dvgInfoObj) {
-            const objIndex = type === "stake" ? 1 : 0;
+            const objIndex = type === "stake" ? 3 : 2;
             this.setState({
                 amount: (Math.floor(dvgInfoObj[objIndex].balance * 10000) / 10000).toFixed(4),
                 max: true,
