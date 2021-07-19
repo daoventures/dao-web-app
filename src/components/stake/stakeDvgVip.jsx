@@ -770,7 +770,7 @@ class StakeDvgVip extends Component {
             return;
         }
 
-        let balance = (type === "stake") ? this.state.dvgInfoObj[1].balance : this.state.dvgInfoObj[0].balance;
+        let balance = (type === "stake") ? this.state.dvgInfoObj[3].balance : this.state.dvgInfoObj[2].balance;
         balance = (Math.floor(balance * 10000) / 10000).toFixed(4);
 
         if(validateInputMoreThanBalance(amount, balance)){
