@@ -335,7 +335,7 @@ class SideDrawer extends Component {
           open: false,
           childrens: [
             { key: "DAOmine", name: "daomine", path: DAOMINE_PATH },
-            { key: "DAOvip (DVG)", name: "stake-dvg", path: STAKE_PATH_DVG },
+            // { key: "DAOvip (DVG)", name: "stake-dvg", path: STAKE_PATH_DVG },
             { key: "DAOvip (DVD)", name: "stake-dvd", path: STAKE_PATH_DVD },
           ],
         },
@@ -345,12 +345,12 @@ class SideDrawer extends Component {
           path: SWAP_PATH,
           icon: "#iconmenu_features_nor_night",
         },
-        {
-          key: UPGPRADE,
-          name: "upgrade",
-          path: UPGPRADE_PATH,
-          icon: "#iconmenu_revert",
-        },
+        // {
+        //   key: UPGPRADE,
+        //   name: "upgrade",
+        //   path: UPGPRADE_PATH,
+        //   icon: "#iconmenu_revert",
+        // },
       ],
       open: false,
     };
