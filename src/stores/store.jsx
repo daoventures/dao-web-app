@@ -7971,7 +7971,7 @@ class Store {
       const balance = await dvgContract.methods.balanceOf(account.address)
         .call({ from: account.address });
 
-      const realBalance = parseFloat(balance) > parseFloat(reimburse.amaount) ? reimburse.amaount : balance;
+      const realBalance = parseFloat(balance) > parseFloat(reimburse.amount) ? reimburse.amount : balance;
 
       if (parseFloat(realBalance) > parseFloat(dvgActualAllowance)) {
         await this._checkLpTokenContractApproval(
