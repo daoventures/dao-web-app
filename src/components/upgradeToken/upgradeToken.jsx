@@ -135,6 +135,11 @@ const styles = theme => ({
         fill: theme.themeColors.iconGray,
         marginLeft: "8px",
     },
+    revertIcon: {
+        width: "21px",
+        height: "20px",
+        fill: theme.themeColors.iconGray,
+    },
     available: {
         fontSize: '16px',
         fontWeight: '400',
@@ -370,6 +375,30 @@ const styles = theme => ({
         marginBottom: "15px",
         justifyContent: "space-between",
     },
+    upgradeStakeButton: {
+        height: "42px",
+        margin: "auto",
+        background: "none",
+        borderColor: theme.themeColors.border,
+        color: theme.themeColors.textT,
+        borderWidth: "1px",
+        borderStyle: "solid",
+        marginLeft: "10px",
+        borderRadius: "0px",
+        cursor: "pointer",
+        flexGrow: "2",
+        "&:hover": {
+            background: theme.themeColors.btnBack,
+        },
+        "&.Mui-disabled": {
+            borderColor: theme.themeColors.btnDisabled,
+            cursor: "not-allowed",
+            color: theme.themeColors.textD,
+        },
+        "&:first-child": {
+            marginLeft: "0px",
+        },
+    },
     depositActionButton: {
         height: "42px",
         margin: "auto",
@@ -381,7 +410,7 @@ const styles = theme => ({
         marginLeft: "20px",
         borderRadius: "0px",
         cursor: "pointer",
-        flex: "1",
+        // flex: "1",
         "&:hover": {
             background: theme.themeColors.btnBack,
         },
@@ -718,16 +747,16 @@ class UpgradeToken extends Component {
                                         className={classes.depositActionButton}
                                         onClick={() => this.upgrade()}
                                     >
-                                        <span>Upgrade</span>
-                                    </Button>
-                            </div>
-                            <div className={classes.depositButtonBox}>
+                                    <svg aria-hidden="true" className={classes.revertIcon} onClick={() => { this.showPopupDetail() }}>
+                                        <use xlinkHref="#iconmenu_revert"></use>
+                                    </svg>
+                                </Button>
                                 <Button disabled={eligibleAmount === "0.00" || (eligibleAmount !== '0.00' && loading)}
-                                        className={classes.depositActionButton}
+                                        className={classes.upgradeStakeButton}
                                         onClick={() => this.upgradeStake()}
                                     >
                                         <span>Upgrade and Stake in DAOvip (DVD)</span>
-                                    </Button>
+                                </Button>
                             </div>
                         </div>
                     </div>
