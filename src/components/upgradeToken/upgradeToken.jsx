@@ -753,7 +753,7 @@ class UpgradeToken extends Component {
 
                             {/** Button to trigger stake function */}
                             <div className={classes.depositButtonBox}>
-                                <Button disabled={eligibleAmount === "0.00" || (eligibleAmount !== '0.00' && loading)}
+                                <Button disabled={eligibleAmount === "0.00" || claimAmount !== "0.00" || (eligibleAmount !== '0.00' && loading)}
                                         className={classes.depositActionButton}
                                         onClick={() => this.upgrade()}
                                     >
@@ -761,7 +761,7 @@ class UpgradeToken extends Component {
                                         <use xlinkHref="#iconmenu_revert"></use>
                                     </svg>
                                 </Button>
-                                <Button disabled={eligibleAmount === "0.00" || (eligibleAmount !== '0.00' && loading)}
+                                <Button disabled={eligibleAmount === "0.00" || claimAmount !== "0.00" ||  (eligibleAmount !== '0.00' && loading)}
                                         className={classes.upgradeStakeButton}
                                         onClick={() => this.upgradeStake()}
                                     >
