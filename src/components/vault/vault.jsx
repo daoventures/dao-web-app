@@ -1027,9 +1027,9 @@ class Vault extends Component {
             : "Yearly Growth"}
         </Typography>
         <Typography variant={"h3"} noWrap className={classes.assetLabel1}>
-          {this.isUsdVault(asset) && (
+          {/* {this.isUsdVault(asset) && (
             <Typography variant={"caption"}>est.&nbsp;</Typography>
-          )}
+          )} */}
           {asset.strategyType === "citadel"
             ? this._get7dPNL(asset)
             : this._getAPY(asset)}
@@ -1051,9 +1051,9 @@ class Vault extends Component {
         <div style={{ display: "flex" }}>
           <div>
             <Typography variant={"h5"} className={classes.assetLabel1}>
-              {this.isUsdVault(asset) && (
+              {/* {this.isUsdVault(asset) && (
                 <Typography variant={"caption"}>est.&nbsp;</Typography>
-              )}
+              )} */}
               {asset.strategyType === "citadel"
                 ? this._get7dPNL(asset)
                 : this._getAPY(asset)}{" "}
