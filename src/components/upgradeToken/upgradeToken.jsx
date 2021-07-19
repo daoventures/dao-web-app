@@ -749,13 +749,8 @@ class UpgradeToken extends Component {
                                 {/** Stake or Unstake Button */}
                                 <div>
                                     <div className={classes.available}>Your wallet</div>
-<<<<<<< HEAD
                                     <div className={classes.walletAmount}>Eligible for upgrade 
                                         {/* <svg aria-hidden="true" className={classes.warnIcon} onClick={() => { this.showPopupDetail() }}>
-=======
-                                    <div className={classes.walletAmount}>Eligible for upgrade
-                                        <svg aria-hidden="true" className={classes.warnIcon} onClick={() => { this.showPopupDetail() }}>
->>>>>>> 34996955878202b45d459f392b60e987e2e39a83
                                             <use xlinkHref="#iconinformation-day"></use>
                                         </svg> */}
                                         {this.renderEligibleUpgradeInfo()}
