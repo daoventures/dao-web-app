@@ -1,4 +1,5 @@
 import {
+  ALL,
   APPROVE_COMPLETED,
   APPROVE_TRANSACTING,
   CHANGE_NETWORK,
@@ -18,7 +19,6 @@ import {
   WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
   WITHDRAW_VAULT_RETURNED,
   WITHDRAW_VAULT_RETURNED_COMPLETED,
-  ALL
 } from "../../constants";
 import {
   Accordion,
@@ -34,7 +34,6 @@ import {
   Typography,
 } from "@material-ui/core";
 import React, { Component } from "react";
-import { colors } from "../../theme";
 
 import Asset from "./asset";
 import ConnectBiconomy from "../connectBiconomy";
@@ -47,6 +46,7 @@ import SearchIcon from "@material-ui/icons/Search";
 import Snackbar from "../snackbar";
 import Store from "../../stores";
 import UnlockModal from "../unlock/unlockModal";
+import { colors } from "../../theme";
 import queryString from "query-string";
 import { withNamespaces } from "react-i18next";
 import { withRouter } from "react-router-dom";
@@ -964,6 +964,7 @@ class Vault extends Component {
   isLogoVault = (asset) => {
     return asset.strategyType === "citadel" ||
       asset.strategyType === "elon" ||
+      asset.strategyType === "cuban" ||
       asset.strategyType === "daoFaang"
       ? true
       : false;
@@ -1159,13 +1160,17 @@ class Vault extends Component {
                 <Typography className={classes.itemTitleText} variant="h4">
                   {asset.strategyName}
                 </Typography>
-                <a href={asset.infoLink} target="_blank" style={{display:"flex"}}>
+                <a
+                  href={asset.infoLink}
+                  target="_blank"
+                  style={{ display: "flex" }}
+                >
                   <svg aria-hidden="true" className={classes.warnIcon}>
                     <use xlinkHref="#iconinformation-day"></use>
                   </svg>
                 </a>
                 {asset.isPopularItem || this.state.happyHour
-                  ? this.state.happyHour && asset.strategyType === "citadel"
+                  ? this.state.happyHour && asset.happyHourEnabled === true
                     ? this.renderHappyHourIcon(asset)
                     : this.renderPopularIcon(asset)
                   : null}
@@ -1353,13 +1358,13 @@ class Vault extends Component {
   };
 
   renderRiskLabel = (asset) => {
-    return <RiskLevelLabel risk={asset.risk}></RiskLevelLabel>
+    return <RiskLevelLabel risk={asset.risk}></RiskLevelLabel>;
   };
 
   renderPopularIcon = (asset) => {
     return (
       asset.isPopularItem && (
-        <div style={{display: "flex"}}>
+        <div style={{ display: "flex" }}>
           <img
             alt="icon-popular"
             src={require("../../assets/img_new/icon_popular.svg")}
@@ -1458,8 +1463,16 @@ class Vault extends Component {
         } else {
           return "0.00%";
         }
+      } else if (asset.strategyType === "cuban") {
+        if (asset.stats.cubanApy) {
+          return (asset.stats.cubanApy / 1).toFixed(2) + "%";
+        } else {
+          return "0.00%";
+        }
       } else if (asset.strategyType === "daoFaang") {
-        return (asset.stats.faangApy) ? (asset.stats.faangApy / 1).toFixed(2) + "%" : "0.00%"
+        return asset.stats.faangApy
+          ? (asset.stats.faangApy / 1).toFixed(2) + "%"
+          : "0.00%";
       }
     } else {
       return "0.00%";

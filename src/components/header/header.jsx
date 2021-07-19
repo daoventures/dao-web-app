@@ -9,10 +9,12 @@ import {
 } from "../../constants";
 import {
   HEADER_TITLE_DAOMINE,
-  HEADER_TITLE_DAOVIP,
+  HEADER_TITLE_DAOVIP_DVD,
+  HEADER_TITLE_DAOVIP_DVG,
   HEADER_TITLE_INVEST,
   HEADER_TITLE_PORTFOLIO,
   HEADER_TITLE_SWAP,
+  HEADER_TITLE_UPGRADE,
 } from "../../constants/page-constant";
 import { IconButton, Typography } from "@material-ui/core";
 import React, { Component } from "react";
@@ -240,9 +242,11 @@ class Header extends Component {
       menuObj: {
         "/portfolio": HEADER_TITLE_PORTFOLIO,
         "/invest": HEADER_TITLE_INVEST,
-        "/stake": HEADER_TITLE_DAOVIP,
+        "/stake-dvg": HEADER_TITLE_DAOVIP_DVG,
+        "/stake-dvd": HEADER_TITLE_DAOVIP_DVD,
         "/daomine": HEADER_TITLE_DAOMINE,
         "/swap": HEADER_TITLE_SWAP,
+        "/upgrade": HEADER_TITLE_UPGRADE,
       },
       currentTheme: store.getStore("currentTheme"),
       currentNetwork: 0,
@@ -507,8 +511,13 @@ class Header extends Component {
           {!hideNav && <ToggleTheme></ToggleTheme>}
           {this.renderHappyHourTimer()}
         </div>
-        
-        { modalOpen && this.renderModal()}
+        {hideNav ? (
+          <div className={classes.pathname}>
+            {this.state.menuObj[this.props.history.location.pathname]}
+          </div>
+        ) : null}
+
+        {modalOpen && this.renderModal()}
       </div>
     );
   }

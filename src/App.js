@@ -20,18 +20,16 @@ import IDai from "./components/idai";
 // import Home from './components/home';
 import Header from "./components/header";
 import Vaults from "./components/vault";
-import MobileViewWarning from "./components/mobileViewWarning";
 import Dashboard from "./components/dashboard";
 import SideDrawer from "./components/sideDrawer";
 import MainContainer from "./components/mainContainer";
 
+import StakeDvdVip from './components/stake/stakeDvdVip';
 import StakeDvgVip from './components/stake/stakeDvgVip';
 import Stake from './components/stake';
 
 import Swap from './components/swap';
-
-import { injected } from "./stores/connectors";
-import { initOnboard } from "./walletsServices.js";
+import UpgradeToken from './components/upgradeToken/upgradeToken';
 
 import {
   CONNECTION_CONNECTED,
@@ -40,8 +38,6 @@ import {
 } from "./constants";
 
 import Store from "./stores";
-import { hotjar } from 'react-hotjar';
-
 const emitter = Store.emitter;
 const store = Store.store;
 const dispatcher = Store.dispatcher;
@@ -53,8 +49,6 @@ class App extends Component {
   };
 
   componentWillMount() {
-    hotjar.initialize(2496922, 6);
-
     dispatcher.dispatch({ type: GET_VAULT_INFO });
 
     // console.log('没到这里吗####');
@@ -194,12 +188,12 @@ class App extends Component {
                 <MainContainer />
                 <InvestSimple />
               </Route> */}
-              {/* <Route path="/portfolio">
+              <Route path="/portfolio">
                 <Header />
                 <SideDrawer />
                 <MainContainer />
                 <Dashboard />
-              </Route> */}
+              </Route>
             
               <Route path="/invest">
                 <Header />
@@ -209,22 +203,23 @@ class App extends Component {
                   <Vaults />
                 </BrowserView>
                 <MobileView>
-                  <MobileViewWarning />
+                  {/* <MobileViewWarning /> */}
+                  <Vaults />
                 </MobileView>
               </Route>
 
-              <Route path="/stake">
+              <Route path="/stake-dvd">
+                <Header />
+                <SideDrawer />
+                <MainContainer />
+                <StakeDvdVip />
+              </Route>
+
+              <Route path="/stake-dvg">
                 <Header />
                 <SideDrawer />
                 <MainContainer />
                 <StakeDvgVip />
-              </Route>
-
-              <Route path="/swap">
-                <Header />
-                <SideDrawer />
-                <MainContainer />
-                <Swap />
               </Route>
 
               <Route path="/daomine">
@@ -232,6 +227,27 @@ class App extends Component {
                 <SideDrawer />
                 <MainContainer />
                 <Stake />
+              </Route>
+
+              <Route path="/upgrade">
+                <Header />
+                <SideDrawer />
+                <MainContainer />
+                <UpgradeToken />
+              </Route>
+
+              {/* <Route path="/stake">
+                <Header />
+                <SideDrawer />
+                <MainContainer />
+                <Stake />
+              </Route> */}
+
+              <Route path="/swap">
+                <Header />
+                <SideDrawer />
+                <MainContainer />
+                <Swap />
               </Route>
 
               <Route path="/">

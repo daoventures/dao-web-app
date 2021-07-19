@@ -116,7 +116,6 @@ class ConnectBiconomy extends Component {
       })
       .onEvent(happyHourbiconomy.ERROR, () => {
         // Handle error while initializing mexa
-        console.log("hi");
       });
 
     // erc20Paymentbiconomy

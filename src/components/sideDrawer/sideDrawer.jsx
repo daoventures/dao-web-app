@@ -22,11 +22,16 @@ import {
 } from "../../constants/constants";
 import {
   INVEST_PATH,
-  STAKE_PATH,
+  STAKE_PATH_DVD,
+  STAKE_PATH_DVG,
   INVEST,
   SWAP_PATH,
   SWAP,
   DAOMINE_PATH,
+  PORTFOLIO,
+  PORTFOLIO_PATH,
+  UPGPRADE,
+  UPGPRADE_PATH,
 } from "../../constants/page-constant";
 import { drawerWidth } from "../../theme/theme";
 import ToggleTheme from "../toggleTheme";
@@ -298,7 +303,6 @@ const styles = (theme) => ({
     flexDirection: "column",
   },
 });
-
 class SideDrawer extends Component {
   constructor(props) {
     super();
@@ -316,7 +320,7 @@ class SideDrawer extends Component {
         (store.getStore("account") && store.getStore("account").balance) || "",
       totalValue: "",
       listItem: [
-        // { key: PORTFOLIO, name:"portfolio", path: PORTFOLIO_PATH, icon: "#iconmenu_porftfolio_nor_day" },
+        { key: PORTFOLIO, name:"portfolio", path: PORTFOLIO_PATH, icon: "#iconmenu_porftfolio_nor_day" },
         {
           key: INVEST,
           name: "invest",
@@ -331,7 +335,8 @@ class SideDrawer extends Component {
           open: false,
           childrens: [
             { key: "DAOmine", name: "daomine", path: DAOMINE_PATH },
-            { key: "DAOvip", name: "stake", path: STAKE_PATH },
+            { key: "DAOvip (DVG)", name: "stake-dvg", path: STAKE_PATH_DVG },
+            { key: "DAOvip (DVD)", name: "stake-dvd", path: STAKE_PATH_DVD },
           ],
         },
         {
@@ -339,6 +344,12 @@ class SideDrawer extends Component {
           name: "swap",
           path: SWAP_PATH,
           icon: "#iconmenu_features_nor_night",
+        },
+        {
+          key: UPGPRADE,
+          name: "upgrade",
+          path: UPGPRADE_PATH,
+          icon: "#iconmenu_revert",
         },
       ],
       open: false,
