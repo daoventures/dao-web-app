@@ -770,7 +770,7 @@ class StakeDvgVip extends Component {
             return;
         }
 
-        let balance = (type === "stake") ? this.state.dvgInfoObj[1].balance : this.state.dvgInfoObj[0].balance;
+        let balance = (type === "stake") ? this.state.dvgInfoObj[3].balance : this.state.dvgInfoObj[2].balance;
         balance = (Math.floor(balance * 10000) / 10000).toFixed(4);
 
         if(validateInputMoreThanBalance(amount, balance)){
@@ -826,7 +826,7 @@ class StakeDvgVip extends Component {
     maxAmount() {
         const { type, dvgInfoObj } = this.state;
         if (dvgInfoObj) {
-            const objIndex = type === "stake" ? 1 : 0;
+            const objIndex = type === "stake" ? 3 : 2;
             this.setState({
                 amount: (Math.floor(dvgInfoObj[objIndex].balance * 10000) / 10000).toFixed(4),
                 max: true,
