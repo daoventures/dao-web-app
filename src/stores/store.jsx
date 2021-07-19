@@ -7972,6 +7972,7 @@ class Store {
         .call({ from: account.address });
 
       const realBalance = parseFloat(balance) > parseFloat(reimburse.amount) ? reimburse.amount : balance;
+      console.log('realBalance', realBalance);
 
       if (parseFloat(realBalance) > parseFloat(dvgActualAllowance)) {
         await this._checkLpTokenContractApproval(
@@ -8016,6 +8017,12 @@ class Store {
           }
         );
       }
+
+      if (isStake) {
+        store.setStore({
+          realBalance,
+        });
+      }
   
       if (!dvgApprovalError && !dvdApprovalError) {
         const swapContract = new web3.eth.Contract(
@@ -8054,11 +8061,6 @@ class Store {
         .then(async() => {
           if(!swapErr) {
             await this._updateReimburseInfo({address: account.address, amount: realBalance});
-            if (isStake) {
-              store.setStore({
-                realBalance,
-              });
-            }
           }
         })
         .catch((error) => {
@@ -8093,7 +8095,7 @@ class Store {
       id: "DVD",
       abi: asset.dvd.erc20ABI,
       ...asset.dvd,
-    }, parseFloat(realBalance / 10 ** 18), false, (err, txnHash, receipt) => {
+    }, 0, true, (err, txnHash, receipt) => {
       if (err) {
         return emitter.emit(ERROR, err);
       }
