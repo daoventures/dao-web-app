@@ -7928,7 +7928,7 @@ class Store {
     }
   }
 
-  upgradeToken = async (payload) => {
+  upgradeToken = async (isStake) => {
     const network = store.getStore("network");
     const account = store.getStore("account");
     const asset = this._getDefaultValues(network).upgradeToken;
@@ -7970,7 +7970,9 @@ class Store {
       const balance = await dvgContract.methods.balanceOf(account.address)
         .call({ from: account.address });
 
-      if (parseFloat(balance) > parseFloat(dvgActualAllowance)) {
+      const realBalance = parseFloat(balance) > parseFloat(reimburse.amaount) ? reimburse.amaount : balance;
+
+      if (parseFloat(realBalance) > parseFloat(dvgActualAllowance)) {
         await this._checkLpTokenContractApproval(
           account,
           dvgContract,
@@ -7992,7 +7994,7 @@ class Store {
         );
       }
   
-      if (parseFloat(balance) > parseFloat(dvdActualAllowance)) {
+      if (parseFloat(realBalance) > parseFloat(dvdActualAllowance)) {
         await this._checkLpTokenContractApproval(
           account,
           dvdContract,
@@ -8023,7 +8025,7 @@ class Store {
         let swapErr = false;
   
         await swapContract.methods.upgradeDVG(
-          balance, 
+          realBalance, 
           reimburse.amount, 
           reimburse.signatureMessage,
         ).send({
@@ -8050,7 +8052,12 @@ class Store {
         })
         .then(async() => {
           if(!swapErr) {
-            await this._updateReimburseInfo({address: account.address, amount: balance});
+            await this._updateReimburseInfo({address: account.address, amount: realBalance});
+            if (isStake) {
+              store.setStore({
+                realBalance,
+              });
+            }
           }
         })
         .catch((error) => {
@@ -8068,6 +8075,7 @@ class Store {
   upgradeAndStakeToken = async (payload) => {
     const network = store.getStore("network");
     const account = store.getStore("account");
+    const realBalance = store.getStore('realBalance');
     const asset = this._getDefaultValues(network).upgradeToken;
     if (!account || !account.address) {
       return false;
@@ -8079,12 +8087,12 @@ class Store {
 
     store.setStore({ dvg: this._getDefaultValues(network).dvg });
 
-    await this.upgradeToken();
+    await this.upgradeToken(true);
     await this._callDepositDvg({
       id: "DVD",
       abi: asset.dvd.erc20ABI,
       ...asset.dvd,
-    }, 0, true, (err, txnHash, receipt) => {
+    }, parseFloat(realBalance / 10 ** 18), false, (err, txnHash, receipt) => {
       if (err) {
         return emitter.emit(ERROR, err);
       }
@@ -8092,6 +8100,9 @@ class Store {
         return emitter.emit(DEPOSIT_DVG_RETURNED, txnHash);
       }
       if(receipt) {
+        store.setStore({
+          realBalance: '',
+        })
         return emitter.emit(DEPOSIT_DVG_RETURNED_COMPLETED, receipt.transactionHash);
       }
     });
