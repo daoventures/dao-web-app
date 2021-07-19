@@ -426,6 +426,11 @@ const styles = theme => ({
     },
     upgradeBalances: {
         marginBottom: '3rem',
+    },
+    reminder: {
+        marginTop: '10px',
+        marginBottom: "10px",
+        color: theme.themeColors.textT,
     }
 });
 
@@ -516,11 +521,11 @@ class UpgradeToken extends Component {
         this.setState({ loading: false });
         const that = this;
         setTimeout(() => {
-          const snackbarObj = {
-            snackbarMessage: "Approving...",
-            snackbarType: "Hash",
-          };
-          that.setState(snackbarObj);
+            const snackbarObj = {
+                snackbarMessage: "Approving...",
+                snackbarType: "Hash",
+            };
+            that.setState(snackbarObj);
         });
     };
 
@@ -530,14 +535,14 @@ class UpgradeToken extends Component {
         this.setState({ loading: false });
         const that = this;
         setTimeout(() => {
-          const snackbarObj = {
-            snackbarMessage: "Approved.",
-            snackbarType: "Transaction Success",
-          };
-          that.setState(snackbarObj);
+            const snackbarObj = {
+                snackbarMessage: "Approved.",
+                snackbarType: "Transaction Success",
+            };
+            that.setState(snackbarObj);
         });
     };
-    
+
     getBalances = (asset) => {
         this.setState({
             loading: false,
@@ -575,10 +580,10 @@ class UpgradeToken extends Component {
         });
 
         setTimeout(() => {
-            this.setState({ 
-                loading: false, 
-                snackbarMessage: txHash, 
-                snackbarType: 'Hash' 
+            this.setState({
+                loading: false,
+                snackbarMessage: txHash,
+                snackbarType: 'Hash'
             });
         });
     };
@@ -590,13 +595,13 @@ class UpgradeToken extends Component {
         });
 
         setTimeout(() => {
-            this.setState({ 
-                loading: false, 
-                snackbarMessage: txHash, 
-                snackbarType: 'Transaction Success' 
+            this.setState({
+                loading: false,
+                snackbarMessage: txHash,
+                snackbarType: 'Transaction Success'
             });
         })
-        
+
         dispatcher.dispatch({ type: GET_UPGRADE_TOKEN });
     };
 
@@ -650,10 +655,10 @@ class UpgradeToken extends Component {
                     </div>
                     <div className={classes.balanceRight}>
                         <div className={classes.balanceAmount}>{dvgBalance
-                                    .toLocaleString(undefined, {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2,
-                                    })}</div>
+                            .toLocaleString(undefined, {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                            })}</div>
                         <div className={classes.balanceCurrency}>DVG</div>
                     </div>
                 </div>
@@ -666,10 +671,10 @@ class UpgradeToken extends Component {
                     </div>
                     <div className={classes.balanceRight}>
                         <div className={classes.balanceAmount}>{dvdBalance
-                                    .toLocaleString(undefined, {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2,
-                                    })}</div>
+                            .toLocaleString(undefined, {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                            })}</div>
                         <div className={classes.balanceCurrency}>DVD</div>
                     </div>
                 </div>
@@ -722,7 +727,7 @@ class UpgradeToken extends Component {
                         <div className={classes.text}>Upgrade your DVG to the new DVD token</div>
 
                         <div className={classes.contentText}>
-                            A brand new upgraded DAOVentures DeFi token (DVD) is created to replace the DVG tokens with additional features (such as token burning and tier rewards) that are designed to boost the utility of the token. 
+                            A brand new upgraded DAOVentures DeFi token (DVD) is created to replace the DVG tokens with additional features (such as token burning and tier rewards) that are designed to boost the utility of the token.
                         </div>
                         <br />
                         <div className={classes.contentText}>
@@ -733,7 +738,6 @@ class UpgradeToken extends Component {
                         <img className={classes.logoImg} src={require("../../assets/DAO-logo-2.png")} alt="" />
                     </div>
                 </Grid>
-                
 
                 <div className={classes.content}>
                     <div className={classes.contentLeft}>
@@ -756,40 +760,38 @@ class UpgradeToken extends Component {
                                 {/** Available Amount in Wallet */}
                                 <div className={classes.upgradeBalances}>
                                     <div className={classes.availableAmount}>{dvgBalance
-                                    .toLocaleString(undefined, {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2,
-                                    })} DVG</div>
-                                    {
-                                        (claimAmount === "0.00" &&
-                                            <div className={classes.walletAmount}>{eligibleAmount !== '0.00' ? eligibleAmount
-                                            .toLocaleString(undefined, {
-                                                minimumFractionDigits: 2,
-                                                maximumFractionDigits: 2,
-                                            }) : eligibleAmount} DVG</div>
-                                        )
-                                    }
-                                    {
-                                        claimAmount !== "0.00" && <div className={classes.walletAmount}>0 DVG</div>
-                                    }
+                                        .toLocaleString(undefined, {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                        })} DVG</div>
+                                    <div className={classes.walletAmount}>{eligibleAmount !== '0.00' ? eligibleAmount
+                                        .toLocaleString(undefined, {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                        }) : eligibleAmount} DVG</div>
                                 </div>
-                            </div>        
+                            </div>
+
+                            <div className={classes.reminder}>
+                                <small>Please ensure all liquidity are removed and all DVG are unstaked from all platforms before performing the upgrade.</small>
+                            </div>
+
 
                             {/** Button to trigger stake function */}
                             <div className={classes.depositButtonBox}>
-                                <Button disabled={eligibleAmount === "0.00" || claimAmount !== "0.00" || (eligibleAmount !== '0.00' && loading)}
-                                        className={classes.depositActionButton}
-                                        onClick={() => this.upgrade()}
-                                    >
+                                <Button disabled={eligibleAmount === "0.00" || (Number(claimAmount) >= Number(eligibleAmount)) || (eligibleAmount !== '0.00' && loading)}
+                                    className={classes.depositActionButton}
+                                    onClick={() => this.upgrade()}
+                                >
                                     <svg aria-hidden="true" className={classes.revertIcon} onClick={() => { this.showPopupDetail() }}>
                                         <use xlinkHref="#iconmenu_revert"></use>
                                     </svg>
                                 </Button>
-                                <Button disabled={eligibleAmount === "0.00" || claimAmount !== "0.00" ||  (eligibleAmount !== '0.00' && loading)}
-                                        className={classes.upgradeStakeButton}
-                                        onClick={() => this.upgradeStake()}
-                                    >
-                                        <span>Upgrade and Stake in DAOvip (DVD)</span>
+                                <Button disabled={eligibleAmount === "0.00" || (Number(claimAmount) >= Number(eligibleAmount)) || (eligibleAmount !== '0.00' && loading)}
+                                    className={classes.upgradeStakeButton}
+                                    onClick={() => this.upgradeStake()}
+                                >
+                                    <span>Upgrade and Stake in DAOvip (DVD)</span>
                                 </Button>
                             </div>
                         </div>
@@ -800,13 +802,14 @@ class UpgradeToken extends Component {
                             <div className={classes.titleText}>Balance</div>
                         </div>
                         <div className={classes.contentCenter}>
-                            { this.renderBalance('DVG') }
-                            { this.renderBalance('DVD') }
+                            {this.renderBalance('DVG')}
+                            {this.renderBalance('DVD')}
                         </div>
                     </div>
                 </div>
-                {/* {isPopUp ?
-                    <div className={classes.}>
+
+                {isPopUp ?
+                    <div className={classes.share}>
                         <div className={classes.shareBox}>
                             <div className={classes.shareTitle}>
                                 <p className={classes.shareTitleText}></p>
