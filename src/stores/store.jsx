@@ -95,6 +95,7 @@ import {
   UPGRADE_TOKEN,
   UPGRADE_TOKEN_SUCCESS,
   UPGRADE_TOKEN_RETURN,
+  UPGRADE_STAKE_TOKEN,
 } from "../constants";
 import {
   Biconomy,
@@ -446,6 +447,9 @@ class Store {
           case UPGRADE_TOKEN:
             this.upgradeToken();
             break;
+          case UPGRADE_STAKE_TOKEN:
+            this.upgradeAndStakeToken();
+            break;
           default: {
           }
         }
@@ -628,7 +632,7 @@ class Store {
             "0x6b175474e89094c44da98b954eedeac495271d0f",
           ],
           erc20address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
-          vaultContractAddress: "", // TODO: Update to the mainnet address
+          vaultContractAddress: "0x2ad9f8d4c24652ea9f8a954f7e1fdb50a3be1dfd", 
           vaultContractABI: config.vaultDAOCUBContractABI,
           balance: 0,
           balances: [0, 0, 0],
@@ -638,13 +642,13 @@ class Store {
           depositAll: true,
           withdraw: true,
           withdrawAll: true,
-          lastMeasurement: 12722655, // TODO: Update to the mainnet block number
+          lastMeasurement: 12799447, 
           measurement: 1e18,
           price_id: ["tether", "usd-coin", "dai"],
           priceInUSD: [0, 0, 0],
           strategyName: "Cuban's Ape: USDT USDC DAI",
           strategy: "DAO Cuban",
-          strategyAddress: "", // TODO: Update to the mainnet address
+          strategyAddress: "0x7c0f84e9dc6f721de21d51a490de6e370fa01cd6", 
           strategyContractABI: config.strategyDAOCUBContractABI,
           historicalPriceId: "daoCUB_price",
           logoFormat: "svg",
@@ -657,7 +661,7 @@ class Store {
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-cuban-vault",
           isPopularItem: false,
-          // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
+          isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
         },
         {
           id: "USDT",
@@ -987,6 +991,7 @@ class Store {
           infoLink:
             "https://daoventures.gitbook.io/daoventures/products/strategies#bf64",
           isPopularItem: true, // use to render popular item icon
+          happyHourEnabled: true,
         },
         {
           id: "daoELO",
@@ -7645,7 +7650,7 @@ class Store {
 
     //xdvg授权数量小于金额的话 需要重新授权
     if (parseFloat(_amount) > parseFloat(allowance)) {
-      this._callDvgApproval(account, amount, (err) => {
+      this._callDvgApproval(account, _amount, (err) => {
         if (err) {
           return emitter.emit(ERROR, err);
         }
@@ -7873,6 +7878,9 @@ class Store {
         (callbackInner) => {
           this._getERC20Balance(web3, asset.dvd, account, callbackInner);
         },
+        (callbackInner) => {
+          this._getReimburseInfo(account.address.toLowerCase(), callbackInner);
+        },
       ],
       (err, data) => {
         if (err) {
@@ -7881,6 +7889,8 @@ class Store {
         }
         asset.balance = data[0];
         asset.upgradeBalance = data[1];
+        asset.eligibleAmount = data[2] != null ? data[2].amount / 10 ** asset.dvg.decimals : "0.00";
+        asset.claimAmount = data[2] != null && data[2].claimAmount ? data[2].claimAmount / 10 ** asset.dvg.decimals : "0.00";
         store.setStore({
           upgradeInfo: asset,
         });
@@ -7889,18 +7899,37 @@ class Store {
     );
   };
 
-  _getReimburseInfo = async (address) => {
+  _getReimburseInfo = async (address, callback) => {
     try {
       const url = config.statsProvider + "user/reimburse-address/" + address;
       const reimburseInfo = await rp(url);
-      return JSON.parse(reimburseInfo).body;
+      if (callback) {
+        return callback(null, JSON.parse(reimburseInfo).body);
+      } else {
+        return JSON.parse(reimburseInfo).body;
+      }
     } catch (e) {
       console.log(e);
       return store.getStore("universalGasPrice");
     }
   }
 
-  upgradeToken = async (payload) => {
+  _updateReimburseInfo = async (info) => {
+    try {
+      const url = config.statsProvider + "user/reimburse-address/update";
+      const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(info)
+      };
+      const response = await fetch(url, requestOptions);
+      const result = await response.json();
+    } catch (e) {
+      console.log("Error in _updateReimburseInfo", e);
+    }
+  }
+
+  upgradeToken = async (isStake) => {
     const network = store.getStore("network");
     const account = store.getStore("account");
     const asset = this._getDefaultValues(network).upgradeToken;
@@ -7929,12 +7958,12 @@ class Store {
       const dvgAllowance = await dvgContract.methods
         .allowance(account.address, asset.swapAddress)
         .call({ from: account.address });
-      const dvgActualAllowance = dvgAllowance / 10 ** asset.dvg.decimals; 
+      const dvgActualAllowance = dvgAllowance; 
   
       const dvdAllowance = await dvdContract.methods
         .allowance(account.address, asset.swapAddress)
         .call({ from: account.address });
-      const dvdActualAllowance = dvdAllowance / 10 ** asset.dvd.decimals; 
+      const dvdActualAllowance = dvdAllowance; 
   
       // Approval
       let dvgApprovalError;
@@ -7942,7 +7971,10 @@ class Store {
       const balance = await dvgContract.methods.balanceOf(account.address)
         .call({ from: account.address });
 
-      if (parseFloat(balance) > parseFloat(dvgActualAllowance)) {
+      const realBalance = parseFloat(balance) > parseFloat(reimburse.amount) ? reimburse.amount : balance;
+      console.log('realBalance', realBalance);
+
+      if (parseFloat(realBalance) > parseFloat(dvgActualAllowance)) {
         await this._checkLpTokenContractApproval(
           account,
           dvgContract,
@@ -7964,7 +7996,7 @@ class Store {
         );
       }
   
-      if (parseFloat(balance) > parseFloat(dvdActualAllowance)) {
+      if (parseFloat(realBalance) > parseFloat(dvdActualAllowance)) {
         await this._checkLpTokenContractApproval(
           account,
           dvdContract,
@@ -7985,15 +8017,23 @@ class Store {
           }
         );
       }
+
+      if (isStake) {
+        store.setStore({
+          realBalance,
+        });
+      }
   
       if (!dvgApprovalError && !dvdApprovalError) {
         const swapContract = new web3.eth.Contract(
           asset.swapContractAbi,
           asset.swapAddress
         );
+        
+        let swapErr = false;
   
         await swapContract.methods.upgradeDVG(
-          balance, 
+          realBalance, 
           reimburse.amount, 
           reimburse.signatureMessage,
         ).send({
@@ -8011,10 +8051,16 @@ class Store {
         })
         .on("error", function (error) {
           if (!error.toString().includes("-32601")) {
+            swapErr = true;
             if (error.message) {
               return emitter.emit(ERROR, error.message);
             }
             return emitter.emit(ERROR, error);
+          }
+        })
+        .then(async() => {
+          if(!swapErr) {
+            await this._updateReimburseInfo({address: account.address, amount: realBalance});
           }
         })
         .catch((error) => {
@@ -8028,6 +8074,42 @@ class Store {
       } 
     }
   };
+
+  upgradeAndStakeToken = async (payload) => {
+    const network = store.getStore("network");
+    const account = store.getStore("account");
+    const realBalance = store.getStore('realBalance');
+    const asset = this._getDefaultValues(network).upgradeToken;
+    if (!account || !account.address) {
+      return false;
+    }
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      return null;
+    }
+
+    store.setStore({ dvg: this._getDefaultValues(network).dvg });
+
+    await this.upgradeToken(true);
+    await this._callDepositDvg({
+      id: "DVD",
+      abi: asset.dvd.erc20ABI,
+      ...asset.dvd,
+    }, 0, true, (err, txnHash, receipt) => {
+      if (err) {
+        return emitter.emit(ERROR, err);
+      }
+      if(txnHash) {
+        return emitter.emit(DEPOSIT_DVG_RETURNED, txnHash);
+      }
+      if(receipt) {
+        store.setStore({
+          realBalance: '',
+        })
+        return emitter.emit(DEPOSIT_DVG_RETURNED_COMPLETED, receipt.transactionHash);
+      }
+    });
+  }
 }
 
 var store = new Store();

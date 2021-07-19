@@ -188,12 +188,12 @@ class App extends Component {
                 <MainContainer />
                 <InvestSimple />
               </Route> */}
-              <Route path="/portfolio">
+              {/* <Route path="/portfolio">
                 <Header />
                 <SideDrawer />
                 <MainContainer />
                 <Dashboard />
-              </Route>
+              </Route> */}
             
               <Route path="/invest">
                 <Header />

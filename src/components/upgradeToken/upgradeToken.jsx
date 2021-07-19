@@ -17,10 +17,12 @@ import {
     UPGRADE_TOKEN_RETURN,
     APPROVE_TRANSACTING,
     APPROVE_COMPLETED,
+    DEPOSIT_DVG_RETURNED,
+    UPGRADE_STAKE_TOKEN,
+    DEPOSIT_DVG_RETURNED_COMPLETED,
 } from '../../constants'
 import Store from "../../stores";
 import ConnectWallet from "../common/connectWallet/connectWallet";
-import { initOnboard } from '../../walletsServices.js';
 import Snackbar from "../snackbar/snackbar";
 import InfoModal from "../common/infoModal/infoModal";
 
@@ -64,8 +66,8 @@ const styles = theme => ({
     text: {
         fontSize: '30px',
         fontWeight: '500',
-        color: '#FFFFFF',
         lineHeight: '96px',
+        color: theme.themeColors.textT,
         [theme.breakpoints.down('sm')]: {
             width: '100%',
             lineHeight: 1,
@@ -77,8 +79,8 @@ const styles = theme => ({
     contentText: {
         fontSize: '16px',
         fontWeight: '500',
-        color: '#FFFFFF',
         lineHeight: '20px',
+        color: theme.themeColors.textT,
         [theme.breakpoints.down('sm')]: {
             width: '100%',
             lineHeight: 1,
@@ -123,7 +125,6 @@ const styles = theme => ({
     contentHeader: {
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'center',
         marginTop: '25px',
         [theme.breakpoints.down('sm')]: {
             display: 'block'
@@ -135,11 +136,27 @@ const styles = theme => ({
         fill: theme.themeColors.iconGray,
         marginLeft: "8px",
     },
+    revertIcon: {
+        width: "21px",
+        height: "20px",
+        fill: theme.themeColors.iconGray,
+    },
     available: {
         fontSize: '16px',
         fontWeight: '400',
         lineHeight: '16px',
         color: theme.themeColors.textT,
+        [theme.breakpoints.down('sm')]: {
+            marginTop: '23px',
+            textAlign: 'right'
+        },
+    },
+    availableAmount: {
+        fontSize: '16px',
+        fontWeight: '400',
+        lineHeight: '16px',
+        color: theme.themeColors.textT,
+        textAlign: 'right',
         [theme.breakpoints.down('sm')]: {
             marginTop: '23px',
             textAlign: 'right'
@@ -151,6 +168,7 @@ const styles = theme => ({
         display: 'flex',
         marginTop: '7px',
         color: theme.themeColors.textP,
+        justifyContent: 'flex-end',
         [theme.breakpoints.down('sm')]: {
             marginTop: '23px',
             textAlign: 'right'
@@ -355,9 +373,32 @@ const styles = theme => ({
     depositButtonBox: {
         width: "100%",
         display: "flex",
-        marginTop: "4rem",
         marginBottom: "15px",
         justifyContent: "space-between",
+    },
+    upgradeStakeButton: {
+        height: "42px",
+        margin: "auto",
+        background: "none",
+        borderColor: theme.themeColors.border,
+        color: theme.themeColors.textT,
+        borderWidth: "1px",
+        borderStyle: "solid",
+        marginLeft: "10px",
+        borderRadius: "0px",
+        cursor: "pointer",
+        flexGrow: "2",
+        "&:hover": {
+            background: theme.themeColors.btnBack,
+        },
+        "&.Mui-disabled": {
+            borderColor: theme.themeColors.btnDisabled,
+            cursor: "not-allowed",
+            color: theme.themeColors.textD,
+        },
+        "&:first-child": {
+            marginLeft: "0px",
+        },
     },
     depositActionButton: {
         height: "42px",
@@ -370,7 +411,7 @@ const styles = theme => ({
         marginLeft: "20px",
         borderRadius: "0px",
         cursor: "pointer",
-        flex: "1",
+        // flex: "1",
         "&:hover": {
             background: theme.themeColors.btnBack,
         },
@@ -382,6 +423,14 @@ const styles = theme => ({
         "&:first-child": {
             marginLeft: "0px",
         },
+    },
+    upgradeBalances: {
+        marginBottom: '3rem',
+    },
+    reminder: {
+        marginTop: '10px',
+        marginBottom: "10px",
+        color: theme.themeColors.textT,
     }
 });
 
@@ -403,6 +452,8 @@ class UpgradeToken extends Component {
             disableUnstake: false,
             dvgBalance: 0,
             dvdBalance: 0,
+            eligibleAmount: "0.00",
+            claimAmount: "0.00",
         }
         if (account && account.address) {
             dispatcher.dispatch({ type: GET_UPGRADE_TOKEN })
@@ -417,6 +468,8 @@ class UpgradeToken extends Component {
         emitter.on(ERROR, this.errorReturned)
         emitter.on(APPROVE_TRANSACTING, this.showHashApproval);
         emitter.on(APPROVE_COMPLETED, this.onApprovalCompleted);
+        emitter.on(DEPOSIT_DVG_RETURNED, this.showHash)
+        emitter.on(DEPOSIT_DVG_RETURNED_COMPLETED, this.upgradeReturned)
     }
 
     componentWillUnmount() {
@@ -428,6 +481,8 @@ class UpgradeToken extends Component {
         emitter.removeListener(ERROR, this.errorReturned)
         emitter.removeListener(APPROVE_TRANSACTING, this.showHashApproval)
         emitter.removeListener(APPROVE_COMPLETED, this.onApprovalCompleted)
+        emitter.removeListener(DEPOSIT_DVG_RETURNED, this.showHash)
+        emitter.removeListener(DEPOSIT_DVG_RETURNED_COMPLETED, this.upgradeReturned)
     }
 
     errorReturned = (error) => {
@@ -466,11 +521,11 @@ class UpgradeToken extends Component {
         this.setState({ loading: false });
         const that = this;
         setTimeout(() => {
-          const snackbarObj = {
-            snackbarMessage: "Approving...",
-            snackbarType: "Hash",
-          };
-          that.setState(snackbarObj);
+            const snackbarObj = {
+                snackbarMessage: "Approving...",
+                snackbarType: "Hash",
+            };
+            that.setState(snackbarObj);
         });
     };
 
@@ -480,19 +535,21 @@ class UpgradeToken extends Component {
         this.setState({ loading: false });
         const that = this;
         setTimeout(() => {
-          const snackbarObj = {
-            snackbarMessage: "Approved.",
-            snackbarType: "Transaction Success",
-          };
-          that.setState(snackbarObj);
+            const snackbarObj = {
+                snackbarMessage: "Approved.",
+                snackbarType: "Transaction Success",
+            };
+            that.setState(snackbarObj);
         });
     };
-    
+
     getBalances = (asset) => {
         this.setState({
             loading: false,
             dvgBalance: asset.balance,
             dvdBalance: asset.upgradeBalance,
+            eligibleAmount: asset.eligibleAmount,
+            claimAmount: asset.claimAmount,
         })
     }
 
@@ -501,6 +558,14 @@ class UpgradeToken extends Component {
 
         dispatcher.dispatch({
             type: UPGRADE_TOKEN,
+        })
+    }
+
+    upgradeStake = () => {
+        this.setState({ errorMessage: "", loading: true });
+
+        dispatcher.dispatch({
+            type: UPGRADE_STAKE_TOKEN,
         })
     }
 
@@ -515,10 +580,10 @@ class UpgradeToken extends Component {
         });
 
         setTimeout(() => {
-            this.setState({ 
-                loading: false, 
-                snackbarMessage: txHash, 
-                snackbarType: 'Hash' 
+            this.setState({
+                loading: false,
+                snackbarMessage: txHash,
+                snackbarType: 'Hash'
             });
         });
     };
@@ -530,13 +595,13 @@ class UpgradeToken extends Component {
         });
 
         setTimeout(() => {
-            this.setState({ 
-                loading: false, 
-                snackbarMessage: txHash, 
-                snackbarType: 'Transaction Success' 
+            this.setState({
+                loading: false,
+                snackbarMessage: txHash,
+                snackbarType: 'Transaction Success'
             });
         })
-        
+
         dispatcher.dispatch({ type: GET_UPGRADE_TOKEN });
     };
 
@@ -579,7 +644,7 @@ class UpgradeToken extends Component {
         const { classes } = this.props;
         const {
             dvgBalance,
-            dvdBalance
+            dvdBalance,
         } = this.state;
 
         if (symbol === 'DVG') {
@@ -590,10 +655,10 @@ class UpgradeToken extends Component {
                     </div>
                     <div className={classes.balanceRight}>
                         <div className={classes.balanceAmount}>{dvgBalance
-                                    .toLocaleString(undefined, {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2,
-                                    })}</div>
+                            .toLocaleString(undefined, {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                            })}</div>
                         <div className={classes.balanceCurrency}>DVG</div>
                     </div>
                 </div>
@@ -606,10 +671,10 @@ class UpgradeToken extends Component {
                     </div>
                     <div className={classes.balanceRight}>
                         <div className={classes.balanceAmount}>{dvdBalance
-                                    .toLocaleString(undefined, {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2,
-                                    })}</div>
+                            .toLocaleString(undefined, {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                            })}</div>
                         <div className={classes.balanceCurrency}>DVD</div>
                     </div>
                 </div>
@@ -647,8 +712,9 @@ class UpgradeToken extends Component {
             loading,
             account,
             isPopUp,
-            disableStake,
             dvgBalance,
+            eligibleAmount,
+            claimAmount,
         } = this.state
 
         if (!account || !account.address) {
@@ -661,7 +727,7 @@ class UpgradeToken extends Component {
                         <div className={classes.text}>Upgrade your DVG to the new DVD token</div>
 
                         <div className={classes.contentText}>
-                            A brand new upgraded DAOVentures DeFi token (DVD) is created to replace the DVG tokens with additional features (such as token burning and tier rewards) that are designed to boost the utility of the token. 
+                            A brand new upgraded DAOVentures DeFi token (DVD) is created to replace the DVG tokens with additional features (such as token burning and tier rewards) that are designed to boost the utility of the token.
                         </div>
                         <br />
                         <div className={classes.contentText}>
@@ -672,7 +738,6 @@ class UpgradeToken extends Component {
                         <img className={classes.logoImg} src={require("../../assets/DAO-logo-2.png")} alt="" />
                     </div>
                 </Grid>
-                
 
                 <div className={classes.content}>
                     <div className={classes.contentLeft}>
@@ -693,28 +758,43 @@ class UpgradeToken extends Component {
                                 </div>
 
                                 {/** Available Amount in Wallet */}
-                                <div>
-                                    <div className={classes.available}>{dvgBalance
-                                    .toLocaleString(undefined, {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2,
-                                    })} DVG</div>
-                                    <div className={classes.walletAmount}>{dvgBalance
-                                    .toLocaleString(undefined, {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2,
-                                    })} DVG</div>
+                                <div className={classes.upgradeBalances}>
+                                    <div className={classes.availableAmount}>{dvgBalance
+                                        .toLocaleString(undefined, {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                        })} DVG</div>
+                                    <div className={classes.walletAmount}>{eligibleAmount !== '0.00' ? eligibleAmount
+                                        .toLocaleString(undefined, {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                        }) : eligibleAmount} DVG</div>
                                 </div>
-                            </div>        
+                            </div>
+
+                            <div className={classes.reminder}>
+                                <small>Please ensure all liquidity are removed and all DVG are unstaked from all platforms before performing the upgrade.</small>
+                            </div>
+
 
                             {/** Button to trigger stake function */}
                             <div className={classes.depositButtonBox}>
-                                <Button disabled={disableStake || (!disableStake && loading)}
-                                        className={classes.depositActionButton}
-                                        onClick={() => this.upgrade()}
-                                    >
-                                        <span>Upgrade</span>
-                                    </Button>
+                                <Button disabled={eligibleAmount === "0.00" || 
+                                                   (eligibleAmount !== '0.00' && loading)}
+                                    className={classes.depositActionButton}
+                                    onClick={() => this.upgrade()}
+                                >
+                                    <svg aria-hidden="true" className={classes.revertIcon} onClick={() => { this.showPopupDetail() }}>
+                                        <use xlinkHref="#iconmenu_revert"></use>
+                                    </svg>
+                                </Button>
+                                <Button disabled={eligibleAmount === "0.00" || 
+                                                (eligibleAmount !== '0.00' && loading)}
+                                    className={classes.upgradeStakeButton}
+                                    onClick={() => this.upgradeStake()}
+                                >
+                                    <span>Upgrade and Stake in DAOvip (DVD)</span>
+                                </Button>
                             </div>
                         </div>
                     </div>
@@ -724,8 +804,8 @@ class UpgradeToken extends Component {
                             <div className={classes.titleText}>Balance</div>
                         </div>
                         <div className={classes.contentCenter}>
-                            { this.renderBalance('DVG') }
-                            { this.renderBalance('DVD') }
+                            {this.renderBalance('DVG')}
+                            {this.renderBalance('DVD')}
                         </div>
                     </div>
                 </div>
