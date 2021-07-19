@@ -20,19 +20,16 @@ import IDai from "./components/idai";
 // import Home from './components/home';
 import Header from "./components/header";
 import Vaults from "./components/vault";
-import MobileViewWarning from "./components/mobileViewWarning";
 import Dashboard from "./components/dashboard";
 import SideDrawer from "./components/sideDrawer";
 import MainContainer from "./components/mainContainer";
 
+import StakeDvdVip from './components/stake/stakeDvdVip';
 import StakeDvgVip from './components/stake/stakeDvgVip';
 import Stake from './components/stake';
 
 import Swap from './components/swap';
 import UpgradeToken from './components/upgradeToken/upgradeToken';
-
-import { injected } from "./stores/connectors";
-import { initOnboard } from "./walletsServices.js";
 
 import {
   CONNECTION_CONNECTED,
@@ -211,7 +208,14 @@ class App extends Component {
                 </MobileView>
               </Route>
 
-              <Route path="/stake">
+              <Route path="/stake-dvd">
+                <Header />
+                <SideDrawer />
+                <MainContainer />
+                <StakeDvdVip />
+              </Route>
+
+              <Route path="/stake-dvg">
                 <Header />
                 <SideDrawer />
                 <MainContainer />
@@ -236,7 +240,7 @@ class App extends Component {
                 <Header />
                 <SideDrawer />
                 <MainContainer />
-                <StakeDvgVip />
+                <Stake />
               </Route> */}
 
               <Route path="/swap">
