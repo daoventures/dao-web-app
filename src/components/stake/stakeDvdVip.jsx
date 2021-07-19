@@ -1142,7 +1142,7 @@ class StakeDvdVip extends Component {
                                     </p>
                                     <p className={classes.totalTextNum}>
                                        {xDVGObj && (
-                                           <span>1.{(Number(xDVGObj._depositedAmount) <= 0 ) ? "0" : Number(xDVGObj.tier) + 1}x</span>
+                                           <span>1.{Number(xDVGObj.tier)}x</span>
                                        )}
                                     </p>
                                 </div>
