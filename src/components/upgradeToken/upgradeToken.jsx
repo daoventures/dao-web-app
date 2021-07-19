@@ -24,6 +24,7 @@ import {
 import Store from "../../stores";
 import ConnectWallet from "../common/connectWallet/connectWallet";
 import Snackbar from "../snackbar/snackbar";
+import InfoModal from "../common/infoModal/infoModal";
 
 const emitter = Store.emitter
 const dispatcher = Store.dispatcher
@@ -602,11 +603,11 @@ class UpgradeToken extends Component {
         tempwindow.location = url;
     }
 
-    showPopupDetail = () => {
-        this.setState({
-            isPopUp: !this.state.isPopUp
-        })
-    }
+    // showPopupDetail = () => {
+    //     this.setState({
+    //         isPopUp: !this.state.isPopUp
+    //     })
+    // }
 
     renderAvailableAmount = (amount, symbol) => {
         const { classes } = this.props;
@@ -674,6 +675,28 @@ class UpgradeToken extends Component {
         }
     }
 
+    renderEligibleUpgradeInfo = () => {
+        const { classes } = this.props;
+
+        const modalContent = (
+            <div className={classes.shareContent}>
+                <div className={classes.aprIntroduction}>
+                    <h3>
+                        Tokens in your wallet at block 12801522 (Jul-10-2021 07:28:49 PM +UTC) are eligible for swapping at a ratio of 1:1.
+                    </h3>
+                    <h3>
+                        Tokens that are purchased after the block will be swapped based on an initial price of $0.225. Please reach out to us via our Telegram or Discord if you had purchased the DVG token after block 12801522.
+                    </h3>
+                    <h3>
+                        <a href="https://daoventuresco.medium.com/the-day-after-chainswap-exploit-our-action-plan-4a53a75a0c26" target="_blank" rel="noopener noreferrer" className={classes.seeMore}>Read more here</a>
+                    </h3>
+                </div>
+            </div>
+        );
+
+        return <InfoModal content={modalContent} size={`Large`}></InfoModal>
+    }
+
     render() {
         const {
             classes
@@ -720,9 +743,10 @@ class UpgradeToken extends Component {
                                 <div>
                                     <div className={classes.available}>Your wallet</div>
                                     <div className={classes.walletAmount}>Eligible for upgrade 
-                                        <svg aria-hidden="true" className={classes.warnIcon} onClick={() => { this.showPopupDetail() }}>
+                                        {/* <svg aria-hidden="true" className={classes.warnIcon} onClick={() => { this.showPopupDetail() }}>
                                             <use xlinkHref="#iconinformation-day"></use>
-                                        </svg>
+                                        </svg> */}
+                                        {this.renderEligibleUpgradeInfo()}
                                     </div>
                                 </div>
 
@@ -771,9 +795,8 @@ class UpgradeToken extends Component {
                         </div>
                     </div>
                 </div>
-                
-                {isPopUp ?
-                    <div className={classes.share}>
+                {/* {isPopUp ?
+                    <div className={classes.}>
                         <div className={classes.shareBox}>
                             <div className={classes.shareTitle}>
                                 <p className={classes.shareTitleText}></p>
@@ -795,7 +818,7 @@ class UpgradeToken extends Component {
                                 </div>
                             </div>
                         </div>
-                    </div> : null}
+                    </div> : null} */}
                 {/** Snackbar */}
                 {this.state.snackbarMessage && this.renderSnackbar()}
             </div>
