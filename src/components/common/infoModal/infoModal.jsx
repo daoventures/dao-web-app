@@ -37,6 +37,12 @@ const styles = (theme) => ({
         fill: theme.themeColors.textT,
         marginLeft: '5px'
     },
+    infoLinkLarge: {
+        width: "20px",
+        height: "20px",
+        fill: theme.themeColors.iconGray,
+        marginLeft: "8px",
+    },
 });
 
 class InfoModal extends Component {
@@ -84,11 +90,13 @@ class InfoModal extends Component {
     }
 
     render() {
-        const { classes } = this.props;
+        const { classes, size } = this.props;
+        const iconSize = (size !== "" &&  size !== undefined) ? size : "";
+    
         return (
             <React.Fragment>
                 {this.renderModal()}
-                <svg aria-hidden="true" className={classes.infoLink} aria-hidden="true" onClick={() => this.handleModalDisplay(true)}>
+                <svg aria-hidden="true" className={classes[`infoLink${iconSize}`]} aria-hidden="true" onClick={() => this.handleModalDisplay(true)}>
                     <use xlinkHref="#iconinformation-day"></use>
                 </svg>
             </React.Fragment>
