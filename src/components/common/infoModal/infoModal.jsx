@@ -34,7 +34,7 @@ const styles = (theme) => ({
     infoLink: {
         width: '14px',
         height: '14px',
-        fill: theme.themeColors.textT,
+        fill: theme.themeColors.iconGray,
         marginLeft: '5px'
     },
     infoLinkLarge: {
