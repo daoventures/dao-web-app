@@ -749,8 +749,13 @@ class UpgradeToken extends Component {
                                 {/** Stake or Unstake Button */}
                                 <div>
                                     <div className={classes.available}>Your wallet</div>
+<<<<<<< HEAD
                                     <div className={classes.walletAmount}>Eligible for upgrade 
                                         {/* <svg aria-hidden="true" className={classes.warnIcon} onClick={() => { this.showPopupDetail() }}>
+=======
+                                    <div className={classes.walletAmount}>Eligible for upgrade
+                                        <svg aria-hidden="true" className={classes.warnIcon} onClick={() => { this.showPopupDetail() }}>
+>>>>>>> 34996955878202b45d459f392b60e987e2e39a83
                                             <use xlinkHref="#iconinformation-day"></use>
                                         </svg> */}
                                         {this.renderEligibleUpgradeInfo()}
@@ -779,9 +784,7 @@ class UpgradeToken extends Component {
 
                             {/** Button to trigger stake function */}
                             <div className={classes.depositButtonBox}>
-                                <Button disabled={eligibleAmount === "0.00" ||
-                                                   !((dvgBalance - claimAmount) <= eligibleAmount && (dvgBalance - claimAmount) > 0) || 
-                                                   (eligibleAmount !== '0.00' && loading)}
+                                <Button disabled={eligibleAmount === "0.00" || (Number(claimAmount) >= Number(eligibleAmount)) || (eligibleAmount !== '0.00' && loading)}
                                     className={classes.depositActionButton}
                                     onClick={() => this.upgrade()}
                                 >
@@ -789,9 +792,7 @@ class UpgradeToken extends Component {
                                         <use xlinkHref="#iconmenu_revert"></use>
                                     </svg>
                                 </Button>
-                                <Button disabled={eligibleAmount === "0.00" || 
-                                                 !((dvgBalance - claimAmount) <= eligibleAmount && (dvgBalance - claimAmount) > 0)  || 
-                                                (eligibleAmount !== '0.00' && loading)}
+                                <Button disabled={eligibleAmount === "0.00" || (Number(claimAmount) >= Number(eligibleAmount)) || (eligibleAmount !== '0.00' && loading)}
                                     className={classes.upgradeStakeButton}
                                     onClick={() => this.upgradeStake()}
                                 >
@@ -811,9 +812,8 @@ class UpgradeToken extends Component {
                         </div>
                     </div>
                 </div>
-
-                {isPopUp ?
-                    <div className={classes.share}>
+                {/* {isPopUp ?
+                    <div className={classes.}>
                         <div className={classes.shareBox}>
                             <div className={classes.shareTitle}>
                                 <p className={classes.shareTitleText}></p>
