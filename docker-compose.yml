@@ -27,6 +27,4 @@ services:
 networks: 
   yearn-api_backend:
     external: true
-  dao-swap-frontend_dao_swap:
-    external: true
   
