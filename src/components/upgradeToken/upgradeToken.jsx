@@ -387,7 +387,7 @@ const styles = theme => ({
         marginLeft: "10px",
         borderRadius: "0px",
         cursor: "pointer",
-        flexGrow: "2",
+        flexGrow: "1",
         "&:hover": {
             background: theme.themeColors.btnBack,
         },
@@ -411,6 +411,7 @@ const styles = theme => ({
         marginLeft: "20px",
         borderRadius: "0px",
         cursor: "pointer",
+        flexGrow: 5,
         // flex: "1",
         "&:hover": {
             background: theme.themeColors.btnBack,
@@ -786,9 +787,10 @@ class UpgradeToken extends Component {
                                     className={classes.depositActionButton}
                                     onClick={() => this.upgrade()}
                                 >
-                                    <svg aria-hidden="true" className={classes.revertIcon} onClick={() => { this.showPopupDetail() }}>
+                                    Upgrade
+                                    {/* <svg aria-hidden="true" className={classes.revertIcon} onClick={() => { this.showPopupDetail() }}>
                                         <use xlinkHref="#iconmenu_revert"></use>
-                                    </svg>
+                                    </svg> */}
                                 </Button>
                                 <Button disabled={disableUpgrade ||
                                                 (!disableUpgrade && loading)}
