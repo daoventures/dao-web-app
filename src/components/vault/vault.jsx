@@ -1020,8 +1020,9 @@ class Vault extends Component {
     return showMobile ? (
       <React.Fragment>
         <Typography variant={"h5"} className={classes.assetLabel2}>
-          {this.isUsdVault(asset)
-            ? asset.strategyType === "citadel"
+          {this.isLogoVault(asset)
+            ? asset.strategyType === "citadel" ||
+              asset.strategyType === "daoFaang"
               ? "7d PnL"
               : "YTD Performance"
             : "Yearly Growth"}
@@ -1030,7 +1031,7 @@ class Vault extends Component {
           {/* {this.isUsdVault(asset) && (
             <Typography variant={"caption"}>est.&nbsp;</Typography>
           )} */}
-          {asset.strategyType === "citadel"
+          {asset.strategyType === "citadel" || asset.strategyType === "daoFaang"
             ? this._get7dPNL(asset)
             : this._getAPY(asset)}
         </Typography>
@@ -1054,7 +1055,8 @@ class Vault extends Component {
               {/* {this.isUsdVault(asset) && (
                 <Typography variant={"caption"}>est.&nbsp;</Typography>
               )} */}
-              {asset.strategyType === "citadel"
+              {asset.strategyType === "citadel" ||
+              asset.strategyType === "daoFaang"
                 ? this._get7dPNL(asset)
                 : this._getAPY(asset)}{" "}
             </Typography>
@@ -1088,8 +1090,9 @@ class Vault extends Component {
         <div style={{ display: "flex" }}>
           <div>
             <Typography variant={"h5"} className={classes.assetLabel2}>
-              {this.isUsdVault(asset)
-                ? asset.strategyType === "citadel"
+              {this.isLogoVault(asset)
+                ? asset.strategyType === "citadel" ||
+                  asset.strategyType === "daoFaang"
                   ? "7d PnL"
                   : "YTD Performance"
                 : "Yearly Growth"}
@@ -1524,7 +1527,10 @@ class Vault extends Component {
       //       return (asset.apy + parseFloat(asset.earnApr) * 100) / 2;
       //   }
       // } else if (asset.strategyType === "citadel") {
-      if (asset.strategyType === "citadel") {
+      if (
+        asset.strategyType === "citadel" ||
+        asset.strategyType === "daoFaang"
+      ) {
         console.log("🚀 | Asset | asset.stats.pnl", asset.stats.pnl);
 
         return (asset.stats.pnl["7d"] * 100).toFixed(2) + "%";

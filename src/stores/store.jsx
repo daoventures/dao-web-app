@@ -6201,10 +6201,7 @@ class Store {
   };
 
   _getHistoricalPerformance = async (performanceId, interval, callback) => {
-    console.log(
-      "🚀 | _getHistoricalPerformance= | performanceId",
-      performanceId
-    );
+
     if (performanceId) {
       try {
         const url = `${config.statsProvider}vaults/performance/${performanceId}/${interval}`;
@@ -6221,10 +6218,7 @@ class Store {
   };
 
   _getPNL = async (performanceId, callback) => {
-    console.log(
-      "🚀 | _getHistoricalPerformance= | performanceId",
-      performanceId
-    );
+
     let output = {};
     let url;
     let resultString;
