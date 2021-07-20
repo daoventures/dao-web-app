@@ -7612,7 +7612,7 @@ class Store {
       // return emitter.emit(WITHDRAW_VAULT_RETURNED, withdrawResult);
     });
   };
-  _callDepositDvg = async (asset, amount, max, callback) => {
+  _callDepositDvg = async (asset, amount, max, callback, withoutConvert) => {
     const account = this.getStore("account");
     const web3 = await this._getWeb3Provider();
     if (!web3) {
@@ -7644,7 +7644,11 @@ class Store {
         .balanceOf(account.address)
         .call({ from: account.address });
     } else {
-      _amount = web3.utils.toWei(amount, "ether");
+      if (withoutConvert) {
+        _amount = amount;
+      } else {
+        _amount = web3.utils.toWei(amount, "ether");
+      }
     }
 
     //xdvg授权数量小于金额的话 需要重新授权
@@ -7888,8 +7892,35 @@ class Store {
         }
         asset.balance = data[0];
         asset.upgradeBalance = data[1];
-        asset.eligibleAmount = data[2] != null ? data[2].amount / 10 ** asset.dvg.decimals : "0.00";
+        asset.claimAmountRaw = data[2] != null && data[2].claimAmount ? data[2].claimAmount : "0.00";
         asset.claimAmount = data[2] != null && data[2].claimAmount ? data[2].claimAmount / 10 ** asset.dvg.decimals : "0.00";
+        asset.eligibleAmountRaw = data[2] != null && data[2].amount ? data[2].amount : "0.00";
+        asset.eligibleAmount = data[2] != null ? data[2].amount / 10 ** asset.dvg.decimals : 0;
+        asset.disableUpgrade = true;
+
+        if (asset.claimAmount !== "0.00") {
+          if (asset.claimAmount < asset.eligibleAmount) {
+            asset.eligibleAmount  = asset.eligibleAmount - asset.claimAmount;
+            asset.eligibleAmountRaw = new BigNumber(asset.eligibleAmountRaw).minus(asset.claimAmountRaw).toFixed();
+            asset.disableUpgrade = false;
+          }
+
+          if (asset.claimAmount >= asset.eligibleAmount) {
+            asset.eligibleAmount = 0;
+            asset.eligibleAmountRaw = "0.00";
+            asset.disableUpgrade = true;
+          }
+        } else {
+          if (asset.eligibleAmount === 0) {
+            asset.disableUpgrade = true;
+          } else {
+            asset.disableUpgrade = false;
+          }
+        }
+
+        // If DVG Balance is zero, disable button
+        asset.disableUpgrade = (!asset.disableUpgrade && asset.balance <= 0) ? true : asset.disableUpgrade;
+        
         store.setStore({
           upgradeInfo: asset,
         });
@@ -7931,6 +7962,7 @@ class Store {
   upgradeToken = async (isStake) => {
     const network = store.getStore("network");
     const account = store.getStore("account");
+    const upgradeInfo = store.getStore('upgradeInfo');
     const asset = this._getDefaultValues(network).upgradeToken;
     if (!account || !account.address) {
       return false;
@@ -7963,16 +7995,16 @@ class Store {
         .allowance(account.address, asset.swapAddress)
         .call({ from: account.address });
       const dvdActualAllowance = dvdAllowance; 
+
+      const balance = await dvgContract.methods
+        .balanceOf(account.address)
+        .call({ from: account.address });
   
       // Approval
       let dvgApprovalError;
       let dvdApprovalError;
-      const balance = await dvgContract.methods.balanceOf(account.address)
-        .call({ from: account.address });
-
-      const realBalance = parseFloat(balance) > parseFloat(reimburse.amount) ? reimburse.amount : balance;
-      console.log('realBalance', realBalance);
-
+      const realBalance = new BigNumber(balance).isGreaterThan(upgradeInfo.eligibleAmountRaw) ? upgradeInfo.eligibleAmountRaw : balance;
+      console.log('realBalance', realBalance)
       if (parseFloat(realBalance) > parseFloat(dvgActualAllowance)) {
         await this._checkLpTokenContractApproval(
           account,
@@ -8016,12 +8048,6 @@ class Store {
           }
         );
       }
-
-      if (isStake) {
-        store.setStore({
-          realBalance,
-        });
-      }
   
       if (!dvgApprovalError && !dvdApprovalError) {
         const swapContract = new web3.eth.Contract(
@@ -8060,6 +8086,9 @@ class Store {
         .then(async() => {
           if(!swapErr) {
             await this._updateReimburseInfo({address: account.address, amount: realBalance});
+            store.setStore({
+              realBalance,
+            })
           }
         })
         .catch((error) => {
@@ -8077,7 +8106,7 @@ class Store {
   upgradeAndStakeToken = async (payload) => {
     const network = store.getStore("network");
     const account = store.getStore("account");
-    const realBalance = store.getStore('realBalance');
+    
     const asset = this._getDefaultValues(network).upgradeToken;
     if (!account || !account.address) {
       return false;
@@ -8090,24 +8119,30 @@ class Store {
     store.setStore({ dvg: this._getDefaultValues(network).dvg });
 
     await this.upgradeToken(true);
-    await this._callDepositDvg({
-      id: "DVD",
-      abi: asset.dvd.erc20ABI,
-      ...asset.dvd,
-    }, 0, true, (err, txnHash, receipt) => {
-      if (err) {
-        return emitter.emit(ERROR, err);
-      }
-      if(txnHash) {
-        return emitter.emit(DEPOSIT_DVG_RETURNED, txnHash);
-      }
-      if(receipt) {
-        store.setStore({
-          realBalance: '',
-        })
-        return emitter.emit(DEPOSIT_DVG_RETURNED_COMPLETED, receipt.transactionHash);
-      }
-    });
+
+    const realBalance = store.getStore('realBalance');
+    if (!isNaN(realBalance)) {
+      await this._callDepositDvg({
+        id: "DVD",
+        abi: asset.dvd.erc20ABI,
+        ...asset.dvd,
+      }, realBalance, false, (err, txnHash, receipt) => {
+        if (err) {
+          return emitter.emit(ERROR, err);
+        }
+        if(txnHash) {
+          return emitter.emit(DEPOSIT_DVG_RETURNED, txnHash);
+        }
+        if(receipt) {
+          store.setStore({
+            realBalance: '',
+          })
+          return emitter.emit(DEPOSIT_DVG_RETURNED_COMPLETED, receipt.transactionHash);
+        }
+      }, true);
+    } else {
+      return emitter.emit(ERROR, 'Failed to upgrade to DVD token to stake into DAOvip (DVD).');
+    }
   }
 }
 

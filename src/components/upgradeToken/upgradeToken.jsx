@@ -453,6 +453,7 @@ class UpgradeToken extends Component {
             dvdBalance: 0,
             eligibleAmount: "0.00",
             claimAmount: "0.00",
+            disableUpgrade: false,
         }
         if (account && account.address) {
             dispatcher.dispatch({ type: GET_UPGRADE_TOKEN })
@@ -549,6 +550,7 @@ class UpgradeToken extends Component {
             dvdBalance: asset.upgradeBalance,
             eligibleAmount: asset.eligibleAmount,
             claimAmount: asset.claimAmount,
+            disableUpgrade: asset.disableUpgrade,
         })
     }
 
@@ -580,7 +582,6 @@ class UpgradeToken extends Component {
 
         setTimeout(() => {
             this.setState({
-                loading: false,
                 snackbarMessage: txHash,
                 snackbarType: 'Hash'
             });
@@ -692,6 +693,7 @@ class UpgradeToken extends Component {
             dvgBalance,
             eligibleAmount,
             claimAmount,
+            disableUpgrade,
         } = this.state
 
         if (!account || !account.address) {
@@ -755,8 +757,8 @@ class UpgradeToken extends Component {
 
                             {/** Button to trigger stake function */}
                             <div className={classes.depositButtonBox}>
-                                <Button disabled={eligibleAmount === "0.00" || 
-                                                   (eligibleAmount !== '0.00' && loading)}
+                                <Button disabled={disableUpgrade ||
+                                                   (!disableUpgrade && loading)}
                                     className={classes.depositActionButton}
                                     onClick={() => this.upgrade()}
                                 >
@@ -764,8 +766,8 @@ class UpgradeToken extends Component {
                                         <use xlinkHref="#iconmenu_revert"></use>
                                     </svg>
                                 </Button>
-                                <Button disabled={eligibleAmount === "0.00" || 
-                                                (eligibleAmount !== '0.00' && loading)}
+                                <Button disabled={disableUpgrade ||
+                                                (!disableUpgrade && loading)}
                                     className={classes.upgradeStakeButton}
                                     onClick={() => this.upgradeStake()}
                                 >
