@@ -1020,14 +1020,21 @@ class Vault extends Component {
     return showMobile ? (
       <React.Fragment>
         <Typography variant={"h5"} className={classes.assetLabel2}>
-          {this.isUsdVault(asset) ? "YTD Performance" : "Yearly Growth"}
+          {this.isUsdVault(asset)
+            ? asset.strategyType === "citadel"
+              ? "7d PnL"
+              : "YTD Performance"
+            : "Yearly Growth"}
         </Typography>
         <Typography variant={"h3"} noWrap className={classes.assetLabel1}>
-          {this.isUsdVault(asset) && (
+          {/* {this.isUsdVault(asset) && (
             <Typography variant={"caption"}>est.&nbsp;</Typography>
-          )}
-          {this._getAPY(asset)}
+          )} */}
+          {asset.strategyType === "citadel"
+            ? this._get7dPNL(asset)
+            : this._getAPY(asset)}
         </Typography>
+        q
       </React.Fragment>
     ) : (
       <React.Fragment>
@@ -1044,10 +1051,12 @@ class Vault extends Component {
         <div style={{ display: "flex" }}>
           <div>
             <Typography variant={"h5"} className={classes.assetLabel1}>
-              {this.isUsdVault(asset) && (
+              {/* {this.isUsdVault(asset) && (
                 <Typography variant={"caption"}>est.&nbsp;</Typography>
-              )}
-              {this._getAPY(asset)}{" "}
+              )} */}
+              {asset.strategyType === "citadel"
+                ? this._get7dPNL(asset)
+                : this._getAPY(asset)}{" "}
             </Typography>
           </div>
 
@@ -1079,7 +1088,11 @@ class Vault extends Component {
         <div style={{ display: "flex" }}>
           <div>
             <Typography variant={"h5"} className={classes.assetLabel2}>
-              {this.isUsdVault(asset) ? "YTD Performance" : "Yearly Growth"}
+              {this.isUsdVault(asset)
+                ? asset.strategyType === "citadel"
+                  ? "7d PnL"
+                  : "YTD Performance"
+                : "Yearly Growth"}
             </Typography>
           </div>
         </div>
@@ -1477,6 +1490,58 @@ class Vault extends Component {
     } else {
       return "0.00%";
     }
+  };
+
+  _get7dPNL = (asset) => {
+    const { basedOn } = this.props;
+    // To calculate APY (Vault + Earn divide by 2 : Estimated)
+    // Compound APY is using compoundApy
+    if (asset && asset.stats) {
+      // if (asset.strategyType === "compound") {
+      //   if (asset.stats.compoundApy) {
+      //     return asset.stats.compoundApy;
+      //   }
+      // } else if (asset.strategyType === "yearn") {
+      //   switch (basedOn) {
+      //     case 1:
+      //       return (
+      //         (asset.stats.apyOneWeekSample + parseFloat(asset.earnApr) * 100) /
+      //         2
+      //       );
+      //     case 2:
+      //       return (
+      //         (asset.stats.apyOneMonthSample +
+      //           parseFloat(asset.earnApr) * 100) /
+      //         2
+      //       );
+      //     case 3:
+      //       return (
+      //         (asset.stats.apyInceptionSample +
+      //           parseFloat(asset.earnApr) * 100) /
+      //         2
+      //       );
+      //     default:
+      //       return (asset.apy + parseFloat(asset.earnApr) * 100) / 2;
+      //   }
+      // } else if (asset.strategyType === "citadel") {
+      if (asset.strategyType === "citadel") {
+        console.log("🚀 | Asset | asset.stats.pnl", asset.stats.pnl);
+
+        return (asset.stats.pnl["7d"] * 100).toFixed(2) + "%";
+      }
+      // else if (asset.strategyType === "elon") {
+      //   if (asset.stats.elonApy) {
+      //     return asset.stats.elonApy;
+      //   }
+      // } else if (asset.strategyType === "cuban") {
+      //   if (asset.stats.cubanApy) {
+      //     return asset.stats.cubanApy;
+      //   }
+      // } else if (asset.strategyType === "daoFaang") {
+      //   return asset.stats.faangApy;
+      // }
+    }
+    return 0;
   };
 
   calculateYearnAPY = (earnAPR, vaultAPY) => {

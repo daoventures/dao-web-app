@@ -518,6 +518,7 @@ class Store {
           strategyAddress: "0x8a00046ab28051a952e64a886cd8961ca90a59bd",
           strategyContractABI: config.strategyDAOCDVContractABI,
           historicalPriceId: "daoCDV_price",
+          // historicalPerformanceId: "daoCDV_performance",
           logoFormat: "svg",
           risk: EXPERT,
           strategyType: "citadel",
@@ -936,6 +937,7 @@ class Store {
           strategyAddress: "0xc9939B0b2af53E8BeCBA22ab153795e168140237",
           strategyContractABI: config.strategyDAOCDVContractABI,
           historicalPriceId: "daoCDV_price",
+          // historicalPerformanceId: "daoCDV_performance",
           logoFormat: "svg",
           risk: EXPERT,
           strategyType: "citadel",
@@ -1037,50 +1039,50 @@ class Store {
           isPopularItem: false,
           // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
         },
-        {
-          id: "daoCUB",
-          name: "USDT/USDC/DAI",
-          symbol: "USDT",
-          symbols: ["USDT", "USDC", "DAI"],
-          description: "Stablecoins",
-          vaultSymbol: "daoCUB",
-          erc20addresses: [
-            "0x07de306ff27a2b630b1141956844eb1552b956b5",
-            "0xb7a4f3e9097c08da09517b5ab877f7a917224ede",
-            "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
-          ],
-          erc20address: "0x07de306ff27a2b630b1141956844eb1552b956b5",
-          vaultContractAddress: "0x5c304A6cB105E1BFf9805cA5CF072F1d2C3bEAC5",
-          vaultContractABI: config.vaultDAOELOContractABI,
-          balance: 0, // Stores balance of selectedERC20Address
-          balances: [0, 0, 0],
-          vaultBalance: 0,
-          decimals: 18,
-          deposit: true,
-          depositAll: true,
-          withdraw: true,
-          withdrawAll: true,
-          lastMeasurement: 25536976,
-          measurement: 1e18,
-          price_id: ["tether", "usd-coin", "dai"],
-          priceInUSD: [0, 0, 0],
-          strategyName: "Cuban's Ape: USDT USDC DAI",
-          strategy: "DAO Cuban",
-          strategyAddress: "0x998372C8dC70833A7dC687020257302582FA5838",
-          strategyContractABI: config.strategyDAOCUBContractABI,
-          historicalPriceId: "daoCUB_price",
-          logoFormat: "svg",
-          risk: DEGEN,
-          strategyType: "cuban",
-          cTokenAddress: "",
-          cAbi: "",
-          group: DEGEN,
-          tvlKey: "daoCUB_tvl",
-          infoLink:
-            "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-cuban-vault",
-          isPopularItem: false,
-          // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
-        },
+        // {
+        //   id: "daoCUB",
+        //   name: "USDT/USDC/DAI",
+        //   symbol: "USDT",
+        //   symbols: ["USDT", "USDC", "DAI"],
+        //   description: "Stablecoins",
+        //   vaultSymbol: "daoCUB",
+        //   erc20addresses: [
+        //     "0x07de306ff27a2b630b1141956844eb1552b956b5",
+        //     "0xb7a4f3e9097c08da09517b5ab877f7a917224ede",
+        //     "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
+        //   ],
+        //   erc20address: "0x07de306ff27a2b630b1141956844eb1552b956b5",
+        //   vaultContractAddress: "0x5c304A6cB105E1BFf9805cA5CF072F1d2C3bEAC5",
+        //   vaultContractABI: config.vaultDAOELOContractABI,
+        //   balance: 0, // Stores balance of selectedERC20Address
+        //   balances: [0, 0, 0],
+        //   vaultBalance: 0,
+        //   decimals: 18,
+        //   deposit: true,
+        //   depositAll: true,
+        //   withdraw: true,
+        //   withdrawAll: true,
+        //   lastMeasurement: 25536976,
+        //   measurement: 1e18,
+        //   price_id: ["tether", "usd-coin", "dai"],
+        //   priceInUSD: [0, 0, 0],
+        //   strategyName: "Cuban's Ape: USDT USDC DAI",
+        //   strategy: "DAO Cuban",
+        //   strategyAddress: "0x998372C8dC70833A7dC687020257302582FA5838",
+        //   strategyContractABI: config.strategyDAOCUBContractABI,
+        //   historicalPriceId: "daoCUB_price",
+        //   logoFormat: "svg",
+        //   risk: DEGEN,
+        //   strategyType: "cuban",
+        //   cTokenAddress: "",
+        //   cAbi: "",
+        //   group: DEGEN,
+        //   tvlKey: "daoCUB_tvl",
+        //   infoLink:
+        //     "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-cuban-vault",
+        //   isPopularItem: false,
+        //   // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
+        // },
         {
           id: "USDT",
           name: "USDT",
@@ -3856,20 +3858,25 @@ class Store {
         async.parallel(
           [
             (callbackInner) => {
+              // 0
               this._getERC20Balance(web3, asset, account, callbackInner);
             },
             // (callbackInner) => { this._getVaultBalance(web3, asset, account, callbackInner) },
             (callbackInner) => {
+              // 1
               this._getBalances(web3, asset, account, callbackInner);
             },
             // (callbackInner) => { this._getStrategy(web3, asset, account, callbackInner) },
             (callbackInner) => {
+              // 2
               this._getStatsAPY(vaultStatistics, asset, callbackInner);
             },
             (callbackInner) => {
+              // 3
               this._getVaultHoldings(web3, asset, account, callbackInner);
             },
             (callbackInner) => {
+              // 4
               this._getAssetUSDPrices(
                 web3,
                 asset,
@@ -3879,12 +3886,15 @@ class Store {
               );
             },
             (callbackInner) => {
+              // 5
               this._getVaultAPY(web3, asset, account, callbackInner);
             },
             (callbackInner) => {
+              // 6
               this._getAddressStats(addressStatistics, asset, callbackInner);
             },
             (callbackInner) => {
+              // 7
               this._getAddressTransactions(
                 addressTXHitory,
                 asset,
@@ -3892,16 +3902,25 @@ class Store {
               );
             },
             (callbackInner) => {
+              // 8
               this._getMaxAPR(web3, asset, account, callbackInner);
             },
             (callbackInner) => {
+              // 9
               this._getHistoricalPrice(
                 asset.historicalPriceId,
                 interval,
                 callbackInner
               );
             },
-            //
+            (callbackInner) => {
+              // 10
+              this._getHistoricalPerformance(
+                asset.id,
+                "7d", // TODO: Remove hardcode and refactor, default interval is 1d
+                callbackInner
+              );
+            },
           ],
           (err, data) => {
             if (err) {
@@ -4932,8 +4951,6 @@ class Store {
       decimals !== "18"
         ? web3.utils.toBN(amount * 10 ** decimals).toString()
         : web3.utils.toWei(amount, "ether");
-
-    console.log("🚀 | tx | account.address", account.address);
 
     // Citadel, Elon, and Cuban pass token's index for deposit, while FAANG pass token address
     const tokenToSent =
@@ -6270,6 +6287,63 @@ class Store {
     }
   };
 
+  _getHistoricalPerformance = async (performanceId, interval, callback) => {
+    console.log(
+      "🚀 | _getHistoricalPerformance= | performanceId",
+      performanceId
+    );
+    if (performanceId) {
+      try {
+        const url = `${config.statsProvider}vaults/performance/${performanceId}/${interval}`;
+        const resultString = await rp(url);
+        const result = JSON.parse(resultString);
+        callback(null, result.body);
+      } catch (e) {
+        console.log(e);
+        callback(null, []);
+      }
+    } else {
+      callback(null, []);
+    }
+  };
+
+  _getPNL = async (performanceId, callback) => {
+    console.log(
+      "🚀 | _getHistoricalPerformance= | performanceId",
+      performanceId
+    );
+    let output = {};
+    let url;
+    let resultString;
+    let result;
+    const intervals = ["30d", "7d"];
+    if (performanceId) {
+      for (const interval of intervals) {
+        try {
+          let url = `${config.statsProvider}vaults/pnl/${performanceId}/${interval}`;
+          resultString = await rp(url);
+          result = JSON.parse(resultString);
+          output[interval] = result.body;
+        } catch (e) {
+          console.log(e);
+          callback(null, []);
+        }
+      }
+      try {
+        url = `${config.statsProvider}vaults/pnl/${performanceId}`;
+        resultString = await rp(url);
+        result = JSON.parse(resultString);
+        output["inception"] = result.body;
+      } catch (e) {
+        console.log(e);
+        callback(null, []);
+      }
+      callback(null, output);
+    } else {
+      callback(null, []);
+    }
+  };
+
   _getTvl = async (tvl_id, callback) => {
     try {
       const url = `${config.statsProvider}vaults/tvl/${tvl_id}`;
@@ -6345,7 +6419,6 @@ class Store {
     const url = `${config.statsProvider}event/verify/`;
     const resultString = await rp(url);
     const result = JSON.parse(resultString);
-    console.log("🚀 | eventVerify= | result", result);
     let _result = {};
     if (result.body.happyHour === true) {
       _result = {
@@ -6455,18 +6528,10 @@ class Store {
         citadelAsset[0].vaultContractABI,
         citadelAsset[0].vaultContractAddress
       );
-      console.log(
-        "🚀 | saveBiconomyProvider= | happyHourContract",
-        happyHourContract
-      );
 
       const happyHourContractFAANG = new happyHourWeb3.eth.Contract(
         FAANGAsset[0].vaultContractABI,
         FAANGAsset[0].vaultContractAddress
-      );
-      console.log(
-        "🚀 | saveBiconomyProvider= | happyHourContractFAANG",
-        happyHourContractFAANG
       );
 
       store.setStore({
@@ -6966,12 +7031,25 @@ class Store {
               // 10
               this._getVaultDAOmineAPY(asset, pools, callbackInner);
             },
+            (callbackInner) => {
+              // 11
+              this._getHistoricalPerformance(
+                asset.id,
+                "7d", // TODO: Remove hardcode and refactor, default interval is 1d
+                callbackInner
+              );
+            },
+            (callbackInner) => {
+              // 12
+              this._getPNL(asset.id, callbackInner);
+            },
 
             // (callbackInner) => { this._getVaultHoldings(web3, asset, account, callbackInner) },
             // (callbackInner) => { this._getAddressTransactions(addressTXHitory, asset, callbackInner) },
           ],
           (err, data) => {
             if (err) {
+              console.log(err);
               return callback(err);
             }
             asset.balance = data[0];
@@ -7011,6 +7089,9 @@ class Store {
               data[9] && data[9].priceInUSD ? data[9].priceInUSD : null;
             asset.sumBalances = data[9].sumBalances;
             asset.daomineApy = data[10] ? data[10].daomineApy : 0;
+            asset.historicalPerformance = data[11]
+            asset.stats.pnl = data[12];
+
             // asset.addressTransactions = data[7]
             // asset.vaultHoldings = data[3]
 
@@ -7025,6 +7106,10 @@ class Store {
         }
 
         store.setStore({ vaultAssets: assets });
+        console.log(
+          "🚀 | getStrategyBalancesFull= | STRATEGY_BALANCES_FULL_RETURNED",
+          STRATEGY_BALANCES_FULL_RETURNED
+        );
         return emitter.emit(STRATEGY_BALANCES_FULL_RETURNED, assets);
       }
     );
