@@ -215,12 +215,12 @@ class App extends Component {
                 <StakeDvdVip />
               </Route>
 
-              {/* <Route path="/stake-dvg">
+              <Route path="/stake-dvg">
                 <Header />
                 <SideDrawer />
                 <MainContainer />
                 <StakeDvgVip />
-              </Route> */}
+              </Route>
 
               <Route path="/daomine">
                 <Header />
@@ -229,12 +229,12 @@ class App extends Component {
                 <Stake />
               </Route>
 
-              {/* <Route path="/upgrade">
+              <Route path="/upgrade">
                 <Header />
                 <SideDrawer />
                 <MainContainer />
                 <UpgradeToken />
-              </Route> */}
+              </Route>
 
               {/* <Route path="/stake">
                 <Header />
