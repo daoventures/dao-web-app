@@ -431,7 +431,7 @@ const styles = theme => ({
     reminder: {
         marginTop: '10px',
         marginBottom: "10px",
-        color: theme.themeColors.textT,
+        color: theme.themeColors.textP,
     }
 });
 
@@ -752,12 +752,11 @@ class UpgradeToken extends Component {
                                 {/** Stake or Unstake Button */}
                                 <div>
                                     <div className={classes.available}>Your wallet</div>
-                                    <div className={classes.walletAmount}>Eligible for upgrade 
-                                        {/* <svg aria-hidden="true" className={classes.warnIcon} onClick={() => { this.showPopupDetail() }}>
+                                    {/* <div className={classes.walletAmount}>Eligible for upgrade
+                                        <svg aria-hidden="true" className={classes.warnIcon} onClick={() => { this.showPopupDetail() }}>
                                             <use xlinkHref="#iconinformation-day"></use>
-                                        </svg> */}
-                                        {this.renderEligibleUpgradeInfo()}
-                                    </div>
+                                        </svg>
+                                    </div> */}
                                 </div>
 
                                 {/** Available Amount in Wallet */}
@@ -767,11 +766,11 @@ class UpgradeToken extends Component {
                                             minimumFractionDigits: 2,
                                             maximumFractionDigits: 2,
                                         })} DVG</div>
-                                    <div className={classes.walletAmount}>{eligibleAmount !== '0.00' ? eligibleAmount
+                                    {/* <div className={classes.walletAmount}>{eligibleAmount !== '0.00' ? eligibleAmount
                                         .toLocaleString(undefined, {
                                             minimumFractionDigits: 2,
                                             maximumFractionDigits: 2,
-                                        }) : eligibleAmount} DVG</div>
+                                        }) : eligibleAmount} DVG</div> */}
                                 </div>
                             </div>
 
