@@ -7033,7 +7033,7 @@ class Store {
           })
           .on("receipt", function (receipt) {
             callback(null, null, receipt);
-            dispatcher.dispatch({ type: GET_DVG_INFO });
+            // dispatcher.dispatch({ type: GET_DVG_INFO });
           })
           .on("error", function (error) {
             if (!error.toString().includes("-32601")) {
@@ -7068,7 +7068,7 @@ class Store {
         })
         .on("receipt", function (receipt) {
           callback(null, null, receipt);
-          dispatcher.dispatch({ type: GET_DVG_INFO });
+          // dispatcher.dispatch({ type: GET_DVG_INFO });
         })
         .on("error", function (error) {
           if (!error.toString().includes("-32601")) {
@@ -7167,7 +7167,7 @@ class Store {
       .on("receipt", function (receipt) {
         console.log(receipt);
         callback(null, null, receipt);
-        dispatcher.dispatch({ type: GET_DVG_INFO });
+        // dispatcher.dispatch({ type: GET_DVG_INFO });
       })
       .on("error", function (error) {
         if (!error.toString().includes("-32601")) {

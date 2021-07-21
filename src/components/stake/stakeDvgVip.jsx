@@ -805,6 +805,7 @@ class StakeDvgVip extends Component {
           };
           that.setState(snackbarObj);
         });
+        dispatcher.dispatch({ type: GET_DVG_INFO });
         this.setState({ loading: false, amount: "" });
     };
 
@@ -820,6 +821,7 @@ class StakeDvgVip extends Component {
           };
           that.setState(snackbarObj);
         });
+        dispatcher.dispatch({ type: GET_DVG_INFO });
         this.setState({ loading: false, amount: "" });
     };
 
