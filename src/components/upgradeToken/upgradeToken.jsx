@@ -431,7 +431,7 @@ const styles = theme => ({
     reminder: {
         marginTop: '10px',
         marginBottom: "10px",
-        color: theme.themeColors.textT,
+        color: theme.themeColors.textP,
     }
 });
 
@@ -733,9 +733,9 @@ class UpgradeToken extends Component {
                             A brand new upgraded DAOVentures DeFi token (DVD) is created to replace the DVG tokens with additional features (such as token burning and tier rewards) that are designed to boost the utility of the token.
                         </div>
                         <br />
-                        <div className={classes.contentText}>
+                        {/* <div className={classes.contentText}>
                             Users that hold DVG before block 12801522 can swap their DVG tokens to DVD tokens at a 1:1 ratio.
-                        </div>
+                        </div> */}
                     </div>
                     <div className={classes.headerRight}>
                         <img className={classes.logoImg} src={require("../../assets/DAO-logo-2.png")} alt="" />
@@ -752,12 +752,11 @@ class UpgradeToken extends Component {
                                 {/** Stake or Unstake Button */}
                                 <div>
                                     <div className={classes.available}>Your wallet</div>
-                                    <div className={classes.walletAmount}>Eligible for upgrade 
-                                        {/* <svg aria-hidden="true" className={classes.warnIcon} onClick={() => { this.showPopupDetail() }}>
+                                    {/* <div className={classes.walletAmount}>Eligible for upgrade
+                                        <svg aria-hidden="true" className={classes.warnIcon} onClick={() => { this.showPopupDetail() }}>
                                             <use xlinkHref="#iconinformation-day"></use>
-                                        </svg> */}
-                                        {this.renderEligibleUpgradeInfo()}
-                                    </div>
+                                        </svg>
+                                    </div> */}
                                 </div>
 
                                 {/** Available Amount in Wallet */}
@@ -767,11 +766,11 @@ class UpgradeToken extends Component {
                                             minimumFractionDigits: 2,
                                             maximumFractionDigits: 2,
                                         })} DVG</div>
-                                    <div className={classes.walletAmount}>{eligibleAmount !== '0.00' ? eligibleAmount
+                                    {/* <div className={classes.walletAmount}>{eligibleAmount !== '0.00' ? eligibleAmount
                                         .toLocaleString(undefined, {
                                             minimumFractionDigits: 2,
                                             maximumFractionDigits: 2,
-                                        }) : eligibleAmount} DVG</div>
+                                        }) : eligibleAmount} DVG</div> */}
                                 </div>
                             </div>
 

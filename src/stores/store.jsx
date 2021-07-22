@@ -7982,30 +7982,31 @@ class Store {
         asset.claimAmount = data[2] != null && data[2].claimAmount ? data[2].claimAmount / 10 ** asset.dvg.decimals : "0.00";
         asset.eligibleAmountRaw = data[2] != null && data[2].amount ? data[2].amount : "0.00";
         asset.eligibleAmount = data[2] != null ? data[2].amount / 10 ** asset.dvg.decimals : 0;
-        asset.disableUpgrade = true;
+        // asset.disableUpgrade = false;
 
-        if (asset.claimAmount !== "0.00") {
-          if (asset.claimAmount < asset.eligibleAmount) {
-            asset.eligibleAmount  = asset.eligibleAmount - asset.claimAmount;
-            asset.eligibleAmountRaw = new BigNumber(asset.eligibleAmountRaw).minus(asset.claimAmountRaw).toFixed();
-            asset.disableUpgrade = false;
-          }
+        // if (asset.claimAmount !== "0.00") {
+        //   if (asset.claimAmount < asset.eligibleAmount) {
+        //     asset.eligibleAmount  = asset.eligibleAmount - asset.claimAmount;
+        //     asset.eligibleAmountRaw = new BigNumber(asset.eligibleAmountRaw).minus(asset.claimAmountRaw).toFixed();
+        //     asset.disableUpgrade = false;
+        //   }
 
-          if (asset.claimAmount >= asset.eligibleAmount) {
-            asset.eligibleAmount = 0;
-            asset.eligibleAmountRaw = "0.00";
-            asset.disableUpgrade = true;
-          }
-        } else {
-          if (asset.eligibleAmount === 0) {
-            asset.disableUpgrade = true;
-          } else {
-            asset.disableUpgrade = false;
-          }
-        }
+        //   if (asset.claimAmount >= asset.eligibleAmount) {
+        //     asset.eligibleAmount = 0;
+        //     asset.eligibleAmountRaw = "0.00";
+        //     asset.disableUpgrade = true;
+        //   }
+        // } else {
+        //   if (asset.eligibleAmount === 0) {
+        //     asset.disableUpgrade = true;
+        //   } else {
+        //     asset.disableUpgrade = false;
+        //   }
+        // }
 
         // If DVG Balance is zero, disable button
-        asset.disableUpgrade = (!asset.disableUpgrade && asset.balance <= 0) ? true : asset.disableUpgrade;
+        // asset.disableUpgrade = (!asset.disableUpgrade && asset.balance <= 0) ? true : asset.disableUpgrade;
+        asset.disableUpgrade = asset.balance <= 0;
         
         store.setStore({
           upgradeInfo: asset,
@@ -8089,8 +8090,11 @@ class Store {
       // Approval
       let dvgApprovalError;
       let dvdApprovalError;
-      const realBalance = new BigNumber(balance).isGreaterThan(upgradeInfo.eligibleAmountRaw) ? upgradeInfo.eligibleAmountRaw : balance;
-      console.log('realBalance', realBalance)
+
+      // DAO -228 Allow User to swap all DVG to DVD at 1.1 ratio
+      // const realBalance = new BigNumber(balance).isGreaterThan(upgradeInfo.eligibleAmountRaw) ? upgradeInfo.eligibleAmountRaw : balance;
+      const realBalance =  balance;
+      
       if (parseFloat(realBalance) > parseFloat(dvgActualAllowance)) {
         await this._checkLpTokenContractApproval(
           account,
