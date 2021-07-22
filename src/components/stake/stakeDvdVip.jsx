@@ -840,6 +840,7 @@ class StakeDvdVip extends Component {
           };
           that.setState(snackbarObj);
         });
+        dispatcher.dispatch({ type: GET_DVG_INFO });
         this.setState({ loading: false, amount: "" });
     };
 
@@ -855,6 +856,7 @@ class StakeDvdVip extends Component {
           };
           that.setState(snackbarObj);
         });
+        dispatcher.dispatch({ type: GET_DVG_INFO });
         this.setState({ loading: false, amount: "" });
     };
 
