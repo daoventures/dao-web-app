@@ -710,9 +710,9 @@ class UpgradeToken extends Component {
                             A brand new upgraded DAOVentures DeFi token (DVD) is created to replace the DVG tokens with additional features (such as token burning and tier rewards) that are designed to boost the utility of the token.
                         </div>
                         <br />
-                        <div className={classes.contentText}>
+                        {/* <div className={classes.contentText}>
                             Users that hold DVG before block 12801522 can swap their DVG tokens to DVD tokens at a 1:1 ratio.
-                        </div>
+                        </div> */}
                     </div>
                     <div className={classes.headerRight}>
                         <img className={classes.logoImg} src={require("../../assets/DAO-logo-2.png")} alt="" />
