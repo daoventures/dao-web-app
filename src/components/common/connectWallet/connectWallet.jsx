@@ -221,7 +221,7 @@ class ConnectWallet extends Component {
         emitter.emit(CONNECTION_CONNECTED);
       },
       network: (network) => {
-        // console.log('onboard###network#####', network);
+        console.log('onboard###network#####', network);
         store.setStore({network: network});
         emitter.emit('CHANGE_NETWORK', {network: network});
       },

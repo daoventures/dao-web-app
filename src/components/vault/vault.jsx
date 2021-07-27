@@ -965,7 +965,8 @@ class Vault extends Component {
     return asset.strategyType === "citadel" ||
       asset.strategyType === "elon" ||
       asset.strategyType === "cuban" ||
-      asset.strategyType === "daoFaang"
+      asset.strategyType === "daoFaang" || 
+      asset.strategyType === "moneyPrinter"
       ? true
       : false;
   };
@@ -1485,6 +1486,10 @@ class Vault extends Component {
       } else if (asset.strategyType === "daoFaang") {
         return asset.stats.faangApy
           ? (asset.stats.faangApy / 1).toFixed(2) + "%"
+          : "0.00%";
+      } else if (asset.strategyType === "moneyPrinter") {
+        return asset.stats.moneyPrinterApy
+          ? (asset.stats.moneyPrinterApy / 1).toFixed(2) + "%"
           : "0.00%";
       }
     } else {

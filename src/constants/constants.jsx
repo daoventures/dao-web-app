@@ -135,6 +135,8 @@ export const BLOCK_EXPLORERS = {
   42: "https://kovan.etherscan.io/tx/",
   56: "https://bscscan.com/tx/",
   97: "https://testnet.bscscan.com/tx/",
+  80001: "https://mumbai.polygonscan.com/tx/",
+  137: "https://polygonscan.com/tx/"
 };
 
 // Pools
@@ -180,3 +182,10 @@ export const UPGRADE_STAKE_TOKEN = 'UPGRADE_STAKE_TOKEN';
 export const UPGRADE_TOKEN_SUCCESS = 'UPGRADE_TOKEN_SUCCESS';
 export const UPGRADE_TOKEN_RETURN = 'UPGRADE_TOKEN_RETURN';
 
+
+export const NETWORK = {
+  ETHEREUM: 1,
+  KOVAN: 42,
+  MATIC: 137,
+  MUMBAI: 80001,
+}
