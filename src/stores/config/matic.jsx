@@ -10,12 +10,12 @@ const matic = [
         description: "Stablecoins",
         vaultSymbol: "daoMPT",
         erc20addresses: [
-            "0xbd21a10f619be90d6066c941b04e340841f1f989",
-            "0x2058a9d7613eee744279e3856ef0eada5fcbaa7e",
-            "0x001b3b4d0f3714ca98ba10f6042daebf0b1b7b6f",
+            "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+            "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+            "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
         ],
-        erc20address: "0xbd21a10f619be90d6066c941b04e340841f1f989",
-        vaultContractAddress: "",
+        erc20address: "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+        vaultContractAddress: "0x7e515e00e2d605d763ffe25fd7b1e00f8fd97a16",
         vaultContractABI: config.vaultDAOMPTContractABI,
         balance: 0, // Stores balance of selectedERC20Address
         balances: [0, 0, 0],
@@ -25,13 +25,13 @@ const matic = [
         depositAll: true,
         withdraw: true,
         withdrawAll: true,
-        lastMeasurement: 16133926,
+        lastMeasurement: 17293764,
         measurement: 1e18,
         price_id: ["tether", "usd-coin", "dai"],
         priceInUSD: [0, 0, 0],
         strategyName: "DAO Money Printer: USDT USDC DAI",
         strategy: "DAO Money Printer",
-        strategyAddress: "",
+        strategyAddress: "0x111de482a01eb87875d18f8c1131fca709b6a646",
         strategyContractABI: config.vaultDAOMPTStrategyABI,
         historicalPriceId: "daoMPT_price",
         logoFormat: "svg",
@@ -44,7 +44,7 @@ const matic = [
         infoLink:
           "https://www.google.com",
         isPopularItem: false,
-        // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
+        isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
       },
 ];
 
