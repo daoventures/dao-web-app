@@ -11,9 +11,6 @@ import {
 import {
     GET_DVG_INFO,
     CONNECTION_CONNECTED,
-    CHANGE_NETWORK,
-    GET_DASHBOARD_SNAPSHOT,
-    DASHBOARD_SNAPSHOT_RETURNED,
     GET_DVG_BALANCE_SUCCESS,
     DEPOSIT_XDVG,
     WIDTHDRAW_XDVG,
@@ -606,7 +603,6 @@ const styles = theme => ({
 class StakeDvgVip extends Component {
     constructor(props) {
         super();
-        const dashboard = store.getStore('dashboard')
         const account = store.getStore('account')
         this.state = {
             assets: store.getStore('account'),
@@ -614,7 +610,7 @@ class StakeDvgVip extends Component {
             onboard: '',
             dvgInfoObj: '',
             amount: '',
-            type: 'stake',
+            type: 'unstake',
             isShowApr: false,
             max: false,
             aprInfo: {
@@ -622,7 +618,6 @@ class StakeDvgVip extends Component {
             },
             amountError: false,
             errorMessage: '',
-            network: 0,
             disableStake: true,
             disableUnstake: false,
         }
@@ -632,8 +627,6 @@ class StakeDvgVip extends Component {
         dispatcher.dispatch({ type: GET_DVG_APR, content: { type: "xdvg"} });
     }
     componentWillMount() {
-        emitter.on(CHANGE_NETWORK, this.networkChanged);
-        emitter.on(DASHBOARD_SNAPSHOT_RETURNED, this.dashboardSnapshotReturned);
         emitter.on(CONNECTION_CONNECTED, this.connectionConnected);
         emitter.on(GET_DVG_BALANCE_SUCCESS, this.dvgBalance);
         emitter.on(GET_XDVG_APR_SUCCESS, this.getAprInfo);
@@ -645,8 +638,6 @@ class StakeDvgVip extends Component {
     }
 
     componentWillUnmount() {
-        emitter.removeListener(CHANGE_NETWORK, this.networkChanged);
-        emitter.removeListener(DASHBOARD_SNAPSHOT_RETURNED, this.dashboardSnapshotReturned);
         emitter.removeListener(CONNECTION_CONNECTED, this.connectionConnected);
         emitter.removeListener(GET_DVG_BALANCE_SUCCESS, this.dvgBalance)
         emitter.removeListener(GET_XDVG_APR_SUCCESS, this.getAprInfo)
@@ -681,40 +672,25 @@ class StakeDvgVip extends Component {
         });
     };
 
-    networkChanged = (obj) => {
-        this.setState({ networkId: obj.network });
-        const account = store.getStore('account')
-        if (account && account.address) {
-            dispatcher.dispatch({ type: GET_DASHBOARD_SNAPSHOT, content: { interval: this.state.period } })
-        }
-    }
-
-    dashboardSnapshotReturned = () => {
-        this.setState({
-            loading: false,
-            dashboard: store.getStore('dashboard')
-        })
-    }
-
     connectionConnected = () => {
-        const { period } = this.state;
         const account = store.getStore('account')
         this.setState({ loading: true, account: account })
         if (account && account.address) {
             dispatcher.dispatch({ type: GET_DVG_INFO })
         }
-        dispatcher.dispatch({ type: GET_DASHBOARD_SNAPSHOT, content: { interval: period } })
     };
 
     dvgBalance = (asset) => {
         this.setState({
-            dvgInfoObj: asset
+            dvgInfoObj: asset,
+            loading: false
         })
     }
 
     xdvgBalance = (asset) => {
         this.setState({
-            dvgInfoObj: asset
+            dvgInfoObj: asset,
+            loading: false,
         })
     }
 
@@ -840,7 +816,6 @@ class StakeDvgVip extends Component {
 
     getAprInfo = () => {
         const aprInfo = store.getStore('dvgApr');
-        console.log("xdvg apr info", aprInfo["xdvg"]);
         this.setState({ aprInfo: aprInfo["xdvg"]});
     }
 

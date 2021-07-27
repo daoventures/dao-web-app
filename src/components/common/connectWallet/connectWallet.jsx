@@ -3,25 +3,13 @@ import { withRouter } from "react-router-dom";
 import { withStyles } from '@material-ui/core/styles';
 import {
   Typography,
-  TextField,
-  MenuItem,
-  Grid,
-  Button
-} from '@material-ui/core';
-import { colors, drawerWidth } from '../../../theme'
+  Grid} from '@material-ui/core';
+import { drawerWidth } from '../../../theme'
 
-import Loader from '../../loader'
 
 import {
   ERROR,
-  CONNECTION_CONNECTED,
-  CONNECTION_DISCONNECTED,
-  GET_DASHBOARD_SNAPSHOT,
-  DASHBOARD_SNAPSHOT_RETURNED,
-  CHANGE_NETWORK,
-  GET_VAULT_BALANCES_FULL
-} from '../../../constants'
-import * as moment from 'moment';
+  CONNECTION_CONNECTED} from '../../../constants'
 import _ from 'lodash';
 
 // blocknative测试
@@ -29,8 +17,6 @@ import {initOnboard} from '../../../walletsServices.js';
 
 import Store from "../../../stores";
 import UnlockModal from "../../unlock/unlockModal";
-import Highcharts from 'highcharts';
-import HighchartsReact from "highcharts-react-official";
 const emitter = Store.emitter
 const dispatcher = Store.dispatcher
 const store = Store.store
@@ -216,23 +202,18 @@ class ConnectWallet extends Component {
     emitter.on(ERROR, this.errorReturned);
     const onboard = initOnboard({
       address: (address) => {
-        // console.log('onboard#####address####', address);
         store.setStore({account: {address: address}});
         emitter.emit(CONNECTION_CONNECTED);
       },
       network: (network) => {
-        console.log('onboard###network#####', network);
         store.setStore({network: network});
         emitter.emit('CHANGE_NETWORK', {network: network});
       },
       balance: (balance) => {
         let account = store.getStore('account');
-        // console.log('onboard#####balance#####', balance);
         store.setStore({account: {...account,balance: balance}});
-        emitter.emit(CONNECTION_CONNECTED);
       },
       wallet: (wallet) => {
-        console.log('onboard#####wallet#####', wallet);
         store.setStore({
           web3context: {library: {provider: wallet.provider}},
         })
