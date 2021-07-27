@@ -208,3 +208,5 @@ export const NETWORK = {
   MATIC: 137,
   MUMBAI: 80001,
 }
+
+export const UNIVERSAL_GAS_PRICE = "70";

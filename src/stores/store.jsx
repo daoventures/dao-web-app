@@ -118,6 +118,7 @@ import { getERC20AbiByNetwork } from "./helper/contractHelper";
 import { injected } from "./connectors";
 
 import contractHelper from './helper/contractHelper';
+import apiHelper from './helper/apiHelper';
 
 const rp = require("request-promise");
 const ethers = require("ethers");
@@ -2018,7 +2019,7 @@ class Store {
       });
     }
 
-    const coinsInUSDPrice = await this._getUSDPrices();
+    const coinsInUSDPrice = await apiHelper.findTokenUSDPrices();
     let priceInUSD = [];
     for (let i = 0; i < asset.price_id.length; i++) {
       const coinPrice = coinsInUSDPrice[asset.price_id[i]].usd;
@@ -3042,10 +3043,10 @@ class Store {
     if (!web3) {
       return null;
     }
-    const vaultStatistics = await this._getStatistics();
-    const addressStatistics = await this._getAddressStatistics(account.address);
+    const vaultStatistics = await apiHelper.findVaultsAPY();
+    const addressStatistics = await apiHelper.getUserVaultStatistics(account.address);
     const addressTXHitory = await this._getAddressTxHistory(account.address);
-    const usdPrices = await this._getUSDPrices();
+    const usdPrices = await apiHelper.findTokenUSDPrices();
 
     async.map(
       assets,
@@ -5251,25 +5252,11 @@ class Store {
 
   getUSDPrices = async () => {
     try {
-      const priceJSON = await this._getUSDPrices();
+      const priceJSON = await apiHelper.findTokenUSDPrices();
       store.setStore({ usdPrices: priceJSON });
       return emitter.emit(USD_PRICE_RETURNED, priceJSON);
     } catch (e) {
       console.log(e);
-    }
-  };
-
-  _getUSDPrices = async () => {
-    try {
-      const url =
-        "https://api.coingecko.com/api/v3/simple/price?ids=usd-coin,dai,true-usd,tether,compound-usdt,compound-usd-coin,cdai,ethereum&vs_currencies=usd,eth";
-      const priceString = await rp(url);
-      const priceJSON = JSON.parse(priceString);
-
-      return priceJSON;
-    } catch (e) {
-      console.log(e);
-      return null;
     }
   };
 
@@ -5282,7 +5269,7 @@ class Store {
 
     await this.getVaultBalancesFull(interval);
     // this.getBalancesLight()
-    await this.getUSDPrices();
+    // await this.getUSDPrices();
     await this.getStatistics();
     return emitter.emit(GET_DASHBOARD_SNAPSHOT);
   };
@@ -5556,7 +5543,7 @@ class Store {
 
   getStatistics = async () => {
     try {
-      const statistics = await this._getStatistics();
+      const statistics = await apiHelper.findVaultsAPY();
 
       store.setStore({ statistics: statistics });
       emitter.emit(STATISTICS_RETURNED, statistics);
@@ -5566,24 +5553,11 @@ class Store {
     }
   };
 
-  _getStatistics = async () => {
-    try {
-      const url = config.statsProvider + "vaults/apy";
-      const statisticsString = await rp(url);
-      const statistics = JSON.parse(statisticsString);
-      return statistics.body;
-    } catch (e) {
-      console.log(e);
-      return store.getStore("universalGasPrice");
-    }
-  };
 
   _getHistoricalPrice = async (price_id, interval, callback) => {
     try {
-      const url = `${config.statsProvider}vaults/price/${price_id}/${interval}`;
-      const resultString = await rp(url);
-      const result = JSON.parse(resultString);
-      callback(null, result.body);
+      const result = await apiHelper.getVaultHistoricalPrice();
+      callback(null, result);
     } catch (e) {
       console.log(e);
       callback(null, []);
@@ -5648,11 +5622,8 @@ class Store {
 
   _getTvl = async (tvl_id, callback) => {
     try {
-      const url = `${config.statsProvider}vaults/tvl/${tvl_id}`;
-      const resultString = await rp(url);
-      const result = JSON.parse(resultString);
-
-      callback(null, result.body);
+      const result = await apiHelper.getVaultHistoricalPrice();
+      callback(null, result);
     } catch (e) {
       console.log(e);
       callback(null, []);
@@ -5745,20 +5716,6 @@ class Store {
     emitter.emit(HAPPY_HOUR_RETURN, _result);
   };
 
-  _getAddressStatistics = async (address) => {
-    try {
-      const url =
-        config.statsProvider + "user/" + address + "/vaults/statistics";
-      const statisticsString = await rp(url);
-      const statistics = JSON.parse(statisticsString);
-
-      return statistics.body;
-    } catch (e) {
-      console.log(e);
-      return store.getStore("universalGasPrice");
-    }
-  };
-
   _getAddressTxHistory = async (address) => {
     try {
       const url =
@@ -5772,50 +5729,11 @@ class Store {
       return store.getStore("universalGasPrice");
     }
   };
-  //获取策略总额
-  _getTotalValue(totalValue, vaultApiInfo, callback) {
-    // callback();
-  }
-
-  _getTotalValueStatistic = async () => {
-    try {
-      const url = config.statsProvider + "vaults/tvl/total";
-      const statisticsString = await rp(url);
-      const statistics = JSON.parse(statisticsString);
-      return statistics.body;
-    } catch (e) {
-      console.log(e);
-      // return store.getStore('universalGasPrice')
-    }
-  };
 
   getVaultInfo = async () => {
-    const vaultApiInfo = store.getStore("vaultApiInfo");
-    // const web3 = await this._getWeb3Provider()
-    // if(!web3) {
-    //   console.log('我在这跳出了2')
-    //   return null
-    // }
-    const totalValue = await this._getTotalValueStatistic();
-    // async.map(vaultApiInfo, (vaultApiInfo, callback) => {
-    //   async.parallel([
-    //     (callbackInner) => { this._getTotalValue(totalValue, vaultApiInfo, callbackInner) },
-    //   ], (err, data) => {
-    //     if(err) {
-    //       return callback(err)
-    //     }
-    //     vaultApiInfo.totalValue = '11'
-    //     callback(null, vaultApiInfo)
-    //   })
-    // }, (err, vaultApiInfo) => {
-    //   if(err) {
-    //     console.log(err)
-    //     return emitter.emit(ERROR, err)
-    //   }
-    const val = totalValue[0].tvl;
-    store.setStore({ totalValue: val });
-    return emitter.emit(GET_VAULT_INFO, val);
-    // })
+    const totalValue = await apiHelper.getTotalTVL();
+    store.setStore({ totalValue: totalValue[0].tvl });
+    return emitter.emit(GET_VAULT_INFO, totalValue[0].tvl);
   };
 
   saveBiconomyProvider = async (payload) => {
@@ -6269,16 +6187,13 @@ class Store {
     if (!web3) {
       return null;
     }
-
-    store.setStore({executeStrategyBalanceFunction: true});
-
-    const vaultStatistics = await this._getStatistics();
-    const addressStatistics = await this._getAddressStatistics(account.address);
-    const daoMinePools = await this._findDAOminePool();
+    const vaultStatistics = await apiHelper.findVaultsAPY();
+    const addressStatistics = await apiHelper.getUserVaultStatistics(account.address);
+    const daoMinePools = await apiHelper.findDAOminePool();
     const pools = daoMinePools.pools;
 
-    const usdPrices = await this._getUSDPrices();
-    await this.getUSDPrices();
+    const usdPrices = await apiHelper.findTokenUSDPrices();
+    // await this.getUSDPrices();
 
     async.map(
       assets,
@@ -7367,25 +7282,13 @@ class Store {
       console.err("type is missing in payload content of getDvgApr()");
       return;
     }
-    const apr = await this._getDvgApr(type);
+    const apr = await apiHelper.getVipTokenInfo(type);
 
     let dvgApr = store.getStore("dvgApr");
     dvgApr[type] = apr;
     store.setStore({ dvgApr });
 
     return emitter.emit(GET_XDVG_APR_SUCCESS);
-  };
-
-  _getDvgApr = async (type) => {
-    try {
-      const url = config.statsProvider + `staking/get-${type}-stake`;
-      const statisticsString = await rp(url);
-      const statistics = JSON.parse(statisticsString);
-      return statistics.body;
-    } catch (e) {
-      console.log(e);
-      // return store.getStore('universalGasPrice')
-    }
   };
 
   isUsdVault = (asset) => {
