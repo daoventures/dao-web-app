@@ -12,6 +12,10 @@ import { BLOCK_EXPLORERS } from "../../constants";
 import { colors } from "../../theme";
 import { withNamespaces } from "react-i18next";
 
+import Store from "../../stores";
+
+const store = Store.store;
+
 const iconStyle = {
   fontSize: "22px",
   marginRight: "10px",
@@ -108,6 +112,7 @@ class MySnackbar extends Component {
   state = {
     open: this.props.open,
     progress: 0,
+    network: store.getStore("network")
   };
 
   handleClick = () => {
@@ -123,12 +128,13 @@ class MySnackbar extends Component {
   };
 
   render() {
-    const { type, message, networkId, t } = this.props;
-
+    const { type, message, t } = this.props;
+  
     // Default Settings
     let icon = <SuccessIcon color={colors.blue} />;
     let color = colors.blue;
     let messageType = "";
+    let networkId = store.getStore("network");
     let messageLink = BLOCK_EXPLORERS[networkId] + message;
     let progressBar = null;
     let autoHideDuration = 6000;
