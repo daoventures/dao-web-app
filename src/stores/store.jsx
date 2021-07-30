@@ -2,6 +2,8 @@ import {
   ADVANCE,
   APPROVE_COMPLETED,
   APPROVE_TRANSACTING,
+  APPROVAL_DVG_RETURNED,
+  APPROVAL_DVG_RETURNED_COMPLETED,
   BALANCES_LIGHT_RETURNED,
   BALANCES_RETURNED,
   BICONOMY_CONNECTED,
@@ -1959,25 +1961,25 @@ class Store {
         console.log(ex);
         return callback(ex);
       }
-      return;
-    } 
-      
-    const network = store.getStore("network");
-    const erc20Abi =getERC20AbiByNetwork(network);
-    let erc20Contract = new web3.eth.Contract(
-      erc20Abi,
-      asset.erc20address
-    );
-    
-    try {
-      var balance = await erc20Contract.methods
-        .balanceOf(account.address)
-        .call({ from: account.address });
-      balance = parseFloat(balance) / 10 ** asset.decimals;
-      callback(null, parseFloat(balance));
-    } catch (ex) {
-      console.log(ex);
-      // return callback(ex);
+    } else {
+      const network = store.getStore("network");
+      const erc20Abi = getERC20AbiByNetwork(network);
+      let erc20Contract = new web3.eth.Contract(
+        erc20Abi,
+        asset.erc20address
+      );
+      console.log(`Getting ERC 20 Balance for asset:  ${asset.erc20address}`);
+
+      try {
+        var balance = await erc20Contract.methods
+          .balanceOf(account.address)
+          .call({ from: account.address });
+        balance = parseFloat(balance) / 10 ** asset.decimals;
+        callback(null, parseFloat(balance));
+      } catch (ex) {
+        console.error("Error in getting ERC 20 Balance for asset: ", ex);
+        // return callback(ex);
+      }
     }
   };
 
@@ -6896,15 +6898,23 @@ class Store {
   //获取vipdvg
   getDvgbalance = async () => {
     const network = store.getStore("network");
+    if(!network) {
+      console.error(`No network found in getDvgBalance()`);
+      return null;
+    }
     const account = store.getStore("account");
-    const assets = this._getDefaultValues(network).dvg;
     if (!account || !account.address) {
+      console.error(`No account in getDvgBalance()`);
       return false;
     }
     const web3 = await this._getWeb3Provider();
     if (!web3) {
+      console.error(`No web3 in getDvgBalance()`);
       return null;
     }
+
+    const assets = this._getDefaultValues(network).dvg;
+    console.log("DVG Assets", assets);
 
     async.map(
       assets,
@@ -6937,7 +6947,7 @@ class Store {
           return emitter.emit(ERROR, err);
         }
 
-        console.log("Assets in getDvgbalance()", assets);
+        console.log("Final Assets in getDvgbalance()", assets);
         store.setStore({ dvg: assets });
         return emitter.emit(GET_DVG_BALANCE_SUCCESS, assets);
       }
@@ -6957,54 +6967,30 @@ class Store {
   depositXdvg = async (payload) => {
     const account = store.getStore("account");
 
-    const { asset, amount, max } = payload.content;
-    //asset 是dvg
-    this._callDepositDvg(asset, amount, max, (err, txnHash, receipt) => {
-      if (err) {
-        return emitter.emit(ERROR, err);
-      }
-      if(txnHash) {
-        return emitter.emit(DEPOSIT_DVG_RETURNED, txnHash);
-      }
-      if(receipt) {
-        return emitter.emit(DEPOSIT_DVG_RETURNED_COMPLETED, receipt.transactionHash);
-      }
-      
-      // dispatcher.dispatch({ type: GET_DVG_INFO })
-      // return emitter.emit(WITHDRAW_VAULT_RETURNED, withdrawResult);
-    });
-  };
-  _callDepositDvg = async (asset, amount, max, callback, withoutConvert) => {
-    const account = this.getStore("account");
+    const { asset, amount, max, withoutConvert } = payload.content;
     const web3 = await this._getWeb3Provider();
     if (!web3) {
       return null;
     }
 
     //创建dvg合约对象
-    const dvgContract = new web3.eth.Contract(asset.abi, asset.erc20address);
+    const tokenContract = new web3.eth.Contract(asset.abi, asset.erc20address);
 
     //判断dvg质押金额是否大于dvg授权数量
-    let xdvg;
-    if(asset.id === "DVD"){
-      xdvg = this.getStore("dvg")[0]; // xDVD
-    } else {
-      xdvg = this.getStore("dvg")[2]; // xDVG
-    }
-   
+    const index = (asset.id === "DVD") ? 0 : 2;
+    const vipTokenInfo = this.getStore("dvg")[index];
+
     //创建xdvg合约对象
-    const xDVGCOntract = new web3.eth.Contract(xdvg.abi, xdvg.erc20address);
-    //查询xdvg授权数量
-    const allowance = await dvgContract.methods
-      .allowance(account.address, xdvg.erc20address)
+    const vipTokenContract = new web3.eth.Contract(vipTokenInfo.abi, vipTokenInfo.erc20address);
+    const allowance = await tokenContract.methods
+      .allowance(account.address, vipTokenInfo.erc20address)
       .call({ from: account.address });
-    console.log(allowance, "allowance###5552");
+    console.log(`Allowance of token to vipToken ${allowance}`);
+
     let _amount = "";
     if (max) {
       //查询dvg可用
-      _amount = await dvgContract.methods
-        .balanceOf(account.address)
-        .call({ from: account.address });
+      _amount = await tokenContract.methods.balanceOf(account.address).call({ from: account.address });
     } else {
       if (withoutConvert) {
         _amount = amount;
@@ -7012,81 +6998,84 @@ class Store {
         _amount = web3.utils.toWei(amount, "ether");
       }
     }
+    console.log(`Amount to deposit into vipToken ${_amount}`);
 
-    //xdvg授权数量小于金额的话 需要重新授权
+    let approvalErr = false;
     if (parseFloat(_amount) > parseFloat(allowance)) {
-      this._callDvgApproval(account, _amount, (err) => {
+      console.log(`Calling Approval DVG`);
+      await this._callDvgApproval(account, amount, (err, txHash, receipt) => {
+        if (err) {
+          approvalErr = true;
+          return emitter.emit(ERROR, err);
+        }
+        if (txHash) {
+          console.log(`Approval Transaction Hash`, txHash);
+          return emitter.emit(APPROVAL_DVG_RETURNED, txHash);
+        }
+        if (receipt) {
+          console.log("Approval Receipt", receipt);
+          return emitter.emit(APPROVAL_DVG_RETURNED_COMPLETED, receipt.transactionHash);
+        }
+      });
+    }
+
+    if(!approvalErr) {
+      console.log(`Calling Deposit DVG`);
+      await this._callDepositDvg(vipTokenContract, _amount, (err, txnHash, receipt) => {
         if (err) {
           return emitter.emit(ERROR, err);
         }
-        xDVGCOntract.methods
-          .deposit(_amount)
-          .send({
-            from: account.address,
-          })
-          .on("transactionHash", function (txnHash) {
-            console.log(txnHash, "hash###");
-            callback(null, txnHash, null);
-          })
-          .on("confirmation", function (confirmationNumber, receipt) {
-            console.log(confirmationNumber, receipt);
-          })
-          .on("receipt", function (receipt) {
-            callback(null, null, receipt);
-            // dispatcher.dispatch({ type: GET_DVG_INFO });
-          })
-          .on("error", function (error) {
-            if (!error.toString().includes("-32601")) {
-              if (error.message) {
-                return callback(error.message);
-              }
-              callback(error);
-            }
-          })
-          .catch((error) => {
-            if (!error.toString().includes("-32601")) {
-              if (error.message) {
-                return callback(error.message);
-              }
-              callback(error);
-            }
-          });
+        if (txnHash) {
+          return emitter.emit(DEPOSIT_DVG_RETURNED, txnHash);
+        }
+        if (receipt) {
+          return emitter.emit(DEPOSIT_DVG_RETURNED_COMPLETED, receipt.transactionHash);
+        }
       });
-    } else {
-      console.log(_amount, "_amount5612");
-      xDVGCOntract.methods
-        .deposit(_amount)
-        .send({
-          from: account.address,
-        })
-        .on("transactionHash", function (hash) {
-          console.log(hash, "hash###");
-          callback(null, hash);
-        })
-        .on("confirmation", function (confirmationNumber, receipt) {
-          console.log(confirmationNumber, receipt);
-        })
-        .on("receipt", function (receipt) {
-          callback(null, null, receipt);
-          // dispatcher.dispatch({ type: GET_DVG_INFO });
-        })
-        .on("error", function (error) {
-          if (!error.toString().includes("-32601")) {
-            if (error.message) {
-              return callback(error.message);
-            }
-            callback(error);
-          }
-        })
-        .catch((error) => {
-          if (!error.toString().includes("-32601")) {
-            if (error.message) {
-              return callback(error.message);
-            }
-            callback(error);
-          }
-        });
     }
+  };
+
+  _callDepositDvg = async (vipTokenContract, amount, callback) => {
+    const account = this.getStore("account");
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      return null;
+    }
+
+    await vipTokenContract.methods
+      .deposit(amount)
+      .send({
+        from: account.address,
+      })
+      .on("transactionHash", function (hash) {
+        console.log("Deposit vipToken Transaction Hash: ", hash);
+        callback(null, hash, null);
+      })
+      .on("confirmation", function (confirmationNumber, receipt) {
+        // console.log(confirmationNumber, receipt);
+      })
+      .on("receipt", function (receipt) {
+        console.log("Deposit vipToken receipt: ", receipt);
+        callback(null, null, receipt);
+      })
+      .on("error", function (error) {
+        console.error("Error in Deposit vipToken: ", error);
+        if (!error.toString().includes("-32601")) {
+          if (error.message) {
+            return callback(error.message, null, null);
+          }
+          callback(error, null, null);
+        }
+      })
+      .catch((error) => {
+        console.error("Error in Deposit vipToken: ", error);
+        if (!error.toString().includes("-32601")) {
+          if (error.message) {
+            return callback(error.message, null, null);
+          }
+          callback(error, null, null);
+        }
+      });
   };
 
   _callDvgApproval = async (account, amount, callback) => {
@@ -7094,17 +7083,21 @@ class Store {
     let asset = store.getStore("dvg")[1]; //dvd
     let xdvg = store.getStore("dvg")[0]; //xdvg
     let dvgContract = new web3.eth.Contract(asset.abi, asset.erc20address);
-    dvgContract.methods
+    await dvgContract.methods
       .approve(xdvg.erc20address, web3.utils.toWei("999999999999", "ether"))
       .send({
         from: account.address,
       })
       .on("transactionHash", function (hash) {
-        //success...
-        callback();
+        console.log("Transaction hash for dvd approval: ", hash);
+        callback(null, hash, null);
       })
+      .on("receipt", function(receipt) {
+        console.log("Receipt for dvd approval: ", receipt);
+        callback(null, null, receipt);
+      }) 
       .on("error", function (error) {
-        console.log("5682");
+        console.error("Error in getting dvd contract approval: ", error);
         if (!error.toString().includes("-32601")) {
           if (error.message) {
             return callback(error.message);
@@ -7489,24 +7482,18 @@ class Store {
 
     const realBalance = store.getStore('realBalance');
     if (!isNaN(realBalance)) {
-      await this._callDepositDvg({
-        id: "DVD",
-        abi: asset.dvd.erc20ABI,
-        ...asset.dvd,
-      }, realBalance, false, (err, txnHash, receipt) => {
-        if (err) {
-          return emitter.emit(ERROR, err);
+      await this.depositXdvg({
+        content: {
+          asset: {
+            id: "DVD",
+            abi: asset.dvd.erc20ABI,
+            ...asset.dvd
+          },
+          amount: realBalance,
+          max: false,
+          withoutConvert: true,
         }
-        if(txnHash) {
-          return emitter.emit(DEPOSIT_DVG_RETURNED, txnHash);
-        }
-        if(receipt) {
-          store.setStore({
-            realBalance: '',
-          })
-          return emitter.emit(DEPOSIT_DVG_RETURNED_COMPLETED, receipt.transactionHash);
-        }
-      }, true);
+      });
     } else {
       return emitter.emit(ERROR, 'Failed to upgrade to DVD token to stake into DAOvip (DVD).');
     }
