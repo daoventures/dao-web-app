@@ -148,7 +148,7 @@ const ethereum = [
       "0x6b175474e89094c44da98b954eedeac495271d0f",
     ],
     erc20address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
-    vaultContractAddress: "", // TODO: Update to the mainnet address
+    vaultContractAddress: "0x2ad9f8d4c24652ea9f8a954f7e1fdb50a3be1dfd",
     vaultContractABI: config.vaultDAOCUBContractABI,
     balance: 0,
     balances: [0, 0, 0],
@@ -158,13 +158,13 @@ const ethereum = [
     depositAll: true,
     withdraw: true,
     withdrawAll: true,
-    lastMeasurement: 12722655, // TODO: Update to the mainnet block number
+    lastMeasurement: 12799447, 
     measurement: 1e18,
     price_id: ["tether", "usd-coin", "dai"],
     priceInUSD: [0, 0, 0],
     strategyName: "Cuban's Ape: USDT USDC DAI",
     strategy: "DAO Cuban",
-    strategyAddress: "", // TODO: Update to the mainnet address
+    strategyAddress: "0x7c0f84e9dc6f721de21d51a490de6e370fa01cd6",
     strategyContractABI: config.strategyDAOCUBContractABI,
     historicalPriceId: "daoCUB_price",
     logoFormat: "svg",
