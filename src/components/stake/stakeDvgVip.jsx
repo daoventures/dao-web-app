@@ -20,7 +20,8 @@ import {
     WITHDRAW_DVG_RETURNED_COMPLETED,
     DEPOSIT_DVG_RETURNED,
     DEPOSIT_DVG_RETURNED_COMPLETED,
-    ERROR
+    ERROR,
+    CHANGE_NETWORK
 } from '../../constants/constants'
 import Store from "../../stores/store";
 import ConnectWallet from "../common/connectWallet/connectWallet";
@@ -628,6 +629,7 @@ class StakeDvgVip extends Component {
     }
     componentWillMount() {
         emitter.on(CONNECTION_CONNECTED, this.connectionConnected);
+        emitter.on(CHANGE_NETWORK, this.networkChanged);
         emitter.on(GET_DVG_BALANCE_SUCCESS, this.dvgBalance);
         emitter.on(GET_XDVG_APR_SUCCESS, this.getAprInfo);
         emitter.on(WITHDRAW_DVG_RETURNED, this.showHash);
@@ -639,6 +641,7 @@ class StakeDvgVip extends Component {
 
     componentWillUnmount() {
         emitter.removeListener(CONNECTION_CONNECTED, this.connectionConnected);
+        emitter.removeListener(CHANGE_NETWORK, this.networkChanged);
         emitter.removeListener(GET_DVG_BALANCE_SUCCESS, this.dvgBalance)
         emitter.removeListener(GET_XDVG_APR_SUCCESS, this.getAprInfo)
         emitter.removeListener(WITHDRAW_DVG_RETURNED, this.withdrawReturned)
@@ -676,9 +679,19 @@ class StakeDvgVip extends Component {
         const account = store.getStore('account')
         this.setState({ loading: true, account: account })
         if (account && account.address) {
+            console.log(`Connection Connected, dispatching get dvg info`);
             dispatcher.dispatch({ type: GET_DVG_INFO })
         }
     };
+
+    networkChanged = (payload) => {
+        console.log(`Network Changed:  ${payload.network}`);
+        const account = store.getStore('account')
+        if (account && account.address) {
+            console.log(`Dispatching get DVG info upon network changed.`)
+            dispatcher.dispatch({ type: GET_DVG_INFO })
+        }
+    }
 
     dvgBalance = (asset) => {
         this.setState({
