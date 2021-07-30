@@ -314,6 +314,7 @@ class Store {
       openDrawer: false,
       stakePools: [],
       dvgApr: "",
+      performanceIds: ['daoCDV']
     };
 
     dispatcher.register(
@@ -6202,7 +6203,8 @@ class Store {
 
   _getHistoricalPerformance = async (performanceId, interval, callback) => {
 
-    if (performanceId) {
+    const performanceIds = store.getStore('performanceIds');
+    if (performanceId && performanceIds.includes(performanceId)) {
       try {
         const url = `${config.statsProvider}vaults/performance/${performanceId}/${interval}`;
         const resultString = await rp(url);
@@ -6224,7 +6226,8 @@ class Store {
     let resultString;
     let result;
     const intervals = ["30d", "7d"];
-    if (performanceId) {
+    const performanceIds = store.getStore('performanceIds');
+    if (performanceId && performanceIds.includes(performanceId)) {
       for (const interval of intervals) {
         try {
           let url = `${config.statsProvider}vaults/pnl/${performanceId}/${interval}`;
