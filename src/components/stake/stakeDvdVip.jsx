@@ -21,6 +21,8 @@ import {
     WITHDRAW_DVG_RETURNED_COMPLETED,
     DEPOSIT_DVG_RETURNED,
     DEPOSIT_DVG_RETURNED_COMPLETED,
+    APPROVAL_DVG_RETURNED,
+    APPROVAL_DVG_RETURNED_COMPLETED,
     ERROR
 } from '../../constants/constants'
 import Store from "../../stores/store";
@@ -640,17 +642,21 @@ class StakeDvdVip extends Component {
         emitter.on(WITHDRAW_DVG_RETURNED_COMPLETED, this.withdrawReturned);
         emitter.on(DEPOSIT_DVG_RETURNED, this.showHash);
         emitter.on(DEPOSIT_DVG_RETURNED_COMPLETED, this.depositReturned);
+        emitter.on(APPROVAL_DVG_RETURNED, this.showHash);
+        emitter.on(APPROVAL_DVG_RETURNED_COMPLETED, this.onApprovalCompleted);
         emitter.on(ERROR, this.errorReturned)
     }
 
     componentWillUnmount() {
         emitter.removeListener(CONNECTION_CONNECTED, this.connectionConnected);
-        emitter.removeListener(GET_DVG_BALANCE_SUCCESS, this.dvgBalance)
-        emitter.removeListener(GET_XDVG_BALANCE_SUCCESS, this.xdvgBalance)
-        emitter.removeListener(GET_XDVG_APR_SUCCESS, this.getAprInfo)
-        emitter.removeListener(WITHDRAW_DVG_RETURNED, this.withdrawReturned)
-        emitter.removeListener(DEPOSIT_DVG_RETURNED, this.depositReturned)
-        emitter.removeListener(ERROR, this.errorReturned)
+        emitter.removeListener(GET_DVG_BALANCE_SUCCESS, this.dvgBalance);
+        emitter.removeListener(GET_XDVG_BALANCE_SUCCESS, this.xdvgBalance);
+        emitter.removeListener(GET_XDVG_APR_SUCCESS, this.getAprInfo);
+        emitter.removeListener(WITHDRAW_DVG_RETURNED, this.withdrawReturned);
+        emitter.removeListener(DEPOSIT_DVG_RETURNED, this.depositReturned);
+        emitter.removeListener(APPROVAL_DVG_RETURNED, this.showHash);
+        emitter.removeListener(APPROVAL_DVG_RETURNED_COMPLETED, this.onApprovalCompleted);
+        emitter.removeListener(ERROR, this.errorReturned);
     }
 
     showHash = (txHash) => {
@@ -807,6 +813,20 @@ class StakeDvdVip extends Component {
         dispatcher.dispatch({ type: GET_DVG_INFO });
         this.setState({ loading: false, amount: "" });
     };
+
+    onApprovalCompleted = (txHash) => {
+        const snackbarObj = { snackbarMessage: null, snackbarType: null };
+        this.setState(snackbarObj);
+        this.setState({ loading: false });
+        const that = this;
+        setTimeout(() => {
+          const snackbarObj = {
+            snackbarMessage: txHash,
+            snackbarType: "Transaction Success",
+          };
+          that.setState(snackbarObj);
+        });
+      };
 
     maxAmount() {
         const { type, dvgInfoObj } = this.state;
