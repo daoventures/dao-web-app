@@ -148,7 +148,7 @@ const kovan = [
       "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
     ],
     erc20address: "0x07de306ff27a2b630b1141956844eb1552b956b5",
-    vaultContractAddress: "0x5c304A6cB105E1BFf9805cA5CF072F1d2C3bEAC5",
+    vaultContractAddress: "0x5c304a6cb105e1bff9805ca5cf072f1d2c3beac5",
     vaultContractABI: config.vaultDAOELOContractABI,
     balance: 0, // Stores balance of selectedERC20Address
     balances: [0, 0, 0],
@@ -164,7 +164,7 @@ const kovan = [
     priceInUSD: [0, 0, 0],
     strategyName: "Cuban's Ape: USDT USDC DAI",
     strategy: "DAO Cuban",
-    strategyAddress: "0x998372C8dC70833A7dC687020257302582FA5838",
+    strategyAddress: "0x998372c8dc70833a7dc687020257302582fa5838",
     strategyContractABI: config.strategyDAOCUBContractABI,
     historicalPriceId: "daoCUB_price",
     logoFormat: "svg",
