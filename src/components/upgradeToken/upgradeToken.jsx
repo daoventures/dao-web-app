@@ -20,6 +20,8 @@ import {
     DEPOSIT_DVG_RETURNED,
     UPGRADE_STAKE_TOKEN,
     DEPOSIT_DVG_RETURNED_COMPLETED,
+    APPROVAL_DVG_RETURNED,
+    APPROVAL_DVG_RETURNED_COMPLETED
 } from '../../constants'
 import Store from "../../stores";
 import ConnectWallet from "../common/connectWallet/connectWallet";
@@ -470,6 +472,8 @@ class UpgradeToken extends Component {
         emitter.on(ERROR, this.errorReturned)
         emitter.on(APPROVE_TRANSACTING, this.showHashApproval);
         emitter.on(APPROVE_COMPLETED, this.onApprovalCompleted);
+        emitter.on(APPROVAL_DVG_RETURNED, this.showHash);
+        emitter.on(APPROVAL_DVG_RETURNED_COMPLETED, this.onApprovalCompleted);
         emitter.on(DEPOSIT_DVG_RETURNED, this.showHash)
         emitter.on(DEPOSIT_DVG_RETURNED_COMPLETED, this.upgradeReturned)
     }
@@ -483,6 +487,8 @@ class UpgradeToken extends Component {
         emitter.removeListener(ERROR, this.errorReturned)
         emitter.removeListener(APPROVE_TRANSACTING, this.showHashApproval)
         emitter.removeListener(APPROVE_COMPLETED, this.onApprovalCompleted)
+        emitter.removeListener(APPROVAL_DVG_RETURNED, this.showHash);
+        emitter.removeListener(APPROVAL_DVG_RETURNED_COMPLETED, this.onApprovalCompleted);
         emitter.removeListener(DEPOSIT_DVG_RETURNED, this.showHash)
         emitter.removeListener(DEPOSIT_DVG_RETURNED_COMPLETED, this.upgradeReturned)
     }
@@ -524,10 +530,24 @@ class UpgradeToken extends Component {
         const that = this;
         setTimeout(() => {
             const snackbarObj = {
-                snackbarMessage: "Approving...",
+                snackbarMessage: txHash,
                 snackbarType: "Hash",
             };
             that.setState(snackbarObj);
+        });
+    };
+
+    showHash = (txHash) => {
+        this.setState({
+            snackbarMessage: null,
+            snackbarType: null,
+        });
+
+        setTimeout(() => {
+            this.setState({
+                snackbarMessage: txHash,
+                snackbarType: 'Hash'
+            });
         });
     };
 
@@ -538,8 +558,8 @@ class UpgradeToken extends Component {
         const that = this;
         setTimeout(() => {
             const snackbarObj = {
-                snackbarMessage: "Approved.",
-                snackbarType: "Transaction Success",
+                snackbarMessage: txHash,
+                snackbarType: "Approval Success",
             };
             that.setState(snackbarObj);
         });
@@ -574,20 +594,6 @@ class UpgradeToken extends Component {
 
     depositReturned = () => {
         this.setState({ loading: false, amount: "", });
-    };
-
-    showHash = (txHash) => {
-        this.setState({
-            snackbarMessage: null,
-            snackbarType: null,
-        });
-
-        setTimeout(() => {
-            this.setState({
-                snackbarMessage: txHash,
-                snackbarType: 'Hash'
-            });
-        });
     };
 
     upgradeReturned = (txHash) => {
