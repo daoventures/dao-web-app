@@ -97,6 +97,7 @@ import {
   UPGRADE_TOKEN,
   UPGRADE_TOKEN_SUCCESS,
   UPGRADE_TOKEN_RETURN,
+  UPGRADE_STAKE_TOKEN,
 } from "../constants";
 import {
   Biconomy,
@@ -447,6 +448,9 @@ class Store {
             break;
           case UPGRADE_TOKEN:
             this.upgradeToken();
+            break;
+          case UPGRADE_STAKE_TOKEN:
+            this.upgradeAndStakeToken();
             break;
           default: {
           }
@@ -7602,8 +7606,7 @@ class Store {
   depositXdvg = async (payload) => {
     const account = store.getStore("account");
 
-    const { asset, amount, max } = payload.content;
-
+    const { asset, amount, max, withoutConvert } = payload.content;
     const web3 = await this._getWeb3Provider();
     if (!web3) {
       return null;
@@ -7622,10 +7625,18 @@ class Store {
       .allowance(account.address, vipTokenInfo.erc20address)
       .call({ from: account.address });
     console.log(`Allowance of token to vipToken ${allowance}`);
-  
-    const _amount = max 
-      ? await tokenContract.methods.balanceOf(account.address).call({ from: account.address })
-      : web3.utils.toWei(amount, "ether");
+
+    let _amount = "";
+    if (max) {
+      //查询dvg可用
+      _amount = await tokenContract.methods.balanceOf(account.address).call({ from: account.address });
+    } else {
+      if (withoutConvert) {
+        _amount = amount;
+      } else {
+        _amount = web3.utils.toWei(amount, "ether");
+      }
+    }
     console.log(`Amount to deposit into vipToken ${_amount}`);
 
     let approvalErr = false;
@@ -7864,6 +7875,9 @@ class Store {
         (callbackInner) => {
           this._getERC20Balance(web3, asset.dvd, account, callbackInner);
         },
+        (callbackInner) => {
+          this._getReimburseInfo(account.address.toLowerCase(), callbackInner);
+        },
       ],
       (err, data) => {
         if (err) {
@@ -7872,6 +7886,36 @@ class Store {
         }
         asset.balance = data[0];
         asset.upgradeBalance = data[1];
+        asset.claimAmountRaw = data[2] != null && data[2].claimAmount ? data[2].claimAmount : "0.00";
+        asset.claimAmount = data[2] != null && data[2].claimAmount ? data[2].claimAmount / 10 ** asset.dvg.decimals : "0.00";
+        asset.eligibleAmountRaw = data[2] != null && data[2].amount ? data[2].amount : "0.00";
+        asset.eligibleAmount = data[2] != null ? data[2].amount / 10 ** asset.dvg.decimals : 0;
+        // asset.disableUpgrade = false;
+
+        // if (asset.claimAmount !== "0.00") {
+        //   if (asset.claimAmount < asset.eligibleAmount) {
+        //     asset.eligibleAmount  = asset.eligibleAmount - asset.claimAmount;
+        //     asset.eligibleAmountRaw = new BigNumber(asset.eligibleAmountRaw).minus(asset.claimAmountRaw).toFixed();
+        //     asset.disableUpgrade = false;
+        //   }
+
+        //   if (asset.claimAmount >= asset.eligibleAmount) {
+        //     asset.eligibleAmount = 0;
+        //     asset.eligibleAmountRaw = "0.00";
+        //     asset.disableUpgrade = true;
+        //   }
+        // } else {
+        //   if (asset.eligibleAmount === 0) {
+        //     asset.disableUpgrade = true;
+        //   } else {
+        //     asset.disableUpgrade = false;
+        //   }
+        // }
+
+        // If DVG Balance is zero, disable button
+        // asset.disableUpgrade = (!asset.disableUpgrade && asset.balance <= 0) ? true : asset.disableUpgrade;
+        asset.disableUpgrade = asset.balance <= 0;
+        
         store.setStore({
           upgradeInfo: asset,
         });
@@ -7880,20 +7924,40 @@ class Store {
     );
   };
 
-  _getReimburseInfo = async (address) => {
+  _getReimburseInfo = async (address, callback) => {
     try {
       const url = config.statsProvider + "user/reimburse-address/" + address;
       const reimburseInfo = await rp(url);
-      return JSON.parse(reimburseInfo).body;
+      if (callback) {
+        return callback(null, JSON.parse(reimburseInfo).body);
+      } else {
+        return JSON.parse(reimburseInfo).body;
+      }
     } catch (e) {
       console.log(e);
       return store.getStore("universalGasPrice");
     }
   }
 
-  upgradeToken = async (payload) => {
+  _updateReimburseInfo = async (info) => {
+    try {
+      const url = config.statsProvider + "user/reimburse-address/update";
+      const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(info)
+      };
+      const response = await fetch(url, requestOptions);
+      const result = await response.json();
+    } catch (e) {
+      console.log("Error in _updateReimburseInfo", e);
+    }
+  }
+
+  upgradeToken = async (isStake) => {
     const network = store.getStore("network");
     const account = store.getStore("account");
+    const upgradeInfo = store.getStore('upgradeInfo');
     const asset = this._getDefaultValues(network).upgradeToken;
     if (!account || !account.address) {
       return false;
@@ -7920,20 +7984,26 @@ class Store {
       const dvgAllowance = await dvgContract.methods
         .allowance(account.address, asset.swapAddress)
         .call({ from: account.address });
-      const dvgActualAllowance = dvgAllowance / 10 ** asset.dvg.decimals; 
+      const dvgActualAllowance = dvgAllowance; 
   
       const dvdAllowance = await dvdContract.methods
         .allowance(account.address, asset.swapAddress)
         .call({ from: account.address });
-      const dvdActualAllowance = dvdAllowance / 10 ** asset.dvd.decimals; 
+      const dvdActualAllowance = dvdAllowance; 
+
+      const balance = await dvgContract.methods
+        .balanceOf(account.address)
+        .call({ from: account.address });
   
       // Approval
       let dvgApprovalError;
       let dvdApprovalError;
-      const balance = await dvgContract.methods.balanceOf(account.address)
-        .call({ from: account.address });
 
-      if (parseFloat(balance) > parseFloat(dvgActualAllowance)) {
+      // DAO -228 Allow User to swap all DVG to DVD at 1.1 ratio
+      // const realBalance = new BigNumber(balance).isGreaterThan(upgradeInfo.eligibleAmountRaw) ? upgradeInfo.eligibleAmountRaw : balance;
+      const realBalance =  balance;
+      
+      if (parseFloat(realBalance) > parseFloat(dvgActualAllowance)) {
         await this._checkLpTokenContractApproval(
           account,
           dvgContract,
@@ -7955,7 +8025,7 @@ class Store {
         );
       }
   
-      if (parseFloat(balance) > parseFloat(dvdActualAllowance)) {
+      if (parseFloat(realBalance) > parseFloat(dvdActualAllowance)) {
         await this._checkLpTokenContractApproval(
           account,
           dvdContract,
@@ -7982,9 +8052,11 @@ class Store {
           asset.swapContractAbi,
           asset.swapAddress
         );
+        
+        let swapErr = false;
   
         await swapContract.methods.upgradeDVG(
-          balance, 
+          realBalance, 
           reimburse.amount, 
           reimburse.signatureMessage,
         ).send({
@@ -8002,10 +8074,19 @@ class Store {
         })
         .on("error", function (error) {
           if (!error.toString().includes("-32601")) {
+            swapErr = true;
             if (error.message) {
               return emitter.emit(ERROR, error.message);
             }
             return emitter.emit(ERROR, error);
+          }
+        })
+        .then(async() => {
+          if(!swapErr) {
+            await this._updateReimburseInfo({address: account.address, amount: realBalance});
+            store.setStore({
+              realBalance,
+            })
           }
         })
         .catch((error) => {
@@ -8019,6 +8100,42 @@ class Store {
       } 
     }
   };
+
+  upgradeAndStakeToken = async (payload) => {
+    const network = store.getStore("network");
+    const account = store.getStore("account");
+    
+    const asset = this._getDefaultValues(network).upgradeToken;
+    if (!account || !account.address) {
+      return false;
+    }
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      return null;
+    }
+
+    store.setStore({ dvg: this._getDefaultValues(network).dvg });
+
+    await this.upgradeToken(true);
+
+    const realBalance = store.getStore('realBalance');
+    if (!isNaN(realBalance)) {
+      await this.depositXdvg({
+        content: {
+          asset: {
+            id: "DVD",
+            abi: asset.dvd.erc20ABI,
+            ...asset.dvd
+          },
+          amount: realBalance,
+          max: false,
+          withoutConvert: true,
+        }
+      });
+    } else {
+      return emitter.emit(ERROR, 'Failed to upgrade to DVD token to stake into DAOvip (DVD).');
+    }
+  }
 }
 
 var store = new Store();
