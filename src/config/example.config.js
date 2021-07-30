@@ -26726,7 +26726,7 @@ const config = {
   ],
   yFarmerVaultContract: "0x2f08119c6f07c006695e079aafc638b8789faf18",
   yFarmerEarnContract: "0xE6354ed5bC4b393a5Aad09f21c46E101e692d447",
-  USDTETHPriceFeedContract: "0x0bf499444525a23e7bb61997539725ca2e928138",
+  USDTETHPriceFeedContract: "0xEe9F2375b4bdF6387aa8265dD4FB8F16512A1d46",
   USDTUSDPriceFeedMainnetContract: "0x3E7d1eAB13ad0104d2750B8863b489D65364e32D",
   USDTUSDPriceFeedKovanContract: "0x2ca5A90D34cA333661083F89D831f757A9A50148",
   eacAggregatoorProxyContract: [
