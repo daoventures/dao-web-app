@@ -2794,6 +2794,7 @@ class Store {
         config.erc20ABI,
         asset.erc20address
       );
+      console.log(`Getting ERC 20 Balance for asset:  ${asset.erc20address}`);
 
       try {
         var balance = await erc20Contract.methods
@@ -2802,7 +2803,7 @@ class Store {
         balance = parseFloat(balance) / 10 ** asset.decimals;
         callback(null, parseFloat(balance));
       } catch (ex) {
-        console.log(ex);
+        console.error("Error in getting ERC 20 Balance for asset: ", ex);
         // return callback(ex);
       }
     }
@@ -7532,15 +7533,23 @@ class Store {
   //获取vipdvg
   getDvgbalance = async () => {
     const network = store.getStore("network");
+    if(!network) {
+      console.error(`No network found in getDvgBalance()`);
+      return null;
+    }
     const account = store.getStore("account");
-    const assets = this._getDefaultValues(network).dvg;
     if (!account || !account.address) {
+      console.error(`No account in getDvgBalance()`);
       return false;
     }
     const web3 = await this._getWeb3Provider();
     if (!web3) {
+      console.error(`No web3 in getDvgBalance()`);
       return null;
     }
+
+    const assets = this._getDefaultValues(network).dvg;
+    console.log("DVG Assets", assets);
 
     async.map(
       assets,
@@ -7573,7 +7582,7 @@ class Store {
           return emitter.emit(ERROR, err);
         }
 
-        console.log("Assets in getDvgbalance()", assets);
+        console.log("Final Assets in getDvgbalance()", assets);
         store.setStore({ dvg: assets });
         return emitter.emit(GET_DVG_BALANCE_SUCCESS, assets);
       }
