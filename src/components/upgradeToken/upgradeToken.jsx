@@ -26,10 +26,6 @@ import {
 import Store from "../../stores";
 import ConnectWallet from "../common/connectWallet/connectWallet";
 import Snackbar from "../snackbar/snackbar";
-<<<<<<< HEAD
-import InfoModal from "../common/infoModal/infoModal";
-=======
->>>>>>> 6795b24ffac1148a8a136f6a7079ce2419c5ee26
 
 const emitter = Store.emitter
 const dispatcher = Store.dispatcher
@@ -799,14 +795,8 @@ class UpgradeToken extends Component {
                         </div>
                     </div>
                 </div>
-<<<<<<< HEAD
                 {/* {isPopUp ?
                     <div className={classes.}>
-=======
-
-                {isPopUp ?
-                    <div className={classes.share}>
->>>>>>> 6795b24ffac1148a8a136f6a7079ce2419c5ee26
                         <div className={classes.shareBox}>
                             <div className={classes.shareTitle}>
                                 <p className={classes.shareTitleText}></p>
