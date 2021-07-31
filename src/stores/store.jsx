@@ -322,7 +322,7 @@ class Store {
       openDrawer: false,
       stakePools: [],
       dvgApr: {},
-      performanceIds: ['daoCDV']
+      performanceIds: ['daoCDV', 'daoSTO']
     };
 
     dispatcher.register(
