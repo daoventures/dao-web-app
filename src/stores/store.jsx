@@ -4107,10 +4107,12 @@ class Store {
         );
       });
 
-      if (vault.length === 0) {
+      if (vault.length === 0 || (vault.length > 0 && vault[0].message)) {
         return callback(null, null);
       }
+
       callback(null, vault[0]);
+
     } catch (ex) {
       callback(null, {});
     }
