@@ -6448,48 +6448,59 @@ class Store {
   };
 
   findDAOminePool = async (payload) => {
-    const account = store.getStore("account");
+    const isNewDAOmine = (payload && payload.content) ? payload.content.isNewVersion : false;
 
     try {
       const network = store.getStore("network");
-
-      const web3 = await this._getWeb3Provider();
-
-      if (!web3) {
+      if(!network) {
+        console.error(`findDAOminePool() is missing network.`);
         return null;
       }
 
-      const poolsResponse = await this._findDAOminePool();
-      const pools = poolsResponse.pools;
+      const account = store.getStore("account");
+      if(!account || !account.address) {
+        console.error(`findDAOminePool() is missing account.`);
+        return null;
+      }
 
+      const web3 = await this._getWeb3Provider();
+      if (!web3) {
+        console.error(`findDAOminePool() is missing web3.`);
+        return null;
+      }
+
+      let pools = [];
       let daoMineContract;
-      let dvgContract;
-      let dvgDecimal = 0;
+      let tokenDecimal = 18;
 
-      if (network === 42) {
+      if(isNewDAOmine) {
+        const poolResponse = await this._findNewDAOminePool();
+        pools = poolResponse.pools;
+
+        emitter.emit(DAOMINE_POOL_RETURNED, pools);
+
+        const address = (network === NETWORK.KOVAN) 
+          ? config.daomineTestContract
+          : config.daomineMainnetContract;
+
+        daoMineContract = new web3.eth.Contract(
+          config.daomineContractABI,
+          address
+        );
+      } else {
+        const poolsResponse = await this._findDAOminePool();
+        pools = poolsResponse.pools;
+
+        emitter.emit(DAOMINE_POOL_RETURNED, pools);
+
+        const address = (network === NETWORK.KOVAN) 
+          ? config.daoStakeTestContract
+          : config.daoStakeMainnetContract;
+
         daoMineContract = new web3.eth.Contract(
           config.daoStakeContractABI,
-          config.daoStakeTestContract
+          address
         );
-
-        dvgContract = new web3.eth.Contract(
-          config.dvgTokenContractABI,
-          config.dvgTokenTestContract
-        );
-
-        dvgDecimal = await dvgContract.methods.decimals().call();
-      } else if (network === 1) {
-        daoMineContract = new web3.eth.Contract(
-          config.daoStakeContractABI,
-          config.daoStakeMainnetContract
-        );
-
-        dvgContract = new web3.eth.Contract(
-          config.dvgTokenContractABI,
-          config.dvgTokenMainnetContract
-        );
-
-        dvgDecimal = await dvgContract.methods.decimals().call();
       }
 
       async.map(
@@ -6506,7 +6517,7 @@ class Store {
                 this._getUserBalanceForLpToken(poolContract, account, callbackInner);
               },
               (callbackInner) => {
-                this._getUserDepositForDAOmine(daoMineContract, dvgDecimal, account, pool.pid, callbackInner);
+                this._getUserDepositForDAOmine(daoMineContract, tokenDecimal, account, pool.pid, callbackInner);
               }
             ],
             (err, data) => {
@@ -6548,8 +6559,18 @@ class Store {
       const pools = JSON.parse(poolsString);
       return pools.body;
     } catch (e) {
-      console.log(e);
-      return store.getStore("universalGasPrice");
+      console.err("Error in _findDAOminePool(): ",e);
+    }
+  }
+
+  _findNewDAOminePool = async() => {
+    try {
+      const url = config.statsProvider + "staking/get-daomine-pools";
+      const poolsString = await rp(url);
+      const pools = JSON.parse(poolsString);
+      return pools.body;
+    } catch (e) {
+      console.err("Error in _findNewDAOminePool(): ",e);
     }
   }
 
