@@ -502,7 +502,7 @@ class Stake extends Component {
     return (
       <div className={classes.root}>
         {/** Banner */}
-        <div className={classes.banner}>
+        {/* <div className={classes.banner}>
           <div>
             <Typography variant={"h3"} className={classes.bannerTit}>
               Create DVG-ETH UNI-V2 LP tokens
@@ -527,7 +527,7 @@ class Stake extends Component {
               Add Liquidity
             </a>
           </div>
-        </div>
+        </div> */}
 
         {/** Content */}
         <div className={classes.contentContainer}>
