@@ -361,7 +361,7 @@ class StakeWithdraw extends Component {
                             className={classes.cursor}
                             noWrap
                         >
-                            {userInfo.depositedLPAmount
+                            {userInfo && userInfo.depositedLPAmount
                                 ? (
                                     Math.floor(
                                         (userInfo.depositedLPAmount / 10 ** pool.decimal) * 10000
@@ -384,7 +384,7 @@ class StakeWithdraw extends Component {
                             value={amount}
                             error={amountError}
                             onChange={this.onChange}
-                            disabled={(pool.withdraw && loading) || !pool.withdraw}
+                            disabled={(pool.withdraw && loading) || !pool.withdraw || !userInfo}
                             placeholder="0.00"
                             variant="outlined"
                             onKeyDown={this.inputKeyDown}
@@ -398,7 +398,7 @@ class StakeWithdraw extends Component {
                                         : classes.withdrawalScale
                                 }
                                 variant="text"
-                                disabled={(pool.withdraw && loading) || !pool.withdraw}
+                                disabled={(pool.withdraw && loading) || !pool.withdraw || !userInfo}
                                 onClick={() => {
                                     this.setAmount(100);
                                 }}

@@ -280,7 +280,7 @@ class StakeDeposit extends Component {
 
     const { userInfo } = pool;
 
-    return (
+    return  (
       <div className={classes.depositContainer}>
         <div className={classes.tradeContainer}>
           {/** Wallet Balance */}
@@ -297,7 +297,7 @@ class StakeDeposit extends Component {
               className={classes.cursor}
               noWrap
             >
-              {userInfo.tokenBalance
+              {userInfo && userInfo.tokenBalance
                 ? (
                   Math.floor(
                     (userInfo.tokenBalance / 10 ** pool.decimal) * 10000
@@ -355,7 +355,7 @@ class StakeDeposit extends Component {
           {/** Deposit Button */}
           <div className={classes.depositButtonBox}>
             <Button
-              disabled={(pool.deposit && loading) || !pool.deposit}
+              disabled={(pool.deposit && loading) || !pool.deposit || !userInfo}
               className={classes.depositActionButton}
               onClick={this.onDeposit}
             >

@@ -311,6 +311,7 @@ class Stake extends Component {
     if (account && account.address) {
       dispatcher.dispatch({
         type: FIND_DAOMINE_POOL,
+        content: { isNewVersion: false }
       });
     }
   }
@@ -366,6 +367,7 @@ class Stake extends Component {
     if (account && account.address) {
       dispatcher.dispatch({
         type: FIND_DAOMINE_POOL,
+        content: { isNewVersion: false }
       });
     }
 
@@ -410,6 +412,7 @@ class Stake extends Component {
   onDepositWithdrawalCompleted = (txHash) => {
     dispatcher.dispatch({
       type: FIND_DAOMINE_POOL,
+      content: { isNewVersion: false }
     });
 
     const snackbarObj = { snackbarMessage: null, snackbarType: null };
@@ -642,7 +645,7 @@ class Stake extends Component {
                             }}
                             className={classes.assetLabel1}
                           >
-                            {pool.userInfo.pendingDVG
+                            {pool.userInfo && pool.userInfo.pendingDVG
                               ? (Number(pool.userInfo.pendingDVG) / 10 ** 18)
                                   .toFixed(2)
                                   .toLocaleString(undefined, {
@@ -674,7 +677,7 @@ class Stake extends Component {
                             }}
                             className={classes.assetLabel1}
                           >
-                            { pool.userInfo.depositedLPAmount 
+                            { pool.userInfo && pool.userInfo.depositedLPAmount 
                               ? (
                                   Number(pool.userInfo.depositedLPAmount) /
                                   10 ** pool.decimal
