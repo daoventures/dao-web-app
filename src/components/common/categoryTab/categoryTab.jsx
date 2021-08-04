@@ -59,6 +59,9 @@ const styles = (theme) => ({
   },
   disableButton: {
     pointerEvents: "none",
+    color: theme.themeColors.btnDisabled,
+    borderColor: theme.themeColors.btnDisabled,
+    cursor: "not-allowed"
   }
 });
 
