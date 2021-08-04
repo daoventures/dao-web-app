@@ -6511,20 +6511,19 @@ class Store {
             pool.contract_address
           );
 
-          async.parallel(
-            [
-              (callbackInner) => {
-                this._getUserBalanceForLpToken(poolContract, account, callbackInner);
-              },
-              (callbackInner) => {
-                this._getUserDepositForDAOmine(daoMineContract, tokenDecimal, account, pool.pid, callbackInner);
-              }
-            ],
-            (err, data) => {
-              if (err) {
-                return callback(err);
-              }
+          const obj = {
+            poolContract,
+            account, 
+            daoMineContract, 
+            tokenDecimal,
+            pool
+          };
 
+          this.getDAOmineUserInfo(obj, (err, data) => {
+            if(err) {
+              callback(err, null);
+            }
+            if(data) {
               const userInfo = {};
 
               userInfo.tokenBalance = data[0];
@@ -6533,10 +6532,9 @@ class Store {
               userInfo.pendingDVG = data[1] ? data[1].userPendingDVG : null;
 
               pool.userInfo = userInfo;
-
               callback(null, pool);
             }
-          );
+          });
         },
         (err, pools) => {
           if (err) {
@@ -6550,6 +6548,26 @@ class Store {
     } catch (err) {
       console.log(err);
     }
+  }
+
+  getDAOmineUserInfo = (obj, callback) => {
+    const {
+      poolContract,
+      account, 
+      daoMineContract, 
+      tokenDecimal,
+      pool, 
+    } = obj;
+
+    async.parallel(
+      [
+        (callbackInner) => {
+          this._getUserBalanceForLpToken(poolContract, account, callbackInner);
+        },
+        (callbackInner) => {
+          this._getUserDepositForDAOmine(daoMineContract, tokenDecimal, account, pool.pid, callbackInner);
+        }
+      ], callback);
   }
 
   _findDAOminePool = async () => {
