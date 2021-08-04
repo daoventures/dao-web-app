@@ -6857,37 +6857,40 @@ class Store {
   }
 
   withdrawDAOmine = async (payload) => {
-    const account = store.getStore("account");
+    // Get web3
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      console.error(`Missing web3 in withdrawDAOmine()`);
+      return null;
+    }
+
+    // Network
     const network = store.getStore("network");
-   
+    if(!network) {
+      console.error(`Missing network in withdrawDAOmine()`);
+      return null;
+    }
+
+    // Account
+    const account = store.getStore("account");
+    if(!account) {
+      console.error(`Missing account in withdrawDAOmine()`);
+      return null;
+    }
+
     const { pool, amount } = payload.content;
     const poolDecimal = pool.decimal;
     const poolIndex = pool.pid;
 
-    // Get web3
-    const web3 = await this._getWeb3Provider();
-    if (!web3) {
-      return null;
-    }
-
-    // DAOMmine contract address by network
-    let daoMineContractAddress = "";
-    if (network === 42) {
-      daoMineContractAddress = config.daoStakeTestContract;
-    } else if (network === 1) {
-      daoMineContractAddress = config.daoStakeMainnetContract;
-    }
+    const daomineType = store.getStore("daomineType");
 
     try {
-      const daoMineContract = new web3.eth.Contract(
-        config.daoStakeContractABI,
-        daoMineContractAddress
-      );
+      const daoMineContract = await contractHelper.getDAOmineContract(web3, network, daomineType);
 
-      var amountToWithdraw =
-        poolDecimal !== "18"
+      var amountToWithdraw = poolDecimal !== "18"
           ? web3.utils.toBN(amount * 10 ** poolDecimal).toString()
           : web3.utils.toWei(amount, "ether");
+      console.log(`Withdraw from : ${daomineType}, Amount: ${amountToWithdraw}, Pool Index: ${poolIndex}`);
 
       await daoMineContract.methods
         .withdraw(poolIndex, amountToWithdraw)
