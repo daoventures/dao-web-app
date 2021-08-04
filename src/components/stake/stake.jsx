@@ -25,7 +25,9 @@ import {
   ALL,
   LATEST_POOLS,
   LEGACY_POOLS,
-  UPDATE_SELECTED_POOL_TYPE
+  UPDATE_SELECTED_POOL_TYPE,
+  YIELD_DAOMINE_RETURNED,
+  YIELD_DAOMINE_RETURNED_COMPLETED
 } from "../../constants/constants";
 
 import RiskLevelTab from "../common/riskLevelTab/riskLevelTab";
@@ -308,6 +310,8 @@ class Stake extends Component {
     emitter.on(WITHDRAW_DAOMINE_RETURNED_COMPLETED,this.onDepositWithdrawalCompleted);
     emitter.on(EMERGENCY_WITHDRAW_DAOMINE_RETURNED, this.showHash);
     emitter.on(EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,this.onDepositWithdrawalCompleted);
+    emitter.on(YIELD_DAOMINE_RETURNED, this.showHash);
+    emitter.on(YIELD_DAOMINE_RETURNED_COMPLETED, this.onDepositWithdrawalCompleted);
   }
 
   componentWillUnmount() {
@@ -321,6 +325,8 @@ class Stake extends Component {
     emitter.removeListener(WITHDRAW_DAOMINE_RETURNED_COMPLETED,this.onDepositWithdrawalCompleted);
     emitter.removeListener(EMERGENCY_WITHDRAW_DAOMINE_RETURNED, this.showHash);
     emitter.removeListener(EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,this.onDepositWithdrawalCompleted);
+    emitter.removeListener(YIELD_DAOMINE_RETURNED, this.showHash);
+    emitter.removeListener(YIELD_DAOMINE_RETURNED_COMPLETED, this.onDepositWithdrawalCompleted);
   }
 
   /** Handler function when wallet successfully connected */
@@ -423,7 +429,7 @@ class Stake extends Component {
     const that = this;
     setTimeout(() => {
       const snackbarObj = {
-        snackbarMessage: "Approving...",
+        snackbarMessage: txHash,
         snackbarType: "Hash",
       };
       that.setState(snackbarObj);
@@ -500,7 +506,7 @@ class Stake extends Component {
   handleSelectedPoolType = (type) => {
     this.setState({ selectedPoolType: type, disablePoolTab: true }, () => {
       this.dispatchUpdateDAOmineType();
-      
+
       const pools = (type === LEGACY_POOLS) 
         ? store.getStore("stakePools")
         : store.getStore("daominePools");

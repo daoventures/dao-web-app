@@ -97,6 +97,9 @@ import {
   UPGRADE_STAKE_TOKEN,
   DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED,
   DEPOSIT_ALL_CONTRACT,
+  YIELD_DAOMINE,
+  YIELD_DAOMINE_RETURNED,
+  YIELD_DAOMINE_RETURNED_COMPLETED
 } from "../constants";
 
 import BigNumber from "bignumber.js";
@@ -457,6 +460,9 @@ class Store {
           case UPDATE_SELECTED_POOL_TYPE: 
             this.updateSelectedPoolType(payload);
             break;  
+          case YIELD_DAOMINE:
+            this.yieldDAOmine(payload);
+            break;
           default: {
           }
         }
@@ -6929,6 +6935,61 @@ class Store {
     } catch (err) {
       console.log("withdrawDAOmine() Error: ", err);
     }  
+  }
+
+  yieldDAOmine = async (payload) => {
+    // Get web3
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      console.error(`Missing web3 in yieldDAOmine()`);
+      return null;
+    }
+
+    // Network
+    const network = store.getStore("network");
+    if (!network) {
+      console.error(`Missing network in yieldDAOmine()`);
+      return null;
+    }
+
+    // Account
+    const account = store.getStore("account");
+    if (!account) {
+      console.error(`Missing account in yieldDAOmine()`);
+      return null;
+    }
+
+    if (!payload || !payload.content || payload.content.pid === undefined) {
+      emitter.emit(ERROR, "Missing PID for yieldDAOmine()");
+    }
+
+    const pid = payload.content.pid;
+    const daomineType = store.getStore("daomineType");
+    const daomineContract = await contractHelper.getDAOmineContract(web3, network, daomineType);
+
+    await daomineContract.methods
+      .yield(pid)
+      .send({
+        from: account.address,
+        gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+      })
+      .on("transactionHash", function (txnHash) {
+        return emitter.emit(YIELD_DAOMINE_RETURNED, txnHash);
+      })
+      .on("receipt", function (receipt) {
+        emitter.emit(
+          YIELD_DAOMINE_RETURNED_COMPLETED,
+          receipt.transactionHash
+        );
+      })
+      .on("error", function (error) {
+        console.log("yieldDAOmine() Error: ", error);
+        if (!error.toString().includes("-32601")) {
+          if (error.message) {
+            emitter.emit(ERROR, error.message);
+          }
+        }
+      })
   }
 
   //stake开始

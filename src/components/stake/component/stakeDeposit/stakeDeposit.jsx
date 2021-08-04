@@ -7,6 +7,8 @@ import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import {
   DEPOSIT_DAOMINE,
   DEPOSIT_DAOMINE_RETURNED_COMPLETED,
+  YIELD_DAOMINE,
+  YIELD_DAOMINE_RETURNED_COMPLETED,
   ERROR
 } from "../../../../constants/constants";
 import Store from "../../../../stores/store";
@@ -173,11 +175,13 @@ class StakeDeposit extends Component {
 
   componentWillMount() {
     emitter.on(DEPOSIT_DAOMINE_RETURNED_COMPLETED, this.onDepositCompleted);
+    emitter.on(YIELD_DAOMINE_RETURNED_COMPLETED, this.onYieldCompleted);
     emitter.on(ERROR, this.errorReturned);
   }
 
   componentWillUnmount() {
     emitter.removeListener(DEPOSIT_DAOMINE_RETURNED_COMPLETED, this.onDepositCompleted);
+    emitter.removeListener(YIELD_DAOMINE_RETURNED_COMPLETED, this.onYieldCompleted);
     emitter.removeListener(ERROR, this.errorReturned);
   }
 
@@ -193,6 +197,12 @@ class StakeDeposit extends Component {
       percent: 0,
       loading: false
     })
+  }
+
+  onYieldCompleted = () => {
+    this.setState({
+      loading: false
+    });
   }
 
   onChange = (event) => {
@@ -260,6 +270,20 @@ class StakeDeposit extends Component {
       })
     }
   };
+
+  onYield = () => {
+    const { pool, startLoading } = this.props;
+    const pid = pool.pid;
+    if(!pool || !pid) { return; }
+
+    this.setState({loading: true});
+    startLoading();
+
+    dispatcher.dispatch({
+      type: YIELD_DAOMINE,
+      content: {pid}
+    })
+  }
 
   navigate = (vaultName) => {
     if (vaultName === 'ETH<->DVG') {
@@ -356,14 +380,24 @@ class StakeDeposit extends Component {
             )
           }
 
-          {/** Deposit Button */}
+         
           <div className={classes.depositButtonBox}>
+            {/** Deposit Button */}
             <Button
               disabled={(pool.deposit && loading) || !pool.deposit || !userInfo}
               className={classes.depositActionButton}
               onClick={this.onDeposit}
             >
               <span>Confirm Deposit</span>
+            </Button>
+
+             {/** Yield Button */}
+            <Button
+              disabled={(pool.deposit && loading) || !userInfo}
+              className={classes.depositActionButton}
+              onClick={this.onYield}
+              >
+                <span>Yield</span>
             </Button>
           </div>
 

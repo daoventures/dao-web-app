@@ -1,6 +1,5 @@
 import {
   LATEST_POOLS, 
-  LEGACY_POOLS,
   NETWORK 
 } from '../../constants/constants';
 import config from "../../config/config";
