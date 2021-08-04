@@ -22,11 +22,14 @@ import {
   EMERGENCY_WITHDRAW_DAOMINE_RETURNED,
   EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,
   ERROR,
-  ALL
+  ALL,
+  LATEST_POOLS,
+  LEGACY_POOLS
 } from "../../constants/constants";
 
 import RiskLevelTab from "../common/riskLevelTab/riskLevelTab";
 import RiskLevelLabel from "../common/riskLevelLabel/riskLevelLabel";
+import CategoryTab from "../common/categoryTab/categoryTab";
 import ConnectWallet from "../common/connectWallet/connectWallet";
 import Snackbar from "../snackbar/snackbar";
 import StakeDeposit from "./component/stakeDeposit/stakeDeposit";
@@ -124,30 +127,16 @@ const styles = (theme) => ({
     display: "flex",
     flex: 1,
     flexDirection: "column",
-    alignItems: "center",
     justifyContent: "center",
     position: "relative",
-    // [theme.breakpoints.up('md')]: {
-    //   minWidth: 'calc(100% - '+ drawerWidth + 'px)',
-    // }
   },
-  investedContainer: {
+  optionsContainer: {
     display: "flex",
-    flex: 1,
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "flex-start",
-    minWidth: "100%",
-    marginTop: "20px",
-    marginBottom: "40px",
-    [theme.breakpoints.up("md")]: {
-      width: "100%",
-      minWidth: "900px",
-    },
+    flexDirection: "row",
+    justifyContent: "space-between",
     [theme.breakpoints.down("sm")]: {
-      minWidth: "90%",
-      margin: "auto",
-      marginTop: "40px",
+      flexDirection: "column",
+      justifyContent: "flex-start",
     },
   },
   poolContainer: {
@@ -306,6 +295,7 @@ class Stake extends Component {
       currentTab: ALL,
       expanded: "",
       loading: false,
+      selectedPoolType: "latest"
     };
 
     if (account && account.address) {
@@ -490,9 +480,56 @@ class Stake extends Component {
     );
   };
 
+  renderBanner = () => {
+    const { classes } = this.props;
+    return (
+      <div className={classes.banner}>
+        <div>
+          <Typography variant={"h3"} className={classes.bannerTit}>
+            Create DVG-ETH UNI-V2 LP tokens
+          </Typography>
+          <p className={classes.bannerCon}>
+            Provide liquidity in Uniswap to get LP tokens.
+          </p>
+        </div>
+        <div>
+          <img
+            alt="banner"
+            className={classes.bannerImg}
+            src={require("../../assets/img_new/active_banner@2x.png")}
+          />
+        </div>
+        <div>
+          <a
+            href="https://info.uniswap.org/#/pools/0xa58262270521d7732fccbbdcdf9fcd1fc70d47e5"
+            target="_blank"
+            className={classes.addLiquidity}
+          >
+            Add Liquidity
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  renderPoolType = () => {
+    const items = [
+      { label: LATEST_POOLS, value: LATEST_POOLS },
+      { label: LEGACY_POOLS, value: LEGACY_POOLS }
+    ];
+
+    return (
+      <CategoryTab items={items} selectedTab={this.handleSelectedPoolType}></CategoryTab>
+    )
+  }
+
   handleSelectedRisk = (risk) => {
     this.setState({ currentTab: risk });
   };
+
+  handleSelectedPoolType = (p) => {
+    // Check store for legacy or current pool
+  }
 
   render() {
     const { classes } = this.props;
@@ -505,42 +542,20 @@ class Stake extends Component {
     return (
       <div className={classes.root}>
         {/** Banner */}
-        {/* <div className={classes.banner}>
-          <div>
-            <Typography variant={"h3"} className={classes.bannerTit}>
-              Create DVG-ETH UNI-V2 LP tokens
-            </Typography>
-            <p className={classes.bannerCon}>
-              Provide liquidity in Uniswap to get LP tokens.
-            </p>
-          </div>
-          <div>
-            <img
-              alt="banner"
-              className={classes.bannerImg}
-              src={require("../../assets/img_new/active_banner@2x.png")}
-            />
-          </div>
-          <div>
-            <a
-              href="https://info.uniswap.org/#/pools/0xa58262270521d7732fccbbdcdf9fcd1fc70d47e5"
-              target="_blank"
-              className={classes.addLiquidity}
-            >
-              Add Liquidity
-            </a>
-          </div>
-        </div> */}
+        {/* { this.renderBanner() } */}
 
         {/** Content */}
         <div className={classes.contentContainer}>
-          <div className={classes.investedContainer}>
+          <div className={classes.optionsContainer}>
             {/** Risk Type Tabs */}
-            {this.renderRiskTypeTab()}
+            <div>{this.renderRiskTypeTab()}</div>
 
-            {/** Display Pool List */}
-            {this.renderPools()}
+            {/** Render Pool Type */}
+            <div>{this.renderPoolType()}</div>
           </div>
+
+          {/** Display Pool List */}
+          {this.renderPools()}
         </div>
 
         {/** Loading */}

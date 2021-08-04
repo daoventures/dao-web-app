@@ -184,6 +184,9 @@ export const UPGRADE_STAKE_TOKEN = 'UPGRADE_STAKE_TOKEN';
 export const UPGRADE_TOKEN_SUCCESS = 'UPGRADE_TOKEN_SUCCESS';
 export const UPGRADE_TOKEN_RETURN = 'UPGRADE_TOKEN_RETURN';
 
+// For pools in DAOmine
+export const LATEST_POOLS = 'Latest Pools';
+export const LEGACY_POOLS = 'Legacy Pools';
 
 export const NETWORK = {
   ETHEREUM: 1,
