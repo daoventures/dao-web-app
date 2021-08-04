@@ -1,7 +1,7 @@
 const daostakeKovanAddress = "0xd8f59a99acfc597feb84914fef3769def87e7553";
 const daostakeEthereumAddress = "0x8437a6bf9235fd003d50cd4024fa7ec6979208d5";
 
-const daomineKovanAddress = "";
+const daomineKovanAddress = "0x651bf479d19cccb9d8646e760a7c1befbcda7411";
 const daomineEthereumAddress = "";
 
 const daomineABI = [

@@ -109,7 +109,7 @@ import Kovan from './config/kovan';
 import Ethereum from './config/ethereum';
 import Matic from './config/matic';
 
-import { getERC20AbiByNetwork } from './helper/contractHelper';
+import contractHelper from './helper/contractHelper';
 
 const rp = require("request-promise");
 const ethers = require("ethers");
@@ -320,7 +320,8 @@ class Store {
       ethBalance: 0,
       sCrvBalance: 0,
       openDrawer: false,
-      stakePools: [],
+      stakePools: [], // for legacy
+      daominePools: [], // for latest
       dvgApr: {},
       performanceIds: ['daoCDV']
     };
@@ -1377,7 +1378,7 @@ class Store {
     }
 
     const network = store.getStore("network");
-    const erc20ABI =getERC20AbiByNetwork(network);
+    const erc20ABI = contractHelper.getERC20AbiByNetwork(network);
 
     let erc20Contract = new web3.eth.Contract(
       erc20ABI,
@@ -1965,7 +1966,7 @@ class Store {
       return;
     } else {
       const network = store.getStore("network");
-      const erc20Abi = getERC20AbiByNetwork(network);
+      const erc20Abi = contractHelper.getERC20AbiByNetwork(network);
       let erc20Contract = new web3.eth.Contract(
         erc20Abi,
         asset.erc20address
@@ -4111,7 +4112,7 @@ class Store {
     );
 
     const network = store.getStore("network");
-    const erc20ABI = getERC20AbiByNetwork(network);
+    const erc20ABI = contractHelper.getERC20AbiByNetwork(network);
 
     let erc20Contract = new web3.eth.Contract(
       erc20ABI,
@@ -6519,6 +6520,7 @@ class Store {
             pool
           };
 
+
           this.getDAOmineUserInfo(obj, (err, data) => {
             if(err) {
               callback(err, null);
@@ -6541,7 +6543,7 @@ class Store {
             console.log(err);
             return emitter.emit(ERROR, err);
           }
-          store.setStore({ stakePools: pools });
+          (isNewDAOmine) ? store.setStore({ daominePools: pools }) : store.setStore({ stakePools: pools });
           return emitter.emit(DAOMINE_POOL_RETURNED, pools);
         }
       )

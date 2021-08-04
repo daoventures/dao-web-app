@@ -287,14 +287,12 @@ class Stake extends Component {
       currentTab: ALL,
       expanded: "",
       loading: false,
-      selectedPoolType: "latest"
+      selectedPoolType: LATEST_POOLS,
+      disablePoolTab: false
     };
 
     if (account && account.address) {
-      dispatcher.dispatch({
-        type: FIND_DAOMINE_POOL,
-        content: { isNewVersion: false }
-      });
+      this.dispatchGetPools();
     }
   }
 
@@ -332,10 +330,7 @@ class Stake extends Component {
     this.setState({ loading: true, account: account});
 
     if (account && account.address) {
-      dispatcher.dispatch({
-        type: FIND_DAOMINE_POOL,
-        content: { isNewVersion: false }
-      });
+      this.dispatchGetPools();
     }
 
     const that = this;
@@ -357,16 +352,20 @@ class Stake extends Component {
     this.setState({ loading: true });
   };
 
+  dispatchGetPools = () => {
+    dispatcher.dispatch({
+      type: FIND_DAOMINE_POOL,
+      content: { isNewVersion: this.state.selectedPoolType === LATEST_POOLS }
+    });
+  }
+
   onDAOminePoolReturned = (pools) => {
-    this.setState({ pools });
+    this.setState({ pools, disablePoolTab: false });
   };
 
   // Handler once deposit or withdrawal completed
   onDepositWithdrawalCompleted = (txHash) => {
-    dispatcher.dispatch({
-      type: FIND_DAOMINE_POOL,
-      content: { isNewVersion: false }
-    });
+    this.dispatchGetPools();
 
     const snackbarObj = { snackbarMessage: null, snackbarType: null };
     this.setState(snackbarObj);
@@ -482,7 +481,7 @@ class Stake extends Component {
     ];
 
     return (
-      <CategoryTab items={items} selectedTab={this.handleSelectedPoolType}></CategoryTab>
+      <CategoryTab items={items} selectedTab={this.handleSelectedPoolType} disableAllTab={this.state.disablePoolTab}></CategoryTab>
     )
   }
 
@@ -490,8 +489,20 @@ class Stake extends Component {
     this.setState({ currentTab: risk });
   };
 
-  handleSelectedPoolType = (p) => {
-    // Check store for legacy or current pool
+  handleSelectedPoolType = (type) => {
+    this.setState({ selectedPoolType: type, disablePoolTab: true }, () => {
+      const pools = (type === LEGACY_POOLS) 
+        ? store.getStore("stakePools")
+        : store.getStore("daominePools");
+
+      // Get from store, if there's any existing pools stored in store
+      if(pools.length > 0) {
+        this.setState({pools, disablePoolTab: false});
+        return;
+      }
+
+      this.dispatchGetPools();
+    });
   }
 
   render() {
