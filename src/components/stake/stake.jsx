@@ -24,7 +24,8 @@ import {
   ERROR,
   ALL,
   LATEST_POOLS,
-  LEGACY_POOLS
+  LEGACY_POOLS,
+  UPDATE_SELECTED_POOL_TYPE
 } from "../../constants/constants";
 
 import RiskLevelTab from "../common/riskLevelTab/riskLevelTab";
@@ -359,6 +360,13 @@ class Stake extends Component {
     });
   }
 
+  dispatchUpdateDAOmineType = () => {
+    dispatcher.dispatch({
+      type: UPDATE_SELECTED_POOL_TYPE,
+      content: { type: this.state.selectedPoolType }
+    })
+  }
+
   onDAOminePoolReturned = (pools) => {
     this.setState({ pools, disablePoolTab: false });
   };
@@ -491,6 +499,8 @@ class Stake extends Component {
 
   handleSelectedPoolType = (type) => {
     this.setState({ selectedPoolType: type, disablePoolTab: true }, () => {
+      this.dispatchUpdateDAOmineType();
+      
       const pools = (type === LEGACY_POOLS) 
         ? store.getStore("stakePools")
         : store.getStore("daominePools");

@@ -187,6 +187,7 @@ export const UPGRADE_TOKEN_RETURN = 'UPGRADE_TOKEN_RETURN';
 // For pools in DAOmine
 export const LATEST_POOLS = 'Latest Pools';
 export const LEGACY_POOLS = 'Legacy Pools';
+export const UPDATE_SELECTED_POOL_TYPE = "UPDATE_SELECTED_POOL_TYPE";
 
 export const NETWORK = {
   ETHEREUM: 1,

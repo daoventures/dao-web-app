@@ -46,6 +46,9 @@ import {
   IDAI_RETURNED,
   INVEST,
   INVEST_RETURNED,
+  LATEST_POOLS,
+  LEGACY_POOLS,
+  UPDATE_SELECTED_POOL_TYPE,
   NETWORK,
   REBALANCE,
   REBALANCE_RETURNED,
@@ -322,6 +325,7 @@ class Store {
       openDrawer: false,
       stakePools: [], // for legacy
       daominePools: [], // for latest
+      daomineType: LATEST_POOLS, 
       dvgApr: {},
       performanceIds: ['daoCDV']
     };
@@ -450,6 +454,9 @@ class Store {
           case UPGRADE_STAKE_TOKEN:
             this.upgradeAndStakeToken();
             break;
+          case UPDATE_SELECTED_POOL_TYPE: 
+            this.updateSelectedPoolType(payload);
+            break;  
           default: {
           }
         }
@@ -6447,6 +6454,12 @@ class Store {
       callback(null, null);
     }
   };
+
+  // Important, to indicate which DAOmine used for withdrawal
+  updateSelectedPoolType = (payload) => {
+    const type = payload.content.type;
+    store.setStore({ daomineType: type });
+  }
 
   findDAOminePool = async (payload) => {
     const isNewDAOmine = (payload && payload.content) ? payload.content.isNewVersion : false;
