@@ -6587,38 +6587,40 @@ class Store {
   }
 
   depositDAOmine = async (payload) => {
-    const account = store.getStore("account");
-
-    const { pool, amount } = payload.content;
-
     const web3 = await this._getWeb3Provider();
     if (!web3) {
+      console.error(`Missing Web3 in depositDAOmine()`);
       return null;
     }
+
+    const account = store.getStore("account");
+    if(!account || !account.address) {
+      console.error(`Missing account in depositDAOmine()`);
+      return null;
+    }
+
+    const network = store.getStore("network");
+    if(!network) {
+      console.error(`Missing network in depositDAOmine()`);
+      return null;
+    }
+
+    const { pool, amount } = payload.content;
+    const daomineType = store.getStore("daomineType");
 
     const lpTokenContract = new web3.eth.Contract(
       JSON.parse(pool.abi),
       pool.contract_address
     );
 
-    const network = store.getStore("network");
-
-    let daoMineContractAddress = "";
-    if (network === 42) {
-      daoMineContractAddress = config.daoStakeTestContract;
-    } else if (network === 1) {
-      daoMineContractAddress = config.daoStakeMainnetContract;
-    }
-
-    const daoMineContract = new web3.eth.Contract(
-      config.daoStakeContractABI,
-      daoMineContractAddress
-    );
+    const daoMineContractAddress = contractHelper.getDAOmineAddress(network, daomineType);
+    const daoMineContract = await contractHelper.getDAOmineContract(web3, network, daomineType);
 
     const allowance = await lpTokenContract.methods
       .allowance(account.address, daoMineContractAddress)
       .call({ from: account.address });
     const actualAllowance = allowance / 10 ** pool.decimal;
+    console.log(`Checking allowance for ${daoMineContractAddress} in lp token contract ${pool.contract_address}, Actual allowance:  ${actualAllowance}`);
 
     let approvalError;
     if (parseFloat(amount) > parseFloat(actualAllowance)) {
@@ -6643,6 +6645,7 @@ class Store {
       );
     }
     if (!approvalError) {
+      console.log(`Deposit to DAOmine: ${daoMineContractAddress}, amount: ${amount}`);
       await this._callDepositAmountDAOmineContract(
         account,
         pool,
