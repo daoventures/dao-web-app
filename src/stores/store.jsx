@@ -6483,40 +6483,19 @@ class Store {
         return null;
       }
 
-      let pools = [];
-      let daoMineContract;
       let tokenDecimal = 18;
 
-      if(isNewDAOmine) {
-        const poolResponse = await this._findNewDAOminePool();
-        pools = poolResponse.pools;
+      console.log(`DAOmine type ${store.getStore("daomineType")}`);
+      const daomineType = store.getStore("daomineType");
 
-        emitter.emit(DAOMINE_POOL_RETURNED, pools);
-
-        const address = (network === NETWORK.KOVAN) 
-          ? config.daomineTestContract
-          : config.daomineMainnetContract;
-
-        daoMineContract = new web3.eth.Contract(
-          config.daomineContractABI,
-          address
-        );
-      } else {
-        const poolsResponse = await this._findDAOminePool();
-        pools = poolsResponse.pools;
-
-        emitter.emit(DAOMINE_POOL_RETURNED, pools);
-
-        const address = (network === NETWORK.KOVAN) 
-          ? config.daoStakeTestContract
-          : config.daoStakeMainnetContract;
-
-        daoMineContract = new web3.eth.Contract(
-          config.daoStakeContractABI,
-          address
-        );
-      }
-
+      const poolResponse = (daomineType === LATEST_POOLS) 
+        ? await this._findNewDAOminePool()
+        : await this._findDAOminePool();
+      const pools = poolResponse.pools;
+      emitter.emit(DAOMINE_POOL_RETURNED, pools);
+      
+      const daoMineContract = await contractHelper.getDAOmineContract(web3, network, daomineType);
+  
       async.map(
         pools,
         (pool, callback) => {
