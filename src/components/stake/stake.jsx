@@ -283,14 +283,6 @@ class Stake extends Component {
 
     this.state = {
       account: account,
-      address: account.address
-        ? account.address.substring(0, 6) +
-          "..." +
-          account.address.substring(
-            account.address.length - 4,
-            account.address.length
-          )
-        : null,
       pools: store.getStore("stakePools"),
       currentTab: ALL,
       expanded: "",
@@ -308,32 +300,28 @@ class Stake extends Component {
 
   componentWillMount() {
     emitter.on(CONNECTION_CONNECTED, this.connectionConnected);
-    // emitter.on(CHANGE_NETWORK, this.networkChanged);
     emitter.on(DAOMINE_POOL_RETURNED, this.onDAOminePoolReturned);
     emitter.on(APPROVE_TRANSACTING, this.showHashApproval);
     emitter.on(ERROR, this.errorReturned);
     emitter.on(DEPOSIT_DAOMINE_RETURNED, this.showHash);
-    emitter.on(
-      DEPOSIT_DAOMINE_RETURNED_COMPLETED,
-      this.onDepositWithdrawalCompleted
-    );
+    emitter.on(DEPOSIT_DAOMINE_RETURNED_COMPLETED,this.onDepositWithdrawalCompleted);
     emitter.on(WITHDRAW_DAOMINE_RETURNED, this.showHash);
-    emitter.on(
-      WITHDRAW_DAOMINE_RETURNED_COMPLETED,
-      this.onDepositWithdrawalCompleted
-    );
+    emitter.on(WITHDRAW_DAOMINE_RETURNED_COMPLETED,this.onDepositWithdrawalCompleted);
     emitter.on(EMERGENCY_WITHDRAW_DAOMINE_RETURNED, this.showHash);
-    emitter.on(
-      EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,
-      this.onDepositWithdrawalCompleted
-    );
+    emitter.on(EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,this.onDepositWithdrawalCompleted);
   }
 
   componentWillUnmount() {
     emitter.removeListener(CONNECTION_CONNECTED, this.connectionConnected);
-    // emitter.removeListener(CHANGE_NETWORK, this.networkChanged);
     emitter.removeListener(DAOMINE_POOL_RETURNED, this.onDAOminePoolReturned);
+    emitter.removeListener(APPROVE_TRANSACTING, this.showHashApproval);
     emitter.removeListener(ERROR, this.errorReturned);
+    emitter.removeListener(DEPOSIT_DAOMINE_RETURNED, this.showHash);
+    emitter.removeListener(DEPOSIT_DAOMINE_RETURNED_COMPLETED,this.onDepositWithdrawalCompleted);
+    emitter.removeListener(WITHDRAW_DAOMINE_RETURNED, this.showHash);
+    emitter.removeListener(WITHDRAW_DAOMINE_RETURNED_COMPLETED,this.onDepositWithdrawalCompleted);
+    emitter.removeListener(EMERGENCY_WITHDRAW_DAOMINE_RETURNED, this.showHash);
+    emitter.removeListener(EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,this.onDepositWithdrawalCompleted);
   }
 
   /** Handler function when wallet successfully connected */
@@ -341,18 +329,7 @@ class Stake extends Component {
     const { t } = this.props;
     const account = store.getStore("account");
 
-    this.setState({
-      loading: true,
-      account: account,
-      address: account.address
-        ? account.address.substring(0, 6) +
-          "..." +
-          account.address.substring(
-            account.address.length - 4,
-            account.address.length
-          )
-        : null,
-    });
+    this.setState({ loading: true, account: account});
 
     if (account && account.address) {
       dispatcher.dispatch({
@@ -373,22 +350,8 @@ class Stake extends Component {
 
   /** Handler function when wallet disconnected */
   connectionDisconnected = () => {
-    this.setState({
-      account: null,
-      address: null,
-    });
+    this.setState({ account: null,});
   };
-
-  // networkChanged = (obj) => {
-  //   const account = store.getStore("account");
-  //   const basedOn = localStorage.getItem("yearn.finance-dashboard-basedon");
-
-  //   const networkId = obj.network;
-
-  //   this.setState({
-  //     networkId: networkId,
-  //   });
-  // };
 
   startLoading = () => {
     this.setState({ loading: true });
@@ -639,11 +602,6 @@ class Stake extends Component {
                           >
                             {pool.label}
                           </Typography>
-                          {/* <Typography
-                                variant={"body1"}
-                                className={classes.assetLabel2}>
-                                {asset.description}
-                              </Typography> */}
                         </Grid>
 
                         {/** Pending DVG */}
@@ -755,31 +713,6 @@ class Stake extends Component {
                             Multiplier
                           </Typography>
                         </Grid>
-
-                        {/** TVL */}
-                        {/* <Grid
-                          item
-                          sm={2}
-                          xs={6}
-                          className={classes.gridItemColumn}
-                        >
-                          <Typography
-                            variant={"h5"}
-                            style={{
-                              wordWrap: "break-word",
-                            }}
-                            className={classes.assetLabel1}
-                          >
-                            {"$ "}
-                            {pool.tvl ? Number(pool.tvl).toFixed(2) : "0.00"}
-                          </Typography>
-                          <Typography
-                            variant={"body1"}
-                            className={classes.assetLabel2}
-                          >
-                            Liquidity
-                          </Typography>
-                        </Grid> */}
                       </Grid>
                     </div>
                   </AccordionSummary>
