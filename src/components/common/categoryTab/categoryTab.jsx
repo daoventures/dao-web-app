@@ -57,6 +57,9 @@ const styles = (theme) => ({
       },
     },
   },
+  disableButton: {
+    pointerEvents: "none",
+  }
 });
 
 class CategoryTab extends Component {
@@ -75,9 +78,11 @@ class CategoryTab extends Component {
   };
 
   render() {
-    const { items, classes } = this.props;
+    const { items, classes, disableAllTab } = this.props;
     const { currentTab } = this.state;
 
+    const disableTab = (disableAllTab === undefined) ? false : disableAllTab;
+   
     if (!items || items.length < 0) {
       return null;
     }
@@ -86,7 +91,7 @@ class CategoryTab extends Component {
       return (
         <li
           key={index}
-          className={`${classes.typeTabItem} ${currentTab === index ? "active" : ""} ${(index === items.length - 1 && currentTab !== index)? "last" : ""}`}
+          className={`${classes.typeTabItem} ${currentTab === index ? "active" : ""} ${(index === items.length - 1 && currentTab !== index)? "last" : ""} ${(disableTab) ? classes.disableButton : ""}`}
           onClick={() => this.selectTab(index)}
         >
           <span
