@@ -9,6 +9,7 @@ import {
   BICONOMY_CONNECTED,
   CURRENT_THEME_RETURNED,
   DAOMINE_POOL_RETURNED,
+  DAOMINE_POOL_RETURNED_COMPLETED,
   DEGEN,
   DEPOSIT_CONTRACT,
   DEPOSIT_CONTRACT_RETURNED,
@@ -6417,19 +6418,24 @@ class Store {
         .user(poolIndex, account.address)
         .call({ from: account.address });
 
-      let pool = await daoMineContract.methods
-        .pool(poolIndex)
-        .call({ from: account.address });
+      const daomineType = store.getStore("daomineType");
 
-    //  let userPendingDVG = await daoMineContract.methods
-    //     .pendingDVG(poolIndex, account.address)
-    //     .call({ from: account.address });
-        
       let userPendingDVG = 0;
-      if (pool != null) {
-        userPendingDVG = (Number(userDepositInfo.lpAmount) * Number(pool.accDVGPerLP) / 10 ** 18) - Number(userDepositInfo.finishedDVG);
-      }
+      if(daomineType === LATEST_POOLS) {
+        userPendingDVG = await daoMineContract.methods
+          .pendingDVD(poolIndex, account.address)
+          .call({from : account.address});
+        console.log(userPendingDVG);
+      } else if (daomineType === LEGACY_POOLS) {
+        const pool = await daoMineContract.methods
+          .pool(poolIndex)
+          .call({ from: account.address });
 
+        if (pool != null) {
+          userPendingDVG = (Number(userDepositInfo.lpAmount) * Number(pool.accDVGPerLP) / 10 ** 18) - Number(userDepositInfo.finishedDVG);
+        }
+      }
+      
       const result = { userDepositInfo, userPendingDVG };
       callback(null, result);
     } catch (err) {
@@ -6537,10 +6543,13 @@ class Store {
           });
         },
         (err, pools) => {
+          emitter.emit(DAOMINE_POOL_RETURNED_COMPLETED);
+
           if (err) {
             console.log(err);
             return emitter.emit(ERROR, err);
           }
+          
           (isNewDAOmine) ? store.setStore({ daominePools: pools }) : store.setStore({ stakePools: pools });
           return emitter.emit(DAOMINE_POOL_RETURNED, pools);
         }
@@ -6558,6 +6567,8 @@ class Store {
       tokenDecimal,
       pool, 
     } = obj;
+
+    console.log("Object in get DAOmine user info", obj);
 
     async.parallel(
       [

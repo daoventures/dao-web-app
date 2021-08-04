@@ -14,6 +14,7 @@ import {
   CONNECTION_CONNECTED,
   FIND_DAOMINE_POOL,
   DAOMINE_POOL_RETURNED,
+  DAOMINE_POOL_RETURNED_COMPLETED,
   APPROVE_TRANSACTING,
   DEPOSIT_DAOMINE_RETURNED,
   DEPOSIT_DAOMINE_RETURNED_COMPLETED,
@@ -302,6 +303,7 @@ class Stake extends Component {
   componentWillMount() {
     emitter.on(CONNECTION_CONNECTED, this.connectionConnected);
     emitter.on(DAOMINE_POOL_RETURNED, this.onDAOminePoolReturned);
+    emitter.on(DAOMINE_POOL_RETURNED_COMPLETED, this.onDAOminePoolReturnComplete);
     emitter.on(APPROVE_TRANSACTING, this.showHashApproval);
     emitter.on(ERROR, this.errorReturned);
     emitter.on(DEPOSIT_DAOMINE_RETURNED, this.showHash);
@@ -317,6 +319,7 @@ class Stake extends Component {
   componentWillUnmount() {
     emitter.removeListener(CONNECTION_CONNECTED, this.connectionConnected);
     emitter.removeListener(DAOMINE_POOL_RETURNED, this.onDAOminePoolReturned);
+    emitter.removeListener(DAOMINE_POOL_RETURNED_COMPLETED, this.onDAOminePoolReturnComplete);
     emitter.removeListener(APPROVE_TRANSACTING, this.showHashApproval);
     emitter.removeListener(ERROR, this.errorReturned);
     emitter.removeListener(DEPOSIT_DAOMINE_RETURNED, this.showHash);
@@ -374,8 +377,12 @@ class Stake extends Component {
   }
 
   onDAOminePoolReturned = (pools) => {
-    this.setState({ pools, disablePoolTab: false });
+    this.setState({ pools });
   };
+
+  onDAOminePoolReturnComplete = () => {
+    this.setState({ disablePoolTab: false });
+  }
 
   // Handler once deposit or withdrawal completed
   onDepositWithdrawalCompleted = (txHash) => {
