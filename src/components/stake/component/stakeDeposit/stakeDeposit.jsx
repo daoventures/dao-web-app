@@ -267,9 +267,13 @@ class StakeDeposit extends Component {
       return;
     } 
     if (vaultName === 'vipDVG') {
-      this.props.history.push("/stake");
+      this.props.history.push("/stake-dvg");
       return;
     } 
+    if (vaultName === 'vipDVD') {
+      this.props.history.push("/stake-dvd");
+      return;
+    }
     const path = "/invest#id=" + vaultName;
     this.props.history.push(path);
   }
