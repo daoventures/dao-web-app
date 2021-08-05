@@ -38,6 +38,7 @@ import ConnectWallet from "../common/connectWallet/connectWallet";
 import Snackbar from "../snackbar/snackbar";
 import StakeDeposit from "./component/stakeDeposit/stakeDeposit";
 import StakeWithdrawal from "./component/stakeWithdraw/stakeWithdraw";
+import PendingReward from "./component/pendingReward/pendingReward";
 import Loader from "../loader/loader";
 
 const store = Store.store;
@@ -764,10 +765,17 @@ class Stake extends Component {
                       </div>
                       <hr className={classes.divider}></hr>
                       <div className={classes.yearnEarnAndVaultItem}>
-                        <StakeWithdrawal
-                          pool={pool}
-                          startLoading={this.startLoading}
-                        ></StakeWithdrawal>
+                        {
+                          (selectedPoolType === LATEST_POOLS) 
+                            ? <PendingReward
+                                pool={pool}
+                                startLoading={this.startLoading}
+                              ></PendingReward>
+                            : <StakeWithdrawal
+                                  pool={pool}
+                                  startLoading={this.startLoading}
+                              ></StakeWithdrawal>
+                        }
                       </div>
                     </div>
                   </AccordionDetails>

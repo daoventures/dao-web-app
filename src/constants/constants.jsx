@@ -189,9 +189,13 @@ export const UPGRADE_TOKEN_SUCCESS = 'UPGRADE_TOKEN_SUCCESS';
 export const UPGRADE_TOKEN_RETURN = 'UPGRADE_TOKEN_RETURN';
 
 // For pools in DAOmine
-export const LATEST_POOLS = 'Latest Pools';
-export const LEGACY_POOLS = 'Legacy Pools';
+export const LATEST_POOLS = 'ACTIVE';
+export const LEGACY_POOLS = 'LEGACY';
 export const UPDATE_SELECTED_POOL_TYPE = "UPDATE_SELECTED_POOL_TYPE";
+export const ACTION_COMPOUND = "Compound Reward";
+export const ACTION_HARVEST = "Harvest Reward";
+export const ACTION_EMERGENCY = "Emergency Withdraw";
+export const EARLY_HARVEST_PENALTY = "50";
 
 export const NETWORK = {
   ETHEREUM: 1,
