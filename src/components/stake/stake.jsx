@@ -569,7 +569,7 @@ class Stake extends Component {
   };
 
   renderPools = () => {
-    const { pools, currentTab, expanded } = this.state;
+    const { pools, currentTab, expanded, selectedPoolType } = this.state;
     const { classes } = this.props;
     const width = window.innerWidth;
 
@@ -660,7 +660,7 @@ class Stake extends Component {
                                     maximumFractionDigits: 2,
                                   })
                               : "0.00"}
-                            {" DVG"}
+                            { selectedPoolType === LATEST_POOLS ? " DVD" : " DVG"}
                           </Typography>
                           <Typography
                             variant={"body1"}
