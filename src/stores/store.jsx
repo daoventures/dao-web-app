@@ -1,25 +1,33 @@
 import {
   ADVANCE,
-  APPROVE_COMPLETED,
-  APPROVE_TRANSACTING,
   APPROVAL_DVG_RETURNED,
   APPROVAL_DVG_RETURNED_COMPLETED,
+  APPROVE_COMPLETED,
+  APPROVE_TRANSACTING,
   BALANCES_LIGHT_RETURNED,
   BALANCES_RETURNED,
   BICONOMY_CONNECTED,
   CURRENT_THEME_RETURNED,
   DAOMINE_POOL_RETURNED,
+  DASHBOARD_SNAPSHOT_RETURNED,
   DEGEN,
+  DEPOSIT_ALL_CONTRACT,
   DEPOSIT_CONTRACT,
+  DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED,
   DEPOSIT_CONTRACT_RETURNED,
   DEPOSIT_CONTRACT_RETURNED_COMPLETED,
   DEPOSIT_DAOMINE,
   DEPOSIT_DAOMINE_RETURNED,
   DEPOSIT_DAOMINE_RETURNED_COMPLETED,
   DEPOSIT_DVG_RETURNED,
+  DEPOSIT_DVG_RETURNED_COMPLETED,
   DEPOSIT_XDVG,
   DONATE,
   DONATE_RETURNED,
+  DRAWER_RETURNED,
+  EMERGENCY_WITHDRAW_DAOMINE,
+  EMERGENCY_WITHDRAW_DAOMINE_RETURNED,
+  EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,
   ERROR,
   FIND_DAOMINE_POOL,
   GET_AGGREGATED_YIELD,
@@ -32,10 +40,15 @@ import {
   GET_CONTRACT_EVENTS_RETURNED,
   GET_CURV_BALANCE,
   GET_CURV_BALANCE_RETURNED,
+  GET_DASHBOARD_SNAPSHOT,
   GET_DVG_APR,
   GET_DVG_BALANCE_SUCCESS,
   GET_DVG_INFO,
   GET_HAPPY_HOUR_STATUS,
+  GET_STATISTICS,
+  GET_STRATEGY_BALANCES_FULL,
+  GET_UPGRADE_TOKEN,
+  GET_UPGRADE_TOKEN_RETURN,
   GET_VAULT_BALANCES,
   GET_VAULT_BALANCES_FULL,
   GET_VAULT_INFO,
@@ -51,65 +64,50 @@ import {
   REBALANCE_RETURNED,
   REDEEM,
   REDEEM_RETURNED,
+  STATISTICS_RETURNED,
+  STRATEGY_BALANCES_FULL_RETURNED,
   SWAP,
   SWAP_RETURNED,
+  TOGGLE_DRAWER,
+  TOGGLE_THEME,
   TRADE,
   TRADE_RETURNED,
+  UPGRADE_STAKE_TOKEN,
+  UPGRADE_TOKEN,
+  UPGRADE_TOKEN_RETURN,
+  UPGRADE_TOKEN_SUCCESS,
+  USD_PRICE_RETURNED,
   VAULT_BALANCES_FULL_RETURNED,
   VAULT_BALANCES_RETURNED,
   WIDTHDRAW_XDVG,
+  WITHDRAW_BOTH,
   WITHDRAW_BOTH_VAULT,
   WITHDRAW_BOTH_VAULT_RETURNED,
   WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
-  GET_DASHBOARD_SNAPSHOT,
-  DASHBOARD_SNAPSHOT_RETURNED,
-  USD_PRICE_RETURNED,
-  GET_STATISTICS,
-  STATISTICS_RETURNED,
-  TOGGLE_DRAWER,
-  DRAWER_RETURNED,
-  WITHDRAW_BOTH,
-  GET_STRATEGY_BALANCES_FULL,
-  STRATEGY_BALANCES_FULL_RETURNED,
-  TOGGLE_THEME, // 切换主题
-  ZAP,
-  WITHDRAW_VAULT,
-  ZAP_RETURNED,
-  WITHDRAW_VAULT_RETURNED,
-  WITHDRAW_DVG_RETURNED,
-  WITHDRAW_DVG_RETURNED_COMPLETED,
-  WITHDRAW_VAULT_RETURNED_COMPLETED,
   WITHDRAW_DAOMINE,
   WITHDRAW_DAOMINE_RETURNED,
   WITHDRAW_DAOMINE_RETURNED_COMPLETED,
-  EMERGENCY_WITHDRAW_DAOMINE,
-  EMERGENCY_WITHDRAW_DAOMINE_RETURNED,
-  EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,
-  DEPOSIT_DVG_RETURNED_COMPLETED,
-  GET_UPGRADE_TOKEN,
-  GET_UPGRADE_TOKEN_RETURN,
-  UPGRADE_TOKEN,
-  UPGRADE_TOKEN_SUCCESS,
-  UPGRADE_TOKEN_RETURN,
-  UPGRADE_STAKE_TOKEN,
-  DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED,
-  DEPOSIT_ALL_CONTRACT,
+  WITHDRAW_DVG_RETURNED,
+  WITHDRAW_DVG_RETURNED_COMPLETED,
+  WITHDRAW_VAULT,
+  WITHDRAW_VAULT_RETURNED,
+  WITHDRAW_VAULT_RETURNED_COMPLETED,
+  ZAP,
+  ZAP_RETURNED,
 } from "../constants";
 
 import BigNumber from "bignumber.js";
+import Ethereum from "./config/ethereum";
+import Kovan from "./config/kovan";
+import Matic from "./config/matic";
+import Mumbai from "./config/mumbai";
 import Web3 from "web3";
 import async from "async";
 import citadelABI from "./citadelABI.json";
 import config from "../config";
+import fromExponential from "from-exponential";
+import { getERC20AbiByNetwork } from "./helper/contractHelper";
 import { injected } from "./connectors";
-import fromExponential from 'from-exponential';
-
-import Mumbai from './config/mumbai';
-import Kovan from './config/kovan';
-import Ethereum from './config/ethereum';
-import Matic from './config/matic';
-
-import { getERC20AbiByNetwork } from './helper/contractHelper';
 
 const rp = require("request-promise");
 const ethers = require("ethers");
@@ -322,7 +320,7 @@ class Store {
       openDrawer: false,
       stakePools: [],
       dvgApr: {},
-      performanceIds: ['daoCDV']
+      performanceIds: ["daoCDV", "daoSTO"],
     };
 
     dispatcher.register(
@@ -493,39 +491,42 @@ class Store {
     const upgradeTokenObj = {
       1: {
         dvg: {
-          erc20address: '0x51e00a95748DBd2a3F47bC5c3b3E7B3F0fea666c',
+          erc20address: "0x51e00a95748DBd2a3F47bC5c3b3E7B3F0fea666c",
           erc20ABI: config.DvgAbi,
           decimals: 18,
         },
         dvd: {
-          erc20address: '0x77dcE26c03a9B833fc2D7C31C22Da4f42e9d9582',
+          erc20address: "0x77dcE26c03a9B833fc2D7C31C22Da4f42e9d9582",
           erc20ABI: config.dvdContractAbi,
           decimals: 18,
         },
-        swapAddress: '0x61FfA596ABBbA47fE6014bDa91F894B2Dae6dE05',
+        swapAddress: "0x61FfA596ABBbA47fE6014bDa91F894B2Dae6dE05",
         swapContractAbi: config.upgradeContractAbi,
       },
       42: {
         dvg: {
-          erc20address: '0xea9726eFc9831EF0499fD4Db4Ab143F15a797673',
+          erc20address: "0xea9726eFc9831EF0499fD4Db4Ab143F15a797673",
           erc20ABI: config.DvgAbi,
           decimals: 18,
         },
         dvd: {
-          erc20address: '0x6639c554A299D58284e36663f609a7d94526fEC0',
+          erc20address: "0x6639c554A299D58284e36663f609a7d94526fEC0",
           erc20ABI: config.dvdContractAbi,
           decimals: 18,
         },
-        swapAddress: '0xC314f6527DAC85AcdfE222Cb410133aB6fc09009',
+        swapAddress: "0xC314f6527DAC85AcdfE222Cb410133aB6fc09009",
         swapContractAbi: config.upgradeContractAbi,
-      }
-    }
+      },
+    };
 
+    console.log("🚀 | Store | network", network);
     const vaultAssets = network ? vaultAssetsObj[network] : vaultAssetsObj[1];
-    const upgradeToken = network ? upgradeTokenObj[network] : upgradeTokenObj[1];
+    const upgradeToken = network
+      ? upgradeTokenObj[network]
+      : upgradeTokenObj[1];
 
-    let dvgObj = { xDVG: "", xDVD: "", dvg: "", dvd: ""};
-    if(network === 1) {
+    let dvgObj = { xDVG: "", xDVD: "", dvg: "", dvd: "" };
+    if (network === 1) {
       dvgObj.xDVD = config.xdvdMainnetContract;
       dvgObj.xDVG = config.xdvgMainnetContract;
       dvgObj.dvg = config.dvgTokenMainnetContract;
@@ -1152,7 +1153,7 @@ class Store {
           balance: 1,
         },
         {
-          id: "DVD", 
+          id: "DVD",
           name: "DVDToken",
           symbol: "DVD",
           decimals: 18,
@@ -1377,12 +1378,9 @@ class Store {
     }
 
     const network = store.getStore("network");
-    const erc20ABI =getERC20AbiByNetwork(network);
+    const erc20ABI = getERC20AbiByNetwork(network);
 
-    let erc20Contract = new web3.eth.Contract(
-      erc20ABI,
-      asset.erc20address
-    );
+    let erc20Contract = new web3.eth.Contract(erc20ABI, asset.erc20address);
 
     try {
       const allowance = await erc20Contract.methods
@@ -1966,10 +1964,7 @@ class Store {
     } else {
       const network = store.getStore("network");
       const erc20Abi = getERC20AbiByNetwork(network);
-      let erc20Contract = new web3.eth.Contract(
-        erc20Abi,
-        asset.erc20address
-      );
+      let erc20Contract = new web3.eth.Contract(erc20Abi, asset.erc20address);
       console.log(`Getting ERC 20 Balance for asset:  ${asset.erc20address}`);
 
       try {
@@ -1987,7 +1982,13 @@ class Store {
 
   _getERC20Balances = async (web3, asset, account, callback) => {
     // Strategy which required to get balances for multiple token
-    const strategyTypes = ["citadel", "daoFaang", "elon", "cuban", "moneyPrinter"];
+    const strategyTypes = [
+      "citadel",
+      "daoFaang",
+      "elon",
+      "cuban",
+      "moneyPrinter",
+    ];
     if (!strategyTypes.includes(asset.strategyType)) {
       return callback(null, {
         balances: [0, 0, 0],
@@ -3540,7 +3541,7 @@ class Store {
       const usdtToUsdPrice = await usdtUsdPriceFeedContract.methods
         .latestAnswer()
         .call();
-      
+
       const pool = await vaultContract.methods.getTotalValueInPool().call();
       const totalSupply = await vaultContract.methods.totalSupply().call();
       const depositedShares = await vaultContract.methods
@@ -3550,7 +3551,7 @@ class Store {
       const poolInUSD = (pool * usdtToUsdPrice) / 10 ** 20;
       const depositedSharesInUSD =
         (depositedShares * poolInUSD) / totalSupply / 10 ** 6;
-     
+
       callback(null, {
         earnBalance: 0,
         vaultBalance: 0,
@@ -3585,7 +3586,7 @@ class Store {
       const poolInUSD = (pool * usdtToUsdPrice) / 10 ** 20;
       const depositedSharesInUSD =
         (depositedShares * poolInUSD) / totalSupply / 10 ** 6;
-   
+
       callback(null, {
         earnBalance: 0,
         vaultBalance: 0,
@@ -3950,7 +3951,7 @@ class Store {
         }
       );
 
-      if(!approvalErr) {
+      if (!approvalErr) {
         await this._callDepositAmountContractCitadel(
           asset,
           account,
@@ -4127,7 +4128,7 @@ class Store {
 
     // Citadel, Elon, and Cuban pass token's index for deposit, while FAANG pass token address
     const tokenToSent =
-      (asset.strategyType === "daoFaang" || asset.strategyType === "moneyPrinter")
+      asset.strategyType === "daoFaang" || asset.strategyType === "moneyPrinter"
         ? asset.erc20addresses[tokenIndex]
         : tokenIndex;
 
@@ -5194,7 +5195,9 @@ class Store {
           asset.vaultContractAddress
         );
         const pool = await moneyPrinterContract.methods.getValueInPool().call();
-        const totalSupply = await moneyPrinterContract.methods.totalSupply().call();
+        const totalSupply = await moneyPrinterContract.methods
+          .totalSupply()
+          .call();
         const pricePerFullShare = totalSupply
           ? new BigNumber(pool).dividedBy(totalSupply).toNumber()
           : 0;
@@ -5559,8 +5562,7 @@ class Store {
   };
 
   _getHistoricalPerformance = async (performanceId, interval, callback) => {
-
-    const performanceIds = store.getStore('performanceIds');
+    const performanceIds = store.getStore("performanceIds");
     if (performanceId && performanceIds.includes(performanceId)) {
       try {
         const url = `${config.statsProvider}vaults/performance/${performanceId}/${interval}`;
@@ -5577,13 +5579,16 @@ class Store {
   };
 
   _getPNL = async (performanceId, callback) => {
+    if (!performanceId) {
+      return;
+    }
 
     let output = {};
     let url;
     let resultString;
     let result;
     const intervals = ["30d", "7d"];
-    const performanceIds = store.getStore('performanceIds');
+    const performanceIds = store.getStore("performanceIds");
     if (performanceId && performanceIds.includes(performanceId)) {
       for (const interval of intervals) {
         try {
@@ -5711,6 +5716,9 @@ class Store {
   };
 
   _getAddressStatistics = async (address) => {
+    // REMOVE:
+    return store.getStore("universalGasPrice");
+
     try {
       const url =
         config.statsProvider + "user/" + address + "/vaults/statistics";
@@ -5910,7 +5918,7 @@ class Store {
     tokenIndex
   ) => {
     const web3 = new Web3(store.getStore("web3context").library.provider);
-      
+
     let erc20Contract = new web3.eth.Contract(
       config.erc20ABI,
       asset.erc20addresses[tokenIndex]
@@ -5971,7 +5979,7 @@ class Store {
     );
 
     if (asset.strategyType === "yearn") {
-      let earnAmountSend,  vaultAmountSend;
+      let earnAmountSend, vaultAmountSend;
 
       if (asset.decimals !== 18) {
         earnAmountSend = web3.utils
@@ -6145,7 +6153,7 @@ class Store {
       );
 
       // Soft Check for sufficient liquidity
-      if(asset.strategyType !== "moneyPrinter") {
+      if (asset.strategyType !== "moneyPrinter") {
         await this._isSufficientLiquidityUsd(
           asset,
           vaultContract,
@@ -6153,10 +6161,14 @@ class Store {
           tokenIndex
         );
       }
-      
-      const token = (asset.strategyType === "daoFaang" || asset.strategyType === "moneyPrinter") ? asset.erc20addresses[tokenIndex] : tokenIndex;
+
+      const token =
+        asset.strategyType === "daoFaang" ||
+        asset.strategyType === "moneyPrinter"
+          ? asset.erc20addresses[tokenIndex]
+          : tokenIndex;
       const amountToSend = fromExponential(parseFloat(amount));
-      
+
       await vaultContract.methods
         .withdraw(amountToSend, token)
         .send({
@@ -6223,7 +6235,7 @@ class Store {
     const account = store.getStore("account");
     // const assets = store.getStore('vaultAssets')
     const assets = this._getDefaultValues(network).vaultAssets;
-    store.setStore({vaultAssets: assets});
+    store.setStore({ vaultAssets: assets });
     emitter.emit(STRATEGY_BALANCES_FULL_RETURNED, assets);
 
     const { interval } = payload.content;
@@ -6313,7 +6325,7 @@ class Store {
             },
             (callbackInner) => {
               // 12
-              this._getPNL(asset.id, callbackInner);
+              this._getPNL(asset.performanceId, callbackInner);
             },
 
             // (callbackInner) => { this._getVaultHoldings(web3, asset, account, callbackInner) },
@@ -6361,13 +6373,13 @@ class Store {
               data[9] && data[9].priceInUSD ? data[9].priceInUSD : null;
             asset.sumBalances = data[9].sumBalances;
             asset.daomineApy = data[10] ? data[10].daomineApy : 0;
-            asset.historicalPerformance = data[11]
+            asset.historicalPerformance = data[11];
             asset.stats.pnl = data[12];
 
             // asset.addressTransactions = data[7]
             // asset.vaultHoldings = data[3]
 
-            if(asset.strategyType === "moneyPrinter") {
+            if (asset.strategyType === "moneyPrinter") {
               console.log("Money Printer:", asset);
             }
 
@@ -6407,13 +6419,16 @@ class Store {
         .pool(poolIndex)
         .call({ from: account.address });
 
-    //  let userPendingDVG = await daoMineContract.methods
-    //     .pendingDVG(poolIndex, account.address)
-    //     .call({ from: account.address });
-        
+      //  let userPendingDVG = await daoMineContract.methods
+      //     .pendingDVG(poolIndex, account.address)
+      //     .call({ from: account.address });
+
       let userPendingDVG = 0;
       if (pool != null) {
-        userPendingDVG = (Number(userDepositInfo.lpAmount) * Number(pool.accDVGPerLP) / 10 ** 18) - Number(userDepositInfo.finishedDVG);
+        userPendingDVG =
+          (Number(userDepositInfo.lpAmount) * Number(pool.accDVGPerLP)) /
+            10 ** 18 -
+          Number(userDepositInfo.finishedDVG);
       }
 
       const result = { userDepositInfo, userPendingDVG };
@@ -6503,11 +6518,21 @@ class Store {
           async.parallel(
             [
               (callbackInner) => {
-                this._getUserBalanceForLpToken(poolContract, account, callbackInner);
+                this._getUserBalanceForLpToken(
+                  poolContract,
+                  account,
+                  callbackInner
+                );
               },
               (callbackInner) => {
-                this._getUserDepositForDAOmine(daoMineContract, dvgDecimal, account, pool.pid, callbackInner);
-              }
+                this._getUserDepositForDAOmine(
+                  daoMineContract,
+                  dvgDecimal,
+                  account,
+                  pool.pid,
+                  callbackInner
+                );
+              },
             ],
             (err, data) => {
               if (err) {
@@ -6517,8 +6542,12 @@ class Store {
               const userInfo = {};
 
               userInfo.tokenBalance = data[0];
-              userInfo.finishedDVG = data[1] ? data[1].userDepositInfo.finishedDVG : null;
-              userInfo.depositedLPAmount = data[1] ? parseInt(data[1].userDepositInfo.lpAmount) : null;
+              userInfo.finishedDVG = data[1]
+                ? data[1].userDepositInfo.finishedDVG
+                : null;
+              userInfo.depositedLPAmount = data[1]
+                ? parseInt(data[1].userDepositInfo.lpAmount)
+                : null;
               userInfo.pendingDVG = data[1] ? data[1].userPendingDVG : null;
 
               pool.userInfo = userInfo;
@@ -6535,11 +6564,11 @@ class Store {
           store.setStore({ stakePools: pools });
           return emitter.emit(DAOMINE_POOL_RETURNED, pools);
         }
-      )
+      );
     } catch (err) {
       console.log(err);
     }
-  }
+  };
 
   _findDAOminePool = async () => {
     try {
@@ -6551,7 +6580,7 @@ class Store {
       console.log(e);
       return store.getStore("universalGasPrice");
     }
-  }
+  };
 
   depositDAOmine = async (payload) => {
     const account = store.getStore("account");
@@ -6727,14 +6756,14 @@ class Store {
           callback(error);
         }
       });
-  }
+  };
 
   _emergencyWithdrawSnapShot = async (userPoolInfo) => {
     try {
       const url = config.statsProvider + "staking/emergency-withdraw-snapshot";
       const poolsString = await rp({
         uri: url,
-        method: 'POST',
+        method: "POST",
         body: {
           pid: userPoolInfo.pid,
           userAddress: userPoolInfo.userAddress,
@@ -6748,12 +6777,12 @@ class Store {
       console.log(e);
       return store.getStore("universalGasPrice");
     }
-  }
+  };
 
   emergencyWithdrawDAOmine = async (payload) => {
     const account = store.getStore("account");
     const network = store.getStore("network");
-   
+
     const { pool } = payload.content;
     const poolIndex = pool.pid;
 
@@ -6768,7 +6797,7 @@ class Store {
     if (network === 42) {
       daoMineContractAddress = config.daoStakeTestContract;
     } else if (network === 1) {
-      daoMineContractAddress = config.daoStakeMainnetContract; 
+      daoMineContractAddress = config.daoStakeMainnetContract;
     }
 
     try {
@@ -6782,10 +6811,16 @@ class Store {
           pid: poolIndex,
           userAddress: account.address.toLowerCase(),
           pendingDVG: result.userPendingDVG,
-        })
-      }
+        });
+      };
 
-      await this._getUserDepositForDAOmine(daoMineContract, null, account, poolIndex, snapshot);      
+      await this._getUserDepositForDAOmine(
+        daoMineContract,
+        null,
+        account,
+        poolIndex,
+        snapshot
+      );
 
       await daoMineContract.methods
         .emergencyWithdraw(poolIndex)
@@ -6820,13 +6855,13 @@ class Store {
         });
     } catch (err) {
       console.log("emergencyWithdrawDAOmine() Error: ", err);
-    }  
-  }
+    }
+  };
 
   withdrawDAOmine = async (payload) => {
     const account = store.getStore("account");
     const network = store.getStore("network");
-   
+
     const { pool, amount } = payload.content;
     const poolDecimal = pool.decimal;
     const poolIndex = pool.pid;
@@ -6889,14 +6924,14 @@ class Store {
         });
     } catch (err) {
       console.log("withdrawDAOmine() Error: ", err);
-    }  
-  }
+    }
+  };
 
   //stake开始
   //获取vipdvg
   getDvgbalance = async () => {
     const network = store.getStore("network");
-    if(!network) {
+    if (!network) {
       console.error(`No network found in getDvgBalance()`);
       return null;
     }
@@ -6931,7 +6966,7 @@ class Store {
               return callback(err);
             }
             asset.balance = data[0];
-            if(data[1]) {
+            if (data[1]) {
               asset.tier = data[1]._tier;
               asset.depositedAmount = data[1]._depositedAmount;
             }
@@ -6953,13 +6988,13 @@ class Store {
   };
 
   _getXDvgTier = async (web3, asset, account, callback) => {
-    if(asset.id !== "xDVD") {
+    if (asset.id !== "xDVD") {
       return callback(null, null);
     }
     const xDVDContract = new web3.eth.Contract(asset.abi, asset.erc20address);
     const tier = await xDVDContract.methods.getTier(account.address).call();
     return callback(null, tier);
-  }
+  };
 
   //stake 充值dvg
   depositXdvg = async (payload) => {
@@ -6975,11 +7010,14 @@ class Store {
     const tokenContract = new web3.eth.Contract(asset.abi, asset.erc20address);
 
     //判断dvg质押金额是否大于dvg授权数量
-    const index = (asset.id === "DVD") ? 0 : 2;
+    const index = asset.id === "DVD" ? 0 : 2;
     const vipTokenInfo = this.getStore("dvg")[index];
 
     //创建xdvg合约对象
-    const vipTokenContract = new web3.eth.Contract(vipTokenInfo.abi, vipTokenInfo.erc20address);
+    const vipTokenContract = new web3.eth.Contract(
+      vipTokenInfo.abi,
+      vipTokenInfo.erc20address
+    );
     const allowance = await tokenContract.methods
       .allowance(account.address, vipTokenInfo.erc20address)
       .call({ from: account.address });
@@ -6988,7 +7026,9 @@ class Store {
     let _amount = "";
     if (max) {
       //查询dvg可用
-      _amount = await tokenContract.methods.balanceOf(account.address).call({ from: account.address });
+      _amount = await tokenContract.methods
+        .balanceOf(account.address)
+        .call({ from: account.address });
     } else {
       if (withoutConvert) {
         _amount = amount;
@@ -7012,24 +7052,34 @@ class Store {
         }
         if (receipt) {
           console.log("Approval Receipt", receipt);
-          return emitter.emit(APPROVAL_DVG_RETURNED_COMPLETED, receipt.transactionHash);
+          return emitter.emit(
+            APPROVAL_DVG_RETURNED_COMPLETED,
+            receipt.transactionHash
+          );
         }
       });
     }
 
-    if(!approvalErr) {
+    if (!approvalErr) {
       console.log(`Calling Deposit DVG`);
-      await this._callDepositDvg(vipTokenContract, _amount, (err, txnHash, receipt) => {
-        if (err) {
-          return emitter.emit(ERROR, err);
+      await this._callDepositDvg(
+        vipTokenContract,
+        _amount,
+        (err, txnHash, receipt) => {
+          if (err) {
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(DEPOSIT_DVG_RETURNED, txnHash);
+          }
+          if (receipt) {
+            return emitter.emit(
+              DEPOSIT_DVG_RETURNED_COMPLETED,
+              receipt.transactionHash
+            );
+          }
         }
-        if (txnHash) {
-          return emitter.emit(DEPOSIT_DVG_RETURNED, txnHash);
-        }
-        if (receipt) {
-          return emitter.emit(DEPOSIT_DVG_RETURNED_COMPLETED, receipt.transactionHash);
-        }
-      });
+      );
     }
   };
 
@@ -7090,10 +7140,10 @@ class Store {
         console.log("Transaction hash for dvd approval: ", hash);
         callback(null, hash, null);
       })
-      .on("receipt", function(receipt) {
+      .on("receipt", function (receipt) {
         console.log("Receipt for dvd approval: ", receipt);
         callback(null, null, receipt);
-      }) 
+      })
       .on("error", function (error) {
         console.error("Error in getting dvd contract approval: ", error);
         if (!error.toString().includes("-32601")) {
@@ -7110,19 +7160,27 @@ class Store {
     const account = store.getStore("account");
     const { asset, amount, max } = payload.content;
 
-    this._callWithdrawXdvg(asset, amount, max, (err, txnHash, withdrawResult) => {
-      if (err) {
-        return emitter.emit(ERROR, err);
+    this._callWithdrawXdvg(
+      asset,
+      amount,
+      max,
+      (err, txnHash, withdrawResult) => {
+        if (err) {
+          return emitter.emit(ERROR, err);
+        }
+        if (txnHash) {
+          return emitter.emit(WITHDRAW_DVG_RETURNED, txnHash);
+        }
+        if (withdrawResult) {
+          return emitter.emit(
+            WITHDRAW_DVG_RETURNED_COMPLETED,
+            withdrawResult.transactionHash
+          );
+        }
+        // dispatcher.dispatch({ type: GET_DVG_INFO })
+        // return emitter.emit(WITHDRAW_DVG_RETURNED, withdrawResult);
       }
-      if (txnHash) {
-        return emitter.emit(WITHDRAW_DVG_RETURNED, txnHash);
-      }
-      if(withdrawResult) {
-        return emitter.emit(WITHDRAW_DVG_RETURNED_COMPLETED, withdrawResult.transactionHash);
-      }
-      // dispatcher.dispatch({ type: GET_DVG_INFO })
-      // return emitter.emit(WITHDRAW_DVG_RETURNED, withdrawResult);
-    });
+    );
   };
 
   _callWithdrawXdvg = async (asset, amount, max, callback) => {
@@ -7131,7 +7189,7 @@ class Store {
     if (!web3) {
       return null;
     }
-    
+
     //创建xdvg合约对象
     const xDVGCOntract = new web3.eth.Contract(asset.abi, asset.erc20address);
     let _amount = "";
@@ -7181,15 +7239,15 @@ class Store {
   getDvgApr = async (payload) => {
     const { type } = payload.content;
 
-    if(type === "") { 
+    if (type === "") {
       console.err("type is missing in payload content of getDvgApr()");
       return;
     }
     const apr = await this._getDvgApr(type);
 
     let dvgApr = store.getStore("dvgApr");
-    dvgApr[type] = apr; 
-    store.setStore({ dvgApr});
+    dvgApr[type] = apr;
+    store.setStore({ dvgApr });
 
     return emitter.emit(GET_XDVG_APR_SUCCESS);
   };
@@ -7210,7 +7268,7 @@ class Store {
     return asset.strategyType === "citadel" ||
       asset.strategyType === "elon" ||
       asset.strategyType === "cuban" ||
-      asset.strategyType === "daoFaang" || 
+      asset.strategyType === "daoFaang" ||
       asset.strategyType === "moneyPrinter"
       ? true
       : false;
@@ -7246,10 +7304,16 @@ class Store {
         }
         asset.balance = data[0];
         asset.upgradeBalance = data[1];
-        asset.claimAmountRaw = data[2] != null && data[2].claimAmount ? data[2].claimAmount : "0.00";
-        asset.claimAmount = data[2] != null && data[2].claimAmount ? data[2].claimAmount / 10 ** asset.dvg.decimals : "0.00";
-        asset.eligibleAmountRaw = data[2] != null && data[2].amount ? data[2].amount : "0.00";
-        asset.eligibleAmount = data[2] != null ? data[2].amount / 10 ** asset.dvg.decimals : 0;
+        asset.claimAmountRaw =
+          data[2] != null && data[2].claimAmount ? data[2].claimAmount : "0.00";
+        asset.claimAmount =
+          data[2] != null && data[2].claimAmount
+            ? data[2].claimAmount / 10 ** asset.dvg.decimals
+            : "0.00";
+        asset.eligibleAmountRaw =
+          data[2] != null && data[2].amount ? data[2].amount : "0.00";
+        asset.eligibleAmount =
+          data[2] != null ? data[2].amount / 10 ** asset.dvg.decimals : 0;
         // asset.disableUpgrade = false;
 
         // if (asset.claimAmount !== "0.00") {
@@ -7275,7 +7339,7 @@ class Store {
         // If DVG Balance is zero, disable button
         // asset.disableUpgrade = (!asset.disableUpgrade && asset.balance <= 0) ? true : asset.disableUpgrade;
         asset.disableUpgrade = asset.balance <= 0;
-        
+
         store.setStore({
           upgradeInfo: asset,
         });
@@ -7297,27 +7361,27 @@ class Store {
       console.log(e);
       return store.getStore("universalGasPrice");
     }
-  }
+  };
 
   _updateReimburseInfo = async (info) => {
     try {
       const url = config.statsProvider + "user/reimburse-address/update";
       const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(info)
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(info),
       };
       const response = await fetch(url, requestOptions);
       const result = await response.json();
     } catch (e) {
       console.log("Error in _updateReimburseInfo", e);
     }
-  }
+  };
 
   upgradeToken = async (isStake) => {
     const network = store.getStore("network");
     const account = store.getStore("account");
-    const upgradeInfo = store.getStore('upgradeInfo');
+    const upgradeInfo = store.getStore("upgradeInfo");
     const asset = this._getDefaultValues(network).upgradeToken;
     if (!account || !account.address) {
       return false;
@@ -7327,42 +7391,47 @@ class Store {
       return null;
     }
 
-    const reimburse = await this._getReimburseInfo(account.address.toLowerCase());
+    const reimburse = await this._getReimburseInfo(
+      account.address.toLowerCase()
+    );
     if (reimburse == null) {
-      return emitter.emit(ERROR, 'Your DVG are not eligible for upgrade. Please contact us via Telegram/Discord.');
+      return emitter.emit(
+        ERROR,
+        "Your DVG are not eligible for upgrade. Please contact us via Telegram/Discord."
+      );
     } else {
       const dvgContract = new web3.eth.Contract(
         asset.dvg.erc20ABI,
         asset.dvg.erc20address
       );
-  
+
       const dvdContract = new web3.eth.Contract(
         asset.dvd.erc20ABI,
         asset.dvd.erc20address
       );
-  
+
       const dvgAllowance = await dvgContract.methods
         .allowance(account.address, asset.swapAddress)
         .call({ from: account.address });
-      const dvgActualAllowance = dvgAllowance; 
-  
+      const dvgActualAllowance = dvgAllowance;
+
       const dvdAllowance = await dvdContract.methods
         .allowance(account.address, asset.swapAddress)
         .call({ from: account.address });
-      const dvdActualAllowance = dvdAllowance; 
+      const dvdActualAllowance = dvdAllowance;
 
       const balance = await dvgContract.methods
         .balanceOf(account.address)
         .call({ from: account.address });
-  
+
       // Approval
       let dvgApprovalError;
       let dvdApprovalError;
 
       // DAO -228 Allow User to swap all DVG to DVD at 1.1 ratio
       // const realBalance = new BigNumber(balance).isGreaterThan(upgradeInfo.eligibleAmountRaw) ? upgradeInfo.eligibleAmountRaw : balance;
-      const realBalance =  balance;
-      
+      const realBalance = balance;
+
       if (parseFloat(realBalance) > parseFloat(dvgActualAllowance)) {
         await this._checkLpTokenContractApproval(
           account,
@@ -7384,7 +7453,7 @@ class Store {
           }
         );
       }
-  
+
       if (parseFloat(realBalance) > parseFloat(dvdActualAllowance)) {
         await this._checkLpTokenContractApproval(
           account,
@@ -7406,65 +7475,63 @@ class Store {
           }
         );
       }
-  
+
       if (!dvgApprovalError && !dvdApprovalError) {
         const swapContract = new web3.eth.Contract(
           asset.swapContractAbi,
           asset.swapAddress
         );
-        
+
         let swapErr = false;
-  
-        await swapContract.methods.upgradeDVG(
-          realBalance, 
-          reimburse.amount, 
-          reimburse.signatureMessage,
-        ).send({
-          from: account.address,
-          gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-        })
-        .on("transactionHash", function (txnHash) {
-          return emitter.emit(UPGRADE_TOKEN_RETURN, txnHash);
-        })
-        .on("receipt", function (receipt) {
-          return emitter.emit(
-            UPGRADE_TOKEN_SUCCESS,
-            receipt.transactionHash
-          );
-        })
-        .on("error", function (error) {
-          if (!error.toString().includes("-32601")) {
-            swapErr = true;
-            if (error.message) {
-              return emitter.emit(ERROR, error.message);
+
+        await swapContract.methods
+          .upgradeDVG(realBalance, reimburse.amount, reimburse.signatureMessage)
+          .send({
+            from: account.address,
+            gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+          })
+          .on("transactionHash", function (txnHash) {
+            return emitter.emit(UPGRADE_TOKEN_RETURN, txnHash);
+          })
+          .on("receipt", function (receipt) {
+            return emitter.emit(UPGRADE_TOKEN_SUCCESS, receipt.transactionHash);
+          })
+          .on("error", function (error) {
+            if (!error.toString().includes("-32601")) {
+              swapErr = true;
+              if (error.message) {
+                return emitter.emit(ERROR, error.message);
+              }
+              return emitter.emit(ERROR, error);
             }
-            return emitter.emit(ERROR, error);
-          }
-        })
-        .then(async() => {
-          if(!swapErr) {
-            await this._updateReimburseInfo({address: account.address, amount: realBalance});
-            store.setStore({
-              realBalance,
-            })
-          }
-        })
-        .catch((error) => {
-          if (!error.toString().includes("-32601")) {
-            if (error.message) {
-              return emitter.emit(ERROR, error.message);
+          })
+          .then(async () => {
+            if (!swapErr) {
+              await this._updateReimburseInfo({
+                address: account.address,
+                amount: realBalance,
+              });
+              store.setStore({
+                realBalance,
+              });
             }
-            return emitter.emit(ERROR, error);
-          }
-        });
-      } 
+          })
+          .catch((error) => {
+            if (!error.toString().includes("-32601")) {
+              if (error.message) {
+                return emitter.emit(ERROR, error.message);
+              }
+              return emitter.emit(ERROR, error);
+            }
+          });
+      }
     }
   };
 
   upgradeAndStakeToken = async (payload) => {
     const network = store.getStore("network");
     const account = store.getStore("account");
-    
+
     const asset = this._getDefaultValues(network).upgradeToken;
     if (!account || !account.address) {
       return false;
@@ -7478,24 +7545,27 @@ class Store {
 
     await this.upgradeToken(true);
 
-    const realBalance = store.getStore('realBalance');
+    const realBalance = store.getStore("realBalance");
     if (!isNaN(realBalance)) {
       await this.depositXdvg({
         content: {
           asset: {
             id: "DVD",
             abi: asset.dvd.erc20ABI,
-            ...asset.dvd
+            ...asset.dvd,
           },
           amount: realBalance,
           max: false,
           withoutConvert: true,
-        }
+        },
       });
     } else {
-      return emitter.emit(ERROR, 'Failed to upgrade to DVD token to stake into DAOvip (DVD).');
+      return emitter.emit(
+        ERROR,
+        "Failed to upgrade to DVD token to stake into DAOvip (DVD)."
+      );
     }
-  }
+  };
 }
 
 var store = new Store();

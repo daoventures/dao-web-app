@@ -670,7 +670,7 @@ class Asset extends Component {
     return asset.strategyType === "citadel" ||
       asset.strategyType === "elon" ||
       asset.strategyType === "cuban" ||
-      asset.strategyType === "daoFaang" || 
+      asset.strategyType === "daoFaang" ||
       asset.strategyType === "moneyPrinter"
       ? true
       : false;
@@ -1555,7 +1555,7 @@ class Asset extends Component {
                 {(asset.strategyType === "citadel" ||
                   asset.strategyType === "elon" ||
                   asset.strategyType === "cuban" ||
-                  asset.strategyType === "daoFaang" || 
+                  asset.strategyType === "daoFaang" ||
                   asset.strategyType === "moneyPrinter") && (
                   <div className={classes.withdrawContainer}>
                     <div className={classes.tradeContainer}>
@@ -1661,7 +1661,10 @@ class Asset extends Component {
     if (asset.historicalAPY || asset.historicalPerformance) {
       // this gives an object with dates as keys
       let groups;
-      if (asset.strategyType === "citadel") {
+      if (
+        asset.strategyType === "citadel" ||
+        asset.strategyType === "daoFaang"
+      ) {
         groups = asset.historicalPerformance
           .sort(sortByTimestamp)
           .reduce((groups, apy) => {
@@ -1730,7 +1733,15 @@ class Asset extends Component {
           } else if (asset.strategyType === "daoFaang") {
             faangAPY.push([
               date,
-              parseFloat(groups[date][0].faangApy.toFixed(4)),
+              parseFloat((groups[date][0]["lp_performance"] * 100).toFixed(4)),
+            ]);
+            btcAPY.push([
+              date,
+              parseFloat((groups[date][0]["btc_performance"] * 100).toFixed(4)),
+            ]);
+            ethAPY.push([
+              date,
+              parseFloat((groups[date][0]["eth_performance"] * 100).toFixed(4)),
             ]);
           } else if (asset.strategyType === "moneyPrinter") {
             moneyPrinterAPY.push([
@@ -1738,7 +1749,6 @@ class Asset extends Component {
               parseFloat(groups[date][0].moneyPrinterApy.toFixed(4)),
             ]);
           }
-
 
           // second attempt
           var halfCount = Math.round(Number(groups[date].length / 2));
@@ -2003,6 +2013,17 @@ class Asset extends Component {
           {
             name: "FAANG Stonk",
             data: faangAPY,
+            color: "#FFFFFF",
+          },
+          {
+            name: "BTC",
+            data: btcAPY,
+            color: "#f7931b",
+          },
+          {
+            name: "ETH",
+            data: ethAPY,
+            color: "#464a75",
           },
         ],
         responsive: {
@@ -2232,7 +2253,10 @@ class Asset extends Component {
       //       return (asset.apy + parseFloat(asset.earnApr) * 100) / 2;
       //   }
       // } else if (asset.strategyType === "citadel") {
-      if (asset.strategyType === "citadel") {
+      if (
+        asset.strategyType === "citadel" ||
+        asset.strategyType === "daoFaang"
+      ) {
         console.log("🚀 | Asset | asset.stats.pnl", asset.stats.pnl);
 
         return asset.stats.pnl;
