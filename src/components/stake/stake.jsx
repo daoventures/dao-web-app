@@ -287,11 +287,11 @@ class Stake extends Component {
 
     this.state = {
       account: account,
-      pools: store.getStore("stakePools"),
+      pools: store.getStore("daominePools"),
       currentTab: ALL,
       expanded: "",
       loading: false,
-      selectedPoolType: LATEST_POOLS,
+      selectedPoolType: store.getStore("daomineType"),
       disablePoolTab: false
     };
 
@@ -330,6 +330,9 @@ class Stake extends Component {
     emitter.removeListener(EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,this.onDepositWithdrawalCompleted);
     emitter.removeListener(YIELD_DAOMINE_RETURNED, this.showHash);
     emitter.removeListener(YIELD_DAOMINE_RETURNED_COMPLETED, this.onDepositWithdrawalCompleted);
+    
+    // Reset selected pool tab to Latest pools
+    this.dispatchUpdateDAOmineType(LATEST_POOLS); 
   }
 
   /** Handler function when wallet successfully connected */
@@ -369,10 +372,11 @@ class Stake extends Component {
     });
   }
 
-  dispatchUpdateDAOmineType = () => {
+  dispatchUpdateDAOmineType = (type) => {
+    const poolType = (type === undefined) ? this.state.selectedPoolType : type;
     dispatcher.dispatch({
       type: UPDATE_SELECTED_POOL_TYPE,
-      content: { type: this.state.selectedPoolType }
+      content: { type: poolType }
     })
   }
 
@@ -512,7 +516,7 @@ class Stake extends Component {
 
   handleSelectedPoolType = (type) => {
     this.setState({ selectedPoolType: type, disablePoolTab: true }, () => {
-      this.dispatchUpdateDAOmineType();
+      this.dispatchUpdateDAOmineType(type);
 
       const pools = (type === LEGACY_POOLS) 
         ? store.getStore("stakePools")

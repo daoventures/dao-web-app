@@ -6425,7 +6425,7 @@ class Store {
         userPendingDVG = await daoMineContract.methods
           .pendingDVD(poolIndex, account.address)
           .call({from : account.address});
-        console.log(userPendingDVG);
+        
       } else if (daomineType === LEGACY_POOLS) {
         const pool = await daoMineContract.methods
           .pool(poolIndex)
@@ -6567,8 +6567,6 @@ class Store {
       tokenDecimal,
       pool, 
     } = obj;
-
-    console.log("Object in get DAOmine user info", obj);
 
     async.parallel(
       [
