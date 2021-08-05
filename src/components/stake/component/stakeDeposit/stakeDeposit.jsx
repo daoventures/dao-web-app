@@ -315,7 +315,7 @@ class StakeDeposit extends Component {
                 width: "100%",
               }}
               className={classes.depositInput}
-              id="amount"
+              id={`${pool.pid}_amount`}
               cursor={amount}
               value={amount}
               error={amountError}
@@ -355,7 +355,7 @@ class StakeDeposit extends Component {
           {/** Deposit Button */}
           <div className={classes.depositButtonBox}>
             <Button
-              disabled={loading}
+              disabled={(pool.deposit && loading) || !pool.deposit}
               className={classes.depositActionButton}
               onClick={this.onDeposit}
             >

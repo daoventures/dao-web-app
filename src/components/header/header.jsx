@@ -6,13 +6,16 @@ import {
   GET_HAPPY_HOUR_STATUS,
   HAPPY_HOUR_RETURN,
   TOGGLE_DRAWER,
+  NETWORK
 } from "../../constants";
 import {
   HEADER_TITLE_DAOMINE,
-  HEADER_TITLE_DAOVIP,
+  HEADER_TITLE_DAOVIP_DVD,
+  HEADER_TITLE_DAOVIP_DVG,
   HEADER_TITLE_INVEST,
   HEADER_TITLE_PORTFOLIO,
   HEADER_TITLE_SWAP,
+  HEADER_TITLE_UPGRADE,
 } from "../../constants/page-constant";
 import { IconButton, Typography } from "@material-ui/core";
 import React, { Component } from "react";
@@ -35,6 +38,8 @@ const networkObj = {
   4: "Rinkeby",
   56: "Binance",
   42: "Kovan",
+  80001: "Matic Testnet",
+  137: "Polygon(Matic)"
 };
 
 const styles = (theme) => ({
@@ -240,9 +245,11 @@ class Header extends Component {
       menuObj: {
         "/portfolio": HEADER_TITLE_PORTFOLIO,
         "/invest": HEADER_TITLE_INVEST,
-        "/stake": HEADER_TITLE_DAOVIP,
+        "/stake-dvg": HEADER_TITLE_DAOVIP_DVG,
+        "/stake-dvd": HEADER_TITLE_DAOVIP_DVD,
         "/daomine": HEADER_TITLE_DAOMINE,
         "/swap": HEADER_TITLE_SWAP,
+        "/upgrade": HEADER_TITLE_UPGRADE,
       },
       currentTheme: store.getStore("currentTheme"),
       currentNetwork: 0,
@@ -262,6 +269,16 @@ class Header extends Component {
           label: "Binance",
           value: 56,
           imgUrl: require("../../assets/img_new/bnb-icon.png"),
+        },
+        {
+          label: "Mumbai",
+          value: NETWORK.MUMBAI,
+          imgUrl: require("../../assets/img_new/polygon-icon.svg"),
+        },
+        {
+          label: "Polygon(Matic)",
+          value: NETWORK.MATIC,
+          imgUrl: require("../../assets/img_new/polygon-icon.svg"),
         },
       ],
     };
@@ -444,7 +461,9 @@ class Header extends Component {
             {/*** Network Type */}
             {this.state.currentNetwork === 1 ||
             this.state.currentNetwork === 56 ||
-            this.state.currentNetwork === 42 ? (
+            this.state.currentNetwork === 42 ||
+            this.state.currentNetwork  === NETWORK.MUMBAI || 
+            this.state.currentNetwork  === NETWORK.MATIC ? (
               <div className={classes.netWork}>
                 {this.state.currentNetwork === 1 ||
                 this.state.currentNetwork === 42 ? (
@@ -459,7 +478,15 @@ class Header extends Component {
                     className={classes.netWorkIcon}
                   />
                 ) : null}
-                <span>{networkObj[this.state.currentNetwork]}</span>
+                 {this.state.currentNetwork === NETWORK.MUMBAI ||
+                this.state.currentNetwork === NETWORK.MATIC ? (
+                  <img
+                    alt="matic-icon"
+                    src={require("../../assets/img_new/polygon-icon.svg")}
+                    className={classes.netWorkIcon}
+                  />
+                ) : null}
+                <span style={{marginLeft: "2px"}}>{networkObj[this.state.currentNetwork]}</span>
 
                 {/* <svg className={this.state.isShowNetWorkList ?classes.selectIconActive :classes.selectIcon} aria-hidden="true">
                         <use xlinkHref="#iconicon_menu_dropDown__day"></use>
