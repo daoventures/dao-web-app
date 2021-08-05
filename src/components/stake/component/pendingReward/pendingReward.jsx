@@ -35,10 +35,16 @@ const styles = (theme) => ({
         marginBottom: "5px",
 
         [theme.breakpoints.down("sm")]: {
-            flexDirection: "column",
             justifyContent: "flex-start",
             alignItem: "center"
         },
+    },
+
+    earlyHarvestContainer: {
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "flex-start",
+        minHeight: "60px",
     },
 
     columnContainer: {
@@ -70,8 +76,7 @@ const styles = (theme) => ({
 
     h100: {
         height: "100%",
-    }
-
+    },
 });
 
 const store = Store.store;
@@ -130,12 +135,14 @@ class PendingReward extends Component {
                         </Typography>
                     </div>
 
-                    <div className={`${classes.rowContainer}`}>
-                        {/** Early Harvest Penalty */}
-                        <Typography variant="subtitle1" noWrap>
-                            Early Harvest Penalty: {EARLY_HARVEST_PENALTY} %
-                        </Typography>
-                        {this.renderPenaltyInfo()}
+                    <div className={classes.earlyHarvestContainer}>
+                        <div className={`${classes.rowContainer} ${classes.minHeight60}`}>
+                            {/** Early Harvest Penalty */}
+                            <Typography variant="subtitle1" noWrap>
+                                Early Harvest Penalty: {EARLY_HARVEST_PENALTY} %
+                            </Typography>
+                            {this.renderPenaltyInfo()}
+                        </div>
                     </div>
 
                     <div className={`${classes.rowContainer} ${classes.h100} ${classes.alignFlexEnd}`}>
