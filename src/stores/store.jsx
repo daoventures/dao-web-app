@@ -7077,6 +7077,11 @@ class Store {
     const account = store.getStore("account");
 
     const { asset, amount, max, withoutConvert } = payload.content;
+    
+    let autoCompound = payload.content.autoCompound !== undefined 
+      ? payload.content.autoCompound
+      : false;
+   
     const web3 = await this._getWeb3Provider();
     if (!web3) {
       return null;
@@ -7130,7 +7135,7 @@ class Store {
 
     if(!approvalErr) {
       console.log(`Calling Deposit DVG`);
-      await this._callDepositDvg(vipTokenContract, _amount, (err, txnHash, receipt) => {
+      await this._callDepositDvg(vipTokenContract, _amount, autoCompound, (err, txnHash, receipt) => {
         if (err) {
           return emitter.emit(ERROR, err);
         }
@@ -7144,7 +7149,7 @@ class Store {
     }
   };
 
-  _callDepositDvg = async (vipTokenContract, amount, callback) => {
+  _callDepositDvg = async (vipTokenContract, amount, autoCompound, callback) => {
     const account = this.getStore("account");
     const web3 = await this._getWeb3Provider();
     if (!web3) {
@@ -7152,7 +7157,7 @@ class Store {
     }
 
     await vipTokenContract.methods
-      .deposit(amount)
+      .deposit(amount, autoCompound)
       .send({
         from: account.address,
       })
@@ -7601,6 +7606,7 @@ class Store {
           amount: realBalance,
           max: false,
           withoutConvert: true,
+          autoCompound: false
         }
       });
     } else {
