@@ -29,4 +29,7 @@ networks:
     external: true
   dao-swap-frontend_dao_swap:
     external: true
+  default:
+    external: true
+    name: pricegame
   
