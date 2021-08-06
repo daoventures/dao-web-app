@@ -1,5 +1,6 @@
+import { ADVANCE, BASIC, DEGEN, EXPERT } from "../../constants/constants";
+
 import config from "../../config";
-import { BASIC, ADVANCE, EXPERT, DEGEN } from "../../constants/constants";
 
 const ethereum = [
   {
@@ -45,6 +46,7 @@ const ethereum = [
       "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-citadel-vault",
     isPopularItem: true, // use to render popular item icon
     happyHourEnabled: true,
+    performanceId: "daoCDV",
     // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
   },
   {
@@ -90,6 +92,7 @@ const ethereum = [
       "https://daoventures.gitbook.io/daoventures/products/strategies#bf64", // TODO: Update
     isPopularItem: true, // use to render popular item icon
     happyHourEnabled: true,
+    performanceId: "daoSTO",
   },
   {
     id: "daoELO",
