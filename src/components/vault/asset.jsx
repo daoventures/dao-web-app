@@ -2257,7 +2257,7 @@ class Asset extends Component {
         asset.strategyType === "citadel" ||
         asset.strategyType === "daoFaang"
       ) {
-        console.log("🚀 | Asset | asset.stats.pnl", asset.stats.pnl);
+        // console.log("🚀 | Asset | asset.stats.pnl", asset.stats.pnl);
 
         return asset.stats.pnl;
       }
