@@ -5582,6 +5582,7 @@ class Store {
 
   _getPNL = async (performanceId, callback) => {
     if (!performanceId) {
+      callback(null, []);
       return;
     }
 
