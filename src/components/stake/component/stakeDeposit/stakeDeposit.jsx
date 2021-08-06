@@ -2,16 +2,23 @@ import React, { Component } from "react";
 import { withNamespaces } from "react-i18next";
 import { withRouter } from "react-router";
 import { withStyles } from "@material-ui/core/styles";
-import { Typography, TextField, Button } from "@material-ui/core";
+import { 
+  Typography, 
+  TextField, 
+  Button, 
+  Tooltip  
+} from "@material-ui/core";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import {
   DEPOSIT_DAOMINE,
   DEPOSIT_DAOMINE_RETURNED_COMPLETED,
   YIELD_DAOMINE_RETURNED_COMPLETED,
   LATEST_POOLS,
-  ERROR
+  ERROR,
+  ACTION_WITHDRAW
 } from "../../../../constants/constants";
 import Store from "../../../../stores/store";
+import StakeActions from "../stakeActions/stakeActions";
 import { validateDigit, validateInputMoreThanBalance, validateAmountNotExist } from "../../helper/validation";
 
 const styles = (theme) => ({
@@ -291,7 +298,7 @@ class StakeDeposit extends Component {
 
   render() {
     const { amount, loading, amountError, percent, errorMessage } = this.state;
-    const { classes, pool } = this.props;
+    const { classes, pool, startLoading } = this.props;
 
     const { userInfo } = pool;
     const selectedPoolType = store.getStore("daomineType");
@@ -375,14 +382,13 @@ class StakeDeposit extends Component {
               <span>Confirm Deposit</span>
             </Button>
 
+            {/** Withdraw Button */}
             {(selectedPoolType === LATEST_POOLS) && 
-              <Button
-                disabled={(pool.withdraw && loading) || !pool.withdraw || !userInfo}
-                className={`${classes.depositActionButton} ${classes.w10}`}
-                onClick={this.onDeposit}
-              >
-                <span>-</span>
-              </Button>
+            <Tooltip title="Withdraw">
+              <div>
+                <StakeActions pool={pool} startLoading={startLoading} type={ACTION_WITHDRAW} label={`-`}></StakeActions>
+              </div>
+            </Tooltip>
             }
           </div>
 
