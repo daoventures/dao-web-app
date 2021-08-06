@@ -932,7 +932,7 @@ class Asset extends Component {
       vaultPercent,
       scales,
     } = this.state;
-    if (asset.strategyType === "citadel") {
+    if (asset.strategyType === "citadel" || asset.strategyType === "daoFaang") {
       return (
         <div>
           <Typography variant={"h4"} className={classes.subtitle} noWrap>
