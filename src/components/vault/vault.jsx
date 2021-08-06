@@ -965,7 +965,8 @@ class Vault extends Component {
     return asset.strategyType === "citadel" ||
       asset.strategyType === "elon" ||
       asset.strategyType === "cuban" ||
-      asset.strategyType === "daoFaang"
+      asset.strategyType === "daoFaang" || 
+      asset.strategyType === "moneyPrinter"
       ? true
       : false;
   };
@@ -1017,15 +1018,17 @@ class Vault extends Component {
   // Yearly Growth
   renderYearlyGrowth = (asset, showMobile) => {
     const { classes } = this.props;
+
     return showMobile ? (
       <React.Fragment>
         <Typography variant={"h5"} className={classes.assetLabel2}>
-          {this.isLogoVault(asset)
-            ? asset.strategyType === "citadel" ||
-              asset.strategyType === "daoFaang"
+          {
+            (asset.strategyType === "citadel" || asset.strategyType === "daoFaang")
               ? "7d PnL"
-              : "YTD Performance"
-            : "Yearly Growth"}
+              : (this.isLogoVault(asset) && asset.strategyType !== "moneyPrinter")
+                ? "YTD Performance"
+                : "Yearly Growth"
+          }
         </Typography>
         <Typography variant={"h3"} noWrap className={classes.assetLabel1}>
           {/* {this.isUsdVault(asset) && (
@@ -1089,13 +1092,23 @@ class Vault extends Component {
 
         <div style={{ display: "flex" }}>
           <div>
-            <Typography variant={"h5"} className={classes.assetLabel2}>
+            {/* <Typography variant={"h5"} className={classes.assetLabel2}>
               {this.isLogoVault(asset)
                 ? asset.strategyType === "citadel" ||
                   asset.strategyType === "daoFaang"
                   ? "7d PnL"
                   : "YTD Performance"
                 : "Yearly Growth"}
+            </Typography> */}
+
+            <Typography variant={"h5"} className={classes.assetLabel2}>
+              {
+                (asset.strategyType === "citadel" || asset.strategyType === "daoFaang")
+                  ? "7d PnL"
+                  : (this.isLogoVault(asset) && asset.strategyType !== "moneyPrinter")
+                    ? "YTD Performance"
+                    : "Yearly Growth"
+              }
             </Typography>
           </div>
         </div>
@@ -1488,6 +1501,10 @@ class Vault extends Component {
       } else if (asset.strategyType === "daoFaang") {
         return asset.stats.faangApy
           ? (asset.stats.faangApy / 1).toFixed(2) + "%"
+          : "0.00%";
+      } else if (asset.strategyType === "moneyPrinter") {
+        return asset.stats.moneyPrinterApy
+          ? (asset.stats.moneyPrinterApy / 1).toFixed(2) + "%"
           : "0.00%";
       }
     } else {
