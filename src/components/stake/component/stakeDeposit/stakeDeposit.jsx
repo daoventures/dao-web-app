@@ -51,10 +51,6 @@ const styles = (theme) => ({
     color: theme.themeColors.textT,
     marginTop: "5px",
     marginBottom: "5px",
-    [theme.breakpoints.down("sm")]: {
-      flexDirection: "column",
-      justifyContent: "flex-start"
-    },
   },
 
   cursor: {
@@ -116,6 +112,7 @@ const styles = (theme) => ({
     borderWidth: "1px",
     borderStyle: "solid",
     marginLeft: "10px",
+    marginRight: "5px",
     borderRadius: "0px",
     cursor: "pointer",
     "&:hover": {
