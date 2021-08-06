@@ -5718,9 +5718,6 @@ class Store {
   };
 
   _getAddressStatistics = async (address) => {
-    // REMOVE:
-    return store.getStore("universalGasPrice");
-
     try {
       const url =
         config.statsProvider + "user/" + address + "/vaults/statistics";
