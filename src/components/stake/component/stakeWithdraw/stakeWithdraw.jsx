@@ -338,21 +338,6 @@ class StakeWithdraw extends Component {
         })
     };
 
-    onClaimRewards = () => {
-        const { startLoading, pool } = this.props;
-
-        this.setState({ loading: true });
-        startLoading();
-
-        dispatcher.dispatch({
-            type: WITHDRAW_DAOMINE,
-            content: {
-                pool,
-                amount: "0"
-            }
-        })
-    }
-
     render() {
         const { amount, loading, amountError, percent, errorMessage } = this.state;
         const { classes, pool } = this.props;
@@ -440,14 +425,6 @@ class StakeWithdraw extends Component {
                             onClick={this.onWithdrawal}
                         >
                             <span>Confirm Withdraw & Claim Rewards</span>
-                        </Button>
-
-                        <Button
-                            disabled={(pool.withdraw && loading)}
-                            className={classes.withdrawalActionButton}
-                            onClick={this.onClaimRewards}
-                        >
-                            <span>Claim Rewards only</span>
                         </Button>
                     </div>
 

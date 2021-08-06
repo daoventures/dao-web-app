@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useState } from "react";
 import Store from "../../../../stores/store";
 import { withNamespaces } from "react-i18next";
 import { withRouter } from "react-router";
@@ -9,12 +9,17 @@ import {
     EMERGENCY_WITHDRAW_DAOMINE,
     YIELD_DAOMINE,
     ACTION_COMPOUND,
-    ACTION_HARVEST
+    ACTION_HARVEST,
+    ACTION_WITHDRAW,
+    MODAL_TITLE_WITHDRAW,
 } from '../../../../constants/constants';
+import BasicModal from "../../../common/basicModal/basicModal";
+import StakeWithdraw from "../stakeWithdraw/stakeWithdraw";
 
 const styles = (theme) => ({
     actionButton: {
         height: "42px",
+        width: "100%",
         marginTop: "10px",
         background: "none",
         borderColor: theme.themeColors.border,
@@ -38,6 +43,10 @@ const styles = (theme) => ({
    
     mt10 :{
         marginTop: "10px"
+    },
+
+    w10: {
+        width: "10%"
     }
 });
 
@@ -48,11 +57,8 @@ class StakeActions extends Component {
         super();
 
         this.state = {
-            amountError: false,
             loading: false,
-            amount: 0,
-            percent: 0,
-            errorMessage: ""
+            openWithdraw: false, // open withdraw modal
         };
     }
     
@@ -99,6 +105,34 @@ class StakeActions extends Component {
         })
     };
 
+    renderWithdrawModal = () => {
+        const { openWithdraw } = this.state;
+        const { startLoading } = this.props;
+        const pool = this.props.pool === undefined ? null : this.props.pool;
+
+        if(!pool) {
+            console.error("Missing pool when trying to open withdraw modal");
+        }
+
+        const content = (
+          <StakeWithdraw
+            pool={pool}
+            startLoading={startLoading}
+          ></StakeWithdraw>
+        );
+       
+        return (
+          <BasicModal
+            content={content}
+            title={MODAL_TITLE_WITHDRAW}
+            setOpenModal={this.openWithModal}
+            openModal={openWithdraw}
+          ></BasicModal>
+        );
+    }
+
+    openWithModal = (open) => { this.setState({openWithdraw: open}); }
+
     assignFunctionByType = (type) => {
         switch(type) {
             case ACTION_HARVEST:
@@ -106,6 +140,9 @@ class StakeActions extends Component {
                 break;
             case ACTION_COMPOUND:
                 this.onCompound();
+                break;
+            case ACTION_WITHDRAW:
+                this.openWithModal(true);
                 break;
             default:
                 break;
@@ -118,14 +155,22 @@ class StakeActions extends Component {
 
         const disabled = this.props.disabled === undefined ? false : this.props.disabled;
 
+        // Additional class for Withdraw DAOmine button
+        const additionalClasses = (type === ACTION_WITHDRAW) 
+            ? classes.w10
+            : "";
+        
         return (
-            <Button
-                disabled={ disabled || loading }
-                className={classes.actionButton}
-                onClick={() => this.assignFunctionByType(type)}
-            >
-                <span>{label}</span>
-            </Button>
+            <React.Fragment>
+                <Button
+                    disabled={disabled || loading}
+                    className={`${classes.actionButton} ${additionalClasses}`}
+                    onClick={() => this.assignFunctionByType(type)}
+                >
+                    <span>{label}</span>
+                </Button>
+                {(type === ACTION_WITHDRAW) && this.renderWithdrawModal()}
+            </React.Fragment>
         );
     }
 }
