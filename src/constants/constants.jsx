@@ -198,6 +198,7 @@ export const ACTION_HARVEST = "Harvest Reward";
 export const ACTION_EMERGENCY = "Emergency Withdraw";
 export const ACTION_WITHDRAW = "Withdraw";
 export const MODAL_TITLE_WITHDRAW = "Unstake";
+export const DISABLE_ACTION_BUTTONS_RETURNED = "DISABLE_ACTION_BUTTONS_RETURNED";
 // Pending Rewards section
 export const EARLY_HARVEST_PENALTY = "50";
 

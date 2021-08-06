@@ -12,10 +12,10 @@ import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import {
   DEPOSIT_DAOMINE,
   DEPOSIT_DAOMINE_RETURNED_COMPLETED,
-  YIELD_DAOMINE_RETURNED_COMPLETED,
   LATEST_POOLS,
   ERROR,
-  ACTION_WITHDRAW
+  ACTION_WITHDRAW,
+  DISABLE_ACTION_BUTTONS_RETURNED
 } from "../../../../constants/constants";
 import Store from "../../../../stores/store";
 import StakeActions from "../stakeActions/stakeActions";
@@ -182,15 +182,19 @@ class StakeDeposit extends Component {
   }
 
   componentWillMount() {
+    emitter.on(DISABLE_ACTION_BUTTONS_RETURNED, this.handleActionButtonsControl);
     emitter.on(DEPOSIT_DAOMINE_RETURNED_COMPLETED, this.onDepositCompleted);
-    emitter.on(YIELD_DAOMINE_RETURNED_COMPLETED, this.onYieldCompleted);
     emitter.on(ERROR, this.errorReturned);
   }
 
   componentWillUnmount() {
+    emitter.on(DISABLE_ACTION_BUTTONS_RETURNED, this.handleActionButtonsControl);
     emitter.removeListener(DEPOSIT_DAOMINE_RETURNED_COMPLETED, this.onDepositCompleted);
-    emitter.removeListener(YIELD_DAOMINE_RETURNED_COMPLETED, this.onYieldCompleted);
     emitter.removeListener(ERROR, this.errorReturned);
+  }
+
+  handleActionButtonsControl = (disable) => {
+    this.setState({loading: disable});
   }
 
   errorReturned = () => {
@@ -205,12 +209,6 @@ class StakeDeposit extends Component {
       percent: 0,
       loading: false
     })
-  }
-
-  onYieldCompleted = () => {
-    this.setState({
-      loading: false
-    });
   }
 
   onChange = (event) => {
@@ -374,7 +372,7 @@ class StakeDeposit extends Component {
           <div className={classes.depositButtonBox}>
             {/** Deposit Button */}
             <Button
-              disabled={(pool.deposit && loading) || !pool.deposit || !userInfo}
+              disabled={(pool.deposit && loading) || !pool.deposit || !userInfo }
               className={`${classes.depositActionButton} 
                 ${(selectedPoolType === LATEST_POOLS) ? classes.w90 : classes.w100}`}
               onClick={this.onDeposit}

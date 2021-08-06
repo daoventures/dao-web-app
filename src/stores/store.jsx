@@ -19,6 +19,7 @@ import {
   DEPOSIT_DAOMINE_RETURNED_COMPLETED,
   DEPOSIT_DVG_RETURNED,
   DEPOSIT_XDVG,
+  DISABLE_ACTION_BUTTONS_RETURNED,
   DONATE,
   DONATE_RETURNED,
   ERROR,
@@ -6620,6 +6621,8 @@ class Store {
       return null;
     }
 
+    emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, true);
+
     const { pool, amount } = payload.content;
     const daomineType = store.getStore("daomineType");
 
@@ -6648,6 +6651,7 @@ class Store {
           if (err) {
             console.log(err);
             approvalError = err;
+            emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
             return emitter.emit(ERROR, err);
           }
           if (txnHash) {
@@ -6668,12 +6672,14 @@ class Store {
         amount,
         (err, txnHash, depositResult) => {
           if (err) {
+            emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
             return emitter.emit(ERROR, err);
           }
           if (txnHash) {
             return emitter.emit(DEPOSIT_DAOMINE_RETURNED, txnHash);
           }
           if (depositResult) {
+            emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
             return emitter.emit(
               DEPOSIT_DAOMINE_RETURNED_COMPLETED,
               depositResult.transactionHash
@@ -6896,6 +6902,8 @@ class Store {
       return null;
     }
 
+    emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, true);
+
     const { pool, amount } = payload.content;
     const poolDecimal = pool.decimal;
     const poolIndex = pool.pid;
@@ -6920,6 +6928,7 @@ class Store {
           return emitter.emit(WITHDRAW_DAOMINE_RETURNED, txnHash);
         })
         .on("receipt", function (receipt) {
+          emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
           emitter.emit(
             WITHDRAW_DAOMINE_RETURNED_COMPLETED,
             receipt.transactionHash
@@ -6927,6 +6936,7 @@ class Store {
         })
         .on("error", function (error) {
           console.log("withdrawDAOmine() Error: ", error);
+          emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
           if (!error.toString().includes("-32601")) {
             if (error.message) {
               emitter.emit(ERROR, error.message);
@@ -6942,6 +6952,7 @@ class Store {
           }
         });
     } catch (err) {
+      emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
       console.log("withdrawDAOmine() Error: ", err);
     }  
   }
@@ -6972,6 +6983,8 @@ class Store {
       emitter.emit(ERROR, "Missing PID for yieldDAOmine()");
     }
 
+    emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, true);
+
     const pid = payload.content.pid;
     const daomineType = store.getStore("daomineType");
     const daomineContract = await contractHelper.getDAOmineContract(web3, network, daomineType);
@@ -6986,6 +6999,7 @@ class Store {
         return emitter.emit(YIELD_DAOMINE_RETURNED, txnHash);
       })
       .on("receipt", function (receipt) {
+        emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
         emitter.emit(
           YIELD_DAOMINE_RETURNED_COMPLETED,
           receipt.transactionHash
@@ -6995,6 +7009,7 @@ class Store {
         console.log("yieldDAOmine() Error: ", error);
         if (!error.toString().includes("-32601")) {
           if (error.message) {
+            emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
             emitter.emit(ERROR, error.message);
           }
         }

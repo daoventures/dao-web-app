@@ -4,7 +4,6 @@ import { withRouter } from "react-router";
 import { withStyles } from "@material-ui/core/styles";
 import { Typography} from "@material-ui/core";
 
-import Store from "../../../../stores/store";
 import {
     EARLY_HARVEST_PENALTY,
     ACTION_HARVEST,
@@ -78,10 +77,6 @@ const styles = (theme) => ({
         height: "100%",
     },
 });
-
-const store = Store.store;
-const emitter = Store.emitter;
-const dispatcher = Store.dispatcher;
 
 class PendingReward extends Component {
     constructor(props) {

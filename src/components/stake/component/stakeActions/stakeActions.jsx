@@ -1,4 +1,4 @@
-import React, { Component, useState } from "react";
+import React, { Component } from "react";
 import Store from "../../../../stores/store";
 import { withNamespaces } from "react-i18next";
 import { withRouter } from "react-router";
@@ -12,6 +12,8 @@ import {
     ACTION_HARVEST,
     ACTION_WITHDRAW,
     MODAL_TITLE_WITHDRAW,
+    DISABLE_ACTION_BUTTONS_RETURNED,
+    WITHDRAW_DAOMINE_RETURNED
 } from '../../../../constants/constants';
 import BasicModal from "../../../common/basicModal/basicModal";
 import StakeWithdraw from "../stakeWithdraw/stakeWithdraw";
@@ -51,6 +53,7 @@ const styles = (theme) => ({
 });
 
 const dispatcher = Store.dispatcher;
+const emitter = Store.emitter;
 
 class StakeActions extends Component {
     constructor(props) {
@@ -60,6 +63,25 @@ class StakeActions extends Component {
             loading: false,
             openWithdraw: false, // open withdraw modal
         };
+    }
+
+    componentWillMount() {
+        emitter.on(DISABLE_ACTION_BUTTONS_RETURNED, this.handleActionButtonsControl);
+        emitter.on(WITHDRAW_DAOMINE_RETURNED, this.handleWithdrawTxnHashReturned);
+    }
+
+    componentWillUnmount() {
+        emitter.removeListener(DISABLE_ACTION_BUTTONS_RETURNED, this.handleActionButtonsControl);
+        emitter.removeListener(WITHDRAW_DAOMINE_RETURNED, this.handleWithdrawTxnHashReturned);
+    }
+
+    handleActionButtonsControl = (disable) => {
+        this.setState({loading: disable});
+    }
+
+    // To close withdraw modal once transaction hash is returned
+    handleWithdrawTxnHashReturned = () => {
+        this.openWithModal(false);
     }
     
     onHarvest = () => {
