@@ -178,7 +178,7 @@ const ethereum = [
     group: DEGEN,
     tvlKey: "daoCUB_tvl",
     infoLink:
-      "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-cuban-vault",
+      "https://daoventures.gitbook.io/daoventures/products/strategies#cubans-ape",
     isPopularItem: false,
     // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
   },
