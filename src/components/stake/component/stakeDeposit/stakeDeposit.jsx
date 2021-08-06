@@ -384,7 +384,11 @@ class StakeDeposit extends Component {
             {(selectedPoolType === LATEST_POOLS) && 
             <Tooltip title="Withdraw">
               <div>
-                <StakeActions pool={pool} startLoading={startLoading} type={ACTION_WITHDRAW} label={`-`}></StakeActions>
+                <StakeActions pool={pool} 
+                  startLoading={startLoading} 
+                  type={ACTION_WITHDRAW}
+                  disabled={!pool.withdraw} 
+                  label={`-`}></StakeActions>
               </div>
             </Tooltip>
             }

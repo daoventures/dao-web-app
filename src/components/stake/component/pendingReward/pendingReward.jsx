@@ -7,7 +7,8 @@ import { Typography} from "@material-ui/core";
 import {
     EARLY_HARVEST_PENALTY,
     ACTION_HARVEST,
-    ACTION_COMPOUND
+    ACTION_COMPOUND,
+    ACTION_EMERGENCY
 } from "../../../../constants/constants";
 
 import InfoModal from "../../../common/infoModal/infoModal";
@@ -51,8 +52,6 @@ const styles = (theme) => ({
         display: "flex",
         // alignItems: "center",
         color: theme.themeColors.textT,
-        marginTop: "5px",
-        marginBottom: "5px",
         flexDirection: "column",
     },
      
@@ -64,9 +63,17 @@ const styles = (theme) => ({
         alignItems: "flex-end"
     },
 
+    alignFlexStart: {
+        alignItems: "flex-start"
+    },
+
     modalInfo: {
         color: theme.themeColors.textT,
         padding: "15px",
+    },
+
+    mt15: {
+        marginTop: "15px"
     },
 
     w100: {
@@ -76,6 +83,10 @@ const styles = (theme) => ({
     h100: {
         height: "100%",
     },
+
+    earlyaHarvestContent: {
+        lineHeight: "1.6"
+    }
 });
 
 class PendingReward extends Component {
@@ -95,7 +106,7 @@ class PendingReward extends Component {
         const { classes } = this.props;
         const modalContent = (
             <div className={classes.modalInfo}>
-                <Typography variant={"h5"}>
+                <Typography variant={"h5"} className={classes.earlyaHarvestContent}>
                     Only applies when harvesting within 72hrs of previous harvest/withdrawal. Harvesting
                     after 3 days will not incur a fee. The timer resets every time a harvest or withdrawal is performed.
                 </Typography>
@@ -140,24 +151,43 @@ class PendingReward extends Component {
                         </div>
                     </div>
 
-                    <div className={`${classes.rowContainer} ${classes.h100} ${classes.alignFlexEnd}`}>
+                    <div className={`${classes.rowContainer} ${classes.h100} ${classes.alignFlexStart}`}>
                         <div className={`${classes.w100}`}>
-                            <div className={`${classes.columnContainer}`}>
-                                {/** Harvest Button */}
-                                <StakeActions
-                                    type={ACTION_HARVEST}
-                                    label={ACTION_HARVEST}
-                                    pool={pool}
-                                    startLoading={startLoading}>
-                                </StakeActions>
+                            <div className={`${classes.columnContainer} ${classes.mt15}`}>
+                                {
+                                    (!pool.emergencyWithdraw) &&
+                                    <React.Fragment>
+                                        {/** Harvest Button */}
+                                        <StakeActions
+                                            type={ACTION_HARVEST}
+                                            label={ACTION_HARVEST}
+                                            pool={pool}
+                                            disabled={!pool.harvest}
+                                            startLoading={startLoading}>
+                                        </StakeActions>
 
-                                {/** Compound Button */}
-                                <StakeActions
-                                    type={ACTION_COMPOUND}
-                                    label={ACTION_COMPOUND}
-                                    pool={pool}
-                                    startLoading={startLoading}>
-                                </StakeActions>
+                                        {/** Compound Button */}
+                                        <StakeActions
+                                            type={ACTION_COMPOUND}
+                                            label={ACTION_COMPOUND}
+                                            pool={pool}
+                                            disabled={!pool.compound}
+                                            startLoading={startLoading}>
+                                        </StakeActions>
+                                    </React.Fragment>
+                                }
+                                {
+                                    (pool.emergencyWithdraw) &&
+                                    <React.Fragment>
+                                        {/** Emergency Button */}
+                                        <StakeActions
+                                            type={ACTION_EMERGENCY}
+                                            label={`Confirm MAX withdrawal ${pool.name} only`}
+                                            pool={pool}
+                                            startLoading={startLoading}>
+                                        </StakeActions>
+                                    </React.Fragment>
+                                }
                             </div>
                         </div>
                     </div>

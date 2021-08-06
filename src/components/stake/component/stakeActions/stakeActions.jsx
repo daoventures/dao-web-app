@@ -13,7 +13,8 @@ import {
     ACTION_WITHDRAW,
     MODAL_TITLE_WITHDRAW,
     DISABLE_ACTION_BUTTONS_RETURNED,
-    WITHDRAW_DAOMINE_RETURNED
+    WITHDRAW_DAOMINE_RETURNED,
+    ACTION_EMERGENCY
 } from '../../../../constants/constants';
 import BasicModal from "../../../common/basicModal/basicModal";
 import StakeWithdraw from "../stakeWithdraw/stakeWithdraw";
@@ -49,6 +50,11 @@ const styles = (theme) => ({
 
     w10: {
         width: "10%"
+    },
+
+    emergency: {
+        borderColor: theme.themeColors.formError,
+        color: theme.themeColors.formError,
     }
 });
 
@@ -166,22 +172,28 @@ class StakeActions extends Component {
             case ACTION_WITHDRAW:
                 this.openWithModal(true);
                 break;
+            case ACTION_EMERGENCY:
+                this.onEmergencyWithdrawal();
+                break;
             default:
                 break;
         }
     }
-    
+
     render() {
         const { classes, type, label } = this.props;
         const { loading } = this.state;
 
         const disabled = this.props.disabled === undefined ? false : this.props.disabled;
 
-        // Additional class for Withdraw DAOmine button
-        const additionalClasses = (type === ACTION_WITHDRAW) 
-            ? classes.w10
-            : "";
-        
+        // Additional class for Withdraw / Emergency DAOmine button
+        let additionalClasses = "";
+        if (type === ACTION_WITHDRAW) {
+            additionalClasses = classes.w10;
+        } else if (type === ACTION_EMERGENCY) {
+            additionalClasses = classes.emergency;
+        }
+      
         return (
             <React.Fragment>
                 <Button

@@ -6820,6 +6820,8 @@ class Store {
       return null;
     }
 
+    emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, true);
+
     // DAOMmine contract address by network
     let daoMineContractAddress = "";
     if (network === 42) {
@@ -6854,6 +6856,7 @@ class Store {
           return emitter.emit(EMERGENCY_WITHDRAW_DAOMINE_RETURNED, txnHash);
         })
         .on("receipt", function (receipt) {
+          emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
           emitter.emit(
             EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,
             receipt.transactionHash
@@ -6863,6 +6866,7 @@ class Store {
           console.log("emergencyWithdrawDAOmine() Error: ", error);
           if (!error.toString().includes("-32601")) {
             if (error.message) {
+              emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
               emitter.emit(ERROR, error.message);
             }
           }
