@@ -26,6 +26,7 @@ import {
 import Store from "../../stores";
 import ConnectWallet from "../common/connectWallet/connectWallet";
 import Snackbar from "../snackbar/snackbar";
+import InfoModal from "../common/infoModal/infoModal";
 
 const emitter = Store.emitter
 const dispatcher = Store.dispatcher
