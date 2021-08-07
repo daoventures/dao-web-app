@@ -42,7 +42,7 @@ const matic = [
         group: ADVANCE,
         tvlKey: "daoMPT_tvl",
         infoLink:
-          "https://www.google.com",
+          "https://daoventures.gitbook.io/daoventures/products/strategies#money-printer-goes-brrrrr",
         isPopularItem: false,
         // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
       },
