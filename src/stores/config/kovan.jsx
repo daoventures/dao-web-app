@@ -1,5 +1,6 @@
 import config from "../../config";
 import { BASIC, ADVANCE, EXPERT, DEGEN } from "../../constants/constants";
+import { INFO_LINK } from "../../constants/page-constant";
 
 const kovan = [
   {
@@ -41,8 +42,7 @@ const kovan = [
     cAbi: "",
     group: EXPERT,
     tvlKey: "daoCDV_tvl",
-    infoLink:
-      "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-citadel-vault",
+    infoLink: INFO_LINK.CITADEL,
     isPopularItem: true,
     happyHourEnabled: true,
     // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
@@ -86,8 +86,7 @@ const kovan = [
     cAbi: "",
     group: ADVANCE,
     tvlKey: "daoSTO_tvl",
-    infoLink:
-      "https://daoventures.gitbook.io/daoventures/products/strategies#bf64",
+    infoLink: INFO_LINK.FAANG,
     isPopularItem: true, // use to render popular item icon
     happyHourEnabled: true,
   },
@@ -130,8 +129,7 @@ const kovan = [
     cAbi: "",
     group: DEGEN,
     tvlKey: "daoELO_tvl",
-    infoLink:
-      "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-elon-vault",
+    infoLink: INFO_LINK.ELON,
     isPopularItem: false,
     // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
   },
@@ -174,8 +172,7 @@ const kovan = [
     cAbi: "",
     group: DEGEN,
     tvlKey: "daoCUB_tvl",
-    infoLink:
-      "https://daoventures.gitbook.io/daoventures/products/strategies#the-dao-cuban-vault",
+    infoLink: INFO_LINK.CUBAN,
     isPopularItem: false,
     // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
   },
@@ -209,8 +206,7 @@ const kovan = [
     strategyType: "yearn",
     group: ADVANCE,
     tvlKey: "yUSDT_tvl",
-    infoLink:
-      "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
+    infoLink: INFO_LINK.YEARN,
     isPopularItem: false,
   },
   {
@@ -244,8 +240,7 @@ const kovan = [
     strategyType: "yearn",
     group: ADVANCE,
     tvlKey: "yDAI_tvl",
-    infoLink:
-      "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
+    infoLink: INFO_LINK.YEARN,
     isPopularItem: false,
   },
   {
@@ -278,8 +273,7 @@ const kovan = [
     strategyType: "yearn",
     group: ADVANCE,
     tvlKey: "cUSDC_tvl",
-    infoLink:
-      "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
+    infoLink: INFO_LINK.YEARN,
     isPopularItem: false,
   },
   {
@@ -312,8 +306,7 @@ const kovan = [
     strategyType: "yearn",
     group: ADVANCE,
     tvlKey: "yTUSD_tvl",
-    infoLink:
-      "https://daoventures.gitbook.io/daoventures/products/strategies#yearn-fighter",
+    infoLink: INFO_LINK.YEARN,
     isPopularItem: false,
   },
   {
@@ -346,8 +339,7 @@ const kovan = [
     cAbi: config.cUSDTContract,
     group: BASIC,
     tvlKey: "cUSDT_tvl",
-    infoLink:
-      "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
+    infoLink: INFO_LINK.COMPOUND,
     isPopularItem: false,
   },
   {
@@ -380,8 +372,7 @@ const kovan = [
     cAbi: config.cDAIContract,
     group: BASIC,
     tvlKey: "cDAI_tvl",
-    infoLink:
-      "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
+    infoLink: INFO_LINK.COMPOUND,
     isPopularItem: false,
   },
   {
@@ -414,8 +405,7 @@ const kovan = [
     cAbi: config.cUSDCContract,
     group: BASIC,
     tvlKey: "cUSDT_tvl",
-    infoLink:
-      "https://daoventures.gitbook.io/daoventures/products/strategies#compound-fighter",
+    infoLink: INFO_LINK.COMPOUND,
     isPopularItem: false,
   },
 ];

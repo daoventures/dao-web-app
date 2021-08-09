@@ -1,5 +1,6 @@
 import config from "../../config";
 import { ADVANCE } from "../../constants/constants";
+import { INFO_LINK } from "../../constants/page-constant";
 
 const matic = [
     {
@@ -41,8 +42,7 @@ const matic = [
         cAbi: "",
         group: ADVANCE,
         tvlKey: "daoMPT_tvl",
-        infoLink:
-          "https://daoventures.gitbook.io/daoventures/products/strategies#money-printer-goes-brrrrr",
+        infoLink: INFO_LINK.MONEY_PRINTER,
         isPopularItem: false,
         // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
       },
