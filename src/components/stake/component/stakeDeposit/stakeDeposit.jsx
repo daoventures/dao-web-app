@@ -2,14 +2,23 @@ import React, { Component } from "react";
 import { withNamespaces } from "react-i18next";
 import { withRouter } from "react-router";
 import { withStyles } from "@material-ui/core/styles";
-import { Typography, TextField, Button } from "@material-ui/core";
+import { 
+  Typography, 
+  TextField, 
+  Button, 
+  Tooltip  
+} from "@material-ui/core";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import {
   DEPOSIT_DAOMINE,
   DEPOSIT_DAOMINE_RETURNED_COMPLETED,
-  ERROR
+  LATEST_POOLS,
+  ERROR,
+  ACTION_WITHDRAW,
+  DISABLE_ACTION_BUTTONS_RETURNED
 } from "../../../../constants/constants";
 import Store from "../../../../stores/store";
+import StakeActions from "../stakeActions/stakeActions";
 import { validateDigit, validateInputMoreThanBalance, validateAmountNotExist } from "../../helper/validation";
 
 const styles = (theme) => ({
@@ -24,34 +33,19 @@ const styles = (theme) => ({
   },
 
   depositContainer: {
-    paddingBottom: "12px",
-    paddingLeft: "5px",
-    paddingRight: "5px",
+    paddingTop: "15px",
+    paddingBottom: "27px",
+    paddingLeft: "20px",
+    paddingRight: "20px",
     display: "flex",
     flex: "1",
-    // padding: '24px',
     flexDirection: "column",
-    [theme.breakpoints.down("sm")]: {
-      // padding: '20px 0px',
-    },
-  },
-
-  tradeContainer: {
-    flex: 1,
-    display: "flex",
-    flexDirection: "column",
-    width: "100%",
-    margin: "auto",
-    padding: "15px",
-    marginBottom: "1.5rem",
-    [theme.breakpoints.down("sm")]: {
-      width: "100%",
-    },
   },
 
   displayInfoBox: {
     width: "100%",
     display: "flex",
+    flexDirection: "row",
     justifyContent: "space-between", // to push flex item to left and right
     alignItems: "center", // vertically align flex item
     color: theme.themeColors.textT,
@@ -66,6 +60,10 @@ const styles = (theme) => ({
   depositInputContainer: {
     width: "100%",
     position: "relative",
+    minHeight: "60px",
+    [theme.breakpoints.down("sm")]: {
+      minHeight: "0px"
+    },
   },
 
   depositInput: {
@@ -100,12 +98,9 @@ const styles = (theme) => ({
     color: theme.themeColors.textP,
     minWidth: "30px",
     padding: "0px 6px",
-  },
-
-  depositScaleActive: {
-    minWidth: "30px",
-    padding: "0px 6px",
-    color: theme.themeColors.textT,
+    "&.active": {
+      color: theme.themeColors.textT,
+    },
   },
 
   depositActionButton: {
@@ -116,10 +111,10 @@ const styles = (theme) => ({
     color: theme.themeColors.textT,
     borderWidth: "1px",
     borderStyle: "solid",
-    marginLeft: "20px",
+    marginLeft: "10px",
+    marginRight: "5px",
     borderRadius: "0px",
     cursor: "pointer",
-    flex: "1",
     "&:hover": {
       background: theme.themeColors.btnBack,
     },
@@ -139,6 +134,18 @@ const styles = (theme) => ({
     marginTop: "20px",
     marginBottom: "15px",
     justifyContent: "space-between",
+  },
+
+  w100: {
+    width: "100%",
+  },
+
+  w10: {
+    width: "10%"
+  },
+
+  w90: {
+    width: "90%"
   },
 
   lpLink: {
@@ -172,13 +179,19 @@ class StakeDeposit extends Component {
   }
 
   componentWillMount() {
+    emitter.on(DISABLE_ACTION_BUTTONS_RETURNED, this.handleActionButtonsControl);
     emitter.on(DEPOSIT_DAOMINE_RETURNED_COMPLETED, this.onDepositCompleted);
     emitter.on(ERROR, this.errorReturned);
   }
 
   componentWillUnmount() {
+    emitter.on(DISABLE_ACTION_BUTTONS_RETURNED, this.handleActionButtonsControl);
     emitter.removeListener(DEPOSIT_DAOMINE_RETURNED_COMPLETED, this.onDepositCompleted);
     emitter.removeListener(ERROR, this.errorReturned);
+  }
+
+  handleActionButtonsControl = (disable) => {
+    this.setState({loading: disable});
   }
 
   errorReturned = () => {
@@ -199,7 +212,7 @@ class StakeDeposit extends Component {
     let val = [];
     val[event.target.id] = event.target.value;
     this.verifyInput(val[event.target.id]);
-    this.setState({amount: val[event.target.id]});
+    this.setState({amount: val[event.target.id], percent: 0});
   };
 
   verifyInput = (amount) => {
@@ -267,22 +280,26 @@ class StakeDeposit extends Component {
       return;
     } 
     if (vaultName === 'vipDVG') {
-      this.props.history.push("/stake");
+      this.props.history.push("/stake-dvg");
       return;
     } 
+    if (vaultName === 'vipDVD') {
+      this.props.history.push("/stake-dvd");
+      return;
+    }
     const path = "/invest#id=" + vaultName;
     this.props.history.push(path);
   }
 
   render() {
     const { amount, loading, amountError, percent, errorMessage } = this.state;
-    const { classes, pool } = this.props;
+    const { classes, pool, startLoading } = this.props;
 
     const { userInfo } = pool;
+    const selectedPoolType = store.getStore("daomineType");
 
-    return (
+    return  (
       <div className={classes.depositContainer}>
-        <div className={classes.tradeContainer}>
           {/** Wallet Balance */}
           <div className={classes.displayInfoBox}>
             <Typography variant="body1" className={classes.cursor} noWrap>
@@ -297,7 +314,7 @@ class StakeDeposit extends Component {
               className={classes.cursor}
               noWrap
             >
-              {userInfo.tokenBalance
+              {userInfo && userInfo.tokenBalance
                 ? (
                   Math.floor(
                     (userInfo.tokenBalance / 10 ** pool.decimal) * 10000
@@ -327,11 +344,8 @@ class StakeDeposit extends Component {
 
             <div className={classes.depositScaleContainer}>
               <Button
-                className={
-                  percent === 100
-                    ? classes.depositScaleActive
-                    : classes.depositScale
-                }
+                className={`${classes.depositScale} 
+                ${percent === 100 ? "active" : ""}`}
                 variant="text"
                 disabled={loading}
                 onClick={() => {
@@ -351,16 +365,30 @@ class StakeDeposit extends Component {
               </Typography>
             )
           }
-
-          {/** Deposit Button */}
+      
           <div className={classes.depositButtonBox}>
+            {/** Deposit Button */}
             <Button
-              disabled={(pool.deposit && loading) || !pool.deposit}
-              className={classes.depositActionButton}
+              disabled={(pool.deposit && loading) || !pool.deposit || !userInfo }
+              className={`${classes.depositActionButton} 
+                ${(selectedPoolType === LATEST_POOLS) ? classes.w90 : classes.w100}`}
               onClick={this.onDeposit}
             >
               <span>Confirm Deposit</span>
             </Button>
+
+            {/** Withdraw Button */}
+            {(selectedPoolType === LATEST_POOLS) && 
+            <Tooltip title="Withdraw">
+              <div>
+                <StakeActions pool={pool} 
+                  startLoading={startLoading} 
+                  type={ACTION_WITHDRAW}
+                  disabled={!pool.withdraw} 
+                  label={`-`}></StakeActions>
+              </div>
+            </Tooltip>
+            }
           </div>
 
           {/** Get LP Link*/}
@@ -368,8 +396,7 @@ class StakeDeposit extends Component {
             <a onClick={() => this.navigate(pool.name)} className={classes.lpLink}>
               Get {pool.label}<OpenInNewIcon></OpenInNewIcon>
             </a>
-          </div>
-        </div>
+          </div> 
       </div>
     );
   }

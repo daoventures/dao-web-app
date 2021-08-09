@@ -10,6 +10,7 @@ import {
   CURRENT_THEME_RETURNED,
   DAOMINE_POOL_RETURNED,
   DASHBOARD_SNAPSHOT_RETURNED,
+  DAOMINE_POOL_RETURNED_COMPLETED,
   DEGEN,
   DEPOSIT_ALL_CONTRACT,
   DEPOSIT_CONTRACT,
@@ -22,6 +23,7 @@ import {
   DEPOSIT_DVG_RETURNED,
   DEPOSIT_DVG_RETURNED_COMPLETED,
   DEPOSIT_XDVG,
+  DISABLE_ACTION_BUTTONS_RETURNED,
   DONATE,
   DONATE_RETURNED,
   DRAWER_RETURNED,
@@ -59,6 +61,9 @@ import {
   IDAI_RETURNED,
   INVEST,
   INVEST_RETURNED,
+  LATEST_POOLS,
+  LEGACY_POOLS,
+  UPDATE_SELECTED_POOL_TYPE,
   NETWORK,
   REBALANCE,
   REBALANCE_RETURNED,
@@ -94,6 +99,9 @@ import {
   WITHDRAW_VAULT_RETURNED_COMPLETED,
   ZAP,
   ZAP_RETURNED,
+  YIELD_DAOMINE,
+  YIELD_DAOMINE_RETURNED,
+  YIELD_DAOMINE_RETURNED_COMPLETED
 } from "../constants";
 
 import BigNumber from "bignumber.js";
@@ -108,6 +116,8 @@ import config from "../config";
 import fromExponential from "from-exponential";
 import { getERC20AbiByNetwork } from "./helper/contractHelper";
 import { injected } from "./connectors";
+
+import contractHelper from './helper/contractHelper';
 
 const rp = require("request-promise");
 const ethers = require("ethers");
@@ -318,7 +328,9 @@ class Store {
       ethBalance: 0,
       sCrvBalance: 0,
       openDrawer: false,
-      stakePools: [],
+      stakePools: [], // for legacy
+      daominePools: [], // for latest
+      daomineType: LATEST_POOLS, 
       dvgApr: {},
       performanceIds: ["daoCDV", "daoSTO"],
     };
@@ -446,6 +458,12 @@ class Store {
             break;
           case UPGRADE_STAKE_TOKEN:
             this.upgradeAndStakeToken();
+            break;
+          case UPDATE_SELECTED_POOL_TYPE: 
+            this.updateSelectedPoolType(payload);
+            break;  
+          case YIELD_DAOMINE:
+            this.yieldDAOmine(payload);
             break;
           default: {
           }
@@ -1378,7 +1396,7 @@ class Store {
     }
 
     const network = store.getStore("network");
-    const erc20ABI = getERC20AbiByNetwork(network);
+    const erc20ABI = contractHelper.getERC20AbiByNetwork(network);
 
     let erc20Contract = new web3.eth.Contract(erc20ABI, asset.erc20address);
 
@@ -1963,8 +1981,11 @@ class Store {
       return;
     } else {
       const network = store.getStore("network");
-      const erc20Abi = getERC20AbiByNetwork(network);
-      let erc20Contract = new web3.eth.Contract(erc20Abi, asset.erc20address);
+      const erc20Abi = contractHelper.getERC20AbiByNetwork(network);
+      let erc20Contract = new web3.eth.Contract(
+        erc20Abi,
+        asset.erc20address
+      );
       console.log(`Getting ERC 20 Balance for asset:  ${asset.erc20address}`);
 
       try {
@@ -4114,7 +4135,7 @@ class Store {
     );
 
     const network = store.getStore("network");
-    const erc20ABI = getERC20AbiByNetwork(network);
+    const erc20ABI = contractHelper.getERC20AbiByNetwork(network);
 
     let erc20Contract = new web3.eth.Contract(
       erc20ABI,
@@ -6415,22 +6436,24 @@ class Store {
         .user(poolIndex, account.address)
         .call({ from: account.address });
 
-      let pool = await daoMineContract.methods
-        .pool(poolIndex)
-        .call({ from: account.address });
-
-      //  let userPendingDVG = await daoMineContract.methods
-      //     .pendingDVG(poolIndex, account.address)
-      //     .call({ from: account.address });
+      const daomineType = store.getStore("daomineType");
 
       let userPendingDVG = 0;
-      if (pool != null) {
-        userPendingDVG =
-          (Number(userDepositInfo.lpAmount) * Number(pool.accDVGPerLP)) /
-            10 ** 18 -
-          Number(userDepositInfo.finishedDVG);
-      }
+      if(daomineType === LATEST_POOLS) {
+        userPendingDVG = await daoMineContract.methods
+          .pendingDVD(poolIndex, account.address)
+          .call({from : account.address});
+        
+      } else if (daomineType === LEGACY_POOLS) {
+        const pool = await daoMineContract.methods
+          .pool(poolIndex)
+          .call({ from: account.address });
 
+        if (pool != null) {
+          userPendingDVG = (Number(userDepositInfo.lpAmount) * Number(pool.accDVGPerLP) / 10 ** 18) - Number(userDepositInfo.finishedDVG);
+        }
+      }
+      
       const result = { userDepositInfo, userPendingDVG };
       callback(null, result);
     } catch (err) {
@@ -6462,51 +6485,47 @@ class Store {
     }
   };
 
+  // Important, to indicate which DAOmine used for withdrawal
+  updateSelectedPoolType = (payload) => {
+    const type = payload.content.type;
+    store.setStore({ daomineType: type });
+  }
+
   findDAOminePool = async (payload) => {
-    const account = store.getStore("account");
+    const isNewDAOmine = (payload && payload.content) ? payload.content.isNewVersion : false;
 
     try {
       const network = store.getStore("network");
-
-      const web3 = await this._getWeb3Provider();
-
-      if (!web3) {
+      if(!network) {
+        console.error(`findDAOminePool() is missing network.`);
         return null;
       }
 
-      const poolsResponse = await this._findDAOminePool();
-      const pools = poolsResponse.pools;
-
-      let daoMineContract;
-      let dvgContract;
-      let dvgDecimal = 0;
-
-      if (network === 42) {
-        daoMineContract = new web3.eth.Contract(
-          config.daoStakeContractABI,
-          config.daoStakeTestContract
-        );
-
-        dvgContract = new web3.eth.Contract(
-          config.dvgTokenContractABI,
-          config.dvgTokenTestContract
-        );
-
-        dvgDecimal = await dvgContract.methods.decimals().call();
-      } else if (network === 1) {
-        daoMineContract = new web3.eth.Contract(
-          config.daoStakeContractABI,
-          config.daoStakeMainnetContract
-        );
-
-        dvgContract = new web3.eth.Contract(
-          config.dvgTokenContractABI,
-          config.dvgTokenMainnetContract
-        );
-
-        dvgDecimal = await dvgContract.methods.decimals().call();
+      const account = store.getStore("account");
+      if(!account || !account.address) {
+        console.error(`findDAOminePool() is missing account.`);
+        return null;
       }
 
+      const web3 = await this._getWeb3Provider();
+      if (!web3) {
+        console.error(`findDAOminePool() is missing web3.`);
+        return null;
+      }
+
+      let tokenDecimal = 18;
+
+      console.log(`DAOmine type ${store.getStore("daomineType")}`);
+      const daomineType = store.getStore("daomineType");
+
+      const poolResponse = (daomineType === LATEST_POOLS) 
+        ? await this._findNewDAOminePool()
+        : await this._findDAOminePool();
+      const pools = poolResponse.pools;
+      emitter.emit(DAOMINE_POOL_RETURNED, pools);
+      
+      const daoMineContract = await contractHelper.getDAOmineContract(web3, network, daomineType);
+  
       async.map(
         pools,
         (pool, callback) => {
@@ -6515,30 +6534,20 @@ class Store {
             pool.contract_address
           );
 
-          async.parallel(
-            [
-              (callbackInner) => {
-                this._getUserBalanceForLpToken(
-                  poolContract,
-                  account,
-                  callbackInner
-                );
-              },
-              (callbackInner) => {
-                this._getUserDepositForDAOmine(
-                  daoMineContract,
-                  dvgDecimal,
-                  account,
-                  pool.pid,
-                  callbackInner
-                );
-              },
-            ],
-            (err, data) => {
-              if (err) {
-                return callback(err);
-              }
+          const obj = {
+            poolContract,
+            account, 
+            daoMineContract, 
+            tokenDecimal,
+            pool
+          };
 
+
+          this.getDAOmineUserInfo(obj, (err, data) => {
+            if(err) {
+              callback(err, null);
+            }
+            if(data) {
               const userInfo = {};
 
               userInfo.tokenBalance = data[0];
@@ -6551,17 +6560,19 @@ class Store {
               userInfo.pendingDVG = data[1] ? data[1].userPendingDVG : null;
 
               pool.userInfo = userInfo;
-
               callback(null, pool);
             }
-          );
+          });
         },
         (err, pools) => {
+          emitter.emit(DAOMINE_POOL_RETURNED_COMPLETED);
+
           if (err) {
             console.log(err);
             return emitter.emit(ERROR, err);
           }
-          store.setStore({ stakePools: pools });
+          
+          (isNewDAOmine) ? store.setStore({ daominePools: pools }) : store.setStore({ stakePools: pools });
           return emitter.emit(DAOMINE_POOL_RETURNED, pools);
         }
       );
@@ -6570,6 +6581,26 @@ class Store {
     }
   };
 
+  getDAOmineUserInfo = (obj, callback) => {
+    const {
+      poolContract,
+      account, 
+      daoMineContract, 
+      tokenDecimal,
+      pool, 
+    } = obj;
+
+    async.parallel(
+      [
+        (callbackInner) => {
+          this._getUserBalanceForLpToken(poolContract, account, callbackInner);
+        },
+        (callbackInner) => {
+          this._getUserDepositForDAOmine(daoMineContract, tokenDecimal, account, pool.pid, callbackInner);
+        }
+      ], callback);
+  }
+
   _findDAOminePool = async () => {
     try {
       const url = config.statsProvider + "staking/get-pools";
@@ -6577,44 +6608,58 @@ class Store {
       const pools = JSON.parse(poolsString);
       return pools.body;
     } catch (e) {
-      console.log(e);
-      return store.getStore("universalGasPrice");
+      console.err("Error in _findDAOminePool(): ",e);
     }
   };
 
+  _findNewDAOminePool = async() => {
+    try {
+      const url = config.statsProvider + "staking/get-daomine-pools";
+      const poolsString = await rp(url);
+      const pools = JSON.parse(poolsString);
+      return pools.body;
+    } catch (e) {
+      console.err("Error in _findNewDAOminePool(): ",e);
+    }
+  }
+
   depositDAOmine = async (payload) => {
-    const account = store.getStore("account");
-
-    const { pool, amount } = payload.content;
-
     const web3 = await this._getWeb3Provider();
     if (!web3) {
+      console.error(`Missing Web3 in depositDAOmine()`);
       return null;
     }
+
+    const account = store.getStore("account");
+    if(!account || !account.address) {
+      console.error(`Missing account in depositDAOmine()`);
+      return null;
+    }
+
+    const network = store.getStore("network");
+    if(!network) {
+      console.error(`Missing network in depositDAOmine()`);
+      return null;
+    }
+
+    emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, true);
+
+    const { pool, amount } = payload.content;
+    const daomineType = store.getStore("daomineType");
 
     const lpTokenContract = new web3.eth.Contract(
       JSON.parse(pool.abi),
       pool.contract_address
     );
 
-    const network = store.getStore("network");
-
-    let daoMineContractAddress = "";
-    if (network === 42) {
-      daoMineContractAddress = config.daoStakeTestContract;
-    } else if (network === 1) {
-      daoMineContractAddress = config.daoStakeMainnetContract;
-    }
-
-    const daoMineContract = new web3.eth.Contract(
-      config.daoStakeContractABI,
-      daoMineContractAddress
-    );
+    const daoMineContractAddress = contractHelper.getDAOmineAddress(network, daomineType);
+    const daoMineContract = await contractHelper.getDAOmineContract(web3, network, daomineType);
 
     const allowance = await lpTokenContract.methods
       .allowance(account.address, daoMineContractAddress)
       .call({ from: account.address });
     const actualAllowance = allowance / 10 ** pool.decimal;
+    console.log(`Checking allowance for ${daoMineContractAddress} in lp token contract ${pool.contract_address}, Actual allowance:  ${actualAllowance}`);
 
     let approvalError;
     if (parseFloat(amount) > parseFloat(actualAllowance)) {
@@ -6627,6 +6672,7 @@ class Store {
           if (err) {
             console.log(err);
             approvalError = err;
+            emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
             return emitter.emit(ERROR, err);
           }
           if (txnHash) {
@@ -6639,6 +6685,7 @@ class Store {
       );
     }
     if (!approvalError) {
+      console.log(`Deposit to DAOmine: ${daoMineContractAddress}, amount: ${amount}`);
       await this._callDepositAmountDAOmineContract(
         account,
         pool,
@@ -6646,12 +6693,14 @@ class Store {
         amount,
         (err, txnHash, depositResult) => {
           if (err) {
+            emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
             return emitter.emit(ERROR, err);
           }
           if (txnHash) {
             return emitter.emit(DEPOSIT_DAOMINE_RETURNED, txnHash);
           }
           if (depositResult) {
+            emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
             return emitter.emit(
               DEPOSIT_DAOMINE_RETURNED_COMPLETED,
               depositResult.transactionHash
@@ -6792,6 +6841,8 @@ class Store {
       return null;
     }
 
+    emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, true);
+
     // DAOMmine contract address by network
     let daoMineContractAddress = "";
     if (network === 42) {
@@ -6832,6 +6883,7 @@ class Store {
           return emitter.emit(EMERGENCY_WITHDRAW_DAOMINE_RETURNED, txnHash);
         })
         .on("receipt", function (receipt) {
+          emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
           emitter.emit(
             EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,
             receipt.transactionHash
@@ -6841,6 +6893,7 @@ class Store {
           console.log("emergencyWithdrawDAOmine() Error: ", error);
           if (!error.toString().includes("-32601")) {
             if (error.message) {
+              emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
               emitter.emit(ERROR, error.message);
             }
           }
@@ -6859,37 +6912,42 @@ class Store {
   };
 
   withdrawDAOmine = async (payload) => {
-    const account = store.getStore("account");
+    // Get web3
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      console.error(`Missing web3 in withdrawDAOmine()`);
+      return null;
+    }
+
+    // Network
     const network = store.getStore("network");
+    if(!network) {
+      console.error(`Missing network in withdrawDAOmine()`);
+      return null;
+    }
+
+    // Account
+    const account = store.getStore("account");
+    if(!account) {
+      console.error(`Missing account in withdrawDAOmine()`);
+      return null;
+    }
+
+    emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, true);
 
     const { pool, amount } = payload.content;
     const poolDecimal = pool.decimal;
     const poolIndex = pool.pid;
 
-    // Get web3
-    const web3 = await this._getWeb3Provider();
-    if (!web3) {
-      return null;
-    }
-
-    // DAOMmine contract address by network
-    let daoMineContractAddress = "";
-    if (network === 42) {
-      daoMineContractAddress = config.daoStakeTestContract;
-    } else if (network === 1) {
-      daoMineContractAddress = config.daoStakeMainnetContract;
-    }
+    const daomineType = store.getStore("daomineType");
 
     try {
-      const daoMineContract = new web3.eth.Contract(
-        config.daoStakeContractABI,
-        daoMineContractAddress
-      );
+      const daoMineContract = await contractHelper.getDAOmineContract(web3, network, daomineType);
 
-      var amountToWithdraw =
-        poolDecimal !== "18"
+      var amountToWithdraw = poolDecimal !== "18"
           ? web3.utils.toBN(amount * 10 ** poolDecimal).toString()
           : web3.utils.toWei(amount, "ether");
+      console.log(`Withdraw from : ${daomineType}, Amount: ${amountToWithdraw}, Pool Index: ${poolIndex}`);
 
       await daoMineContract.methods
         .withdraw(poolIndex, amountToWithdraw)
@@ -6901,6 +6959,7 @@ class Store {
           return emitter.emit(WITHDRAW_DAOMINE_RETURNED, txnHash);
         })
         .on("receipt", function (receipt) {
+          emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
           emitter.emit(
             WITHDRAW_DAOMINE_RETURNED_COMPLETED,
             receipt.transactionHash
@@ -6908,6 +6967,7 @@ class Store {
         })
         .on("error", function (error) {
           console.log("withdrawDAOmine() Error: ", error);
+          emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
           if (!error.toString().includes("-32601")) {
             if (error.message) {
               emitter.emit(ERROR, error.message);
@@ -6923,9 +6983,69 @@ class Store {
           }
         });
     } catch (err) {
+      emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
       console.log("withdrawDAOmine() Error: ", err);
     }
   };
+
+  yieldDAOmine = async (payload) => {
+    // Get web3
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      console.error(`Missing web3 in yieldDAOmine()`);
+      return null;
+    }
+
+    // Network
+    const network = store.getStore("network");
+    if (!network) {
+      console.error(`Missing network in yieldDAOmine()`);
+      return null;
+    }
+
+    // Account
+    const account = store.getStore("account");
+    if (!account) {
+      console.error(`Missing account in yieldDAOmine()`);
+      return null;
+    }
+
+    if (!payload || !payload.content || payload.content.pid === undefined) {
+      emitter.emit(ERROR, "Missing PID for yieldDAOmine()");
+    }
+
+    emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, true);
+
+    const pid = payload.content.pid;
+    const daomineType = store.getStore("daomineType");
+    const daomineContract = await contractHelper.getDAOmineContract(web3, network, daomineType);
+
+    await daomineContract.methods
+      .yield(pid)
+      .send({
+        from: account.address,
+        gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+      })
+      .on("transactionHash", function (txnHash) {
+        return emitter.emit(YIELD_DAOMINE_RETURNED, txnHash);
+      })
+      .on("receipt", function (receipt) {
+        emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
+        emitter.emit(
+          YIELD_DAOMINE_RETURNED_COMPLETED,
+          receipt.transactionHash
+        );
+      })
+      .on("error", function (error) {
+        console.log("yieldDAOmine() Error: ", error);
+        if (!error.toString().includes("-32601")) {
+          if (error.message) {
+            emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
+            emitter.emit(ERROR, error.message);
+          }
+        }
+      })
+  }
 
   //stake开始
   //获取vipdvg
@@ -7001,6 +7121,11 @@ class Store {
     const account = store.getStore("account");
 
     const { asset, amount, max, withoutConvert } = payload.content;
+    
+    let autoCompound = payload.content.autoCompound !== undefined 
+      ? payload.content.autoCompound
+      : false;
+   
     const web3 = await this._getWeb3Provider();
     if (!web3) {
       return null;
@@ -7062,28 +7187,21 @@ class Store {
 
     if (!approvalErr) {
       console.log(`Calling Deposit DVG`);
-      await this._callDepositDvg(
-        vipTokenContract,
-        _amount,
-        (err, txnHash, receipt) => {
-          if (err) {
-            return emitter.emit(ERROR, err);
-          }
-          if (txnHash) {
-            return emitter.emit(DEPOSIT_DVG_RETURNED, txnHash);
-          }
-          if (receipt) {
-            return emitter.emit(
-              DEPOSIT_DVG_RETURNED_COMPLETED,
-              receipt.transactionHash
-            );
-          }
+      await this._callDepositDvg(vipTokenContract, _amount, autoCompound, (err, txnHash, receipt) => {
+        if (err) {
+          return emitter.emit(ERROR, err);
         }
-      );
+        if (txnHash) {
+          return emitter.emit(DEPOSIT_DVG_RETURNED, txnHash);
+        }
+        if (receipt) {
+          return emitter.emit(DEPOSIT_DVG_RETURNED_COMPLETED, receipt.transactionHash);
+        }
+      });
     }
   };
 
-  _callDepositDvg = async (vipTokenContract, amount, callback) => {
+  _callDepositDvg = async (vipTokenContract, amount, autoCompound, callback) => {
     const account = this.getStore("account");
     const web3 = await this._getWeb3Provider();
     if (!web3) {
@@ -7091,7 +7209,7 @@ class Store {
     }
 
     await vipTokenContract.methods
-      .deposit(amount)
+      .deposit(amount, autoCompound)
       .send({
         from: account.address,
       })
@@ -7557,7 +7675,8 @@ class Store {
           amount: realBalance,
           max: false,
           withoutConvert: true,
-        },
+          autoCompound: false
+        }
       });
     } else {
       return emitter.emit(
