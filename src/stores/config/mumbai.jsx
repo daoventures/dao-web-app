@@ -1,5 +1,6 @@
 import config from "../../config";
 import { ADVANCE } from "../../constants/constants";
+import { INFO_LINK } from "../../constants/page-constant";
 
 const mumbai = [
     {
@@ -41,8 +42,7 @@ const mumbai = [
         cAbi: "",
         group: ADVANCE,
         tvlKey: "daoMPT_tvl",
-        infoLink:
-          "https://www.google.com",
+        infoLink: INFO_LINK.MONEY_PRINTER,
         isPopularItem: false,
         // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
       },
