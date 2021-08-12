@@ -1,5 +1,6 @@
 import config from "../../config";
 import { ADVANCE } from "../../constants/constants";
+import { INFO_LINK } from "../../constants/page-constant";
 
 const matic = [
     {
@@ -31,7 +32,7 @@ const matic = [
         priceInUSD: [0, 0, 0],
         strategyName: "DAO Money Printer: USDT USDC DAI",
         strategy: "DAO Money Printer",
-        strategyAddress: "0x822427cd2a5a69e810301626bb355450a47c60ea",
+        strategyAddress: "0x4728a38b6b00cdff9fdc59ace8e3c7ef3c6560e5",
         strategyContractABI: config.vaultDAOMPTStrategyABI,
         historicalPriceId: "daoMPT_price",
         logoFormat: "svg",
@@ -41,8 +42,7 @@ const matic = [
         cAbi: "",
         group: ADVANCE,
         tvlKey: "daoMPT_tvl",
-        infoLink:
-          "https://daoventures.gitbook.io/daoventures/products/strategies#money-printer-goes-brrrrr",
+        infoLink: INFO_LINK.MONEY_PRINTER,
         isPopularItem: false,
         // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
       },
