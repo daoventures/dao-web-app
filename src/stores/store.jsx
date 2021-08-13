@@ -1,15 +1,14 @@
 import {
   ADVANCE,
-  APPROVAL_DVG_RETURNED,
-  APPROVAL_DVG_RETURNED_COMPLETED,
   APPROVE_COMPLETED,
   APPROVE_TRANSACTING,
+  APPROVAL_DVG_RETURNED,
+  APPROVAL_DVG_RETURNED_COMPLETED,
   BALANCES_LIGHT_RETURNED,
   BALANCES_RETURNED,
   BICONOMY_CONNECTED,
   CURRENT_THEME_RETURNED,
   DAOMINE_POOL_RETURNED,
-  DASHBOARD_SNAPSHOT_RETURNED,
   DAOMINE_POOL_RETURNED_COMPLETED,
   DEGEN,
   DEPOSIT_ALL_CONTRACT,
@@ -89,15 +88,16 @@ import {
   WITHDRAW_BOTH_VAULT,
   WITHDRAW_BOTH_VAULT_RETURNED,
   WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
+  DASHBOARD_SNAPSHOT_RETURNED,
+  ZAP,
   WITHDRAW_DAOMINE,
   WITHDRAW_DAOMINE_RETURNED,
   WITHDRAW_DAOMINE_RETURNED_COMPLETED,
   WITHDRAW_DVG_RETURNED,
-  WITHDRAW_DVG_RETURNED_COMPLETED,
   WITHDRAW_VAULT,
   WITHDRAW_VAULT_RETURNED,
+  WITHDRAW_DVG_RETURNED_COMPLETED,
   WITHDRAW_VAULT_RETURNED_COMPLETED,
-  ZAP,
   ZAP_RETURNED,
   YIELD_DAOMINE,
   YIELD_DAOMINE_RETURNED,
@@ -333,6 +333,7 @@ class Store {
       daomineType: LATEST_POOLS, 
       dvgApr: {},
       performanceIds: ["daoCDV", "daoSTO"],
+      executeStrategyBalanceFunction: false,
     };
 
     dispatcher.register(
@@ -5122,11 +5123,16 @@ class Store {
           asset.vaultContractABI,
           asset.vaultContractAddress
         );
+        const network = store.getStore("network");
 
         // USDT to ETH price feed contract
+        const address =  (network === NETWORK.ETHEREUM)
+          ? config.USDTETHPriceFeedContract
+          : config.USDTETHPriceFeedKovanContract;
+      
         const usdtEthPriceFeedContract = new web3.eth.Contract(
           config.eacAggregatoorProxyContract,
-          config.USDTETHPriceFeedContract
+          address
         );
         // USDT / ETH conversion result
         const ethPrice = await usdtEthPriceFeedContract.methods
@@ -5233,7 +5239,7 @@ class Store {
         return callback(null, returnObj);
       }
     } catch (e) {
-      console.log(e);
+      console.log(`Asset ${asset.id}: `, e);
       callback(null, {
         earnPricePerFullShare: 0,
         vaultPricePerFullShare: 0,
@@ -6174,7 +6180,7 @@ class Store {
       );
 
       // Soft Check for sufficient liquidity
-      if (asset.strategyType !== "moneyPrinter") {
+      if(asset.strategyType !== "moneyPrinter") {
         await this._isSufficientLiquidityUsd(
           asset,
           vaultContract,
@@ -6182,12 +6188,8 @@ class Store {
           tokenIndex
         );
       }
-
-      const token =
-        asset.strategyType === "daoFaang" ||
-        asset.strategyType === "moneyPrinter"
-          ? asset.erc20addresses[tokenIndex]
-          : tokenIndex;
+      
+      const token = (asset.strategyType === "daoFaang" || asset.strategyType === "moneyPrinter") ? asset.erc20addresses[tokenIndex] : tokenIndex;
       const amountToSend = fromExponential(parseFloat(amount));
 
       await vaultContract.methods
@@ -6267,6 +6269,9 @@ class Store {
     if (!web3) {
       return null;
     }
+
+    store.setStore({executeStrategyBalanceFunction: true});
+
     const vaultStatistics = await this._getStatistics();
     const addressStatistics = await this._getAddressStatistics(account.address);
     const daoMinePools = await this._findDAOminePool();
@@ -6411,10 +6416,11 @@ class Store {
       (err, assets) => {
         if (err) {
           console.log(err);
+          store.setStore({executeStrategyBalanceFunction: false});
           return emitter.emit(ERROR, err);
         }
 
-        store.setStore({ vaultAssets: assets });
+        store.setStore({ vaultAssets: assets, executeStrategyBalanceFunction: false});
         console.log(
           "🚀 | getStrategyBalancesFull= | STRATEGY_BALANCES_FULL_RETURNED",
           STRATEGY_BALANCES_FULL_RETURNED

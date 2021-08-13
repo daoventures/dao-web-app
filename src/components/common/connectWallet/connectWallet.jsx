@@ -206,6 +206,18 @@ class ConnectWallet extends Component {
         emitter.emit(CONNECTION_CONNECTED);
       },
       network: (network) => {
+        const oldNetwork = store.getStore("network");
+        const executeStrategyBalanceFunction = store.getStore("executeStrategyBalanceFunction");
+
+        if(network !== undefined && oldNetwork !== network) {
+          console.log(`Old network ${oldNetwork}, network: ${network}`);
+          if(executeStrategyBalanceFunction) {
+            alert("Changing of network is detected, a page reload will take place.");
+            window.location.reload();
+          }
+          this.updateOnboard(network);
+        }
+
         store.setStore({network: network});
         emitter.emit('CHANGE_NETWORK', {network: network});
       },
@@ -233,7 +245,7 @@ class ConnectWallet extends Component {
       onboard.walletSelect(previouslySelectedWallet);
     }
   }
-
+ 
   componentWillUnmount() {
     emitter.removeListener(ERROR, this.errorReturned);
   };
@@ -291,19 +303,18 @@ class ConnectWallet extends Component {
       )
   };
 
-  // addressClicked = () => {
-  //   this.setState({ modalOpen: true })
-  // }
-
   addressClicked = async () => {
-    console.log('addressClicked###');
     if (this.state.onboard) {
       const walletSelected = await this.state.onboard.walletSelect();
-      console.log('walletSelected######', walletSelected);
       const readyToTransact = await this.state.onboard.walletCheck();
-      console.log('readyToTransact######', readyToTransact);
+      console.log(`Wallet Selected: ${walletSelected}, Ready to transact: ${readyToTransact}`);
     }
-    
+  }
+
+  updateOnboard = async (network) => {
+    if (this.state.onboard) {
+     await this.state.onboard.config({networkId: network});
+    }
   }
 
   closeModal = () => {

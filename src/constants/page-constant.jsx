@@ -21,7 +21,6 @@ export const SWAP = 'SWAP';
 export const UPGPRADE_PATH = '/upgrade';
 export const UPGPRADE = 'UPGRADE';
 
-
 // Info link
 export const INFO_LINK = {
     CITADEL: "https://daoventures.gitbook.io/daoventures/products/strategies/dao-citadel-vault",

@@ -44,7 +44,7 @@ const matic = [
         tvlKey: "daoMPT_tvl",
         infoLink: INFO_LINK.MONEY_PRINTER,
         isPopularItem: false,
-        // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
+        isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
       },
 ];
 
