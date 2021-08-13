@@ -207,8 +207,14 @@ class ConnectWallet extends Component {
       },
       network: (network) => {
         const oldNetwork = store.getStore("network");
+        const executeStrategyBalanceFunction = store.getStore("executeStrategyBalanceFunction");
 
-        if(oldNetwork !== network) {
+        if(network !== undefined && oldNetwork !== network) {
+          console.log(`Old network ${oldNetwork}, network: ${network}`);
+          if(executeStrategyBalanceFunction) {
+            alert("Changing of network is detected, a page reload will take place.");
+            window.location.reload();
+          }
           this.updateOnboard(network);
         }
 
