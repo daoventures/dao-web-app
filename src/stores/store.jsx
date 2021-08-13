@@ -1,5 +1,7 @@
 import {
   ADVANCE,
+  APPROVE_COMPLETED,
+  APPROVE_TRANSACTING,
   APPROVAL_DVG_RETURNED,
   APPROVAL_DVG_RETURNED_COMPLETED,
   BALANCES_LIGHT_RETURNED,
@@ -81,17 +83,20 @@ import {
   WITHDRAW_BOTH_VAULT,
   WITHDRAW_BOTH_VAULT_RETURNED,
   WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
+<<<<<<< HEAD
   APPROVE_TRANSACTING,
   APPROVE_COMPLETED,
+=======
+>>>>>>> beta
   DASHBOARD_SNAPSHOT_RETURNED,
   ZAP,
   WITHDRAW_DAOMINE,
   WITHDRAW_DAOMINE_RETURNED,
   WITHDRAW_DAOMINE_RETURNED_COMPLETED,
   WITHDRAW_DVG_RETURNED,
-  WITHDRAW_DVG_RETURNED_COMPLETED,
   WITHDRAW_VAULT,
   WITHDRAW_VAULT_RETURNED,
+  WITHDRAW_DVG_RETURNED_COMPLETED,
   WITHDRAW_VAULT_RETURNED_COMPLETED,
   ZAP_RETURNED,
 } from "../constants";
@@ -321,6 +326,7 @@ class Store {
       stakePools: [],
       dvgApr: {},
       performanceIds: ["daoCDV", "daoSTO"],
+      executeStrategyBalanceFunction: false,
     };
 
     dispatcher.register(
@@ -5101,11 +5107,16 @@ class Store {
           asset.vaultContractABI,
           asset.vaultContractAddress
         );
+        const network = store.getStore("network");
 
         // USDT to ETH price feed contract
+        const address =  (network === NETWORK.ETHEREUM)
+          ? config.USDTETHPriceFeedContract
+          : config.USDTETHPriceFeedKovanContract;
+      
         const usdtEthPriceFeedContract = new web3.eth.Contract(
           config.eacAggregatoorProxyContract,
-          config.USDTETHPriceFeedContract
+          address
         );
         // USDT / ETH conversion result
         const ethPrice = await usdtEthPriceFeedContract.methods
@@ -5212,7 +5223,7 @@ class Store {
         return callback(null, returnObj);
       }
     } catch (e) {
-      console.log(e);
+      console.log(`Asset ${asset.id}: `, e);
       callback(null, {
         earnPricePerFullShare: 0,
         vaultPricePerFullShare: 0,
@@ -6242,6 +6253,9 @@ class Store {
     if (!web3) {
       return null;
     }
+
+    store.setStore({executeStrategyBalanceFunction: true});
+
     const vaultStatistics = await this._getStatistics();
     const addressStatistics = await this._getAddressStatistics(account.address);
     const daoMinePools = await this._findDAOminePool();
@@ -6386,10 +6400,11 @@ class Store {
       (err, assets) => {
         if (err) {
           console.log(err);
+          store.setStore({executeStrategyBalanceFunction: false});
           return emitter.emit(ERROR, err);
         }
 
-        store.setStore({ vaultAssets: assets });
+        store.setStore({ vaultAssets: assets, executeStrategyBalanceFunction: false});
         console.log(
           "🚀 | getStrategyBalancesFull= | STRATEGY_BALANCES_FULL_RETURNED",
           STRATEGY_BALANCES_FULL_RETURNED
