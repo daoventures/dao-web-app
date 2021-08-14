@@ -211,7 +211,8 @@ class ConnectWallet extends Component {
 
         if(network !== undefined && oldNetwork !== network) {
           console.log(`Old network ${oldNetwork}, network: ${network}`);
-          if(executeStrategyBalanceFunction) {
+          // if store.getStrategyBalanceFull() is in execution and transition of network is not from 0 to another network
+          if(executeStrategyBalanceFunction && network !== 0) {
             alert("Changing of network is detected, a page reload will take place.");
             window.location.reload();
           }

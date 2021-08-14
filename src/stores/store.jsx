@@ -6233,21 +6233,25 @@ class Store {
   };
 
   getStrategyBalancesFull = async (payload) => {
-    const network = store.getStore("network");
     const account = store.getStore("account");
-    // const assets = store.getStore('vaultAssets')
+    if (!account || !account.address) {
+      return false;
+    }
+    const network = store.getStore("network");
+    console.log(`Network in getStrategyBalancesFull() ${network}`);
+    if(!network || network === undefined) {
+      return false;
+    }
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      return false;
+    }
+    
     const assets = this._getDefaultValues(network).vaultAssets;
     store.setStore({ vaultAssets: assets });
     emitter.emit(STRATEGY_BALANCES_FULL_RETURNED, assets);
 
     const { interval } = payload.content;
-    if (!account || !account.address) {
-      return false;
-    }
-    const web3 = await this._getWeb3Provider();
-    if (!web3) {
-      return null;
-    }
 
     store.setStore({executeStrategyBalanceFunction: true});
 
