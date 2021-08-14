@@ -6239,7 +6239,7 @@ class Store {
     }
     const network = store.getStore("network");
     console.log(`Network in getStrategyBalancesFull() ${network}`);
-    if(!network || network === undefined) {
+    if(!network || network === undefined || network === 0) {
       return false;
     }
     const web3 = await this._getWeb3Provider();
