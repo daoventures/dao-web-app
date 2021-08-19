@@ -5622,7 +5622,7 @@ class Store {
 
   _getTvl = async (tvl_id, callback) => {
     try {
-      const result = await apiHelper.getVaultHistoricalPrice();
+      const result = await apiHelper.getTVL(tvl_id);
       callback(null, result);
     } catch (e) {
       console.log(e);
@@ -6319,11 +6319,7 @@ class Store {
 
             // asset.addressTransactions = data[7]
             // asset.vaultHoldings = data[3]
-
-            if (asset.strategyType === "moneyPrinter") {
-              console.log("Money Printer:", asset);
-            }
-
+            
             callback(null, asset);
           }
         );
