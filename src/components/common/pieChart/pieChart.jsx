@@ -53,6 +53,9 @@ class PieChart extends Component {
                     colors: chartColor
                 }
             },
+            credits: {
+                enabled: false
+            }
         };
 
         return options;

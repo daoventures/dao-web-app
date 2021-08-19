@@ -9,12 +9,14 @@ import PieChart from "../common/pieChart/pieChart";
 const styles = (theme) => ({
     contentRow: {
         display: "flex",
-        width: "100%"
+        width: "100%",
+        color: theme.themeColors.textT
     },
 
     assetDistributionRow: {
         display: "flex",
         flexDirection: "row",
+        color: theme.themeColors.textT,
         [theme.breakpoints.down("sm")]: {
             flexDirection: "column",
         },
