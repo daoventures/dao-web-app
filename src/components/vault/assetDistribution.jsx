@@ -10,6 +10,7 @@ const styles = (theme) => ({
     contentRow: {
         display: "flex",
         width: "100%",
+        margin: "3px",
         color: theme.themeColors.textT
     },
 
@@ -83,13 +84,27 @@ const styles = (theme) => ({
     icon: {
         height: "20px",
         marginRight: "2px"
+    },
+
+    backgroundSelected: {
+        backgroundColor: theme.themeColors.blockTextColor
+    },
+
+    textDanger: {
+        color: theme.themeColors.formError
+    },
+
+    textSuccess: {
+        color: "#08BF74"
     }
 });
 
 class AssetDistribution extends Component {
     constructor() {
         super();
-        this.state = {};
+        this.state = {
+            selectedSection: null
+        };
     }
 
     processAssetDistributionChartData = (distribution) => {
@@ -127,31 +142,61 @@ class AssetDistribution extends Component {
 
     renderTableRow = (data, index) => {
         const {classes} = this.props;
+        const {selectedSection} = this.state;
 
         if(!data) {
             return null;
         }
 
+        const assetName = (index === 0) ? "" : data[0];
+       
         return (
-            <React.Fragment>
-                {/** Asset Label */}
-                <div className={classes.assetLabelContainer}>
-                    {(index === 0) ? data[0] : this.renderAssetLogo(data[0])}
-                </div>
+          <React.Fragment>
+            {/** Asset Label */}
+            <div
+              className={`${classes.assetLabelContainer} ${
+                selectedSection === assetName ? classes.backgroundSelected : ""
+              }`}
+            >
+              {index === 0 ? (
+                <Typography variant={"overline"}>{data[0]}</Typography>
+              ) : (
+                this.renderAssetLogo(data[0])
+              )}
+            </div>
 
-                {/** Allocation Percentage */}
-                <div className={classes.allocationContainer}>
-                   {(index === 0) ? data[1]  : `${Number(data[1]).toFixed(2)}%`}
-                </div>
+            {/** Allocation Percentage */}
+            <div
+              className={`${classes.allocationContainer} ${
+                selectedSection === assetName ? classes.backgroundSelected : ""
+              }`}
+            >
+              {index === 0 ? (
+                <Typography variant={"overline"}>{data[1]}</Typography>
+              ) : (
+                `${Number(data[1]).toFixed(2)}%`
+              )}
+            </div>
 
-                {/** 24 Hour USD Price Change */}
-                <div className={`${classes.priceChangeContainer}`}>
-                    <span>
-                        {(index === 0) ? data[2] : `${Number(data[2]).toFixed(2)}%`}
-                    </span>
-                </div>
-            </React.Fragment>
-        )
+            {/** 24 Hour USD Price Change */}
+            <div
+              className={`${classes.priceChangeContainer} ${
+                selectedSection === assetName ? classes.backgroundSelected : ""
+              }`}
+            >
+              <span>
+                {index === 0 ? (
+                  <Typography variant={"overline"}>{data[2]}</Typography>
+                ) : (
+                  <span className={`${this.getPercentageCss(data[2])}`}>
+                    {(Number(data[2]) > 0) ? "+" : ""}
+                    {Number(data[2]).toFixed(2)}%
+                  </span>
+                )}
+              </span>
+            </div>
+          </React.Fragment>
+        );
     }
 
     renderAssetLogo = (asset) => {
@@ -168,6 +213,21 @@ class AssetDistribution extends Component {
                 </Typography>
             </div>
         )
+    }
+
+    getPercentageCss = (percentage) => {
+        const {classes} = this.props;
+        if(percentage < 0) {
+            return classes.textDanger;
+        } else if (percentage > 0) {
+            return classes.textSuccess;
+        } else {
+            return ""
+        }
+    }
+
+    handleSelectedPieChartSection = (section) => {
+        this.setState({selectedSection: section});
     }
 
     render() {
@@ -197,6 +257,7 @@ class AssetDistribution extends Component {
                         <PieChart 
                             data={distributionChartData}
                             innerSize={`90%`}
+                            onSectionSelected={this.handleSelectedPieChartSection}
                         />
                     </div>
 
