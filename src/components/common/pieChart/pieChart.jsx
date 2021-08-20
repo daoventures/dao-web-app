@@ -67,6 +67,9 @@ class PieChart extends Component {
                             mouseOver: function() {
                                const selectedSection = this.label;
                                that.props.onSectionSelected(selectedSection);
+                            },
+                            mouseOut: function () {
+                                that.props.onSectionSelected(null);
                             }
                         }
                     },
