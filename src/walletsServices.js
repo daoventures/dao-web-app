@@ -67,7 +67,7 @@ const wallets = [
 
 export const onboard = Onboard({
   //... other options
-  dappId: '12153f55-f29e-4f11-aa07-90f10da5d778',
+  dappId: 'cfc3e1e8-75ab-498e-9869-c4a3a68917ef',
   networkId: 1,
   walletSelect: {
     wallets: wallets,
@@ -76,7 +76,7 @@ export const onboard = Onboard({
 
 export function initOnboard(subscriptions) {
   return Onboard({
-    dappId: '12153f55-f29e-4f11-aa07-90f10da5d778',
+    dappId: 'cfc3e1e8-75ab-498e-9869-c4a3a68917ef',
     networkId: 1,
     subscriptions,
     walletSelect: {
