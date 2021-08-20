@@ -29,6 +29,7 @@ class PieChart extends Component {
 
     getDefaultChartOption = () => {
         const chartColor = this.state.colors;
+        const that = this;
 
         const options = {
             chart: {
@@ -50,19 +51,32 @@ class PieChart extends Component {
                     dataLabels: {
                         enabled: false,
                     },
-                    colors: chartColor
+                    colors: chartColor,
+                    borderWidth: 0
+                },
+                series: {
+                    states: {
+                       hover: {
+                          halo: {
+                            opacity: 0
+                          }
+                      }
+                    },
+                    point: {
+                        events: {
+                            mouseOver: function() {
+                               const selectedSection = this.label;
+                               that.props.onSectionSelected(selectedSection);
+                            }
+                        }
+                    },
                 }
             },
             credits: {
                 enabled: false
             }
         };
-
         return options;
-    }
-
-    setData = () => {
-
     }
 
     render() {
