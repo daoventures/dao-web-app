@@ -1735,14 +1735,14 @@ class Asset extends Component {
               date,
               parseFloat((groups[date][0]["lp_performance"] * 100).toFixed(4)),
             ]);
-            btcAPY.push([
-              date,
-              parseFloat((groups[date][0]["btc_performance"] * 100).toFixed(4)),
-            ]);
-            ethAPY.push([
-              date,
-              parseFloat((groups[date][0]["eth_performance"] * 100).toFixed(4)),
-            ]);
+            // btcAPY.push([
+            //   date,
+            //   parseFloat((groups[date][0]["btc_performance"] * 100).toFixed(4)),
+            // ]);
+            // ethAPY.push([
+            //   date,
+            //   parseFloat((groups[date][0]["eth_performance"] * 100).toFixed(4)),
+            // ]);
           } else if (asset.strategyType === "moneyPrinter") {
             moneyPrinterAPY.push([
               date,
@@ -2015,16 +2015,16 @@ class Asset extends Component {
             data: faangAPY,
             color: "#FFFFFF",
           },
-          {
-            name: "BTC",
-            data: btcAPY,
-            color: "#f7931b",
-          },
-          {
-            name: "ETH",
-            data: ethAPY,
-            color: "#464a75",
-          },
+          // {
+          //   name: "BTC",
+          //   data: btcAPY,
+          //   color: "#f7931b",
+          // },
+          // {
+          //   name: "ETH",
+          //   data: ethAPY,
+          //   color: "#464a75",
+          // },
         ],
         responsive: {
           rules: [
