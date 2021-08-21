@@ -52,20 +52,32 @@ class PieChart extends Component {
                         enabled: false,
                     },
                     colors: chartColor,
-                    borderWidth: 0
+                    borderWidth: 0,
+                    states: {
+                        inactive: true
+                    }
                 },
                 series: {
                     states: {
-                       hover: {
-                          halo: {
-                            opacity: 0
-                          }
-                      }
+                        hover: {
+                            halo: {
+                                opacity: 0
+                            }
+                        },
+                        inactive: {
+                            opacity: 0.20
+                        }
                     },
                     point: {
                         events: {
                             mouseOver: function() {
                                const selectedSection = this.label;
+                               this.series.points.forEach((p) => {
+                                 if (p.label !== this.label) {
+                                   p.setState("inactive");
+                                   p.graphic.attr({opacity: 0.2});
+                                 }
+                               ;});
                                that.props.onSectionSelected(selectedSection);
                             },
                             mouseOut: function () {
@@ -73,7 +85,8 @@ class PieChart extends Component {
                             }
                         }
                     },
-                }
+                },
+                enableMouseTracking: true
             },
             credits: {
                 enabled: false

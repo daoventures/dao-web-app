@@ -210,3 +210,13 @@ export const NETWORK = {
 }
 
 export const UNIVERSAL_GAS_PRICE = "70";
+export const HIDE_NAV_INNERWIDTH = 760;
+
+export const PERIODS = [
+  { label: "1D", value: "1d"},
+  { label: "1W", value: "7d"},
+  { label: "1M", value: "30d"},
+  { label: "6M", value: "6m"},
+  { label: "1Y", value: "1y"},
+]
+ 

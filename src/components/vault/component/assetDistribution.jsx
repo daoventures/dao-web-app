@@ -4,7 +4,7 @@ import { withStyles } from "@material-ui/core/styles";
 
 import { Typography } from "@material-ui/core";
 
-import PieChart from "../common/pieChart/pieChart";
+import PieChart from "../../common/chart/pieChart/pieChart";
 
 const styles = (theme) => ({
     contentRow: {
@@ -206,7 +206,7 @@ class AssetDistribution extends Component {
                 <img 
                     className={classes.icon}
                     alt={asset}
-                    src={require(`../../assets/USDT-logo.png`)}
+                    src={require(`../../../assets/USDT-logo.png`)}
                 />
                 <Typography variant={"h5"}>
                     {asset}
