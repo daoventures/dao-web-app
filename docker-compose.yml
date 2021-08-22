@@ -2,7 +2,7 @@ version: '3'
 services: 
   nginx:
     container_name: 'frontend'
-    image: daoventures/dao-web-app:app
+    image: soonlai/dao-web-app:app
     restart: always
     env_file:
       - .env
