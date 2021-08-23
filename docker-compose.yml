@@ -2,10 +2,11 @@ version: '3'
 services: 
   nginx:
     container_name: 'frontend'
-    image: soonlai/dao-web-app:app
     restart: always
     env_file:
       - .env
+    build: 
+      context: .
     ports: 
       - 80:80
       - 443:443
@@ -25,4 +26,3 @@ services:
 networks: 
   yearn-api_backend:
     external: true
-  
