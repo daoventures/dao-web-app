@@ -7086,6 +7086,9 @@ class Store {
             (callbackInner) => {
               this._getXDvgTier(web3, asset, account, callbackInner);
             },
+            (callbackInner) => {
+              this._getXDVDApr(web3, asset, assets[1], callbackInner);
+            },
           ],
           (err, data) => {
             if (err) {
@@ -7096,6 +7099,8 @@ class Store {
               asset.tier = data[1]._tier;
               asset.depositedAmount = data[1]._depositedAmount;
             }
+            
+            asset.apr = data[2];
             callback(null, asset);
           }
         );
@@ -7121,6 +7126,17 @@ class Store {
     const tier = await xDVDContract.methods.getTier(account.address).call();
     return callback(null, tier);
   };
+
+  _getXDVDApr = async (web3, asset, dvd, callback) => {
+    if (asset.id !== "xDVD") {
+      return callback(null, null);
+    }
+
+    const dvdContract = new web3.eth.Contract(dvd.abi, dvd.erc20address);
+    const xDVGBalance = await dvdContract.methods.balanceOf(asset.erc20address).call();
+    const balance = parseFloat(xDVGBalance) / 10 ** asset.decimals;
+    return callback(null, (5500000 * 33.33 / 100 * 12) / (24 * balance) * 100);
+  }
 
   //stake 充值dvg
   depositXdvg = async (payload) => {

@@ -346,6 +346,23 @@ const styles = theme => ({
         }
 
     },
+    aprPercent: {
+        display: 'flex',
+        background: theme.themeColors.modelBack,
+        width: '100%',
+        minWidth: '167px',
+        // padding:'0 19px',
+        // boxShadow: '0px 2px 10px 0px rgba(23, 18, 43, 0.85)',
+        border: '1px solid #7367F7',
+        padding: '33px 16px',
+        alignItems: 'center',
+        marginBottom: '10px',
+        justifyContent: 'center',
+        [theme.breakpoints.down('sm')]: {
+            minWidth: '167px',
+            padding: '33px 9px',
+        }
+    },
     totalText: {
 
     },
@@ -1124,21 +1141,21 @@ class StakeDvdVip extends Component {
                     <div className={classes.contentRight}>
                         <div className={classes.totalApr}>
                              {/** APR */}
-                            <div className={classes.total}>
+                            <div className={classes.aprPercent}>
                                 <img className={classes.smallImg} src={require("../../assets/stakeImg/apy-icon@2x.png")} alt="" />
                                 <div className={classes.aprText}>
                                     <p className={classes.totalTextTile}>APR
-                                    {this.renderAPRInfo()}
+                                    {/* {this.renderAPRInfo()} */}
                                     </p>
                                     <p className={classes.totalTextNum}>
                                         {/* {aprInfo.apr && Number(aprInfo.apr).toFixed(2)} % */}
                                         {/** TODO: Remove this after DAOmine launched */}
-                                        40% - 80%
+                                        {dvgInfoObj[0] ? dvgInfoObj[0].apr.toFixed(2) + '%' : '0.00%'}
                                     </p>
                                 </div>
                             </div>
                             {/** Multiplier */}
-                            <div className={classes.apr}>
+                            {/* <div className={classes.apr}>
                                 <img className={classes.smallImg} src={require("../../assets/stakeImg/multiplier.png")} alt="" />
                                 <div className={classes.aprText}>
                                     <p className={classes.totalTextTile}>Multiplier
@@ -1150,7 +1167,7 @@ class StakeDvdVip extends Component {
                                        )}
                                     </p>
                                 </div>
-                            </div>
+                            </div> */}
                         </div>
                         
                         <div className={classes.myAssets}>
