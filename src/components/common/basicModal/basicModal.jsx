@@ -39,7 +39,7 @@ class BasicModal extends Component {
     }
 
     render() {
-        const { classes, content, title, setOpenModal, openModal } = this.props;
+        const { classes, contentTemplate, title, setOpenModal, openModal } = this.props;
 
         const division = (<div></div>);
 
@@ -51,6 +51,7 @@ class BasicModal extends Component {
                 classes={{ paper: classes.dialogRoot }}
                 aria-labelledby="customized-dialog-title"
                 open={openModal}
+                disableBackdropClick
             >
                 <MuiDialogTitle disableTypography className={classes.dialogTitle}>
                     <Typography variant="h6">{title ? title : ""}</Typography>
@@ -63,7 +64,7 @@ class BasicModal extends Component {
                     </IconButton>
                 </MuiDialogTitle>
                 <DialogContent dividers className={classes.dialogContent}>
-                    {content ? content : division }
+                    {contentTemplate ? contentTemplate : division }
                 </DialogContent>
             </Dialog>
         );
