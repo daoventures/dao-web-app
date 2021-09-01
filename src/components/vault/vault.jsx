@@ -665,12 +665,6 @@ const styles = (theme) => ({
       fontSize: "12px",
     },
   },
-  Tabs: {
-    backgroundColor: "#292750"
-  },
-  TabText: {
-    color: "#FFFFFF"
-  }
 });
 
 class Vault extends Component {

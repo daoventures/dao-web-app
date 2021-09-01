@@ -569,7 +569,7 @@ const styles = (theme) => ({
         color: "#FFFFFF",
         position: "absolute",
         zIndex: 1,
-        padding: "15px 82%"
+        right: "1%",
     },
     timeRangeLabel: {
         fontFamily: "Rubik",
@@ -2137,7 +2137,7 @@ class Asset extends Component {
                     <Grid item xs={12}>
                         {this.renderChart(asset)}
                     </Grid>
-                    <Grid item xs={12}>
+                     <Grid item xs={12}>
                         <div className={classes.sepperator}></div>
                     </Grid>
                     <Grid item xs={12}>

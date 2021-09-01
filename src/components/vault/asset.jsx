@@ -41,7 +41,6 @@ import InfoIcon from "@material-ui/icons/Info";
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import Store from "../../stores";
 import { getTheme } from "../../theme";
-import SimpleTabs from "./Tabs";
 import { withRouter } from "react-router-dom";
 import { withStyles } from "@material-ui/core/styles";
 
@@ -52,7 +51,6 @@ const store = Store.store;
 const styles = (theme) => ({
   value: {
     cursor: "pointer",
-    fontSize:"10px"
   },
   test: {
     borderColor: "#ff0000",
@@ -133,7 +131,7 @@ const styles = (theme) => ({
     height: "42px",
     margin: "auto",
     borderRadius: "0px",
-    background: "#7B25D266",
+    background: "none",
     borderColor: theme.themeColors.border,
     borderStyle: "solid",
     borderWidth: "1px",
@@ -361,7 +359,7 @@ const styles = (theme) => ({
   depositActionButton: {
     height: "42px",
     margin: "auto",
-    background: "#7B25D266",
+    background: "none",
     borderColor: theme.themeColors.border,
     color: theme.themeColors.textT,
     borderWidth: "1px",
@@ -423,13 +421,9 @@ const styles = (theme) => ({
   balances: {
     width: "100%",
     display: "flex",
-    alignItems: "end",
+    alignItems: "center",
     justifyContent: "space-between",
-    fontSize: "10px",
-    color: theme.themeColors.textT
-  },
-  operationLabel: {
-    color: theme.themeColors.textT
+    color: theme.themeColors.textT,
   },
   changeCurrencyContainer: {
     padding: "10px 20px 20px 20px",
@@ -439,12 +433,14 @@ const styles = (theme) => ({
     position: "relative",
   },
   accountInfo: {
-    marginTop: "-12px",
+    marginTop: "10px",
     width: "100%",
     height: "30px",
     color: theme.themeColors.textT,
     background: theme.themeColors.blockBack,
     borderColor: theme.themeColors.blockBorder,
+    borderWidth: "1px",
+    borderStyle: "solid",
     fontSize: "14px",
     display: "flex",
     alignItems: "center",
@@ -763,7 +759,7 @@ class Asset extends Component {
     );
   };
 
-  renderDepositWithdrawInput = (isDeposit, asset) => {
+  renderDepositWithdrawInput = (isDeposit) => {
     const { classes } = this.props;
     const {
       amount,
@@ -796,66 +792,34 @@ class Asset extends Component {
             onKeyDown={isDeposit ? this.inputKeyDown : this.inputRedeemKeyDown}
           />
           <div className={classes.depositScaleContainer}>
-            {isDeposit && this.isUsdVault(asset) && (
-                <React.Fragment>
-                  <div className={classes.accountInfoBlock}>
-                    <div
-                        className={classes.accountInfo}
-                        onClick={() => {
-                          this.handleModalDisplay(true);
-                        }}
-                    >
-                      <img
-                          alt=""
-                          src={require("../../assets/" +
-                              this.state.selectedCurrency +
-                              "-logo.png")}
-                          className={classes.assetIconImg}
-                          style={
-                            asset.disabled
-                                ? { filter: "grayscale(100%)" }
-                                : {}
-                          }
-                      />
-                      <span className={classes.addressSpan}>
-                            {this.state.selectedCurrency}
-                          </span>
-                      <ArrowDropDownCircleIcon
-                          className={classes.arrowDropdownIcon}
-                      />
-                    </div>
-                  </div>
-                  {this.renderCurrencyModal(asset.symbols)}
-                </React.Fragment>
-            )}}
-          </div>
-          {scales.length > 0 &&
-          scales.map((percentage) => {
-            return (
-                <Button
+            {scales.length > 0 &&
+              scales.map((percentage) => {
+                return (
+                  <Button
                     className={
                       isDeposit
-                          ? percent === percentage
+                        ? percent === percentage
                           ? classes.depositScaleActive
                           : classes.depositScale
-                          : redeemAmountPercent === percentage
-                          ? classes.depositScaleActive
-                          : classes.depositScale
+                        : redeemAmountPercent === percentage
+                        ? classes.depositScaleActive
+                        : classes.depositScale
                     }
                     variant="text"
                     disabled={loading}
                     onClick={() => {
                       isDeposit
-                          ? this.setAmount(percentage)
-                          : this.setRedeemAmount(percentage);
+                        ? this.setAmount(percentage)
+                        : this.setRedeemAmount(percentage);
                     }}
-                >
-                  <Typography variant={"h5"}>
-                    {percentage === 100 ? "Max" : percentage + "%"}
-                  </Typography>
-                </Button>
-            );
-          })}
+                  >
+                    <Typography variant={"h5"}>
+                      {percentage === 100 ? "Max" : percentage + "%"}
+                    </Typography>
+                  </Button>
+                );
+              })}
+          </div>
         </div>
 
         {/** Error Message */}
@@ -1092,6 +1056,121 @@ class Asset extends Component {
     return (
       <div className={classes.vaultContainer}>
         <Grid container className={classes.assetSummary}>
+          <Grid item sm={6} xs={12}>
+            {this.renderChart(asset)}
+
+            <Grid item sm={12} xs={12} className={classes.assetDetails}>
+              {/* STRATEGY */}
+              {this.renderStrategy()}
+
+              {/** STATISTICS */}
+              <Typography variant={"h4"} className={classes.subtitle} noWrap>
+                STATISTICS
+              </Typography>
+              <Grid container style={{ marginTop: "1rem" }}>
+                {/** Total Earnings */}
+                <Grid item sm={3} xs={6}>
+                  <Typography variant={"h5"} className={classes.grey}>
+                    Total Earnings:
+                  </Typography>
+                  <div className={classes.flexy}>
+                    <Typography variant={"h4"} noWrap>
+                      {asset.addressStatistics
+                        ? (this.isUsdVault(asset)
+                            ? Number(asset.addressStatistics.earnings)
+                            : asset.addressStatistics.earnings / asset.decimals
+                          ).toFixed(2)
+                        : "0.00"}{" "}
+                      {this.isUsdVault(asset) ? "USD" : asset.symbol}
+                    </Typography>
+                  </div>
+                </Grid>
+
+                {/** Deposit */}
+                <Grid item sm={3} xs={6}>
+                  <Typography variant={"h5"} className={classes.grey}>
+                    Deposits:
+                  </Typography>
+                  <div className={classes.flexy}>
+                    <Typography variant={"h4"} noWrap>
+                      {asset.addressStatistics
+                        ? (this.isUsdVault(asset)
+                            ? Number(asset.addressStatistics.totalDepositsInUSD)
+                            : asset.addressStatistics.totalDeposits /
+                              10 ** asset.decimals
+                          ).toFixed(2)
+                        : "0.00"}{" "}
+                      {this.isUsdVault(asset) ? "USD" : asset.symbol}
+                    </Typography>
+                  </div>
+                </Grid>
+
+                {/** Withdrawals */}
+                <Grid item sm={3} xs={6}>
+                  <Typography variant={"h5"} className={classes.grey}>
+                    Withdrawals:
+                  </Typography>
+                  <div className={classes.flexy}>
+                    <Typography variant={"h4"} noWrap>
+                      {asset.addressStatistics
+                        ? (this.isUsdVault(asset)
+                            ? Number(
+                                asset.addressStatistics.totalWithdrawalsInUSD
+                              )
+                            : asset.addressStatistics.totalWithdrawals /
+                              10 ** asset.decimals
+                          ).toFixed(2)
+                        : "0.00"}{" "}
+                      {this.isUsdVault(asset) ? "USD" : asset.symbol}
+                    </Typography>
+                  </div>
+                </Grid>
+
+                {/** Transferred In */}
+                <Grid item sm={3} xs={6}>
+                  <Typography variant={"h5"} className={classes.grey}>
+                    Transferred In:
+                  </Typography>
+                  <div className={classes.flexy}>
+                    <Typography variant={"h4"} noWrap>
+                      {asset.addressStatistics
+                        ? (this.isUsdVault(asset)
+                            ? Number(
+                                asset.addressStatistics.totalTransferredInUSD
+                              )
+                            : asset.addressStatistics.totalTransferredIn /
+                              10 ** asset.decimals
+                          ).toFixed(2)
+                        : "0.00"}{" "}
+                      {this.isUsdVault(asset) ? "USD" : asset.symbol}
+                    </Typography>
+                  </div>
+                </Grid>
+
+                {/** Transferred Out */}
+                <Grid item sm={3} xs={6}>
+                  <Typography variant={"h5"} className={classes.grey}>
+                    Transferred Out:
+                  </Typography>
+                  <div className={classes.flexy}>
+                    <Typography variant={"h4"} noWrap>
+                      {asset.addressStatistics
+                        ? (this.isUsdVault(asset)
+                            ? Number(
+                                asset.addressStatistics.totalTransferredOutInUSD
+                              )
+                            : asset.addressStatistics.totalTransferredOut /
+                              10 ** asset.decimals
+                          ).toFixed(2)
+                        : "0.00"}{" "}
+                      {this.isUsdVault(asset) ? "USD" : asset.symbol}
+                    </Typography>
+                  </div>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
+
           <Grid item sm={6} xs={12} className={classes.tradeBox}>
             {/* 滑动条部分  */}
             {asset.strategyType === "yearn" && (
@@ -1134,9 +1213,6 @@ class Asset extends Component {
             <div className={classes.actionsContainer}>
               {/* 充值部分 */}
               <div className={classes.tradeContainer}>
-                <div className={classes.operationLabel}>
-                  Deposit
-                </div>
                 <div className={classes.balances}>
                   {/** Wallet Balance */}
                   <Typography
@@ -1147,7 +1223,7 @@ class Asset extends Component {
                       this.setAmount(100);
                     }}
                   >
-                    Deposit funds into this strategy.
+                    Your wallet
                   </Typography>
 
                   <Typography
@@ -1161,7 +1237,7 @@ class Asset extends Component {
                     {/** Wallet Balance */}
                     {this.isUsdVault(asset) && (
                       <div>
-                        Available {asset.balances
+                        {asset.balances
                           ? (
                               Math.floor(
                                 asset.balances[this.state.tokenIndex] * 10000
@@ -1185,10 +1261,43 @@ class Asset extends Component {
                     )}
                   </Typography>
 
+                  {/** Change Currency  */}
+                  {this.isUsdVault(asset) && (
+                    <React.Fragment>
+                      <div className={classes.accountInfoBlock}>
+                        <div
+                          className={classes.accountInfo}
+                          onClick={() => {
+                            this.handleModalDisplay(true);
+                          }}
+                        >
+                          <img
+                            alt=""
+                            src={require("../../assets/" +
+                              this.state.selectedCurrency +
+                              "-logo.png")}
+                            className={classes.assetIconImg}
+                            style={
+                              asset.disabled
+                                ? { filter: "grayscale(100%)" }
+                                : {}
+                            }
+                          />
+                          <span className={classes.addressSpan}>
+                            {this.state.selectedCurrency}
+                          </span>
+                          <ArrowDropDownCircleIcon
+                            className={classes.arrowDropdownIcon}
+                          />
+                        </div>
+                      </div>
+                      {this.renderCurrencyModal(asset.symbols)}
+                    </React.Fragment>
+                  )}
                 </div>
 
                 {/** Deposit Input */}
-                {this.renderDepositWithdrawInput(true, asset)}
+                {this.renderDepositWithdrawInput(true)}
 
                 {/** Deposit Buttons */}
                 <div className={classes.depositButtonBox}>
@@ -1228,10 +1337,8 @@ class Asset extends Component {
                   </div>
                 )}
               </div>
-            </div>
-          </Grid>
-          <Grid item sm={6} xs={12} className={classes.tradeBox}>
-            <div className={classes.actionsContainer}>
+
+              <div className={classes.sepperator}></div>
 
               {/* 提现部分 Withdrawal */}
               <div className={classes.tradeContainer}>
@@ -1452,9 +1559,6 @@ class Asset extends Component {
                   asset.strategyType === "moneyPrinter") && (
                   <div className={classes.withdrawContainer}>
                     <div className={classes.tradeContainer}>
-                      <div className={classes.operationLabel}>
-                        Withdrawal
-                      </div>
                       <div className={classes.balances}>
                         <Typography
                           variant="body1"
@@ -1528,123 +1632,6 @@ class Asset extends Component {
               </div>
             </div>
           </Grid>
-          <div className={classes.sepperator}></div>
-          <Grid item xs={12}>
-            {this.renderChart(asset)}
-          </Grid>
-          <div className={classes.sepperator}></div>
-
-          {/*  <Grid item sm={12} xs={12} className={classes.assetDetails}>*/}
-          {/*    /!* STRATEGY *!/*/}
-          {/*    {this.renderStrategy()}*/}
-
-              {/** STATISTICS */}
-              <Typography variant={"h4"} className={classes.subtitle} noWrap>
-                STATISTICS
-              </Typography>
-              <Grid container style={{ marginTop: "1rem" }}>
-                {/** Total Earnings */}
-                <Grid item sm={3} xs={6}>
-                  <Typography variant={"h5"} className={classes.grey}>
-                    Total Earnings:
-                  </Typography>
-                  <div className={classes.flexy}>
-                    <Typography variant={"h4"} noWrap>
-                      {asset.addressStatistics
-                        ? (this.isUsdVault(asset)
-                            ? Number(asset.addressStatistics.earnings)
-                            : asset.addressStatistics.earnings / asset.decimals
-                          ).toFixed(2)
-                        : "0.00"}{" "}
-                      {this.isUsdVault(asset) ? "USD" : asset.symbol}
-                    </Typography>
-                  </div>
-                </Grid>
-              </Grid>
-
-          {/*      /!** Deposit *!/*/}
-          {/*      <Grid item sm={3} xs={6}>*/}
-          {/*        <Typography variant={"h5"} className={classes.grey}>*/}
-          {/*          Deposits:*/}
-          {/*        </Typography>*/}
-          {/*        <div className={classes.flexy}>*/}
-          {/*          <Typography variant={"h4"} noWrap>*/}
-          {/*            {asset.addressStatistics*/}
-          {/*              ? (this.isUsdVault(asset)*/}
-          {/*                  ? Number(asset.addressStatistics.totalDepositsInUSD)*/}
-          {/*                  : asset.addressStatistics.totalDeposits /*/}
-          {/*                    10 ** asset.decimals*/}
-          {/*                ).toFixed(2)*/}
-          {/*              : "0.00"}{" "}*/}
-          {/*            {this.isUsdVault(asset) ? "USD" : asset.symbol}*/}
-          {/*          </Typography>*/}
-          {/*        </div>*/}
-          {/*      </Grid>*/}
-
-          {/*      /!** Withdrawals *!/*/}
-          {/*      <Grid item sm={3} xs={6}>*/}
-          {/*        <Typography variant={"h5"} className={classes.grey}>*/}
-          {/*          Withdrawals:*/}
-          {/*        </Typography>*/}
-          {/*        <div className={classes.flexy}>*/}
-          {/*          <Typography variant={"h4"} noWrap>*/}
-          {/*            {asset.addressStatistics*/}
-          {/*              ? (this.isUsdVault(asset)*/}
-          {/*                  ? Number(*/}
-          {/*                      asset.addressStatistics.totalWithdrawalsInUSD*/}
-          {/*                    )*/}
-          {/*                  : asset.addressStatistics.totalWithdrawals /*/}
-          {/*                    10 ** asset.decimals*/}
-          {/*                ).toFixed(2)*/}
-          {/*              : "0.00"}{" "}*/}
-          {/*            {this.isUsdVault(asset) ? "USD" : asset.symbol}*/}
-          {/*          </Typography>*/}
-          {/*        </div>*/}
-          {/*      </Grid>*/}
-
-          {/*      /!** Transferred In *!/*/}
-          {/*      <Grid item sm={3} xs={6}>*/}
-          {/*        <Typography variant={"h5"} className={classes.grey}>*/}
-          {/*          Transferred In:*/}
-          {/*        </Typography>*/}
-          {/*        <div className={classes.flexy}>*/}
-          {/*          <Typography variant={"h4"} noWrap>*/}
-          {/*            {asset.addressStatistics*/}
-          {/*              ? (this.isUsdVault(asset)*/}
-          {/*                  ? Number(*/}
-          {/*                      asset.addressStatistics.totalTransferredInUSD*/}
-          {/*                    )*/}
-          {/*                  : asset.addressStatistics.totalTransferredIn /*/}
-          {/*                    10 ** asset.decimals*/}
-          {/*                ).toFixed(2)*/}
-          {/*              : "0.00"}{" "}*/}
-          {/*            {this.isUsdVault(asset) ? "USD" : asset.symbol}*/}
-          {/*          </Typography>*/}
-          {/*        </div>*/}
-          {/*      </Grid>*/}
-
-          {/*      /!** Transferred Out *!/*/}
-          {/*      <Grid item sm={3} xs={6}>*/}
-          {/*        <Typography variant={"h5"} className={classes.grey}>*/}
-          {/*          Transferred Out:*/}
-          {/*        </Typography>*/}
-          {/*        <div className={classes.flexy}>*/}
-          {/*          <Typography variant={"h4"} noWrap>*/}
-          {/*            {asset.addressStatistics*/}
-          {/*              ? (this.isUsdVault(asset)*/}
-          {/*                  ? Number(*/}
-          {/*                      asset.addressStatistics.totalTransferredOutInUSD*/}
-          {/*                    )*/}
-          {/*                  : asset.addressStatistics.totalTransferredOut /*/}
-          {/*                    10 ** asset.decimals*/}
-          {/*                ).toFixed(2)*/}
-          {/*              : "0.00"}{" "}*/}
-          {/*            {this.isUsdVault(asset) ? "USD" : asset.symbol}*/}
-          {/*          </Typography>*/}
-          {/*        </div>*/}
-          {/*      </Grid>*/}
-          {/*    </Grid>*/}
-          {/*  </Grid>*/}
         </Grid>
       </div>
     );
@@ -1809,7 +1796,7 @@ class Asset extends Component {
             } else if (asset.strategyType === "moneyPrinter") {
               moneyPrinterAPY.push([
                 date,
-                parseFloat(groups[date][halfCount].moneyPrinterApy.toFixed(4)),
+                parseFloat(groups[date][0].moneyPrinterApy.toFixed(4)),
               ]);
             }
           }
