@@ -38,6 +38,12 @@ class BasicModal extends Component {
         super();
     }
 
+    closeModal = (event, reason) => {
+        if (reason !== 'backdropClick') {
+            this.props.setOpenModal(false);
+        }
+    }
+
     render() {
         const { classes, contentTemplate, title, setOpenModal, openModal } = this.props;
 
@@ -45,13 +51,12 @@ class BasicModal extends Component {
 
         return (
             <Dialog
-                onClose={() => setOpenModal(false)}
+                onClose={this.closeModal}
                 fullWidth={true}
                 maxWidth={"sm"}
                 classes={{ paper: classes.dialogRoot }}
                 aria-labelledby="customized-dialog-title"
                 open={openModal}
-                disableBackdropClick
             >
                 <MuiDialogTitle disableTypography className={classes.dialogTitle}>
                     <Typography variant="h6">{title ? title : ""}</Typography>

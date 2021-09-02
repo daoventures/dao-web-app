@@ -831,6 +831,8 @@ class Asset extends Component {
                 this.setState({
                     needVaultApproval: respondedInfo.needApproval
                 });
+            } else {
+                console.log(respondedInfo);
             }
 
         }
@@ -1402,15 +1404,15 @@ class Asset extends Component {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                <StyledTableRow key={"approveDeposit"}>
+                                <StyledTableRow key={"approveDepositValue"}>
                                     <StyledTableCellDeposit align="left">Deposit</StyledTableCellDeposit>
                                     <StyledTableCellDeposit align="right">{99}</StyledTableCellDeposit>
                                 </StyledTableRow>
-                                <StyledTableRow key={"approveDeposit"}>
+                                <StyledTableRow key={"approveDepositFee"}>
                                     <StyledTableCellDeposit align="left">Fee(1%)</StyledTableCellDeposit>
                                     <StyledTableCellDeposit align="right">-1 {asset.symbol}</StyledTableCellDeposit>
                                 </StyledTableRow>
-                                <StyledTableRow key={"approveDeposit"}>
+                                <StyledTableRow key={"approveDepositTotal"}>
                                     <StyledTableCellDeposit align="left">TOTAL</StyledTableCellDeposit>
                                     <StyledTableCellDeposit align="right">100 {asset.symbol}</StyledTableCellDeposit>
                                 </StyledTableRow>
@@ -1436,9 +1438,9 @@ class Asset extends Component {
                     </Grid>
                 </Grid>
             </div>}
-            {this.state.isCheckingApproval && <Button className={classes.approvalButton}>
-                <CircularProgress/>
-            </Button>
+            {this.state.isCheckingApproval && <div className={classes.erroredMessage}>
+               Checking the wallet connection <CircularProgress/>
+            </div>
             }
             <div className={classes.depositWarningDiv}>
                 <Grid
@@ -1453,17 +1455,17 @@ class Asset extends Component {
                         {!this.state.isDepositCompleted && this.state.isDepositErrored &&
                         <span className={classes.erroredMessage}>Failed to deposit Token in {asset.strategy} Strategy. Please try again</span>}
                     </Grid>
-                    <Grid item sm={8} xs={12}>
+                    {!this.state.isCheckingApproval && <Grid item sm={8} xs={12}>
                         <Button
                             className={classes.depositActionButton}
                             onClick={this.depositTokenToContract}
-                            disabled={this.state.isApprovalLoading}
+                            disabled={this.state.isApprovalLoading || this.state.isApprovalErrored}
                         >
                             {this.state.isDepositLoading ? <CircularProgress/> : this.state.isDepositCompleted ?
                                 <img src={DoneMark} alt="Done"/> : <span>Deposit</span>}
 
                         </Button>
-                    </Grid>
+                    </Grid>}
                 </Grid>
             </div>
 
