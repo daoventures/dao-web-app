@@ -107,6 +107,16 @@ const styles = (theme) => ({
         display: "flex",
         flexDirection: "column",
         width: "100%",
+        background: "#292750"
+    },
+    assetNameInfo: {
+        fontFamily: "Rubik",
+        fontStyle: "normal",
+        fontWeight: "normal",
+        fontSize: "14px",
+        lineHeight: "20px",
+        color: "#FFFFFF",
+        padding: "24px"
     },
     actionsContainer: {
         paddingBottom: "12px",
@@ -197,7 +207,7 @@ const styles = (theme) => ({
         // alignItems: "center",
         width: "100%",
         margin: "auto",
-        marginBottom: "1.5rem",
+        marginBottom: "1.3rem",
         [theme.breakpoints.down("sm")]: {
             width: "100%",
         },
@@ -372,8 +382,8 @@ const styles = (theme) => ({
         minWidth: "30px",
         padding: "0px 6px",
         color: theme.themeColors.textP,
-        // background: 'rgba(24, 160, 251, 0.2)',
-        // borderRadius: '5px'
+        background: 'rgba(115, 103, 247, 0.15)',
+        borderRadius: '5px'
     },
     depositButtonBox: {
         width: "100%",
@@ -413,8 +423,8 @@ const styles = (theme) => ({
     },
     tradeBox: {
         marginTop: "20px",
-        background: theme.themeColors.tradeBack,
-        padding: "20px",
+        background: "#292750",
+        padding: "0px 24px 0px 24px",
     },
     earnAndVaultValue: {
         fontSize: "12px",
@@ -539,14 +549,15 @@ const styles = (theme) => ({
         marginTop: "3px",
     },
     tokenColorKey: {
-        width: "12px",
-        height: "12px",
+        width: "15px",
+        height: "15px",
         left: "32px",
         top: "5px",
         borderRadius: "50%",
         padding: "2px",
         display: "inline-block",
-        lineHeight: "7px"
+        lineHeight: "7px",
+        marginRight: "5px"
 
     },
     approvalDetails: {
@@ -737,14 +748,6 @@ class Asset extends Component {
 
     componentDidMount() {
         window.addEventListener("resize", this.resize.bind(this));
-        store.getUserDistributionByWalletId(this.props.asset.id)
-            .then((tokenDistributionResponse) => {
-                if (tokenDistributionResponse.success) {
-                    this.setState({
-                        assetDistributionData: tokenDistributionResponse.data
-                    });
-                }
-            })
     }
 
     componentWillUnmount() {
@@ -1663,15 +1666,34 @@ class Asset extends Component {
             ratio,
             earnPercent,
             vaultPercent,
-            scales,
-            assetDistributionData
+            scales
         } = this.state;
 
-        const AssetInfo = getAssetData(assetDistributionData);
+        const AssetInfo = getAssetData(asset.asset_distribution? asset.asset_distribution: []);
 
         return (
             <div className={classes.vaultContainer}>
                 <Grid container className={classes.assetSummary}>
+                    <Grid item xs={12}>
+                        <Typography
+                            className={classes.assetNameInfo}
+                            variant="h4"
+                            noWrap
+                        >
+                            Cuban's Ape: USDT USDC DAI
+                        </Typography>
+                        <Typography
+                            className={classes.assetNameInfo}
+                            variant="p"
+                            noWrap
+                        >
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent pellentesque, risus nec pretium porta, sapien metus euismod lectus, vel aliquam mauris nibh et elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                        </Typography>
+
+                    </Grid>
+                    <Grid item xs={12}>
+                        <div className={classes.sepperator}></div>
+                    </Grid>
                     <Grid item sm={6} xs={12} className={classes.tradeBox}>
                         {/* 滑动条部分  */}
                         {asset.strategyType === "yearn" && (
@@ -1774,7 +1796,6 @@ class Asset extends Component {
                                     <BasicModal
                                         title={"Approve Deposit in" + asset.strategyName}
                                         contentTemplate={this.state.openDepositDialogBox ? this.depositModalTemplate(classes, asset) : this.withdrawModalTemplate(classes, asset)}
-                                        classes={classes}
                                         openModal={this.state.openDepositDialogBox || this.state.openWithdrawDialogBox}
                                         setOpenModal={this.state.openDepositDialogBox ? this.setOpenModal : this.setOpenWithdrawModal}
                                     />
@@ -2161,11 +2182,11 @@ class Asset extends Component {
                             </TableHead>
                             <TableBody>
                                 {AssetInfo.map((row) => (
-                                    <StyledTableRow key={row.name}>
+                                    <StyledTableRow key={row.label}>
                                         <StyledTableCell component="th" scope="row">
                                             <span className={classes.tokenColorKey}
-                                                  style={{"background-color": row.color}}>&nbsp;</span>
-                                            <span>{row.name}</span>
+                                                  style={{"backgroundColor": row.color}}>&nbsp;</span>
+                                            <span>{row.label}</span>
                                         </StyledTableCell>
                                         <StyledTableCell align="left">{row.percent} %</StyledTableCell>
                                         <StyledTableCell align="right"
@@ -2776,7 +2797,7 @@ class Asset extends Component {
 
         options["chart"] = {
             width: hideNav ? 300 : null,
-            backgroundColor: this.state.interestTheme.themeColors.itemBack,
+            backgroundColor: "#292750",
             spacingLeft: 25,
             spacingTop: 50
         };

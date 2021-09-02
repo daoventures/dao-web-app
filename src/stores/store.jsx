@@ -6319,6 +6319,23 @@ class Store {
 
   }
 
+  getAllAssetInformation = async () => {
+    try {
+      const url = `${config.statsProvider}vaults/ethereum/all`;
+      const resultString = await rp(url);
+      const result = JSON.parse(resultString);
+      return {
+        success: true,
+        data: result.body
+      };
+    } catch (Err) {
+      console.log(Err);
+      return {
+        success: false,
+      };
+    }
+  }
+
   _eventVerifyAmount = async (amount) => {
     const url = `${config.statsProvider}event/verify/${amount}`;
     const resultString = await rp(url);

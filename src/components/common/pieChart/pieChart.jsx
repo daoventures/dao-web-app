@@ -13,7 +13,7 @@ class PieChart extends Component {
         super();
 
         this.state = {
-            chartInnerSize: '70%',
+            chartInnerSize: '95%',
             colors: [
                 '#50B432',
                 '#ED561B',
@@ -50,7 +50,8 @@ class PieChart extends Component {
                     dataLabels: {
                         enabled: false,
                     },
-                    colors: chartColor
+                    colors: chartColor,
+                    borderWidth:0
                 }
             },
             credits: {

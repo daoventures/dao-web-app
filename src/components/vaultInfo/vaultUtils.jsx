@@ -61,7 +61,7 @@ export const getAssetData = (assetDistributionData) => {
 
     let coinsInfo = assetDistributionData.map((coinData, index) => {
        return {
-            name: coinData[0],
+            label: coinData[0],
             percent: coinData[1].percent,
             y: coinData[1].percent,
             changePercentage: coinData[1].changePercentage.toFixed(2),

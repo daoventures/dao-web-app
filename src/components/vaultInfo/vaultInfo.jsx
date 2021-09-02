@@ -751,6 +751,7 @@ class Vault extends Component {
             DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED,
             this.handleHappyHourCompleted
         );
+        this.getAllAssetInformation();
     }
 
     componentWillUnmount() {
@@ -782,6 +783,25 @@ class Vault extends Component {
         emitter.removeListener(VAULT_BALANCES_FULL_RETURNED, this.networkChanged);
     }
 
+    getAllAssetInformation = () => {
+        store.getAllAssetInformation()
+            .then((data) => {
+                if(data.success) {
+                    let assetsInfo = store.getStore("vaultAssets");
+                    assetsInfo = assetsInfo.map((asset) => {
+                        return {
+                            ...asset,
+                            asset_distribution: data.data[asset.id] && data.data[asset.id] && data.data[asset.id].asset_distribution?data.data[asset.id].asset_distribution : []
+                        }
+                    });
+                    this.setState({assets: assetsInfo});
+                }
+            })
+            .catch((Err) => {
+
+            });
+    }
+
     handleHappyHour = (payload) => {
         this.setState({
             happyHour: payload.happyHour,
@@ -807,10 +827,7 @@ class Vault extends Component {
     };
 
     balancesReturned = (balances) => {
-        this.setState({
-            assets: store.getStore("vaultAssets"),
-            loading: false,
-        });
+        this.getAllAssetInformation();
     };
 
     connectionConnected = () => {
@@ -1060,6 +1077,28 @@ class Vault extends Component {
         </Typography> */}
                 <div style={{ display: "flex" }}>
                     <div>
+                        {/* <Typography variant={"h5"} className={classes.assetLabel2}>
+              {this.isLogoVault(asset)
+                ? asset.strategyType === "citadel" ||
+                  asset.strategyType === "daoFaang"
+                  ? "7d PnL"
+                  : "YTD Performance"
+                : "Yearly Growth"}
+            </Typography> */}
+
+                        <Typography variant={"h5"} className={classes.assetLabel2}>
+                            {
+                                (asset.strategyType === "citadel" || asset.strategyType === "daoFaang")
+                                    ? "7d PnL"
+                                    : (this.isLogoVault(asset) && asset.strategyType !== "moneyPrinter")
+                                    ? "YTD Performance"
+                                    : "Yearly Growth"
+                            }
+                        </Typography>
+                    </div>
+                </div>
+                <div style={{ display: "flex" }}>
+                    <div>
                         <Typography variant={"h5"} className={classes.assetLabel1}>
                             {/* {this.isUsdVault(asset) && (
                 <Typography variant={"caption"}>est.&nbsp;</Typography>
@@ -1096,28 +1135,6 @@ class Vault extends Component {
                     )}
                 </div>
 
-                <div style={{ display: "flex" }}>
-                    <div>
-                        {/* <Typography variant={"h5"} className={classes.assetLabel2}>
-              {this.isLogoVault(asset)
-                ? asset.strategyType === "citadel" ||
-                  asset.strategyType === "daoFaang"
-                  ? "7d PnL"
-                  : "YTD Performance"
-                : "Yearly Growth"}
-            </Typography> */}
-
-                        <Typography variant={"h5"} className={classes.assetLabel2}>
-                            {
-                                (asset.strategyType === "citadel" || asset.strategyType === "daoFaang")
-                                    ? "7d PnL"
-                                    : (this.isLogoVault(asset) && asset.strategyType !== "moneyPrinter")
-                                    ? "YTD Performance"
-                                    : "Yearly Growth"
-                            }
-                        </Typography>
-                    </div>
-                </div>
             </React.Fragment>
         );
     };
@@ -1159,6 +1176,52 @@ class Vault extends Component {
             </React.Fragment>
         );
     };
+
+    renderStackedBlocked = (assets, showMobile) => {
+        const { classes } = this.props;
+
+        return (
+            <React.Fragment>
+                <Typography
+                    variant={showMobile ? "h5" : "h5"}
+                    className={classes.assetLabel2}
+                >
+                    Stacked
+                </Typography>
+                <Typography
+                    variant={showMobile ? "h3" : "h5"}
+                    className={classes.assetLabel1}
+                >
+                    <div>
+                        0 USDT
+                    </div>
+                </Typography>
+            </React.Fragment>
+        );
+    }
+
+    renderAvailableForDeposit = (showMobile) => {
+        const { classes } = this.props;
+
+        return (
+            <React.Fragment>
+                <Typography
+                    variant={showMobile ? "h5" : "h5"}
+                    className={classes.assetLabel2}
+                >
+                    AVAILABLE FOR DEPOSIT
+                </Typography>
+                <Typography
+                    variant={showMobile ? "h3" : "h5"}
+                    className={classes.assetLabel1}
+                >
+                    <div>
+                        $1234.567
+                    </div>
+                </Typography>
+            </React.Fragment>
+        );
+    }
 
     renderAssetBlocks = () => {
         const {
@@ -1210,7 +1273,7 @@ class Vault extends Component {
                                         : this.renderPopularIcon(asset)
                                     : null}
                             </Grid>
-                            <RiskLevelLabel risk={asset.risk}></RiskLevelLabel>
+                            <RiskLevelLabel risk={asset.risk}/>
                         </Grid>
                         <Accordion
                             className={classes.expansionPanel}
@@ -1235,7 +1298,7 @@ class Vault extends Component {
                                 <div className={classes.assetSummary}>
                                     <Grid container>
                                         {/** Asset Logo */}
-                                        <Grid item sm={1} xs={2} className={classes.gridItemColumn}>
+                                        <Grid item sm={1} xs={1} className={classes.gridItemColumn}>
                                             <div className={classes.assetIcon}>
                                                 <img
                                                     alt=""
@@ -1255,19 +1318,20 @@ class Vault extends Component {
                                         </Grid>
 
                                         {/** Asset name */}
-                                        <Grid item sm={3} xs={4} className={classes.gridItemColumn}>
-                                            <Typography
-                                                variant={"h5"}
-                                                className={classes.assetLabel1}
-                                            >
-                                                {asset.name}
-                                            </Typography>
+                                        <Grid item sm={2} xs={2} className={classes.gridItemColumn}>
                                             <Typography
                                                 variant={"h5"}
                                                 className={classes.assetLabel2}
                                             >
                                                 {asset.description}
                                             </Typography>
+                                            <Typography
+                                                variant={"h5"}
+                                                className={classes.assetLabel1}
+                                            >
+                                                {asset.name}
+                                            </Typography>
+
                                         </Grid>
 
                                         {/** Total Value Locked */}
@@ -1279,19 +1343,28 @@ class Vault extends Component {
                       <Typography variant={'h5'} className={classes.assetLabel2, classes.assetLabelTextRight1}>Total Value Locked</Typography>
                     </Grid> */}
 
-                                        {/** Underlying Token Balance , Available to deposit */}
-                                        <Grid item sm={3} xs={6} className={classes.gridItemColumn}>
+                                        <Grid item sm={2} xs={2} className={classes.gridItemColumn}>
                                             <div className={classes.showDesktop}>
-                                                {this.renderAvailableToDeposit(asset, false)}
-                                            </div>
-
-                                            <div className={classes.showMobile}>
-                                                {this.renderAvailableToDeposit(asset, false)}
+                                                {this.renderStackedBlocked(asset, false)}
                                             </div>
                                         </Grid>
+                                        {/** Underlying Token Balance , Available to deposit */}
+                                        {/*<Grid item sm={3} xs={6} className={classes.gridItemColumn}>*/}
+                                        {/*    <div className={classes.showDesktop}>*/}
+                                        {/*        {this.renderStackedBlocked(asset, false)}*/}
+                                        {/*    </div>*/}
+
+                                        {/*    <div className={classes.showMobile}>*/}
+                                        {/*        {this.renderYearlyGrowth(asset, false)}*/}
+                                        {/*    </div>*/}
+
+                                        {/*    <div className={classes.showDesktop}>*/}
+                                        {/*        {this.renderYearlyGrowth(asset, false)}*/}
+                                        {/*    </div>*/}
+                                        {/*</Grid>*/}
 
                                         {/** Yearly Growth */}
-                                        <Grid item sm={5} xs={6} className={classes.gridItemColumn}>
+                                        <Grid item sm={2} xs={2} className={classes.gridItemColumn}>
                                             {!["LINK"].includes(asset.id) && asset.vaultBalance > 0 && (
                                                 <div>
                                                     {/** Default className: showDesktop */}
@@ -1317,11 +1390,17 @@ class Vault extends Component {
                                                 </div>
                                             )}
                                         </Grid>
+                                        <Grid item sm={2} xs={2} className={classes.gridItemColumn}>
+                                            <div className={classes.showDesktop}>
+                                                {this.renderAvailableForDeposit(asset, false)}
+                                            </div>
+                                        </Grid>
                                     </Grid>
                                 </div>
                             </AccordionSummary>
                             <AccordionDetails className={classes.removePadding}>
                                 <Asset
+                                    key={index}
                                     happyHour={this.state.happyHour}
                                     happyHourThreshold={this.state.happyHourThreshold}
                                     asset={asset}
