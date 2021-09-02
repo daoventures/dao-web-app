@@ -673,6 +673,15 @@ const styles = (theme) => ({
     }
 });
 
+const networkObj = {
+    1: "ethereum",
+    4: "ethereum",
+    56: "Binance",
+    42: "ethereum",
+    80001: "polygon",
+    137: "polygon"
+}
+
 class Vault extends Component {
     constructor(props) {
         super();
@@ -784,14 +793,17 @@ class Vault extends Component {
     }
 
     getAllAssetInformation = () => {
-        store.getAllAssetInformation()
+        store.getAllAssetInformation(networkObj[this.state.networkId])
             .then((data) => {
                 if(data.success) {
                     let assetsInfo = store.getStore("vaultAssets");
                     assetsInfo = assetsInfo.map((asset) => {
+                        let pnl = data.data[asset.id] && data.data[asset.id].pnl? data.data[asset.id].pnl.toFixed(2) : asset.pnl;
                         return {
                             ...asset,
-                            asset_distribution: data.data[asset.id] && data.data[asset.id] && data.data[asset.id].asset_distribution?data.data[asset.id].asset_distribution : []
+                            asset_distribution: data.data[asset.id] && data.data[asset.id].asset_distribution?data.data[asset.id].asset_distribution : [],
+                            pnl,
+                            pnlTextColor: pnl <0 ? 'red': 'green'
                         }
                     });
                     this.setState({assets: assetsInfo});
@@ -1146,6 +1158,12 @@ class Vault extends Component {
         return (
             <React.Fragment>
                 <Typography
+                    variant={showMobile ? "h5" : "h5"}
+                    className={classes.assetLabel2}
+                >
+                    Available to deposit
+                </Typography>
+                <Typography
                     variant={showMobile ? "h3" : "h5"}
                     className={classes.assetLabel1}
                 >
@@ -1167,17 +1185,11 @@ class Vault extends Component {
                         (this.isLogoVault(asset) ? "USD" : asset.symbol)}
                     </div>
                 </Typography>
-                <Typography
-                    variant={showMobile ? "h5" : "h5"}
-                    className={classes.assetLabel2}
-                >
-                    Available to deposit
-                </Typography>
             </React.Fragment>
         );
     };
 
-    renderStackedBlocked = (assets, showMobile) => {
+    renderStackedBlocked = (asset, showMobile) => {
         const { classes } = this.props;
 
         return (
@@ -1193,14 +1205,14 @@ class Vault extends Component {
                     className={classes.assetLabel1}
                 >
                     <div>
-                        0 USDT
+                        {asset.depositedSharesInUSD? asset.depositedSharesInUSD.toFixed(4): 0} USDT
                     </div>
                 </Typography>
             </React.Fragment>
         );
     }
 
-    renderAvailableForDeposit = (showMobile) => {
+    renderAvailableForDeposit = (asset, showMobile) => {
         const { classes } = this.props;
 
         return (
@@ -1216,7 +1228,7 @@ class Vault extends Component {
                     className={classes.assetLabel1}
                 >
                     <div>
-                        $1234.567
+                        ${asset.sumBalances? asset.sumBalances.toFixed(4).toLocaleString(): 0}
                     </div>
                 </Typography>
             </React.Fragment>

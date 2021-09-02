@@ -605,6 +605,19 @@ const styles = (theme) => ({
         color: "#FFFFFF",
         padding: "2%",
         fontWeight: 500
+    },
+    pnlVault: {
+        fontFamily: "Rubik",
+        fontStyle: "normal",
+        fontWeight: "normal",
+        fontSize: "26px",
+        lineHeight: "20px"
+    },
+    pnlDivPosition: {
+        position: "absolute",
+        zIndex: 1,
+        marginTop: "2%",
+        marginLeft: "2%"
     }
 });
 
@@ -2165,7 +2178,7 @@ class Asset extends Component {
                     </Grid>
                     <Grid item xs={12}>
                         <div className={classes.chartTitle}>
-                            <p>Asset Strategy</p>
+                            <p>Asset Strategy</p> <br/>
                         </div>
                     </Grid>
                     <Grid item sm={6} xs={6}>
@@ -2535,7 +2548,7 @@ class Asset extends Component {
                     width: hideNav ? 300 : 420,
                 },
                 title: {
-                    text: "Historical Vault Performance",
+                    text: "Vault Performance History",
                 },
                 xAxis: {
                     categories: labels,
@@ -2570,7 +2583,7 @@ class Asset extends Component {
                     width: hideNav ? 300 : 420,
                 },
                 title: {
-                    text: "Historical Vault Performance",
+                    text: "Vault Performance History",
                 },
                 xAxis: {
                     categories: labels,
@@ -2616,7 +2629,7 @@ class Asset extends Component {
                     width: hideNav ? 300 : 420,
                 },
                 title: {
-                    text: "Historical Vault Performance",
+                    text: "Vault Performance History",
                 },
                 xAxis: {
                     categories: labels,
@@ -2651,7 +2664,7 @@ class Asset extends Component {
                     width: hideNav ? 300 : 420,
                 },
                 title: {
-                    text: "Historical Vault Performance",
+                    text: "Vault Performance History",
                 },
                 xAxis: {
                     categories: labels,
@@ -2686,7 +2699,7 @@ class Asset extends Component {
                     width: hideNav ? 300 : 420,
                 },
                 title: {
-                    text: "Historical Vault Performance",
+                    text: "Vault Performance History",
                 },
                 xAxis: {
                     categories: labels,
@@ -2732,7 +2745,7 @@ class Asset extends Component {
                     width: hideNav ? 300 : 420,
                 },
                 title: {
-                    text: "Historical Vault Performance",
+                    text: "Vault Performance History",
                 },
                 xAxis: {
                     categories: labels,
@@ -2765,12 +2778,12 @@ class Asset extends Component {
 
         const chartTitle = {
             yearn: "Historical Earn & Vault Performance",
-            compound: "Historical Vault Performance",
-            citadel: "Historical Vault Performance",
-            elon: "Historical Vault Performance",
-            cuban: "Historical Vault Performance",
-            daoFaang: "Historical Vault Performance",
-            moneyPrinter: "Historical Vault Performance",
+            compound: "Vault Performance History",
+            citadel: "Vault Performance History",
+            elon: "Vault Performance History",
+            cuban: "Vault Performance History",
+            daoFaang: "Vault Performance History",
+            moneyPrinter: "Vault Performance History",
         };
 
         // 调整折线图展示
@@ -2790,7 +2803,7 @@ class Asset extends Component {
             text: chartTitle[asset.strategyType],
             align: "left",
             floating: true,
-            y: -20,
+            y: -50,
             style: {
                 fontSize: "14px",
                 color: this.state.interestTheme.themeColors.textT,
@@ -2801,7 +2814,7 @@ class Asset extends Component {
             width: hideNav ? 300 : null,
             backgroundColor: "#292750",
             spacingLeft: 25,
-            spacingTop: 50
+            spacingTop: 70
         };
 
         options["yAxis"] = {
@@ -2845,6 +2858,9 @@ class Asset extends Component {
         const {classes} = this.props;
         return (
             <div>
+                <div className={classes.pnlDivPosition}>
+                    <span className={classes.pnlVault} style={{color: asset.pnlTextColor}}>{asset.pnl}%</span>
+                </div>
                 <div className={classes.timeRangeMain}>
                     {this.state.timeRange.map((range, index) => {
                         return <span

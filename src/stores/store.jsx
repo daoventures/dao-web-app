@@ -6319,9 +6319,9 @@ class Store {
 
   }
 
-  getAllAssetInformation = async () => {
+  getAllAssetInformation = async (network) => {
     try {
-      const url = `${config.statsProvider}vaults/ethereum/all`;
+      const url = `${config.statsProvider}vaults/${network}/all`;
       const resultString = await rp(url);
       const result = JSON.parse(resultString);
       return {
