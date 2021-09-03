@@ -116,7 +116,16 @@ const styles = (theme) => ({
         fontSize: "14px",
         lineHeight: "20px",
         color: "#FFFFFF",
-        padding: "24px"
+        padding: "24px 24px 0 24px"
+    },
+    assetNameDescription: {
+        fontFamily: "Rubik",
+        fontStyle: "normal",
+        fontWeight: "normal",
+        fontSize: "14px",
+        lineHeight: "20px",
+        color: "#FFFFFF",
+        padding: "8px 24px 0 24px"
     },
     actionsContainer: {
         paddingBottom: "12px",
@@ -415,6 +424,9 @@ const styles = (theme) => ({
         "&:first-child": {
             marginLeft: "0px",
         },
+        '& img': {
+            height: "30px"
+        }
     },
     depositButtonText: {
         fontWeight: "700",
@@ -569,23 +581,46 @@ const styles = (theme) => ({
         backgroundColor: "#191736",
         color: "#FFFFFF",
         textAlign: "center",
+        padding: "12px 16px"
     },
     depositWarningDiv: {
-        padding: "7% 10px 10px 0px",
-        color: "#FFFFFF"
+        padding: "7% 0 10px 10px",
+        color: "#FFFFFF",
+    },
+    approvalBtnBlock: {
+        display: "flex"
     },
     approvalButton: {
         color: "#FFFFFF",
-        background: "#7B25D266"
+        margin: "auto 0 auto auto",
+        background: "#7B25D266",
+        height: "25px",
+        width: "80%",
+        '& img': {
+            height: "20px"
+        },
+        '& span.MuiButton-label': {
+            fontFamily: "Rubik",
+            fontStyle: "normal",
+            fontWeight: 500,
+            fontSize: "15px",
+            lineHeight: "25px",
+            textAlign: "center",
+            letterSpacing: "1px",
+            textTransform: "uppercase",
+        }
     },
     floatRightItems: {
         float: "right"
     },
     timeRangeMain: {
+        display: "flex",
+        justifyContent: "flex-end",
         color: "#FFFFFF",
-        position: "absolute",
         zIndex: 1,
         right: "1%",
+        padding: "0px 24px 0px 24px",
+        height: "14px"
     },
     timeRangeLabel: {
         fontFamily: "Rubik",
@@ -604,25 +639,44 @@ const styles = (theme) => ({
         borderRadius: "5px"
     },
     erroredMessage: {
-        color: "red"
+        color: "red",
+        display: "flex",
+        alignItems: "center"
     },
     chartTitle: {
+        fontFamily: "Rubik",
+        fontStyle: "normal",
         color: "#FFFFFF",
-        padding: "2%",
-        fontWeight: 500
+        padding: "0 0 0 2%",
+        fontSize: "18px",
+        fontWeight: 500,
+        marginBottom: "5px"
+    },
+    assetChartDistributionBody: {
+        fontFamily: "Rubik",
+        fontStyle: "normal",
+        fontWeight: "normal",
+        fontSize: "14px",
+        lineHeight: "20px",
+        color: "#FFFFFF",
+        marginTop: "0",
+        padding: "0 0 0 2%",
     },
     pnlVault: {
         fontFamily: "Rubik",
         fontStyle: "normal",
         fontWeight: "normal",
         fontSize: "26px",
-        lineHeight: "20px"
+        lineHeight: "20px",
+        marginTop: "16px"
     },
     pnlDivPosition: {
-        position: "absolute",
-        zIndex: 1,
-        marginTop: "2%",
-        marginLeft: "2%"
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-start",
+        fontSize: "14px",
+        color: "#fff",
+        padding: "0px 24px 0px 24px"
     }
 });
 
@@ -1447,39 +1501,39 @@ class Asset extends Component {
                     {this.state.isApprovalErrored && <Grid item sm={8} xs={8}>
                         <span className={classes.erroredMessage}>Transaction denied. Please try again</span>
                     </Grid>}
-                    <Grid item sm={4} xs={4}>
+                    <Grid item sm={4} xs={4} className={classes.approvalBtnBlock}>
                         <Button className={classes.approvalButton} onClick={this.getDepositApproval}
                                 disabled={this.state.isApprovalLoading || this.state.isApprovalCompleted}>
-                            {this.state.isApprovalLoading ? <CircularProgress/> : this.state.isApprovalCompleted ?
+                            {this.state.isApprovalLoading ? <CircularProgress size="20px" /> : this.state.isApprovalCompleted ?
                                 <img src={DoneMark} alt="Done"/> : 'Approve'}
                         </Button>
                     </Grid>
                 </Grid>
             </div>}
             {this.state.isCheckingApproval && <div className={classes.erroredMessage}>
-               Checking the wallet connection <CircularProgress/>
+               Checking the wallet connection <CircularProgress size="25px"/>
             </div>
             }
             <div className={classes.depositWarningDiv}>
                 <Grid
                     container
-                    direction="column"
                     justifyContent="center"
                     alignItems="center"
                 >
-                    <Grid item sm={12} xs={4}>
+                    <Grid item sm={8} xs={12}>
                         {this.state.isDepositCompleted &&
                         <span>Your Token  has been deposited in {asset.strategy} Strategy successfully.</span>}
                         {!this.state.isDepositCompleted && this.state.isDepositErrored &&
                         <span className={classes.erroredMessage}>Failed to deposit Token in {asset.strategy} Strategy. Please try again</span>}
                     </Grid>
-                    {!this.state.isCheckingApproval && <Grid item sm={8} xs={12}>
+                    <Grid xs={12}/>
+                    {!this.state.isCheckingApproval && <Grid item sm={6} xs={8}>
                         <Button
                             className={classes.depositActionButton}
                             onClick={this.depositTokenToContract}
                             disabled={this.state.isApprovalLoading || this.state.isApprovalErrored}
                         >
-                            {this.state.isDepositLoading ? <CircularProgress/> : this.state.isDepositCompleted ?
+                            {this.state.isDepositLoading ? <CircularProgress size="30px"/> : this.state.isDepositCompleted ?
                                 <img src={DoneMark} alt="Done"/> : <span>Deposit</span>}
 
                         </Button>
@@ -1527,7 +1581,6 @@ class Asset extends Component {
             <div className={classes.depositWarningDiv}>
                 <Grid
                     container
-                    direction="column"
                     justifyContent="center"
                     alignItems="center"
                 >
@@ -1540,7 +1593,8 @@ class Asset extends Component {
                     {this.state.isWithdrawing && <Grid item sm={12} xs={12}>
                         <span>Withdrawing your {this.state.selectedCurrency} <br/> in  {asset.strategy} Strategy</span>
                     </Grid>}
-                    <Grid item sm={12} xs={12}>
+                    <Grid item xs={12}/>
+                    <Grid item sm={6} xs={8}>
                         <Button
                             className={classes.depositActionButton}
                             onClick={this.onWithdraw}
@@ -1703,9 +1757,8 @@ class Asset extends Component {
                             Cuban's Ape: USDT USDC DAI
                         </Typography>
                         <Typography
-                            className={classes.assetNameInfo}
-                            variant="text"
-                            noWrap
+                            className={classes.assetNameDescription}
+                            paragraph
                         >
                             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent pellentesque, risus nec pretium porta, sapien metus euismod lectus, vel aliquam mauris nibh et elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                         </Typography>
@@ -2182,8 +2235,9 @@ class Asset extends Component {
                         <div className={classes.sepperator}></div>
                     </Grid>
                     <Grid item xs={12}>
-                        <div className={classes.chartTitle}>
-                            <p>Asset Strategy</p> <br/>
+                        <div>
+                            <p className={classes.chartTitle}>Asset Strategy</p>
+                            <p className={classes.assetChartDistributionBody}>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent pellentesque, risus nec pretium porta.</p>
                         </div>
                     </Grid>
                     <Grid item sm={6} xs={6}>
@@ -2862,25 +2916,33 @@ class Asset extends Component {
 
         const {classes} = this.props;
         return (
-            <div>
-                <div className={classes.pnlDivPosition}>
-                    <span className={classes.pnlVault} style={{color: asset.pnlTextColor}}>{asset.pnl}%</span>
-                </div>
-                <div className={classes.timeRangeMain}>
-                    {this.state.timeRange.map((range, index) => {
-                        return <span
-                            className={classes.timeRangeLabel + (range.value === this.state.selectedTimeRange ? " " + classes.activeLabel : "")}
-                            onClick={() => this.selectRangeLabel(asset, range.value)}>
-                            {range.label}
-                        </span>
-                    })}
-                </div>
+            <>
+                <Grid
+                    container
+                    justifyContent="space-between"
+                >
+                    <Grid item xs={6} className={classes.pnlDivPosition}>
+                        {options.title.text}
+                        <span className={classes.pnlVault} style={{color: asset.pnlTextColor}}>{asset.pnl}%</span>
+                    </Grid>
+                    <Grid item xs={6} className={classes.timeRangeMain}>
+                        {this.state.timeRange.map((range, index) => {
+                            return <span
+                                className={classes.timeRangeLabel + (range.value === this.state.selectedTimeRange ? " " + classes.activeLabel : "")}
+                                onClick={() => this.selectRangeLabel(asset, range.value)}
+                            >
+                                {range.label}
+                            </span>
+                        })}
+                    </Grid>
+                </Grid>
                 <HighchartsReact
                     highcharts={Highcharts}
-                    options={options}
+                    options={{...options, title: { text: '' }}}
                     style={{margin: "auto"}}
+                    containerProps={{ className: 'asset-chart' }}
                 />
-            </div>
+            </>
         );
     };
 

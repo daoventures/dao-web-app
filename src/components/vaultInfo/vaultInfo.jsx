@@ -808,7 +808,7 @@ class Vault extends Component {
                             ...asset,
                             asset_distribution: data.data[asset.id] && data.data[asset.id].asset_distribution?data.data[asset.id].asset_distribution : [],
                             pnl,
-                            pnlTextColor: pnl <0 ? 'red': 'green'
+                            pnlTextColor: pnl <0 ? 'red': '#15C73E'
                         }
                     });
                     this.setState({assets: assetsInfo});
