@@ -1765,13 +1765,13 @@ class Asset extends Component {
                             variant="h4"
                             noWrap
                         >
-                            Cuban's Ape: USDT USDC DAI
+                            {asset.strategyInfo}
                         </Typography>
                         <Typography
                             className={classes.assetNameDescription}
                             paragraph
                         >
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent pellentesque, risus nec pretium porta, sapien metus euismod lectus, vel aliquam mauris nibh et elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                            {asset.strategyDescription}
                         </Typography>
 
                     </Grid>

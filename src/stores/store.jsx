@@ -1397,7 +1397,6 @@ class Store {
           .call({from: account.address});
 
       const ethAllowance = web3.utils.fromWei(allowance, "ether");
-      debugger;
       return {
         success: true,
         needApproval: parseFloat(ethAllowance) < parseFloat(amount)
@@ -1540,7 +1539,6 @@ class Store {
         message: "erc20address not ethereum"
       }
     }
-
     // Handle vaults with multi tokens
     try {
       if (
@@ -1564,6 +1562,47 @@ class Store {
     const erc20ABI = contractHelper.getERC20AbiByNetwork(network);
 
     let erc20Contract = new web3.eth.Contract(erc20ABI, asset.erc20address);
+
+    try {
+      const allowance = await erc20Contract.methods
+          .allowance(account.address, contract)
+          .call({from: account.address});
+
+      const ethAllowance = web3.utils.fromWei(allowance, "ether");
+      return {
+        success: true,
+        needApproval: parseFloat(ethAllowance) < parseFloat(amount)
+      }
+    } catch (error) {
+      if (error.message) {
+        console.log(error.message);
+      }
+      return {
+        success: false,
+        message: error
+      }
+    }
+
+  }
+
+  checkIsCompoundApproved = async (asset,
+                                   account,
+                                   amount,
+                                   contract) => {
+
+    const web3 = new Web3(store.getStore("web3context").library.provider);
+
+    if (asset.erc20address === "Ethereum") {
+      return {
+        success: false,
+        message: "erc20address not ethereum"
+      }
+    }
+
+    let erc20Contract = new web3.eth.Contract(
+        config.erc20ABI,
+        asset.erc20address
+    );
 
     try {
       const allowance = await erc20Contract.methods
@@ -4143,12 +4182,20 @@ class Store {
           account,
           earnAmount + vaultAmount,
           strategyAddress);
-    } else {
+    } else if (asset.strategyType === "citadel") {
       return this.checkIsCitadelApproved(
           asset,
           account,
           amount,
-          asset.vaultContractAddress,
+          strategyAddress,
+          tokenIndex)
+
+    } else if (asset.strategyType === "compound") {
+      return this.checkIsCompoundApproved(
+          asset,
+          account,
+          amount,
+          strategyAddress,
           tokenIndex)
     }
   }
