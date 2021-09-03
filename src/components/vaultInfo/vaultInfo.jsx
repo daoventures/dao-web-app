@@ -194,6 +194,7 @@ const styles = (theme) => ({
         alignItems: "center",
         flex: 1,
         flexWrap: "wrap",
+        background: "#0E0632",
         [theme.breakpoints.up("sm")]: {
             flexWrap: "nowrap",
         },
@@ -239,6 +240,7 @@ const styles = (theme) => ({
         maxWidth: "calc(100vw - 24px)",
         width: "100%",
         border: "none",
+        margin: "0 !important",
         // background: theme.themeColors.modelBack,
         background: theme.themeColors.itemBack,
         borderRadius: "0px",
@@ -465,9 +467,9 @@ const styles = (theme) => ({
     strategyContainer: {
         width: "100%",
         position: "relative",
-        borderColor: theme.themeColors.blockBorder,
-        borderWidth: "1px",
-        borderStyle: "solid",
+        // borderColor: theme.themeColors.blockBorder,
+        // borderWidth: "1px",
+        // borderStyle: "solid",
         boxShadow: "-2px 2px 40px 0px rgba(0, 0, 0, 0.05)",
         // borderRadius: '10px',
         // padding: '1rem',
@@ -600,6 +602,7 @@ const styles = (theme) => ({
         alignItems: "center",
         fontSize: "18px",
         color: theme.themeColors.textT,
+        background: "#0E0632",
         padding: "0px 24px",
         [theme.breakpoints.down("md")]: {
             padding: "0px 10px",
@@ -614,6 +617,8 @@ const styles = (theme) => ({
     accordionsummary: {
         height: "100px",
         padding: "0px 26px",
+        background: "#0E0632",
+        margin: 0,
         [theme.breakpoints.down("md")]: {
             padding: "0px 10px",
         },
@@ -1189,7 +1194,7 @@ class Vault extends Component {
         );
     };
 
-    renderStackedBlocked = (asset, showMobile) => {
+    renderStakedBlocked = (asset, showMobile) => {
         const { classes } = this.props;
 
         return (
@@ -1198,7 +1203,7 @@ class Vault extends Component {
                     variant={showMobile ? "h5" : "h5"}
                     className={classes.assetLabel2}
                 >
-                    Stacked
+                    Staked
                 </Typography>
                 <Typography
                     variant={showMobile ? "h3" : "h5"}
@@ -1357,7 +1362,7 @@ class Vault extends Component {
 
                                         <Grid item sm={2} xs={2} className={classes.gridItemColumn}>
                                             <div className={classes.showDesktop}>
-                                                {this.renderStackedBlocked(asset, false)}
+                                                {this.renderStakedBlocked(asset, false)}
                                             </div>
                                         </Grid>
                                         {/** Underlying Token Balance , Available to deposit */}

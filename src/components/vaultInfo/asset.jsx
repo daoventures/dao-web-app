@@ -458,8 +458,13 @@ const styles = (theme) => ({
         display: "flex",
         alignItems: "end",
         justifyContent: "space-between",
-        fontSize: "10px",
-        color: theme.themeColors.textT
+        color: theme.themeColors.textT,
+    },
+    labelFonts: {
+        fontFamily: "Rubik",
+        fontStyle: "normal",
+        fontWeight: "500",
+        lineHeight: "18px"
     },
     operationLabel: {
         color: theme.themeColors.textT
@@ -1699,7 +1704,7 @@ class Asset extends Component {
                         </Typography>
                         <Typography
                             className={classes.assetNameInfo}
-                            variant="p"
+                            variant="text"
                             noWrap
                         >
                             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent pellentesque, risus nec pretium porta, sapien metus euismod lectus, vel aliquam mauris nibh et elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
