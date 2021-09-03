@@ -984,7 +984,18 @@ class Asset extends Component {
     };
 
     withdrawReturned = () => {
-        this.setState({loading: false, redeemAmount: ""});
+        this.setState({
+            loading: false,
+            redeemAmount: "",
+            isWithdrawing: false,
+            isWithdrawCompleted: true,
+            isWithdrawError: false,
+        });
+        setTimeout(() => {
+            this.setState({
+                openWithdrawDialogBox: false
+            })
+        }, 2000)
     };
 
     errorReturned = () => {
@@ -2262,7 +2273,7 @@ class Asset extends Component {
                                                   style={{"backgroundColor": row.color}}>&nbsp;</span>
                                             <span>{row.label}</span>
                                         </StyledTableCell>
-                                        <StyledTableCell align="left">{row.percent} %</StyledTableCell>
+                                        <StyledTableCell align="left">{row.percent.toFixed(2)} %</StyledTableCell>
                                         <StyledTableCell align="right"
                                                          style={row.textColorStyle}>{row.changeValue}</StyledTableCell>
                                     </StyledTableRow>
