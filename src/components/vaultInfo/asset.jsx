@@ -2107,6 +2107,9 @@ class Asset extends Component {
                                 {asset.strategyType === "compound" && (
                                     <div className={classes.withdrawContainer}>
                                         <div className={classes.tradeContainer}>
+                                            <div className={classes.operationLabel}>
+                                                Withdrawal
+                                            </div>
                                             <div className={classes.balances}>
                                                 <Typography
                                                     variant="body1"
@@ -2934,7 +2937,7 @@ class Asset extends Component {
                 >
                     <Grid item xs={6} className={classes.pnlDivPosition}>
                         {options.title.text}
-                        <span className={classes.pnlVault} style={{color: asset.pnlTextColor}}>{asset.pnl}%</span>
+                        <span className={classes.pnlVault} style={{color: asset.pnlTextColor}}>{asset.pnl? asset.pnl : '0.00'}%</span>
                     </Grid>
                     <Grid item xs={6} className={classes.timeRangeMain}>
                         {this.state.timeRange.map((range, index) => {
