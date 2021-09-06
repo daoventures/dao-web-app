@@ -1152,7 +1152,7 @@ class Asset extends Component {
                         onKeyDown={isDeposit ? this.inputKeyDown : this.inputRedeemKeyDown}
                     />
                     <div className={classes.depositScaleContainer}>
-                        {isDeposit && this.isUsdVault(asset) && (
+                        {this.isUsdVault(asset) && (
                             <React.Fragment>
                                 <div className={classes.accountInfoBlock}>
                                     <div
@@ -1183,7 +1183,8 @@ class Asset extends Component {
                                 </div>
                                 {this.renderCurrencyModal(asset.symbols)}
                             </React.Fragment>
-                        )}}
+                        )}
+                        }
                     </div>
                     <div className={classes.floatRightItems}>
                         {scales.length > 0 &&
@@ -1489,7 +1490,7 @@ class Asset extends Component {
                             <TableBody>
                                 <StyledTableRow key={"approveDepositValue"}>
                                     <StyledTableCellDeposit align="left">Deposit</StyledTableCellDeposit>
-                                    <StyledTableCellDeposit align="right">{99}</StyledTableCellDeposit>
+                                    <StyledTableCellDeposit align="right">{this.state.amount}</StyledTableCellDeposit>
                                 </StyledTableRow>
                                 <StyledTableRow key={"approveDepositFee"}>
                                     <StyledTableCellDeposit align="left">Fee(1%)</StyledTableCellDeposit>
@@ -1497,7 +1498,7 @@ class Asset extends Component {
                                 </StyledTableRow>
                                 <StyledTableRow key={"approveDepositTotal"}>
                                     <StyledTableCellDeposit align="left">TOTAL</StyledTableCellDeposit>
-                                    <StyledTableCellDeposit align="right">100 {asset.symbol}</StyledTableCellDeposit>
+                                    <StyledTableCellDeposit align="right">{this.state.amount} {asset.symbol}</StyledTableCellDeposit>
                                 </StyledTableRow>
                             </TableBody>
                         </Table>
@@ -2138,7 +2139,7 @@ class Asset extends Component {
                                                     {asset.vaultSymbol}){" "}
                                                 </Typography>
                                             </div>
-                                            {this.renderDepositWithdrawInput(false)}
+                                            {this.renderDepositWithdrawInput(false, asset)}
                                         </div>
                                     </div>
                                 )}
@@ -2200,7 +2201,7 @@ class Asset extends Component {
                                                     )}
                                                 </Typography>
                                             </div>
-                                            {this.renderDepositWithdrawInput(false)}
+                                            {this.renderDepositWithdrawInput(false, asset)}
                                         </div>
                                     </div>
                                 )}
