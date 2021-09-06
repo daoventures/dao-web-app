@@ -187,7 +187,7 @@ const ethereum = [
     isPopularItem: false,
     // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
   },
-  {
+  /*{
     id: "USDT",
     name: "USDT",
     symbol: "USDT",
@@ -432,7 +432,7 @@ const ethereum = [
     tvlKey: "cUSDT_tvl",
     infoLink: INFO_LINK.COMPOUND,
     isPopularItem: false,
-  },
+  },*/
 ];
 
 export default ethereum;

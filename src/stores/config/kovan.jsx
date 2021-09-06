@@ -187,7 +187,7 @@ const kovan = [
     isPopularItem: false,
     // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
   },
-  {
+ /* {
     id: "USDT",
     name: "USDT",
     symbol: "USDT",
@@ -418,7 +418,7 @@ const kovan = [
     tvlKey: "cUSDT_tvl",
     infoLink: INFO_LINK.COMPOUND,
     isPopularItem: false,
-  },
+  },*/
 ];
 
 export default kovan;

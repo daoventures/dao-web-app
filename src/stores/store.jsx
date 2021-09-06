@@ -1632,7 +1632,6 @@ class Store {
         message: error
       }
     }
-
   }
 
   _checkApprovalWaitForConfirmation = async (
@@ -4244,6 +4243,8 @@ class Store {
     const {asset, earnAmount, vaultAmount, amount, tokenIndex} =
         payload;
 
+    debugger;
+
     const web3 = await this._getWeb3Provider();
     if (!web3) {
       return null;
@@ -4263,14 +4264,6 @@ class Store {
           account,
           earnAmount + vaultAmount,
           strategyAddress);
-    } else if (asset.strategyType === "citadel") {
-      return this.checkIsCitadelApproved(
-          asset,
-          account,
-          amount,
-          strategyAddress,
-          tokenIndex)
-
     } else if (asset.strategyType === "compound") {
       return this.checkIsCompoundApproved(
           asset,
@@ -4278,6 +4271,46 @@ class Store {
           amount,
           strategyAddress,
           tokenIndex)
+    } else if (asset.strategyType === "citadel") {
+      return this.checkIsCitadelApproved(
+          asset,
+          account,
+          amount,
+          asset.vaultContractAddress,
+          tokenIndex);
+
+    } else if (asset.strategyType === "elon") {
+      return this.checkIsCitadelApproved(
+          asset,
+          account,
+          amount,
+          asset.vaultContractAddress,
+          tokenIndex)
+
+    }  else if (asset.strategyType === "cuban") {
+      return this.checkIsCitadelApproved(
+          asset,
+          account,
+          amount,
+          asset.vaultContractAddress,
+          tokenIndex)
+
+    } else if (asset.strategyType === "daoFaang") {
+      return this.checkIsCitadelApproved(
+          asset,
+          account,
+          amount,
+          asset.vaultContractAddress,
+          tokenIndex)
+
+    } else if (asset.strategyType === "moneyPrinter") {
+      return this.checkIsCitadelApproved(
+          asset,
+          account,
+          amount,
+          asset.vaultContractAddress,
+          tokenIndex)
+
     }
   }
 
@@ -4287,6 +4320,8 @@ class Store {
     //  Token Index USDT = 0, USDC = 1, DAI = 2
     const {asset, earnAmount, vaultAmount, amount, tokenIndex} =
         payload.content;
+
+    debugger;
 
     const web3 = await this._getWeb3Provider();
     if (!web3) {
