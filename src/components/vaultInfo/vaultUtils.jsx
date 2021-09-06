@@ -104,6 +104,10 @@ export const getDataByStrategy = (strategyInfo) => {
 }
 
 export const getMappedData = (data) => {
+
+    if (data.length === 0) {
+        return [];
+    }
     let strategyPostData = [];
 
     data.forEach((strategyData) => {

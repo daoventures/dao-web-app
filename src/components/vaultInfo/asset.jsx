@@ -820,6 +820,7 @@ class Asset extends Component {
 
     componentDidMount() {
         window.addEventListener("resize", this.resize.bind(this));
+        this.selectRangeLabel(this.props.asset, '7d')
     }
 
     componentWillUnmount() {
@@ -861,7 +862,7 @@ class Asset extends Component {
         let apyResponseData = await store.getHistoricDataOfVault(asset.id, value);
 
         if (apyResponseData.success) {
-            let mappedHistoricalData = getMappedData(apyResponseData.data, asset.id)
+            let mappedHistoricalData = getMappedData(apyResponseData.data || [], asset.id)
             this.setState({vaultAssetHistoricalData: mappedHistoricalData});
         }
     }
@@ -2252,7 +2253,7 @@ class Asset extends Component {
                     <Grid item xs={12}>
                         <div>
                             <p className={classes.chartTitle}>Asset Strategy</p>
-                            <p className={classes.assetChartDistributionBody}>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent pellentesque, risus nec pretium porta.</p>
+                            <p className={classes.assetChartDistributionBody}> {asset.strategyInfo}</p>
                         </div>
                     </Grid>
                     <Grid item sm={6} xs={6}>

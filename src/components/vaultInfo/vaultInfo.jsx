@@ -765,7 +765,6 @@ class Vault extends Component {
             DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED,
             this.handleHappyHourCompleted
         );
-        this.getAllAssetInformation();
     }
 
     componentWillUnmount() {
@@ -797,28 +796,6 @@ class Vault extends Component {
         emitter.removeListener(VAULT_BALANCES_FULL_RETURNED, this.networkChanged);
     }
 
-    getAllAssetInformation = () => {
-        store.getAllAssetInformation(networkObj[this.state.networkId])
-            .then((data) => {
-                if(data.success) {
-                    let assetsInfo = store.getStore("vaultAssets");
-                    assetsInfo = assetsInfo.map((asset) => {
-                        let pnl = data.data[asset.id] && data.data[asset.id].pnl? data.data[asset.id].pnl.toFixed(2) : asset.pnl;
-                        return {
-                            ...asset,
-                            asset_distribution: data.data[asset.id] && data.data[asset.id].asset_distribution?data.data[asset.id].asset_distribution : [],
-                            pnl,
-                            pnlTextColor: pnl <0 ? 'red': '#15C73E'
-                        }
-                    });
-                    this.setState({assets: assetsInfo});
-                }
-            })
-            .catch((Err) => {
-
-            });
-    }
-
     handleHappyHour = (payload) => {
         this.setState({
             happyHour: payload.happyHour,
@@ -843,8 +820,12 @@ class Vault extends Component {
         });
     };
 
-    balancesReturned = (balances) => {
-        this.getAllAssetInformation();
+    balancesReturned = (returnedAssets) => {
+        this.setState({assets: returnedAssets});
+        // dispatcher.dispatch({
+        //     type: GET_STRATEGY_BALANCES_FULL,
+        //     content: { interval: "30d" },
+        // });
     };
 
     connectionConnected = () => {
@@ -1618,7 +1599,7 @@ class Vault extends Component {
         const { basedOn } = this.props;
         // To calculate APY (Vault + Earn divide by 2 : Estimated)
         // Compound APY is using compoundApy
-        if (asset && asset.stats) {
+        if (asset && asset.stats && asset.stats.pnl) {
             // if (asset.strategyType === "compound") {
             //   if (asset.stats.compoundApy) {
             //     return asset.stats.compoundApy;

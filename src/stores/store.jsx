@@ -134,6 +134,15 @@ const Emitter = require("events").EventEmitter;
 const dispatcher = new Dispatcher();
 const emitter = new Emitter();
 
+const networkObj = {
+  1: "ethereum",
+  4: "ethereum",
+  56: "Binance",
+  42: "ethereum",
+  80001: "polygon",
+  137: "polygon"
+}
+
 class Store {
   constructor() {
     this.store = {
@@ -423,7 +432,7 @@ class Store {
             this.withdrawBoth(payload);
             break;
           case GET_STRATEGY_BALANCES_FULL:
-            this.getStrategyBalancesFull(payload);
+            this.getStrategyBalancesFullV2(payload);
             break;
           // eslint-disable-next-line no-fallthrough
           case TOGGLE_THEME:
@@ -2160,10 +2169,17 @@ class Store {
       "moneyPrinter",
     ];
     if (!strategyTypes.includes(asset.strategyType)) {
-      return callback(null, {
+      callback(null, {
         balances: [0, 0, 0],
         sumBalances: 0,
       });
+      return {
+        success: false,
+        data: {
+          balances: [0, 0, 0],
+          sumBalances: 0,
+        }
+      }
     }
 
     const coinsInUSDPrice = await this._getUSDPrices();
@@ -2182,10 +2198,10 @@ class Store {
       );
 
       try {
-        var balance = await erc20Contract.methods
+        let balance = await erc20Contract.methods
           .balanceOf(account.address)
           .call({ from: account.address });
-        var decimals = await erc20Contract.methods
+        let decimals = await erc20Contract.methods
           .decimals()
           .call({ from: account.address });
         balance = parseFloat(balance) / 10 ** decimals;
@@ -2193,7 +2209,11 @@ class Store {
         balances.push(parseFloat(balance));
       } catch (ex) {
         console.log("Asset: " + asset.id, ex);
-        return callback(ex);
+        callback(ex);
+        return {
+          success: false,
+          data: ex
+        }
       }
     }
 
@@ -2203,6 +2223,11 @@ class Store {
       sumBalances: balances.reduce((a, b) => a + b, 0),
     };
     callback(null, returnObj);
+
+    return {
+      success: true,
+      data: returnObj
+    }
   };
 
   _getBalance = async (web3, asset, account, callback) => {
@@ -3604,7 +3629,11 @@ class Store {
 
   _getBalances = async (web3, asset, account, callback) => {
     if (asset.vaultContractAddress === null) {
-      return callback(null, 0);
+       callback(null, 0);
+      return {
+        success: true,
+        data: 0
+      }
     }
     if (asset.strategyType === "yearn") {
       let vaultContract = new web3.eth.Contract(
@@ -3647,6 +3676,19 @@ class Store {
           : parseFloat(vaultBalance),
         strategyBalance: 0,
       });
+
+      return {
+        success: true,
+        data: {
+          earnBalance: isNaN(parseFloat(earnBalance))
+              ? 0
+              : parseFloat(earnBalance),
+          vaultBalance: isNaN(parseFloat(vaultBalance))
+              ? 0
+              : parseFloat(vaultBalance),
+          strategyBalance: 0,
+        }
+      }
     } else if (asset.strategyType === "compound") {
       let compoundContract = new web3.eth.Contract(
         asset.vaultContractABI,
@@ -3670,6 +3712,15 @@ class Store {
         vaultBalance: 0,
         strategyBalance: balance,
       });
+
+      return {
+        success: true,
+        data: {
+          earnBalance: 0,
+          vaultBalance: 0,
+          strategyBalance: balance,
+        }
+      }
     } else if (
       asset.strategyType === "citadel" ||
       asset.strategyType === "elon" ||
@@ -3695,6 +3746,15 @@ class Store {
         strategyBalance: depositedShares,
         depositedSharesInUSD: depositedSharesInUSD,
       });
+      return {
+        success: true,
+        data: {
+          earnBalance: 0,
+          vaultBalance: 0,
+          strategyBalance: depositedShares,
+          depositedSharesInUSD: depositedSharesInUSD,
+        }
+      }
     } else if (asset.strategyType === "daoFaang") {
       const network = store.getStore("network");
       const vaultContract = new web3.eth.Contract(
@@ -3730,6 +3790,16 @@ class Store {
         strategyBalance: depositedShares,
         depositedSharesInUSD: depositedSharesInUSD,
       });
+
+      return {
+        success: true,
+        data: {
+          earnBalance: 0,
+          vaultBalance: 0,
+          strategyBalance: depositedShares,
+          depositedSharesInUSD: depositedSharesInUSD,
+        }
+      }
     } else if (asset.strategyType === "moneyPrinter") {
       const network = store.getStore("network");
       const vaultContract = new web3.eth.Contract(
@@ -3765,6 +3835,17 @@ class Store {
         strategyBalance: depositedShares,
         depositedSharesInUSD: depositedSharesInUSD,
       });
+
+      return {
+        success: true,
+        data: {
+          earnBalance: 0,
+          vaultBalance: 0,
+          strategyBalance: depositedShares,
+          depositedSharesInUSD: depositedSharesInUSD,
+        }
+      }
+
     }
   };
 
@@ -5879,6 +5960,42 @@ class Store {
     }
   };
 
+  _getCompoundMarketRate = async (web3,
+                                  asset) => {
+    try {
+
+      if(asset.strategyType === "compound") {
+        return {
+          success: true,
+          exchangeRateCurrent: 0
+        };
+      }
+      const cTokenDecimals = 8; // all cTokens have 8 decimal places
+      const compoundContract = new web3.eth.Contract(
+          asset.cAbi,
+          asset.cTokenAddress
+      );
+
+      // Exchange Rate
+      const exchangeRateCurrent = await compoundContract.methods
+          .exchangeRateCurrent()
+          .call();
+
+      const mantissa = 18 + asset.decimals - cTokenDecimals;
+
+      return {
+        success: true,
+        exchangeRateCurrent: parseFloat(exchangeRateCurrent) / Math.pow(10, mantissa)
+      };
+    } catch (Err) {
+      return {
+        success: false,
+        exchangeRateCurrent: 0
+      }
+    }
+
+  }
+
   getUSDPrices = async () => {
     try {
       const priceJSON = await this._getUSDPrices();
@@ -7113,6 +7230,66 @@ class Store {
       }
     );
   };
+
+  getStrategyBalancesFullV2 = async (payload) => {
+    const network = store.getStore("network");
+    const account = store.getStore("account");
+    let assets = this._getDefaultValues(network).vaultAssets;
+    store.setStore({ vaultAssets: assets });
+    console.log('start time', new Date());
+    emitter.emit(STRATEGY_BALANCES_FULL_RETURNED, assets);
+
+    if (!account || !account.address) {
+      return false;
+    }
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      return null;
+    }
+    await this.getUSDPrices();
+
+    let assetApiInfo = await this.getAllAssetInformation(networkObj[network]);
+
+    assets.forEach(async (asset, i) => {
+      let _promises = [];
+      _promises.push(this._getERC20Balances(web3, asset, account, () => {}));
+      _promises.push(this._getBalances(web3, asset, account, () => {}))
+      _promises.push(this._getCompoundMarketRate(web3, asset));
+
+      let assetApiData = assetApiInfo.data[asset.id] ? assetApiInfo.data[asset.id]: {};
+
+      let data = await Promise.all(_promises);
+
+      let newAssetKeys = {
+        balance: data[0].data.sumBalances,
+        strategyBalance: data[1].data.strategyBalance,
+        vaultBalance: data[1].data.vaultBalance,
+        earnBalance: data[1].data.earnBalance,
+        depositedSharesInUSD: data[1].data.depositedSharesInUSD,
+        stats: {},
+        compoundExchangeRate: data[2].exchangeRateCurrent,
+        earnApr: 0,
+        historicalAPY: [],
+        tvl: assetApiData.tvl,
+        balances: data[0].data.balances,
+        priceInUSD: data[0].data.priceInUSD,
+        sumBalances: data[0].data.sumBalances,
+        daomineApy: assetApiData.daomineApy,
+        pnlTextColor: assetApiData.pnl <0 ? 'red': '#15C73E',
+        asset_distribution: assetApiData.asset_distribution ? assetApiData.asset_distribution : []
+      }
+      asset = {
+        ...asset,
+        ...newAssetKeys
+      }
+      assets[i] = asset;
+      store.setStore({ vaultAssets: assets });
+
+      emitter.emit(STRATEGY_BALANCES_FULL_RETURNED, assets);
+      return asset;
+    })
+
+  }
 
   _getUserDepositForDAOmine = async (
     daoMineContract,
