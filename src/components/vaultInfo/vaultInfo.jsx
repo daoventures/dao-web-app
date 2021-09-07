@@ -1043,7 +1043,7 @@ class Vault extends Component {
         return showMobile ? (
             <React.Fragment>
                 <Typography variant={"h5"} className={classes.assetLabel2}>
-                    YEARLY GROWTH
+                    7d PNL
                 </Typography>
                 <Typography variant={"h3"} noWrap className={classes.assetLabel1}>
                     {/* {this.isUsdVault(asset) && (
@@ -1082,7 +1082,7 @@ class Vault extends Component {
             </Typography> */}
 
                         <Typography variant={"h5"} className={classes.assetLabel2}>
-                            YEARLY GROWTH
+                            7d PNL
                         </Typography>
                     </div>
                 </div>

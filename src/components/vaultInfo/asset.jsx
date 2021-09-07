@@ -2946,7 +2946,7 @@ class Asset extends Component {
                 >
                     <Grid item xs={6} className={classes.pnlDivPosition}>
                         {options.title.text}
-                        <span className={classes.pnlVault} style={{color: asset.pnlTextColor}}>{asset.pnl? asset.pnl : '0.00'}%</span>
+                        <span className={classes.pnlVault} style={{color: asset.pnlTextColor}}>{asset.pnl? asset.pnl.toFixed(2) : '0.00'}%</span>
                     </Grid>
                     <Grid item xs={6} className={classes.timeRangeMain}>
                         {this.state.timeRange.map((range, index) => {
