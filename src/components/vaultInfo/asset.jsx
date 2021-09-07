@@ -1161,7 +1161,7 @@ class Asset extends Component {
                         value={isDeposit ? amount : redeemAmountInUsd}
                         error={isDeposit ? amountError : redeemAmountError}
                         onChange={isDeposit ? this.onChangeDeposit : this.onChange}
-                        disabled={loading || (!(isDeposit? asset.isDepositEnabled :  asset.isWithdrawEnabled))}
+                        disabled={loading || (!(isDeposit ? asset.isDepositEnabled : asset.isWithdrawEnabled))}
                         placeholder="0.00"
                         variant="outlined"
                         onKeyDown={isDeposit ? this.inputKeyDown : this.inputRedeemKeyDown}
@@ -1517,7 +1517,8 @@ class Asset extends Component {
                                 </StyledTableRow>
                                 <StyledTableRow key={"approveDepositTotal"}>
                                     <StyledTableCellDeposit align="left">TOTAL</StyledTableCellDeposit>
-                                    <StyledTableCellDeposit align="right">{this.state.amount} {asset.symbol}</StyledTableCellDeposit>
+                                    <StyledTableCellDeposit
+                                        align="right">{this.state.amount} {asset.symbol}</StyledTableCellDeposit>
                                 </StyledTableRow>
                             </TableBody>
                         </Table>
@@ -1535,14 +1536,15 @@ class Asset extends Component {
                     <Grid item sm={4} xs={4} className={classes.approvalBtnBlock}>
                         <Button className={classes.approvalButton} onClick={this.getDepositApproval}
                                 disabled={this.state.isApprovalLoading || this.state.isApprovalCompleted}>
-                            {this.state.isApprovalLoading ? <CircularProgress size="20px" /> : this.state.isApprovalCompleted ?
-                                <img src={DoneMark} alt="Done"/> : 'Approve'}
+                            {this.state.isApprovalLoading ?
+                                <CircularProgress color="#FFFFFF" size="20px"/> : this.state.isApprovalCompleted ?
+                                    <img src={DoneMark} alt="Done"/> : 'Approve'}
                         </Button>
                     </Grid>
                 </Grid>
             </div>}
             {this.state.isCheckingApproval && <div className={classes.erroredMessage}>
-               Checking the wallet connection <CircularProgress size="25px"/>
+                Checking the wallet connection <CircularProgress color="#FFFFFF" size="25px"/>
             </div>
             }
             <div className={classes.depositWarningDiv}>
@@ -1564,8 +1566,9 @@ class Asset extends Component {
                             onClick={this.depositTokenToContract}
                             disabled={this.state.isApprovalLoading || this.state.isApprovalErrored}
                         >
-                            {this.state.isDepositLoading ? <CircularProgress color="#FFFFFF" size="30px"/> : this.state.isDepositCompleted ?
-                                <img src={DoneMark} alt="Done"/> : <span>Deposit</span>}
+                            {this.state.isDepositLoading ?
+                                <CircularProgress color="#FFFFFF" size="30px"/> : this.state.isDepositCompleted ?
+                                    <img src={DoneMark} alt="Done"/> : <span>Deposit</span>}
 
                         </Button>
                     </Grid>}
@@ -1616,13 +1619,14 @@ class Asset extends Component {
                     alignItems="center"
                 >
                     {this.state.isWithdrawError && !this.state.isWithdrawCompleted && <Grid item sm={12} xs={12}>
-                        <span className={classes.erroredMessage}>Failed to withdraw {this.state.selectedCurrency} <br/> from  {asset.strategy} Strategy. <br/>Please try again</span>
+                        <span className={classes.erroredMessage}>Failed to withdraw {this.state.selectedCurrency}
+                            <br/> from {asset.strategy} Strategy. <br/>Please try again</span>
                     </Grid>}
                     {this.state.isWithdrawCompleted && <Grid item sm={12} xs={12}>
-                        <span>Your {this.state.selectedCurrency}  has been withdrawn <br/>from {asset.strategy} Strategy <br/>successfully.</span>
+                        <span>Your {this.state.selectedCurrency} has been withdrawn <br/>from {asset.strategy} Strategy <br/>successfully.</span>
                     </Grid>}
                     {this.state.isWithdrawing && <Grid item sm={12} xs={12}>
-                        <span>Withdrawing your {this.state.selectedCurrency} <br/> in  {asset.strategy} Strategy</span>
+                        <span>Withdrawing your {this.state.selectedCurrency} <br/> in {asset.strategy} Strategy</span>
                     </Grid>}
                     <Grid item xs={12}/>
                     <Grid item sm={6} xs={8}>
@@ -1630,8 +1634,9 @@ class Asset extends Component {
                             className={classes.depositActionButton}
                             onClick={this.onWithdraw}
                         >
-                            {this.state.isWithdrawing ? <CircularProgress/> : this.state.isWithdrawCompleted ?
-                                <img src={DoneMark} alt="Done"/> : <span>Withdraw</span>}
+                            {this.state.isWithdrawing ?
+                                <CircularProgress color="#FFFFFF"/> : this.state.isWithdrawCompleted ?
+                                    <img src={DoneMark} alt="Done"/> : <span>Withdraw</span>}
 
                         </Button>
                     </Grid>
@@ -1774,7 +1779,7 @@ class Asset extends Component {
             scales
         } = this.state;
 
-        const AssetInfo = getAssetData(asset.asset_distribution? asset.asset_distribution: []);
+        const AssetInfo = getAssetData(asset.asset_distribution ? asset.asset_distribution : []);
 
         return (
             <div className={classes.vaultContainer}>
@@ -2266,7 +2271,7 @@ class Asset extends Component {
                     <Grid item xs={12}>
                         {this.renderChart(asset)}
                     </Grid>
-                     <Grid item xs={12}>
+                    <Grid item xs={12}>
                         <div className={classes.sepperator}></div>
                     </Grid>
                     <Grid item xs={12}>
@@ -2703,10 +2708,10 @@ class Asset extends Component {
                     rules: [
                         {
                             condition: {
-                                maxWidth: 450,
+                                maxWidth: 300,
                                 chartOptions: {
                                     chart: {
-                                        width: 300,
+                                        width: 150,
                                     },
                                 },
                             },
@@ -2738,10 +2743,10 @@ class Asset extends Component {
                     rules: [
                         {
                             condition: {
-                                maxWidth: 450,
+                                maxWidth: 300,
                                 chartOptions: {
                                     chart: {
-                                        width: 300,
+                                        width: 150,
                                     },
                                 },
                             },
@@ -2773,10 +2778,10 @@ class Asset extends Component {
                     rules: [
                         {
                             condition: {
-                                maxWidth: 450,
+                                maxWidth: 300,
                                 chartOptions: {
                                     chart: {
-                                        width: 300,
+                                        width: 150,
                                     },
                                 },
                             },
@@ -2819,10 +2824,10 @@ class Asset extends Component {
                     rules: [
                         {
                             condition: {
-                                maxWidth: 450,
+                                maxWidth: 300,
                                 chartOptions: {
                                     chart: {
-                                        width: 300,
+                                        width: 150,
                                     },
                                 },
                             },
@@ -2958,7 +2963,8 @@ class Asset extends Component {
                 >
                     <Grid item xs={6} className={classes.pnlDivPosition}>
                         {options.title.text}
-                        <span className={classes.pnlVault} style={{color: asset.pnlTextColor}}>{asset.pnl? asset.pnl.toFixed(2) : '0.00'}%</span>
+                        <span className={classes.pnlVault}
+                              style={{color: asset.pnlTextColor}}>{asset.pnl ? asset.pnl.toFixed(2) : '0.00'}%</span>
                     </Grid>
                     <Grid item xs={6} className={classes.timeRangeMain}>
                         {this.state.timeRange.map((range, index) => {
@@ -2973,9 +2979,9 @@ class Asset extends Component {
                 </Grid>
                 <HighchartsReact
                     highcharts={Highcharts}
-                    options={{...options, title: { text: '' }}}
+                    options={{...options, title: {text: ''}}}
                     style={{margin: "auto"}}
-                    containerProps={{ className: 'asset-chart' }}
+                    containerProps={{className: 'asset-chart'}}
                 />
             </>
         );
@@ -3114,7 +3120,7 @@ class Asset extends Component {
 
         val[event.target.id] = event.target.value;
 
-        let assetTokenAmount  =event.target.value * ((balance/10 ** decimals)/priceInUsd);
+        let assetTokenAmount = event.target.value * ((balance / 10 ** decimals) / priceInUsd);
 
         assetTokenAmount = (
             Math.floor(assetTokenAmount * 10000) /
@@ -3672,7 +3678,7 @@ class Asset extends Component {
             redeemAmount: amount.toFixed(4),
             // redeemCoins: ,
             redeemAmountPercent: percent,
-            redeemAmountInUsd: (priceInUsd * percent/100).toFixed(4),
+            redeemAmountInUsd: (priceInUsd * percent / 100).toFixed(4),
             redeemAmountError: false,
             withdrawErrorMessage: "",
         });

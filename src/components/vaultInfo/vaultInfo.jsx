@@ -645,7 +645,7 @@ const styles = (theme) => ({
         fontSize: "18px",
         wordWrap: "break-word",
         color: theme.themeColors.textT,
-        [theme.breakpoints.down("md")]: {
+        [theme.breakpoints.down("lg")]: {
             fontSize: "12px",
         },
     },
@@ -653,13 +653,13 @@ const styles = (theme) => ({
         display: "block",
         fontSize: "14px",
         color: theme.themeColors.textP,
-        [theme.breakpoints.down("md")]: {
+        [theme.breakpoints.down("lg")]: {
             fontSize: "10px",
         },
     },
     assetIconImg: {
         height: "50px",
-        [theme.breakpoints.down("md")]: {
+        [theme.breakpoints.down("lg")]: {
             height: "30px",
         },
     },
