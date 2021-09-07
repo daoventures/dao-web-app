@@ -113,7 +113,7 @@ const styles = (theme) => ({
         fontFamily: "Rubik",
         fontStyle: "normal",
         fontWeight: "normal",
-        fontSize: "14px",
+        fontSize: "18px",
         lineHeight: "20px",
         color: "#FFFFFF",
         padding: "24px 24px 0 24px"
@@ -677,6 +677,9 @@ const styles = (theme) => ({
         fontSize: "14px",
         color: "#fff",
         padding: "0px 24px 0px 24px"
+    },
+    withdrawTextPadding: {
+        padding: "17px"
     }
 });
 
@@ -1586,7 +1589,7 @@ class Asset extends Component {
                             </TableHead>
                         </Table>
                     </Grid>
-                    <Grid item sm={12} xs={12}>
+                    <Grid item sm={12} xs={12} className={classes.withdrawTextPadding}>
                         *Final amount might differ after the 20% profit sharing fee
                     </Grid>
                 </Grid>
@@ -3507,6 +3510,7 @@ class Asset extends Component {
                         vaultAmount: redeemAmount.toString(),
                         amount: "0",
                         asset: asset,
+                        tokenIndex
                     },
                 });
             }

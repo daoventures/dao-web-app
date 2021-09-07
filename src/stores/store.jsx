@@ -4243,8 +4243,6 @@ class Store {
     const {asset, earnAmount, vaultAmount, amount, tokenIndex} =
         payload;
 
-    debugger;
-
     const web3 = await this._getWeb3Provider();
     if (!web3) {
       return null;
@@ -4320,8 +4318,6 @@ class Store {
     //  Token Index USDT = 0, USDC = 1, DAI = 2
     const {asset, earnAmount, vaultAmount, amount, tokenIndex} =
         payload.content;
-
-    debugger;
 
     const web3 = await this._getWeb3Provider();
     if (!web3) {
