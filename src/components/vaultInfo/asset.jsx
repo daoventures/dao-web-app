@@ -2280,7 +2280,7 @@ class Asset extends Component {
                             <p className={classes.assetChartDistributionBody}> {asset.strategyInfo}</p>
                         </div>
                     </Grid>
-                    <Grid item sm={6} xs={6}>
+                    <Grid item sm={6} xs={12}>
                         <PieChart
                             data={AssetInfo}
                         />
@@ -3123,9 +3123,9 @@ class Asset extends Component {
         let assetTokenAmount = event.target.value * ((balance / 10 ** decimals) / priceInUsd);
 
         assetTokenAmount = (
-            Math.floor(assetTokenAmount * 10000) /
-            10000
-        ).toFixed(4)
+            Math.floor(assetTokenAmount * 10 ** 8) /
+            10 ** 8
+        ).toFixed(8)
 
         this.verifyWithdrawInput(assetTokenAmount, event.target.id);
 

@@ -646,7 +646,16 @@ const styles = (theme) => ({
         wordWrap: "break-word",
         color: theme.themeColors.textT,
         [theme.breakpoints.down("lg")]: {
+            fontSize: "14px",
+        },
+        [theme.breakpoints.down("md")]: {
             fontSize: "12px",
+        },
+        [theme.breakpoints.down("sm")]: {
+            fontSize: "10px",
+        },
+        [theme.breakpoints.down("xs")]: {
+            fontSize: "6px",
         },
     },
     assetLabel2: {
@@ -654,13 +663,31 @@ const styles = (theme) => ({
         fontSize: "14px",
         color: theme.themeColors.textP,
         [theme.breakpoints.down("lg")]: {
+            fontSize: "12px",
+        },
+        [theme.breakpoints.down("md")]: {
             fontSize: "10px",
+        },
+        [theme.breakpoints.down("sm")]: {
+            fontSize: "8px",
+        },
+        [theme.breakpoints.down("xs")]: {
+            fontSize: "7px",
         },
     },
     assetIconImg: {
         height: "50px",
         [theme.breakpoints.down("lg")]: {
+            height: "40px",
+        },
+        [theme.breakpoints.down("md")]: {
             height: "30px",
+        },
+        [theme.breakpoints.down("sm")]: {
+            height: "25px",
+        },
+        [theme.breakpoints.down("xs")]: {
+            height: "20px",
         },
     },
     dropDownIcon: {
@@ -1262,7 +1289,7 @@ class Vault extends Component {
                 return (
                     <div key={index} className={classes.strategyContainer}>
                         <Grid container className={classes.itemTop}>
-                            <Grid item sm={12} xs={8} className={classes.itemTitle}>
+                            <Grid item sm={12} xs={12} className={classes.itemTitle}>
                                 <Typography className={classes.itemTitleText} variant="p">
                                     {asset.strategy}
                                 </Typography>
@@ -1284,7 +1311,7 @@ class Vault extends Component {
                                 {/*        : this.renderPopularIcon(asset)*/}
                                 {/*    : null}*/}
                             </Grid>
-                            <RiskLevelLabel risk={asset.risk}/>
+                            {/*<RiskLevelLabel risk={asset.risk}/>*/}
                         </Grid>
                         <Accordion
                             className={classes.expansionPanel}
@@ -1401,7 +1428,7 @@ class Vault extends Component {
                                                 </div>
                                             )}
                                         </Grid>
-                                        <Grid item sm={3} md={3} xs={2} className={classes.gridItemColumn}>
+                                        <Grid item sm={5} md={5} xs={5} className={classes.gridItemColumn}>
                                             <div >
                                                 {this.renderAvailableForDeposit(asset, false)}
                                             </div>
