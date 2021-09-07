@@ -1043,19 +1043,16 @@ class Vault extends Component {
         return showMobile ? (
             <React.Fragment>
                 <Typography variant={"h5"} className={classes.assetLabel2}>
-                    {
-                        (asset.strategyType === "citadel" || asset.strategyType === "daoFaang")
-                            ? "7d PnL"
-                            : (this.isLogoVault(asset) && asset.strategyType !== "moneyPrinter")
-                            ? "YTD Performance"
-                            : "Yearly Growth"
-                    }
+                    YEARLY GROWTH
                 </Typography>
                 <Typography variant={"h3"} noWrap className={classes.assetLabel1}>
                     {/* {this.isUsdVault(asset) && (
             <Typography variant={"caption"}>est.&nbsp;</Typography>
           )} */}
-                    {asset.strategyType === "citadel" || asset.strategyType === "daoFaang"
+                    {asset.strategyType === "citadel" || asset.strategyType === "daoFaang"  ||
+                    asset.strategyType === "elon" ||
+                    asset.strategyType === "cuban" ||
+                    asset.strategyType === "moneyPrinter"
                         ? this._get7dPNL(asset)
                         : this._getAPY(asset)}
                 </Typography>
@@ -1085,13 +1082,7 @@ class Vault extends Component {
             </Typography> */}
 
                         <Typography variant={"h5"} className={classes.assetLabel2}>
-                            {
-                                (asset.strategyType === "citadel" || asset.strategyType === "daoFaang")
-                                    ? "7d PnL"
-                                    : (this.isLogoVault(asset) && asset.strategyType !== "moneyPrinter")
-                                    ? "YTD Performance"
-                                    : "Yearly Growth"
-                            }
+                            YEARLY GROWTH
                         </Typography>
                     </div>
                 </div>
@@ -1102,7 +1093,10 @@ class Vault extends Component {
                 <Typography variant={"caption"}>est.&nbsp;</Typography>
               )} */}
                             {asset.strategyType === "citadel" ||
-                            asset.strategyType === "daoFaang"
+                            asset.strategyType === "daoFaang"  ||
+                            asset.strategyType === "elon" ||
+                            asset.strategyType === "cuban" ||
+                            asset.strategyType === "moneyPrinter"
                                 ? this._get7dPNL(asset)
                                 : this._getAPY(asset)}{" "}
                         </Typography>
@@ -1627,12 +1621,12 @@ class Vault extends Component {
             //       return (asset.apy + parseFloat(asset.earnApr) * 100) / 2;
             //   }
             // } else if (asset.strategyType === "citadel") {
-            if (
+            if ( asset.pnl && (
                 asset.strategyType === "citadel" ||
                 asset.strategyType === "daoFaang" ||
                 asset.strategyType === "elon" ||
                 asset.strategyType === "cuban" ||
-                asset.strategyType === "moneyPrinter"
+                asset.strategyType === "moneyPrinter")
             ) {
 
                 return (asset.pnl * 100).toFixed(2) + "%";
@@ -1649,7 +1643,7 @@ class Vault extends Component {
             //   return asset.stats.faangApy;
             // }
         // }
-        return 0;
+        return 0 +'%';
     };
 
     calculateYearnAPY = (earnAPR, vaultAPY) => {
