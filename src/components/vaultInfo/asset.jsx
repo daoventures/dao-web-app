@@ -552,7 +552,7 @@ const styles = (theme) => ({
     errorMessage: {
         align: "left",
         color: theme.themeColors.formError,
-        marginTop: "3px",
+        marginTop: "-17px",
     },
     happyHourWarning: {
         align: "left",
@@ -986,6 +986,13 @@ class Asset extends Component {
             isDepositCompleted: true,
             isDepositErrored: false
         });
+
+        setTimeout(() => {
+            this.setState({
+                isDepositCompleted: false,
+                openDepositDialogBox: false,
+            })
+        })
     };
 
     withdrawReturned = () => {
@@ -1150,7 +1157,7 @@ class Asset extends Component {
                             width: "100%",
                         }}
                         className={classes.actionInput}
-                        id={isDeposit ? "amount" : "redeemAmount"}
+                        id={isDeposit ? "amount" : "redeemAmountInUsd"}
                         value={isDeposit ? amount : redeemAmountInUsd}
                         error={isDeposit ? amountError : redeemAmountError}
                         onChange={isDeposit ? this.onChangeDeposit : this.onChange}
@@ -1496,6 +1503,10 @@ class Asset extends Component {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
+                                <StyledTableRow key={"emptyRow"}>
+                                    <StyledTableCellDeposit align="left">&nbsp;</StyledTableCellDeposit>
+                                    <StyledTableCellDeposit align="right"></StyledTableCellDeposit>
+                                </StyledTableRow>
                                 <StyledTableRow key={"approveDepositValue"}>
                                     <StyledTableCellDeposit align="left">Deposit</StyledTableCellDeposit>
                                     <StyledTableCellDeposit align="right">{this.state.amount}</StyledTableCellDeposit>
@@ -1553,7 +1564,7 @@ class Asset extends Component {
                             onClick={this.depositTokenToContract}
                             disabled={this.state.isApprovalLoading || this.state.isApprovalErrored}
                         >
-                            {this.state.isDepositLoading ? <CircularProgress size="30px"/> : this.state.isDepositCompleted ?
+                            {this.state.isDepositLoading ? <CircularProgress color="#FFFFFF" size="30px"/> : this.state.isDepositCompleted ?
                                 <img src={DoneMark} alt="Done"/> : <span>Deposit</span>}
 
                         </Button>
@@ -1887,7 +1898,8 @@ class Asset extends Component {
 
                                 <div>
                                     <BasicModal
-                                        title={"Approve Deposit in" + asset.strategyName}
+                                        title={"Approve Deposit"}
+                                        subTitle={"In " + asset.strategyName}
                                         contentTemplate={this.state.openDepositDialogBox ? this.depositModalTemplate(classes, asset) : this.withdrawModalTemplate(classes, asset)}
                                         openModal={this.state.openDepositDialogBox || this.state.openWithdrawDialogBox}
                                         setOpenModal={this.state.openDepositDialogBox ? this.setOpenModal : this.setOpenWithdrawModal}
@@ -3095,15 +3107,30 @@ class Asset extends Component {
 
     onChange = (event) => {
         let val = [];
+        let asset = this.props.asset;
+        const balance = asset.strategyBalance;
+        const decimals = asset.decimals;
+        const priceInUsd = asset.depositedSharesInUSD;
+
         val[event.target.id] = event.target.value;
-        this.verifyWithdrawInput(val[event.target.id], event.target.id);
+
+        let assetTokenAmount  =event.target.value * ((balance/10 ** decimals)/priceInUsd);
+
+        assetTokenAmount = (
+            Math.floor(assetTokenAmount * 10000) /
+            10000
+        ).toFixed(4)
+
+        this.verifyWithdrawInput(assetTokenAmount, event.target.id);
+
         if (event.target.id === "redeemEarnAmount") {
             this.setState({redeemEarnAmount: val[event.target.id], earnPercent: 0});
         } else {
             this.setState({
-                redeemAmount: val[event.target.id],
+                redeemAmountInUsd: val[event.target.id],
                 vaultPercent: 0,
                 redeemAmountPercent: 0,
+                redeemAmount: assetTokenAmount,
             });
         }
     };
@@ -3625,15 +3652,13 @@ class Asset extends Component {
         if (this.state.loading) {
             return;
         }
-
-        const balance = this.props.asset.strategyBalance;
-        const decimals = this.props.asset.decimals;
         const asset = this.props.asset;
+        const balance = asset.strategyBalance;
+        const decimals = asset.decimals;
         const priceInUsd = asset.depositedSharesInUSD;
 
 
         let amount;
-        debugger;
 
         if (this.isUsdVault(asset)) {
             amount = (balance * percent) / 100;

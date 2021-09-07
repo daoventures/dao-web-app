@@ -6485,7 +6485,7 @@ class Store {
       const result = JSON.parse(resultString);
       return {
         success: true,
-        data: result.body
+        data: result.body.chartData
       };
     } catch (Err) {
       console.log(Err);

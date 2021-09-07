@@ -605,9 +605,9 @@ const styles = (theme) => ({
         color: theme.themeColors.textT,
         background: "#0E0632",
         padding: "24px 0 0 24px",
-        [theme.breakpoints.down("md")]: {
-            padding: "0px 10px",
-        },
+        // [theme.breakpoints.down("md")]: {
+        //     padding: "0px 10px",
+        // },
         zIndex: 1,
     },
     itemTitleText: {
@@ -646,7 +646,7 @@ const styles = (theme) => ({
         wordWrap: "break-word",
         color: theme.themeColors.textT,
         [theme.breakpoints.down("md")]: {
-            fontSize: "14px",
+            fontSize: "12px",
         },
     },
     assetLabel2: {
@@ -654,7 +654,7 @@ const styles = (theme) => ({
         fontSize: "14px",
         color: theme.themeColors.textP,
         [theme.breakpoints.down("md")]: {
-            fontSize: "12px",
+            fontSize: "10px",
         },
     },
     assetIconImg: {
@@ -1355,7 +1355,7 @@ class Vault extends Component {
                     </Grid> */}
 
                                         <Grid item sm={2} xs={2} className={classes.gridItemColumn}>
-                                            <div className={classes.showDesktop}>
+                                            <div>
                                                 {this.renderStakedBlocked(asset, false)}
                                             </div>
                                         </Grid>
@@ -1401,8 +1401,8 @@ class Vault extends Component {
                                                 </div>
                                             )}
                                         </Grid>
-                                        <Grid item sm={2} xs={2} className={classes.gridItemColumn}>
-                                            <div className={classes.showDesktop}>
+                                        <Grid item sm={3} md={3} xs={2} className={classes.gridItemColumn}>
+                                            <div >
                                                 {this.renderAvailableForDeposit(asset, false)}
                                             </div>
                                         </Grid>
