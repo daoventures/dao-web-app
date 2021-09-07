@@ -758,6 +758,7 @@ class Asset extends Component {
             vaultPercent: 0,
             amountPercent: 0,
             redeemAmountPercent: 0,
+            redeemAmountInUsd: 0,
             hideNav: false,
             openEarnInfo: false,
             openVaultInfo: false,
@@ -991,13 +992,15 @@ class Asset extends Component {
         this.setState({
             loading: false,
             redeemAmount: "",
+            redeemAmountInUsd: 0,
             isWithdrawing: false,
             isWithdrawCompleted: true,
             isWithdrawError: false,
         });
         setTimeout(() => {
             this.setState({
-                openWithdrawDialogBox: false
+                openWithdrawDialogBox: false,
+                isWithdrawCompleted: false
             })
         }, 2000)
     };
@@ -1131,6 +1134,7 @@ class Asset extends Component {
             scales,
             loading,
             redeemAmount,
+            redeemAmountInUsd,
             redeemAmountError,
             percent,
             redeemAmountPercent,
@@ -1147,10 +1151,10 @@ class Asset extends Component {
                         }}
                         className={classes.actionInput}
                         id={isDeposit ? "amount" : "redeemAmount"}
-                        value={isDeposit ? amount : redeemAmount}
+                        value={isDeposit ? amount : redeemAmountInUsd}
                         error={isDeposit ? amountError : redeemAmountError}
                         onChange={isDeposit ? this.onChangeDeposit : this.onChange}
-                        disabled={loading}
+                        disabled={loading || (!(isDeposit? asset.isDepositEnabled :  asset.isWithdrawEnabled))}
                         placeholder="0.00"
                         variant="outlined"
                         onKeyDown={isDeposit ? this.inputKeyDown : this.inputRedeemKeyDown}
@@ -1584,7 +1588,7 @@ class Asset extends Component {
                                         }
                                     /> {asset.symbol}</StyledTableCellDepositHead>
                                     <StyledTableCellDepositHead
-                                        align="right">{this.state.redeemAmount}</StyledTableCellDepositHead>
+                                        align="right">{this.state.redeemAmountInUsd}</StyledTableCellDepositHead>
                                 </TableRow>
                             </TableHead>
                         </Table>
@@ -3625,7 +3629,11 @@ class Asset extends Component {
         const balance = this.props.asset.strategyBalance;
         const decimals = this.props.asset.decimals;
         const asset = this.props.asset;
+        const priceInUsd = asset.depositedSharesInUSD;
+
+
         let amount;
+        debugger;
 
         if (this.isUsdVault(asset)) {
             amount = (balance * percent) / 100;
@@ -3639,6 +3647,7 @@ class Asset extends Component {
             redeemAmount: amount.toFixed(4),
             // redeemCoins: ,
             redeemAmountPercent: percent,
+            redeemAmountInUsd: (priceInUsd * percent/100).toFixed(4),
             redeemAmountError: false,
             withdrawErrorMessage: "",
         });

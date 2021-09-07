@@ -7262,7 +7262,7 @@ class Store {
     );
   };
 
-  getStrategyBalancesFullV2 = async (payload) => {
+  getStrategyBalancesFullV2 = async () => {
     const network = store.getStore("network");
     const account = store.getStore("account");
     let assets = this._getDefaultValues(network).vaultAssets;
@@ -7307,7 +7307,10 @@ class Store {
         sumBalances: data[0].data.sumBalances,
         daomineApy: assetApiData.daomineApy,
         pnlTextColor: assetApiData.pnl <0 ? 'red': '#15C73E',
-        asset_distribution: assetApiData.asset_distribution ? assetApiData.asset_distribution : []
+        pnl: assetApiData.pnl || 0,
+        asset_distribution: assetApiData.asset_distribution ? assetApiData.asset_distribution : [],
+        isDepositEnabled: assetApiData.deposit,
+        isWithdrawEnabled: assetApiData.withdraw
       }
       asset = {
         ...asset,

@@ -1599,7 +1599,7 @@ class Vault extends Component {
         const { basedOn } = this.props;
         // To calculate APY (Vault + Earn divide by 2 : Estimated)
         // Compound APY is using compoundApy
-        if (asset && asset.stats && asset.stats.pnl) {
+        // if (asset && asset.stats && asset.stats.pnl) {
             // if (asset.strategyType === "compound") {
             //   if (asset.stats.compoundApy) {
             //     return asset.stats.compoundApy;
@@ -1629,11 +1629,13 @@ class Vault extends Component {
             // } else if (asset.strategyType === "citadel") {
             if (
                 asset.strategyType === "citadel" ||
-                asset.strategyType === "daoFaang"
+                asset.strategyType === "daoFaang" ||
+                asset.strategyType === "elon" ||
+                asset.strategyType === "cuban" ||
+                asset.strategyType === "moneyPrinter"
             ) {
-                console.log("🚀 | Asset | asset.stats.pnl", asset.stats.pnl);
 
-                return (asset.stats.pnl["7d"] * 100).toFixed(2) + "%";
+                return (asset.pnl * 100).toFixed(2) + "%";
             }
             // else if (asset.strategyType === "elon") {
             //   if (asset.stats.elonApy) {
@@ -1646,7 +1648,7 @@ class Vault extends Component {
             // } else if (asset.strategyType === "daoFaang") {
             //   return asset.stats.faangApy;
             // }
-        }
+        // }
         return 0;
     };
 
