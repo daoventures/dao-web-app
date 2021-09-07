@@ -240,7 +240,7 @@ const styles = (theme) => ({
         maxWidth: "calc(100vw - 24px)",
         width: "100%",
         border: "none",
-        margin: "0 !important",
+        margin: "14px 0 0 0 !important",
         // background: theme.themeColors.modelBack,
         background: theme.themeColors.itemBack,
         borderRadius: "0px",
@@ -599,20 +599,36 @@ const styles = (theme) => ({
     },
     itemTitle: {
         display: "flex",
-        alignItems: "center",
+        flexDirection: "column",
+        alignItems: "start",
         fontSize: "18px",
         color: theme.themeColors.textT,
         background: "#0E0632",
-        padding: "0px 24px",
+        padding: "24px 0 0 24px",
         [theme.breakpoints.down("md")]: {
             padding: "0px 10px",
         },
+        zIndex: 1,
     },
     itemTitleText: {
         fontSize: "18px",
         [theme.breakpoints.down("md")]: {
             fontSize: "14px",
         },
+        fontFamily: "Rubik",
+        fontStyle: "normal",
+        fontWeight: "bold",
+        lineHeight: "21px"
+    },
+    itemTitleTextInfo: {
+        fontSize: "14px",
+        [theme.breakpoints.down("md")]: {
+            fontSize: "14px",
+        },
+        fontFamily: "Rubik",
+        fontStyle: "normal",
+        fontWeight: "400",
+        lineHeight: "17px"
     },
     accordionsummary: {
         height: "100px",
@@ -1082,7 +1098,7 @@ class Vault extends Component {
             </Typography> */}
 
                         <Typography variant={"h5"} className={classes.assetLabel2}>
-                            7d PNL
+                            P30D PnL
                         </Typography>
                     </div>
                 </div>
@@ -1097,7 +1113,7 @@ class Vault extends Component {
                             asset.strategyType === "elon" ||
                             asset.strategyType === "cuban" ||
                             asset.strategyType === "moneyPrinter"
-                                ? this._get7dPNL(asset)
+                                ? this._getPnl(asset)
                                 : this._getAPY(asset)}{" "}
                         </Typography>
                     </div>
@@ -1247,23 +1263,26 @@ class Vault extends Component {
                     <div key={index} className={classes.strategyContainer}>
                         <Grid container className={classes.itemTop}>
                             <Grid item sm={12} xs={8} className={classes.itemTitle}>
-                                <Typography className={classes.itemTitleText} variant="h4">
-                                    {asset.strategyName}
+                                <Typography className={classes.itemTitleText} variant="p">
+                                    {asset.strategy}
                                 </Typography>
-                                <a
-                                    href={asset.infoLink}
-                                    target="_blank"
-                                    style={{ display: "flex" }}
-                                >
-                                    <svg aria-hidden="true" className={classes.warnIcon}>
-                                        <use xlinkHref="#iconinformation-day"></use>
-                                    </svg>
-                                </a>
-                                {asset.isPopularItem || this.state.happyHour
-                                    ? this.state.happyHour && asset.happyHourEnabled === true
-                                        ? this.renderHappyHourIcon(asset)
-                                        : this.renderPopularIcon(asset)
-                                    : null}
+                                <Typography className={classes.itemTitleTextInfo} variant="p">
+                                    {asset.strategyInfo}
+                                </Typography>
+                                {/*<a*/}
+                                {/*    href={asset.infoLink}*/}
+                                {/*    target="_blank"*/}
+                                {/*    style={{ display: "flex" }}*/}
+                                {/*>*/}
+                                {/*    <svg aria-hidden="true" className={classes.warnIcon}>*/}
+                                {/*        <use xlinkHref="#iconinformation-day"></use>*/}
+                                {/*    </svg>*/}
+                                {/*</a>*/}
+                                {/*{asset.isPopularItem || this.state.happyHour*/}
+                                {/*    ? this.state.happyHour && asset.happyHourEnabled === true*/}
+                                {/*        ? this.renderHappyHourIcon(asset)*/}
+                                {/*        : this.renderPopularIcon(asset)*/}
+                                {/*    : null}*/}
                             </Grid>
                             <RiskLevelLabel risk={asset.risk}/>
                         </Grid>
@@ -1645,6 +1664,20 @@ class Vault extends Component {
         // }
         return 0 +'%';
     };
+
+    _getPnl = (asset) => {
+        if ( asset.pnl && (
+            asset.strategyType === "citadel" ||
+            asset.strategyType === "daoFaang" ||
+            asset.strategyType === "elon" ||
+            asset.strategyType === "cuban" ||
+            asset.strategyType === "moneyPrinter")
+        ) {
+
+            return (asset.pnl * 100).toFixed(2) + "%";
+        }
+        return '0.00 %';
+    }
 
     calculateYearnAPY = (earnAPR, vaultAPY) => {
         if (earnAPR * 100 > vaultAPY) {
