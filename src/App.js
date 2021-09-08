@@ -20,6 +20,7 @@ import IDai from "./components/idai";
 // import Home from './components/home';
 import Header from "./components/header";
 import Vaults from "./components/vault";
+import VaultsInfo from "./components/vaultInfo";
 import Dashboard from "./components/dashboard";
 import SideDrawer from "./components/sideDrawer";
 import MainContainer from "./components/mainContainer";
@@ -200,11 +201,11 @@ class App extends Component {
                 <SideDrawer />
                 <MainContainer />
                 <BrowserView>
-                  <Vaults />
+                  <VaultsInfo />
                 </BrowserView>
                 <MobileView>
                   {/* <MobileViewWarning /> */}
-                  <Vaults />
+                  <VaultsInfo />
                 </MobileView>
               </Route>
 

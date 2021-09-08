@@ -34,6 +34,8 @@ const matic = [
         strategy: "DAO Money Printer",
         strategyAddress: "0x4728a38b6b00cdff9fdc59ace8e3c7ef3c6560e5",
         strategyContractABI: config.vaultDAOMPTStrategyABI,
+        strategyInfo: "A stablecoin farming strategy to compound more stablecoins.",
+        strategyDescription: "A strategy to compound dollars, to ensure minimal portfolio volatility but a decent yield for uncertain times.",
         historicalPriceId: "daoMPT_price",
         logoFormat: "svg",
         risk: ADVANCE,

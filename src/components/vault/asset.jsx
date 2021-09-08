@@ -1796,7 +1796,7 @@ class Asset extends Component {
             } else if (asset.strategyType === "moneyPrinter") {
               moneyPrinterAPY.push([
                 date,
-                parseFloat(groups[date][halfCount].moneyPrinterApy.toFixed(4)),
+                parseFloat(groups[date][0].moneyPrinterApy.toFixed(4)),
               ]);
             }
           }

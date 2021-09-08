@@ -31,6 +31,20 @@ const styles = (theme) => ({
         top: theme.spacing(1),
         color: theme.themeColors.menuSelText,
     },
+    title: {
+        fontFamily: "Rubik",
+        fontStyle: "normal",
+        fontWeight: "500",
+        fontSize: "16px",
+        lineHeight: "18px"
+    },
+    subTitle: {
+        fontFamily: "Rubik",
+        fontStyle: "normal",
+        fontWeight: "400",
+        fontSize: "14px",
+        lineHeight: "18px"
+    }
 });
 
 class BasicModal extends Component {
@@ -38,14 +52,20 @@ class BasicModal extends Component {
         super();
     }
 
+    closeModal = (event, reason) => {
+        if (reason !== 'backdropClick') {
+            this.props.setOpenModal(false);
+        }
+    }
+
     render() {
-        const { classes, content, title, setOpenModal, openModal } = this.props;
+        const { classes, contentTemplate, title, subTitle, setOpenModal, openModal } = this.props;
 
         const division = (<div></div>);
 
         return (
             <Dialog
-                onClose={() => setOpenModal(false)}
+                onClose={this.closeModal}
                 fullWidth={true}
                 maxWidth={"sm"}
                 classes={{ paper: classes.dialogRoot }}
@@ -53,7 +73,8 @@ class BasicModal extends Component {
                 open={openModal}
             >
                 <MuiDialogTitle disableTypography className={classes.dialogTitle}>
-                    <Typography variant="h6">{title ? title : ""}</Typography>
+                    <Typography variant="h6" className={classes.title}>{title ? title : ""}</Typography>
+                    {subTitle && <Typography className={classes.subTitle} variant="h6">{subTitle}</Typography>}
                     <IconButton
                         aria-label="close"
                         className={classes.closeButton}
@@ -63,7 +84,7 @@ class BasicModal extends Component {
                     </IconButton>
                 </MuiDialogTitle>
                 <DialogContent dividers className={classes.dialogContent}>
-                    {content ? content : division }
+                    {contentTemplate ? contentTemplate : division }
                 </DialogContent>
             </Dialog>
         );

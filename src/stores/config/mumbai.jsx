@@ -34,6 +34,8 @@ const mumbai = [
         strategy: "DAO Money Printer",
         strategyAddress: "0x8894da48bb8b7f7751ac4e2c37ed31b68d0c587f",
         strategyContractABI: config.vaultDAOMPTStrategyABI,
+        strategyInfo: "A stablecoin farming strategy to compound more stablecoins.",
+        strategyDescription: "A strategy to compound dollars, to ensure minimal portfolio volatility but a decent yield for uncertain times.",
         historicalPriceId: "daoMPT_price",
         logoFormat: "svg",
         risk: ADVANCE,
