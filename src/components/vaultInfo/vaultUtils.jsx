@@ -75,8 +75,8 @@ export const getAssetData = (assetDistributionData) => {
 }
 
 export const strategyMap = {
-    "Cuban": "cubanApy",
-    "Elon": "elonApy",
+    "Cuban": "lp_performance",
+    "Elon": "lp_performance",
     "FAANG Stonk": "lp_performance",
     "ETH": "eth_performance",
     "BTC": "btc_performance",

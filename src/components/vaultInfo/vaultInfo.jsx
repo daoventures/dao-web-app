@@ -596,6 +596,7 @@ const styles = (theme) => ({
     itemTop: {
         height: "48px",
         background: theme.themeColors.menuSel,
+        maxWidth: "calc(100vw - 24px)"
     },
     itemTitle: {
         display: "flex",
@@ -605,9 +606,9 @@ const styles = (theme) => ({
         color: theme.themeColors.textT,
         background: "#0E0632",
         padding: "24px 0 0 24px",
-        // [theme.breakpoints.down("md")]: {
-        //     padding: "0px 10px",
-        // },
+        [theme.breakpoints.down("xs")]: {
+            padding: "5px 10px",
+        },
         zIndex: 1,
     },
     itemTitleText: {

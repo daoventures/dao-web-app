@@ -2453,7 +2453,10 @@ class Asset extends Component {
             let groups;
             if (
                 asset.strategyType === "citadel" ||
-                asset.strategyType === "daoFaang"
+                asset.strategyType === "daoFaang"  ||
+                asset.strategyType === "cuban"  ||
+                asset.strategyType === "elon"  ||
+                asset.strategyType === "moneyPrinter"
             ) {
 
                 let data = this.state.vaultAssetHistoricalData && this.state.vaultAssetHistoricalData.length ? this.state.vaultAssetHistoricalData : asset.historicalPerformance || [];
@@ -2503,43 +2506,43 @@ class Asset extends Component {
                     } else if (asset.strategyType === "citadel") {
                         citadelAPY.push([
                             date,
-                            parseFloat((groups[date][0]["lp_performance"] * 100).toFixed(4)),
+                            parseFloat((groups[date][0]["lp_performance"]).toFixed(4)),
                         ]);
                         btcAPY.push([
                             date,
-                            parseFloat((groups[date][0]["btc_performance"] * 100).toFixed(4)),
+                            parseFloat((groups[date][0]["btc_performance"]).toFixed(4)),
                         ]);
                         ethAPY.push([
                             date,
-                            parseFloat((groups[date][0]["eth_performance"] * 100).toFixed(4)),
+                            parseFloat((groups[date][0]["eth_performance"]).toFixed(4)),
                         ]);
                     } else if (asset.strategyType === "elon") {
                         elonAPY.push([
                             date,
-                            parseFloat(groups[date][0].elonApy.toFixed(4)),
+                            parseFloat(groups[date][0]['lp_performance'].toFixed(4)),
                         ]);
                     } else if (asset.strategyType === "cuban") {
                         cubanAPY.push([
                             date,
-                            parseFloat(groups[date][0].cubanApy.toFixed(4)),
+                            parseFloat(groups[date][0]['lp_performance'].toFixed(4)),
                         ]);
                     } else if (asset.strategyType === "daoFaang") {
                         faangAPY.push([
                             date,
-                            parseFloat((groups[date][0]["lp_performance"] * 100).toFixed(4)),
+                            parseFloat((groups[date][0]["lp_performance"]).toFixed(4)),
                         ]);
                         btcAPY.push([
                             date,
-                            parseFloat((groups[date][0]["btc_performance"] * 100).toFixed(4)),
+                            parseFloat((groups[date][0]["btc_performance"]).toFixed(4)),
                         ]);
                         ethAPY.push([
                             date,
-                            parseFloat((groups[date][0]["eth_performance"] * 100).toFixed(4)),
+                            parseFloat((groups[date][0]["eth_performance"]).toFixed(4)),
                         ]);
                     } else if (asset.strategyType === "moneyPrinter") {
                         moneyPrinterAPY.push([
                             date,
-                            parseFloat(groups[date][0].moneyPrinterApy.toFixed(4)),
+                            parseFloat(groups[date][0]['lp_performance'].toFixed(4)),
                         ]);
                     }
 
