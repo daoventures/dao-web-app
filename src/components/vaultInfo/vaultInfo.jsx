@@ -1702,7 +1702,7 @@ class Vault extends Component {
             asset.strategyType === "moneyPrinter")
         ) {
 
-            return (asset.pnl * 100).toFixed(2) + "%";
+            return (asset.pnl).toFixed(2) + "%";
         }
         return '0.00 %';
     }

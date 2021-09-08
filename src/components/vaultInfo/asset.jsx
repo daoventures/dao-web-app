@@ -59,7 +59,8 @@ import {withStyles} from "@material-ui/core/styles";
 import PieChart from '../common/pieChart';
 import {
     getAssetData,
-    getMappedData
+    getMappedData,
+    strategyMap
 } from './vaultUtils';
 import BasicModal from '../common/basicModal';
 import DoneMark from '../../assets/done.png';
@@ -866,7 +867,7 @@ class Asset extends Component {
         let apyResponseData = await store.getHistoricDataOfVault(asset.id, value);
 
         if (apyResponseData.success) {
-            let mappedHistoricalData = getMappedData(apyResponseData.data || [], asset.id)
+            let mappedHistoricalData = getMappedData(apyResponseData.data || [], asset.id);
             this.setState({vaultAssetHistoricalData: mappedHistoricalData});
         }
     }
@@ -2448,6 +2449,8 @@ class Asset extends Component {
             return 0;
         };
 
+        let labelColorData = {};
+
         if (asset.historicalAPY || asset.historicalPerformance) {
             // this gives an object with dates as keys
             let groups;
@@ -2459,7 +2462,8 @@ class Asset extends Component {
                 asset.strategyType === "moneyPrinter"
             ) {
 
-                let data = this.state.vaultAssetHistoricalData && this.state.vaultAssetHistoricalData.length ? this.state.vaultAssetHistoricalData : asset.historicalPerformance || [];
+                let data = this.state.vaultAssetHistoricalData && this.state.vaultAssetHistoricalData.data && this.state.vaultAssetHistoricalData.data.length ? this.state.vaultAssetHistoricalData.data : asset.historicalPerformance || [];
+                labelColorData = this.state.vaultAssetHistoricalData && this.state.vaultAssetHistoricalData.data.length ? this.state.vaultAssetHistoricalData.colorInfo: {};
                 groups = data
                     .sort(sortByTimestamp)
                     .reduce((groups, apy) => {
@@ -2471,7 +2475,8 @@ class Asset extends Component {
                         return groups;
                     }, {});
             } else {
-                let data = this.state.vaultAssetHistoricalData && this.state.vaultAssetHistoricalData.length ? this.state.vaultAssetHistoricalData : asset.historicalAPY;
+                let data = this.state.vaultAssetHistoricalData  && this.state.vaultAssetHistoricalData.data  && this.state.vaultAssetHistoricalData.data.length ? this.state.vaultAssetHistoricalData.data : asset.historicalAPY || [];
+                labelColorData = this.state.vaultAssetHistoricalData && this.state.vaultAssetHistoricalData.data.length ? this.state.vaultAssetHistoricalData.colorInfo: {};
                 groups = data
                     .sort(sortByTimestamp)
                     .reduce((groups, apy) => {
@@ -2694,17 +2699,17 @@ class Asset extends Component {
                     {
                         name: "Citadel",
                         data: citadelAPY,
-                        color: "#FFFFFF",
+                        color: labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.Citadel]: "#FFFFF"
                     },
                     {
                         name: "BTC",
                         data: btcAPY,
-                        color: "#f7931b",
+                        color:  labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.BTC]: "#f7931b",
                     },
                     {
                         name: "ETH",
                         data: ethAPY,
-                        color: "#464a75",
+                        color: labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.ETH]:"#464a75",
                     },
                 ],
                 responsive: {
@@ -2740,6 +2745,7 @@ class Asset extends Component {
                     {
                         name: "Elon",
                         data: elonAPY,
+                        color: labelColorData[strategyMap.Elon]? labelColorData[strategyMap.Elon]: "#FFFFF"
                     },
                 ],
                 responsive: {
@@ -2775,6 +2781,7 @@ class Asset extends Component {
                     {
                         name: "Cuban",
                         data: cubanAPY,
+                        color: labelColorData[strategyMap.Cuban]? labelColorData[strategyMap.Cuban]: "#FFFFF"
                     },
                 ],
                 responsive: {
@@ -2810,17 +2817,17 @@ class Asset extends Component {
                     {
                         name: "FAANG Stonk",
                         data: faangAPY,
-                        color: "#FFFFFF",
+                        color:  labelColorData[strategyMap['FAANG Stonk']]? labelColorData[strategyMap['FAANG Stonk']]: "#FFFFFF",
                     },
                     {
                         name: "BTC",
                         data: btcAPY,
-                        color: "#f7931b",
+                        color:  labelColorData[strategyMap.BTC]? labelColorData[strategyMap.BTC]: "#f7931b",
                     },
                     {
                         name: "ETH",
                         data: ethAPY,
-                        color: "#464a75",
+                        color: labelColorData[strategyMap.ETH]? labelColorData[strategyMap.ETH]:"#464a75",
                     },
                 ],
                 responsive: {

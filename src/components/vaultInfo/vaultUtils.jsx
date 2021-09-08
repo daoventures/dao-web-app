@@ -60,14 +60,14 @@ export const getAssetData = (assetDistributionData) => {
 
 
     let coinsInfo = assetDistributionData.map((coinData, index) => {
-       return {
+        return {
             label: coinData[0],
             percent: coinData[1].percent,
             y: coinData[1].percent,
             changePercentage: coinData[1].changePercentage.toFixed(2),
-            textColorStyle: {color: coinData[1].changePercentage>0 ?'green':'red'},
+            textColorStyle: {color: coinData[1].changePercentage > 0 ? 'green' : 'red'},
             color: pallet[index],
-           changeValue: (coinData[1].currentPrice * coinData[1].changePercentage).toFixed(2)
+            changeValue: (coinData[1].currentPrice * coinData[1].changePercentage).toFixed(2)
         };
     });
 
@@ -90,17 +90,21 @@ export const getDataByStrategy = (strategyInfo) => {
     let dataByTimestamp = {};
 
     strategyInfo[1].forEach((values) => {
-            let data = {
-                timestamp: parseInt(values[0]/1000),
-                time_stamp: parseInt(values[0]/1000)
-            }
+        let data = {
+            timestamp: parseInt(values[0] / 1000),
+            time_stamp: parseInt(values[0] / 1000)
+        }
 
-            data[strategyMap[strategyName]] = values[1];
+        data[strategyMap[strategyName]] = values[1];
 
-        dataByTimestamp[data.timestamp] =data;
+        dataByTimestamp[data.timestamp] = data;
     });
 
-    return dataByTimestamp;
+    return {
+        dataByTimestamp,
+        strategyName,
+        [strategyMap[strategyName]]: strategyInfo[2]
+    };
 }
 
 export const getMappedData = (data) => {
@@ -113,20 +117,27 @@ export const getMappedData = (data) => {
     data.forEach((strategyData) => {
         strategyPostData.push(getDataByStrategy(strategyData));
     });
+    let colorInfoData = {};
 
-    let finalDataObject = {}, timeStampKeys = Object.keys(strategyPostData[0]);
+    let finalDataObject = {}, timeStampKeys = Object.keys(strategyPostData[0].dataByTimestamp);
 
-    for(let i=0; i< timeStampKeys.length; i++) {
-        for(let j=0; j< strategyPostData.length; j++) {
-          if(!finalDataObject[timeStampKeys[i]]) {
-              finalDataObject[timeStampKeys[i]] = {};
-          }
+    for (let i = 0; i < timeStampKeys.length; i++) {
+        for (let j = 0; j < strategyPostData.length; j++) {
+            if (!finalDataObject[timeStampKeys[i]]) {
+                finalDataObject[timeStampKeys[i]] = {};
+            }
             finalDataObject[timeStampKeys[i]] = {
-              ...finalDataObject[timeStampKeys[i]],
-              ...strategyPostData[j][timeStampKeys[i]]
+                ...finalDataObject[timeStampKeys[i]],
+                ...strategyPostData[j].dataByTimestamp[timeStampKeys[i]]
+            }
+            if(i===0) {
+                colorInfoData[strategyMap[strategyPostData[j].strategyName]] = strategyPostData[j][strategyMap[strategyPostData[j].strategyName]];
             }
         }
     }
-    return Object.values(finalDataObject);
+    return {
+        data: Object.values(finalDataObject),
+        colorInfo: colorInfoData
+    };
 
 }
