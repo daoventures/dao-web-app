@@ -67,7 +67,7 @@ export const getAssetData = (assetDistributionData) => {
             changePercentage: coinData[1].changePercentage.toFixed(2),
             textColorStyle: {color: coinData[1].changePercentage > 0 ? 'green' : 'red'},
             color: pallet[index],
-            changeValue: (coinData[1].currentPrice * coinData[1].changePercentage).toFixed(2)
+            changeValue: (coinData[1].changePercentage).toFixed(2)
         };
     });
 
