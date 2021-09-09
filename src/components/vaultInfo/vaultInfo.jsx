@@ -596,6 +596,7 @@ const styles = (theme) => ({
     itemTop: {
         height: "48px",
         background: theme.themeColors.menuSel,
+        maxWidth: "calc(100vw - 24px)"
     },
     itemTitle: {
         display: "flex",
@@ -605,9 +606,9 @@ const styles = (theme) => ({
         color: theme.themeColors.textT,
         background: "#0E0632",
         padding: "24px 0 0 24px",
-        // [theme.breakpoints.down("md")]: {
-        //     padding: "0px 10px",
-        // },
+        [theme.breakpoints.down("xs")]: {
+            padding: "5px 10px",
+        },
         zIndex: 1,
     },
     itemTitleText: {
@@ -1444,6 +1445,7 @@ class Vault extends Component {
                                     asset={asset}
                                     startLoading={this.startLoading}
                                     basedOn={basedOn}
+                                    expanded={this.state.expanded}
                                     // refreshVault={this.refreshVault}
                                 />
                             </AccordionDetails>
@@ -1701,7 +1703,7 @@ class Vault extends Component {
             asset.strategyType === "moneyPrinter")
         ) {
 
-            return (asset.pnl * 100).toFixed(2) + "%";
+            return (asset.pnl).toFixed(2) + "%";
         }
         return '0.00 %';
     }

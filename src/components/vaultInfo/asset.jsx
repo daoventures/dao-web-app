@@ -59,7 +59,8 @@ import {withStyles} from "@material-ui/core/styles";
 import PieChart from '../common/pieChart';
 import {
     getAssetData,
-    getMappedData
+    getMappedData,
+    strategyMap
 } from './vaultUtils';
 import BasicModal from '../common/basicModal';
 import DoneMark from '../../assets/done.png';
@@ -784,7 +785,7 @@ class Asset extends Component {
                 label: '1Y',
                 value: '1y'
             }],
-            vaultAssetHistoricalData: [],
+            vaultAssetHistoricalData: {data: []},
             withdrawErrorMessage: "",
             withdrawEarnErrorMessage: "",
             happyHourWarning: "",
@@ -824,7 +825,12 @@ class Asset extends Component {
 
     componentDidMount() {
         window.addEventListener("resize", this.resize.bind(this));
-        this.selectRangeLabel(this.props.asset, '7d')
+    }
+
+    componentDidUpdate(prevProps){
+        if(prevProps.expanded !== this.props.expanded && this.props.expanded === this.props.asset.id) {
+            this.selectRangeLabel(this.props.asset, '7d');
+        }
     }
 
     componentWillUnmount() {
@@ -866,7 +872,7 @@ class Asset extends Component {
         let apyResponseData = await store.getHistoricDataOfVault(asset.id, value);
 
         if (apyResponseData.success) {
-            let mappedHistoricalData = getMappedData(apyResponseData.data || [], asset.id)
+            let mappedHistoricalData = getMappedData(apyResponseData.data || [], asset.id);
             this.setState({vaultAssetHistoricalData: mappedHistoricalData});
         }
     }
@@ -2448,15 +2454,21 @@ class Asset extends Component {
             return 0;
         };
 
+        let labelColorData = {};
+
         if (asset.historicalAPY || asset.historicalPerformance) {
             // this gives an object with dates as keys
             let groups;
             if (
                 asset.strategyType === "citadel" ||
-                asset.strategyType === "daoFaang"
+                asset.strategyType === "daoFaang"  ||
+                asset.strategyType === "cuban"  ||
+                asset.strategyType === "elon"  ||
+                asset.strategyType === "moneyPrinter"
             ) {
 
-                let data = this.state.vaultAssetHistoricalData && this.state.vaultAssetHistoricalData.length ? this.state.vaultAssetHistoricalData : asset.historicalPerformance || [];
+                let data = this.state.vaultAssetHistoricalData && this.state.vaultAssetHistoricalData.data && this.state.vaultAssetHistoricalData.data.length ? this.state.vaultAssetHistoricalData.data : asset.historicalPerformance || [];
+                labelColorData = this.state.vaultAssetHistoricalData && this.state.vaultAssetHistoricalData.data.length ? this.state.vaultAssetHistoricalData.colorInfo: {};
                 groups = data
                     .sort(sortByTimestamp)
                     .reduce((groups, apy) => {
@@ -2468,7 +2480,8 @@ class Asset extends Component {
                         return groups;
                     }, {});
             } else {
-                let data = this.state.vaultAssetHistoricalData && this.state.vaultAssetHistoricalData.length ? this.state.vaultAssetHistoricalData : asset.historicalAPY;
+                let data = this.state.vaultAssetHistoricalData  && this.state.vaultAssetHistoricalData.data  && this.state.vaultAssetHistoricalData.data.length ? this.state.vaultAssetHistoricalData.data : asset.historicalAPY || [];
+                labelColorData = this.state.vaultAssetHistoricalData && this.state.vaultAssetHistoricalData.data.length ? this.state.vaultAssetHistoricalData.colorInfo: {};
                 groups = data
                     .sort(sortByTimestamp)
                     .reduce((groups, apy) => {
@@ -2503,43 +2516,43 @@ class Asset extends Component {
                     } else if (asset.strategyType === "citadel") {
                         citadelAPY.push([
                             date,
-                            parseFloat((groups[date][0]["lp_performance"] * 100).toFixed(4)),
+                            parseFloat((groups[date][0]["lp_performance"]).toFixed(4)),
                         ]);
                         btcAPY.push([
                             date,
-                            parseFloat((groups[date][0]["btc_performance"] * 100).toFixed(4)),
+                            parseFloat((groups[date][0]["btc_performance"]).toFixed(4)),
                         ]);
                         ethAPY.push([
                             date,
-                            parseFloat((groups[date][0]["eth_performance"] * 100).toFixed(4)),
+                            parseFloat((groups[date][0]["eth_performance"]).toFixed(4)),
                         ]);
                     } else if (asset.strategyType === "elon") {
                         elonAPY.push([
                             date,
-                            parseFloat(groups[date][0].elonApy.toFixed(4)),
+                            parseFloat(groups[date][0]['lp_performance'].toFixed(4)),
                         ]);
                     } else if (asset.strategyType === "cuban") {
                         cubanAPY.push([
                             date,
-                            parseFloat(groups[date][0].cubanApy.toFixed(4)),
+                            parseFloat(groups[date][0]['lp_performance'].toFixed(4)),
                         ]);
                     } else if (asset.strategyType === "daoFaang") {
                         faangAPY.push([
                             date,
-                            parseFloat((groups[date][0]["lp_performance"] * 100).toFixed(4)),
+                            parseFloat((groups[date][0]["lp_performance"]).toFixed(4)),
                         ]);
                         btcAPY.push([
                             date,
-                            parseFloat((groups[date][0]["btc_performance"] * 100).toFixed(4)),
+                            parseFloat((groups[date][0]["btc_performance"]).toFixed(4)),
                         ]);
                         ethAPY.push([
                             date,
-                            parseFloat((groups[date][0]["eth_performance"] * 100).toFixed(4)),
+                            parseFloat((groups[date][0]["eth_performance"]).toFixed(4)),
                         ]);
                     } else if (asset.strategyType === "moneyPrinter") {
                         moneyPrinterAPY.push([
                             date,
-                            parseFloat(groups[date][0].moneyPrinterApy.toFixed(4)),
+                            parseFloat(groups[date][0]['lp_performance'].toFixed(4)),
                         ]);
                     }
 
@@ -2691,17 +2704,17 @@ class Asset extends Component {
                     {
                         name: "Citadel",
                         data: citadelAPY,
-                        color: "#FFFFFF",
+                        color: labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.Citadel]: "#FFFFF"
                     },
                     {
                         name: "BTC",
                         data: btcAPY,
-                        color: "#f7931b",
+                        color:  labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.BTC]: "#f7931b",
                     },
                     {
                         name: "ETH",
                         data: ethAPY,
-                        color: "#464a75",
+                        color: labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.ETH]:"#464a75",
                     },
                 ],
                 responsive: {
@@ -2737,6 +2750,7 @@ class Asset extends Component {
                     {
                         name: "Elon",
                         data: elonAPY,
+                        color: labelColorData[strategyMap.Elon]? labelColorData[strategyMap.Elon]: "#FFFFF"
                     },
                 ],
                 responsive: {
@@ -2772,6 +2786,7 @@ class Asset extends Component {
                     {
                         name: "Cuban",
                         data: cubanAPY,
+                        color: labelColorData[strategyMap.Cuban]? labelColorData[strategyMap.Cuban]: "#FFFFF"
                     },
                 ],
                 responsive: {
@@ -2807,17 +2822,17 @@ class Asset extends Component {
                     {
                         name: "FAANG Stonk",
                         data: faangAPY,
-                        color: "#FFFFFF",
+                        color:  labelColorData[strategyMap['FAANG Stonk']]? labelColorData[strategyMap['FAANG Stonk']]: "#FFFFFF",
                     },
                     {
                         name: "BTC",
                         data: btcAPY,
-                        color: "#f7931b",
+                        color:  labelColorData[strategyMap.BTC]? labelColorData[strategyMap.BTC]: "#f7931b",
                     },
                     {
                         name: "ETH",
                         data: ethAPY,
-                        color: "#464a75",
+                        color: labelColorData[strategyMap.ETH]? labelColorData[strategyMap.ETH]:"#464a75",
                     },
                 ],
                 responsive: {
