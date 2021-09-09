@@ -1503,11 +1503,12 @@ class Asset extends Component {
         });
        let feeData = await store.getFeeInfo(this.props.asset, this.state.amount * (10 ** this.props.asset.decimals));
        let feeAmount = (this.state.amount * feeData.feePercent/100).toFixed(4);
+       let finalAmount = (this.state.amount - feeAmount).toFixed(4);
        this.setState({
            calculatingFees: false,
            feeAmount,
-           finalAmount: this.state.amount - feeAmount,
-           feePercentage: feeData.feePercent/100
+           finalAmount,
+           feePercentage: feeData.feePercent
        });
     }
 
@@ -1575,7 +1576,7 @@ class Asset extends Component {
                                     <StyledTableCellDeposit align="right">{this.state.amount}</StyledTableCellDeposit>
                                 </StyledTableRow>
                                 <StyledTableRow key={"approveDepositFee"}>
-                                    <StyledTableCellDeposit align="left">Fee({this.state.feePercentage} %)</StyledTableCellDeposit>
+                                    <StyledTableCellDeposit align="left">Fee({this.state.feePercentage}%)</StyledTableCellDeposit>
                                     <StyledTableCellDeposit align="right">-{this.state.feeAmount} {asset.symbol}</StyledTableCellDeposit>
                                 </StyledTableRow>
                                 <StyledTableRow key={"approveDepositTotal"}>
