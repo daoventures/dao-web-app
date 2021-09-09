@@ -7286,7 +7286,6 @@ class Store {
       let _promises = [];
       _promises.push(this._getERC20Balances(web3, asset, account, () => {}, coinsInUSDPrice));
       _promises.push(this._getBalances(web3, asset, account, () => {}))
-      _promises.push(this._getCompoundMarketRate(web3, asset));
 
       let assetApiData = assetApiInfo.data[asset.id] ? assetApiInfo.data[asset.id]: {};
 
@@ -7299,7 +7298,6 @@ class Store {
         earnBalance: data[1].data.earnBalance,
         depositedSharesInUSD: data[1].data.depositedSharesInUSD,
         stats: {},
-        compoundExchangeRate: data[2].exchangeRateCurrent,
         earnApr: 0,
         historicalAPY: [],
         tvl: assetApiData.tvl,
