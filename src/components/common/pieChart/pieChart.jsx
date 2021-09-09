@@ -51,7 +51,8 @@ class PieChart extends Component {
                         enabled: false,
                     },
                     colors: chartColor,
-                    borderWidth:0
+                    borderWidth:2,
+                    borderColor: "#292750"
                 }
             },
             credits: {

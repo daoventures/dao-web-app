@@ -1291,10 +1291,10 @@ class Vault extends Component {
                     <div key={index} className={classes.strategyContainer}>
                         <Grid container className={classes.itemTop}>
                             <Grid item sm={12} xs={12} className={classes.itemTitle}>
-                                <Typography className={classes.itemTitleText} variant="p">
+                                <Typography className={classes.itemTitleText} variant="h4">
                                     {asset.strategy}
                                 </Typography>
-                                <Typography className={classes.itemTitleTextInfo} variant="p">
+                                <Typography className={classes.itemTitleTextInfo} variant="h4">
                                     {asset.strategyInfo}
                                 </Typography>
                                 {/*<a*/}
@@ -1803,14 +1803,14 @@ class Vault extends Component {
         this.setState({ modalOpen: false });
     };
 
-    renderModal = () => {
-        return (
-            <UnlockModal
-                closeModal={this.closeModal}
-                modalOpen={this.state.modalOpen}
-            />
-        );
-    };
+    // renderModal = () => {
+    //     return (
+    //         <UnlockModal
+    //             closeModal={this.closeModal}
+    //             modalOpen={this.state.modalOpen}
+    //         />
+    //     );
+    // };
 }
 
 export default withNamespaces()(withRouter(withStyles(styles)(Vault)));

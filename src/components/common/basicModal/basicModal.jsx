@@ -60,7 +60,6 @@ class BasicModal extends Component {
 
     render() {
         const { classes, contentTemplate, title, subTitle, setOpenModal, openModal } = this.props;
-
         const division = (<div></div>);
 
         return (
