@@ -2158,7 +2158,7 @@ class Store {
     }
   };
 
-  _getERC20Balances = async (web3, asset, account, callback) => {
+  _getERC20Balances = async (web3, asset, account, callback, coinsInUSDPrice) => {
     // Strategy which required to get balances for multiple token
     const strategyTypes = [
       "citadel",
@@ -2180,8 +2180,9 @@ class Store {
         }
       }
     }
-
-    const coinsInUSDPrice = await this._getUSDPrices();
+    if(!coinsInUSDPrice) {
+      coinsInUSDPrice = await this._getUSDPrices();
+    }
     let priceInUSD = [];
     for (let i = 0; i < asset.price_id.length; i++) {
       const coinPrice = coinsInUSDPrice[asset.price_id[i]].usd;
@@ -6031,7 +6032,8 @@ class Store {
     try {
       const priceJSON = await this._getUSDPrices();
       store.setStore({ usdPrices: priceJSON });
-      return emitter.emit(USD_PRICE_RETURNED, priceJSON);
+      emitter.emit(USD_PRICE_RETURNED, priceJSON);
+      return priceJSON
     } catch (e) {
       console.log(e);
     }
@@ -7277,13 +7279,12 @@ class Store {
     if (!web3) {
       return null;
     }
-    await this.getUSDPrices();
-
+    let coinsInUSDPrice = await this.getUSDPrices();
     let assetApiInfo = await this.getAllAssetInformation(networkObj[network]);
 
     assets.forEach(async (asset, i) => {
       let _promises = [];
-      _promises.push(this._getERC20Balances(web3, asset, account, () => {}));
+      _promises.push(this._getERC20Balances(web3, asset, account, () => {}, coinsInUSDPrice));
       _promises.push(this._getBalances(web3, asset, account, () => {}))
       _promises.push(this._getCompoundMarketRate(web3, asset));
 

@@ -1445,6 +1445,7 @@ class Vault extends Component {
                                     asset={asset}
                                     startLoading={this.startLoading}
                                     basedOn={basedOn}
+                                    expanded={this.state.expanded}
                                     // refreshVault={this.refreshVault}
                                 />
                             </AccordionDetails>

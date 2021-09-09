@@ -785,7 +785,7 @@ class Asset extends Component {
                 label: '1Y',
                 value: '1y'
             }],
-            vaultAssetHistoricalData: [],
+            vaultAssetHistoricalData: {data: []},
             withdrawErrorMessage: "",
             withdrawEarnErrorMessage: "",
             happyHourWarning: "",
@@ -825,7 +825,12 @@ class Asset extends Component {
 
     componentDidMount() {
         window.addEventListener("resize", this.resize.bind(this));
-        this.selectRangeLabel(this.props.asset, '7d')
+    }
+
+    componentDidUpdate(prevProps){
+        if(prevProps.expanded !== this.props.expanded && this.props.expanded === this.props.asset.id) {
+            this.selectRangeLabel(this.props.asset, '7d');
+        }
     }
 
     componentWillUnmount() {
