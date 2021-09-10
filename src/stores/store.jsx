@@ -559,7 +559,6 @@ class Store {
       },
     };
 
-    console.log("🚀 | Store | network", network);
     const vaultAssets = network ? vaultAssetsObj[network] : vaultAssetsObj[1];
     const upgradeToken = network
       ? upgradeTokenObj[network]
@@ -7270,6 +7269,43 @@ class Store {
     );
   };
 
+  getFeeInfo = async (asset, amount) => {
+    try {
+      const web3 = await this._getWeb3Provider();
+      if (!web3) {
+        return null;
+      }
+      let vaultContract = new web3.eth.Contract(
+          asset.vaultContractABI,
+          asset.vaultContractAddress
+      );
+
+      let percentageRange1 = await vaultContract.methods.networkFeePerc(0).call();
+      let percentageRange2 = await vaultContract.methods.networkFeePerc(1).call();
+      let percentageRange3 = await vaultContract.methods.networkFeePerc(2).call();
+
+      let amountRange1 = await vaultContract.methods.networkFeeTier2(0).call();
+      let amountRange2 = await vaultContract.methods.networkFeeTier2(1).call();
+
+      if(amount < amountRange1) {
+        return {
+          feePercent: percentageRange1/100
+        }
+      } else if(amount>=amountRange1 &&  amount <= amountRange2) {
+        return {
+          feePercent: percentageRange2/100
+        }
+      } else {
+        return {
+          feePercent: percentageRange3/100
+        }
+      }
+
+    } catch (Err) {
+
+    }
+  }
+
   getStrategyBalancesFullV2 = async () => {
     const network = store.getStore("network");
     const account = store.getStore("account");
@@ -7291,8 +7327,7 @@ class Store {
     assets.forEach(async (asset, i) => {
       let _promises = [];
       _promises.push(this._getERC20Balances(web3, asset, account, () => {}, coinsInUSDPrice));
-      _promises.push(this._getBalances(web3, asset, account, () => {}))
-      _promises.push(this._getCompoundMarketRate(web3, asset));
+      _promises.push(this._getBalances(web3, asset, account, () => {}));
 
       let assetApiData = assetApiInfo.data[asset.id] ? assetApiInfo.data[asset.id]: {};
 
@@ -7305,7 +7340,6 @@ class Store {
         earnBalance: data[1].data.earnBalance,
         depositedSharesInUSD: data[1].data.depositedSharesInUSD,
         stats: {},
-        compoundExchangeRate: data[2].exchangeRateCurrent,
         earnApr: 0,
         historicalAPY: [],
         tvl: assetApiData.tvl,

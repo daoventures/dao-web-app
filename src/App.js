@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import CssBaseline from "@material-ui/core/CssBaseline";
-import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
+import { createTheme, MuiThemeProvider } from "@material-ui/core/styles";
 import { Switch, Route, Redirect } from "react-router-dom";
 import IpfsRouter from "ipfs-react-router";
 
@@ -103,7 +103,6 @@ class App extends Component {
 
     if (window.ethereum) {
       window.ethereum.on("accountsChanged", function (accounts) {
-        console.log("App.js#####accounts######", accounts);
 
         store.setStore({ account: { address: accounts[0] } });
 
@@ -134,9 +133,7 @@ class App extends Component {
   }
 
   currentThemeChanged = (theme) => {
-    console.log("currentThemeChanged###theme###", theme);
     const currentTheme = theme || store.getStore("currentTheme");
-    console.log("currentTheme####", currentTheme);
     this.setState({
       currentTheme: currentTheme,
       interestTheme: getTheme(currentTheme),
@@ -146,7 +143,7 @@ class App extends Component {
   render() {
     return (
       // <MuiThemeProvider theme={createMuiTheme(interestTheme)}>
-      <MuiThemeProvider theme={createMuiTheme(this.state.interestTheme)}>
+      <MuiThemeProvider theme={createTheme(this.state.interestTheme)}>
         <CssBaseline />
         <IpfsRouter>
           <div
@@ -191,14 +188,14 @@ class App extends Component {
               </Route> */}
               <Route path="/portfolio">
                 <Header />
-                <SideDrawer />
+                <SideDrawer keyName="portfolio"/>
                 <MainContainer />
                 <Dashboard />
               </Route>
             
               <Route path="/invest">
                 <Header />
-                <SideDrawer />
+                <SideDrawer keyName="invest"/>
                 <MainContainer />
                 <BrowserView>
                   <VaultsInfo />
@@ -211,28 +208,28 @@ class App extends Component {
 
               <Route path="/stake-dvd">
                 <Header />
-                <SideDrawer />
+                <SideDrawer keyName="stake-dvd"/>
                 <MainContainer />
                 <StakeDvdVip />
               </Route>
 
               <Route path="/stake-dvg">
                 <Header />
-                <SideDrawer />
+                <SideDrawer keyName="stake-dvg"/>
                 <MainContainer />
                 <StakeDvgVip />
               </Route>
 
               <Route path="/daomine">
                 <Header />
-                <SideDrawer />
+                <SideDrawer keyName="daomine"/>
                 <MainContainer />
                 <Stake />
               </Route>
 
               <Route path="/upgrade">
                 <Header />
-                <SideDrawer />
+                <SideDrawer keyName="upgrade"/>
                 <MainContainer />
                 <UpgradeToken />
               </Route>
@@ -246,7 +243,7 @@ class App extends Component {
 
               <Route path="/swap">
                 <Header />
-                <SideDrawer />
+                <SideDrawer keyName="swap"/>
                 <MainContainer />
                 <Swap />
               </Route>

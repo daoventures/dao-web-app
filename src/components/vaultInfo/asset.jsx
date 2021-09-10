@@ -178,8 +178,6 @@ const styles = (theme) => ({
         borderRadius: "0px",
         background: "#7B25D266",
         borderColor: theme.themeColors.border,
-        borderStyle: "solid",
-        borderWidth: "1px",
         color: theme.themeColors.textT,
         flex: 1,
         marginLeft: "20px",
@@ -393,7 +391,8 @@ const styles = (theme) => ({
         padding: "0px 6px",
         color: theme.themeColors.textP,
         background: 'rgba(115, 103, 247, 0.15)',
-        borderRadius: '5px'
+        borderRadius: '5px',
+        height: "14px"
     },
     depositButtonBox: {
         width: "100%",
@@ -407,8 +406,6 @@ const styles = (theme) => ({
         background: "#7B25D266",
         borderColor: theme.themeColors.border,
         color: theme.themeColors.textT,
-        borderWidth: "1px",
-        borderStyle: "solid",
         marginLeft: "20px",
         width: '100%',
         borderRadius: "0px",
@@ -491,6 +488,7 @@ const styles = (theme) => ({
     },
     accountInfo: {
         marginTop: "-12px",
+        marginRight: "-8px",
         width: "100%",
         height: "30px",
         color: theme.themeColors.textT,
@@ -499,7 +497,6 @@ const styles = (theme) => ({
         fontSize: "14px",
         display: "flex",
         alignItems: "center",
-        padding: "0px 10px",
         cursor: "pointer",
     },
     disableAccountInfoBlock: {
@@ -570,9 +567,8 @@ const styles = (theme) => ({
         width: "15px",
         height: "15px",
         left: "32px",
-        top: "5px",
         borderRadius: "50%",
-        padding: "2px",
+        padding: "5px",
         display: "inline-block",
         lineHeight: "7px",
         marginRight: "5px"
@@ -680,7 +676,45 @@ const styles = (theme) => ({
         padding: "0px 24px 0px 24px"
     },
     withdrawTextPadding: {
-        padding: "17px"
+        padding: "17px",
+        fontFamily: "Rubik",
+        fontStyle: "normal",
+        fontWeight: "normal",
+        marginBottom: "15px",
+        color: "rgba(255, 255, 255, 0.61)"
+    },
+    actionButtonText: {
+        fontFamily: "Rubik",
+        fontStyle: "normal",
+        fontWeight: 500
+    },
+    scaleText: {
+        fontFamily: "Rubik",
+        fontStyle: "normal",
+        fontWeight: "normal",
+        fontSize: "14px",
+        lineHeight: "10px"
+    },
+    strategyCellData: {
+        fontFamily: "Rubik",
+        fontStyle: "normal",
+        fontWeight: "normal",
+        fontSize: "18px",
+    },
+    withDrawMessage: {
+        fontFamily: "Rubik",
+        fontStyle: "normal",
+        fontWeight: "normal",
+    },
+    withdrawTextStandard: {
+        fontFamily: "Rubik",
+        fontStyle: "normal",
+        fontWeight: "normal",
+        color: "rgba(255, 255, 255, 0.61)"
+    },
+    withdrawMessageBlock: {
+        textAlign: "center",
+        marginBottom: "5%"
     }
 });
 
@@ -697,7 +731,11 @@ const HtmlTooltip = withStyles((theme) => ({
 const StyledTableCell = withStyles((theme) => ({
     head: {
         color: "#FFFFFF",
-        borderBottom: "none"
+        borderBottom: "none",
+        fontFamily: "Rubik",
+        fontStyle: "normal",
+        fontWeight: "normal",
+         letterSpacing: "1px"
     },
     body: {
         borderBottom: "none",
@@ -803,7 +841,12 @@ class Asset extends Component {
             isWithdrawError: false,
             needVaultApproval: false,
             isCheckingApproval: false,
-            assetDistributionData: []
+            displayCurrencyModal: false,
+            assetDistributionData: [],
+            calculatingFees: 0,
+            feeAmount: 0,
+            finalAmount: 0,
+            feePercentage: 0,
         };
     }
 
@@ -929,7 +972,8 @@ class Asset extends Component {
     approvalCompleted = () => {
         this.setState({
             isApprovalLoading: false,
-            isApprovalCompleted: true
+            isApprovalCompleted: true,
+            isApprovalErrored: false
         });
     }
 
@@ -1116,11 +1160,12 @@ class Asset extends Component {
                 <DialogContent dividers className={classes.dialogContent}>
                     <List component="nav" aria-label="main mailbox folders">
                         {currencies.length > 0 &&
-                        currencies.map((currency) => {
+                        currencies.map((currency, index) => {
                             return (
                                 <ListItem
                                     button
                                     onClick={() => this.handleSelectedCurrency(currency)}
+                                    key={index}
                                     className={classes.modalListItem}
                                 >
                                     <ListItemAvatar>
@@ -1209,7 +1254,7 @@ class Asset extends Component {
                     </div>
                     <div className={classes.floatRightItems}>
                         {scales.length > 0 &&
-                        scales.map((percentage) => {
+                        scales.map((percentage, index) => {
                             return (
                                 <Button
                                     className={
@@ -1228,8 +1273,9 @@ class Asset extends Component {
                                             ? this.setAmount(percentage)
                                             : this.setRedeemAmount(percentage);
                                     }}
+                                    key={index}
                                 >
-                                    <Typography variant={"h5"}>
+                                    <Typography variant={"h5"} className={classes.scaleText}>
                                         {percentage === 100 ? "Max" : percentage + "%"}
                                     </Typography>
                                 </Button>
@@ -1455,6 +1501,21 @@ class Asset extends Component {
         }
     }
 
+    calculateFeeAmount = async () => {
+        this.setState({
+            calculatingFees: true
+        });
+       let feeData = await store.getFeeInfo(this.props.asset, this.state.amount * (10 ** this.props.asset.decimals));
+       let feeAmount = (this.state.amount * feeData.feePercent/100).toFixed(4);
+       let finalAmount = (this.state.amount - feeAmount).toFixed(4);
+       this.setState({
+           calculatingFees: false,
+           feeAmount,
+           finalAmount,
+           feePercentage: feeData.feePercent
+       });
+    }
+
     setOpenModal = (modalState) => {
         this.setState({
             openDepositDialogBox: modalState,
@@ -1466,6 +1527,7 @@ class Asset extends Component {
         });
         if (modalState) {
             this.checkTheWalletApprovedStatus();
+            this.calculateFeeAmount();
 
         }
     }
@@ -1508,7 +1570,7 @@ class Asset extends Component {
                                         align="right">{this.state.amount}</StyledTableCellDepositHead>
                                 </TableRow>
                             </TableHead>
-                            <TableBody>
+                            {!this.state.calculatingFees && <TableBody>
                                 <StyledTableRow key={"emptyRow"}>
                                     <StyledTableCellDeposit align="left">&nbsp;</StyledTableCellDeposit>
                                     <StyledTableCellDeposit align="right"></StyledTableCellDeposit>
@@ -1518,15 +1580,15 @@ class Asset extends Component {
                                     <StyledTableCellDeposit align="right">{this.state.amount}</StyledTableCellDeposit>
                                 </StyledTableRow>
                                 <StyledTableRow key={"approveDepositFee"}>
-                                    <StyledTableCellDeposit align="left">Fee(1%)</StyledTableCellDeposit>
-                                    <StyledTableCellDeposit align="right">-1 {asset.symbol}</StyledTableCellDeposit>
+                                    <StyledTableCellDeposit align="left">Fee({this.state.feePercentage}%)</StyledTableCellDeposit>
+                                    <StyledTableCellDeposit align="right">-{this.state.feeAmount} {asset.symbol}</StyledTableCellDeposit>
                                 </StyledTableRow>
                                 <StyledTableRow key={"approveDepositTotal"}>
                                     <StyledTableCellDeposit align="left">TOTAL</StyledTableCellDeposit>
                                     <StyledTableCellDeposit
-                                        align="right">{this.state.amount} {asset.symbol}</StyledTableCellDeposit>
+                                        align="right">{this.state.finalAmount} {asset.symbol}</StyledTableCellDeposit>
                                 </StyledTableRow>
-                            </TableBody>
+                            </TableBody>}
                         </Table>
                     </Grid>
                 </Grid>
@@ -1551,8 +1613,11 @@ class Asset extends Component {
             </div>}
             {this.state.isCheckingApproval && <div className={classes.erroredMessage}>
                 Checking the wallet connection <CircularProgress color="#FFFFFF" size="25px"/>
-            </div>
-            }
+            </div>}
+
+            {this.state.calculatingFees && <div className={classes.erroredMessage}>
+               Calculating Fees <CircularProgress color="#FFFFFF" size="25px"/>
+            </div>}
             <div className={classes.depositWarningDiv}>
                 <Grid
                     container
@@ -1570,7 +1635,7 @@ class Asset extends Component {
                         <Button
                             className={classes.depositActionButton}
                             onClick={this.depositTokenToContract}
-                            disabled={this.state.isApprovalLoading || this.state.isApprovalErrored}
+                            disabled={this.state.isApprovalLoading || this.state.isApprovalErrored || this.state.calculatingFees || this.state.needVaultApproval}
                         >
                             {this.state.isDepositLoading ?
                                 <CircularProgress color="#FFFFFF" size="30px"/> : this.state.isDepositCompleted ?
@@ -1588,7 +1653,7 @@ class Asset extends Component {
         return <div>
             <div className={classes.approvalDetails}>
                 <Grid item sm={12} xs={12}>
-                    Kindly approve the transaction in your wallet
+                    <span className={classes.withdrawTextStandard}>Kindly approve the transaction in your wallet</span>
                 </Grid>
                 <Grid item sm={12} xs={12}>
                     <Grid item sm={12} xs={12}>
@@ -1606,9 +1671,9 @@ class Asset extends Component {
                                                 ? {filter: "grayscale(100%)"}
                                                 : {}
                                         }
-                                    /> {asset.symbol}</StyledTableCellDepositHead>
+                                    /> <span className={classes.withdrawTextStandard}>{asset.symbol}</span></StyledTableCellDepositHead>
                                     <StyledTableCellDepositHead
-                                        align="right">{this.state.redeemAmountInUsd}</StyledTableCellDepositHead>
+                                        align="right"><span className={classes.withdrawTextStandard}>{this.state.redeemAmountInUsd}</span></StyledTableCellDepositHead>
                                 </TableRow>
                             </TableHead>
                         </Table>
@@ -1628,11 +1693,11 @@ class Asset extends Component {
                         <span className={classes.erroredMessage}>Failed to withdraw {this.state.selectedCurrency}
                             <br/> from {asset.strategy} Strategy. <br/>Please try again</span>
                     </Grid>}
-                    {this.state.isWithdrawCompleted && <Grid item sm={12} xs={12}>
-                        <span>Your {this.state.selectedCurrency} has been withdrawn <br/>from {asset.strategy} Strategy <br/>successfully.</span>
+                    {this.state.isWithdrawCompleted && <Grid item sm={8} xs={8} className={classes.withdrawMessageBlock}>
+                        <span className={classes.withDrawMessage}>Your {this.state.selectedCurrency} has been withdrawn <br/>from {asset.strategy} Strategy <br/>successfully.</span>
                     </Grid>}
-                    {this.state.isWithdrawing && <Grid item sm={12} xs={12}>
-                        <span>Withdrawing your {this.state.selectedCurrency} <br/> in {asset.strategy} Strategy</span>
+                    {this.state.isWithdrawing && <Grid item sm={8} xs={8} className={classes.withdrawMessageBlock}>
+                        <span className={classes.withDrawMessage}>Withdrawing your {this.state.selectedCurrency} <br/> in {asset.strategy} Strategy</span>
                     </Grid>}
                     <Grid item xs={12}/>
                     <Grid item sm={6} xs={8}>
@@ -1788,7 +1853,7 @@ class Asset extends Component {
         const AssetInfo = getAssetData(asset.asset_distribution ? asset.asset_distribution : []);
 
         return (
-            <div className={classes.vaultContainer}>
+            <div className={classes.vaultContainer} key={asset.id}>
                 <Grid container className={classes.assetSummary}>
                     <Grid item xs={12}>
                         <Typography
@@ -1909,8 +1974,8 @@ class Asset extends Component {
 
                                 <div>
                                     <BasicModal
-                                        title={"Approve Deposit"}
-                                        subTitle={"In " + asset.strategyName}
+                                        title={this.state.openDepositDialogBox ? "Approve Deposit": "Confirm Withdraw"}
+                                        subTitle={(this.state.openDepositDialogBox ? "In ": "from") + asset.strategyName}
                                         contentTemplate={this.state.openDepositDialogBox ? this.depositModalTemplate(classes, asset) : this.withdrawModalTemplate(classes, asset)}
                                         openModal={this.state.openDepositDialogBox || this.state.openWithdrawDialogBox}
                                         setOpenModal={this.state.openDepositDialogBox ? this.setOpenModal : this.setOpenWithdrawModal}
@@ -1925,11 +1990,13 @@ class Asset extends Component {
                                             disabled={
                                                 loading ||
                                                 asset.balance <= 0 ||
-                                                asset.depositDisabled === true
+                                                asset.depositDisabled === true ||
+                                                    this.state.amountError ||
+                                               !this.state.amount
                                             }
                                             onClick={() => this.setOpenModal(true)}
                                         >
-                                            <span>Deposit</span>
+                                            <span className={classes.actionButtonText}>Deposit</span>
                                         </Button>
                                     )}
                                     {/** DAO-157: Remove "Deposit All" button from Invest  */}
@@ -2188,9 +2255,9 @@ class Asset extends Component {
                                             <div className={classes.balances}>
                                                 <Typography
                                                     variant="body1"
-                                                    onClick={() => {
-                                                        this.setRedeemAmount(100);
-                                                    }}
+                                                    // onClick={() => {
+                                                    //     this.setRedeemAmount(100);
+                                                    // }}
                                                     className={classes.value}
                                                     noWrap
                                                 >
@@ -2244,12 +2311,15 @@ class Asset extends Component {
                                             disabled={
                                                 loading ||
                                                 (asset.vaultBalance <= 0 &&
-                                                    asset.earnBalance <= 0 ** asset.strategyBalance <= 0)
+                                                    asset.earnBalance <= 0 ** asset.strategyBalance <= 0) ||
+                                                this.state.redeemAmountError ||
+                                                    !this.state.redeemAmount
+
                                             }
                                             onClick={() => this.setOpenWithdrawModal(true)}
                                             fullWidth
                                         >
-                                            <span>Withdraw</span>
+                                            <span className={classes.actionButtonText}>Withdraw</span>
                                         </Button>
                                     )}
                                     {/** DAO-157 */}
@@ -2295,9 +2365,9 @@ class Asset extends Component {
                         <Table className={classes.table} aria-label="simple table">
                             <TableHead>
                                 <TableRow>
-                                    <StyledTableCell>Coin</StyledTableCell>
-                                    <StyledTableCell align="left">Asset %</StyledTableCell>
-                                    <StyledTableCell align="right">24h change USD</StyledTableCell>
+                                    <StyledTableCell>COIN</StyledTableCell>
+                                    <StyledTableCell align="left">ASSET %</StyledTableCell>
+                                    <StyledTableCell align="right">24H CHANGE</StyledTableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -2306,11 +2376,11 @@ class Asset extends Component {
                                         <StyledTableCell component="th" scope="row">
                                             <span className={classes.tokenColorKey}
                                                   style={{"backgroundColor": row.color}}>&nbsp;</span>
-                                            <span>{row.label}</span>
+                                            <span className={classes.strategyCellData}>{row.label}</span>
                                         </StyledTableCell>
-                                        <StyledTableCell align="left">{row.percent.toFixed(2)} %</StyledTableCell>
+                                        <StyledTableCell align="left" className={classes.strategyCellData}>{row.percent.toFixed(2)} %</StyledTableCell>
                                         <StyledTableCell align="right"
-                                                         style={row.textColorStyle}>{row.changeValue}</StyledTableCell>
+                                                         style={row.textColorStyle} className={classes.strategyCellData}>{row.changeValue}</StyledTableCell>
                                     </StyledTableRow>
                                 ))}
                             </TableBody>
@@ -2986,6 +3056,7 @@ class Asset extends Component {
                             return <span
                                 className={classes.timeRangeLabel + (range.value === this.state.selectedTimeRange ? " " + classes.activeLabel : "")}
                                 onClick={() => this.selectRangeLabel(asset, range.value)}
+                                key={index}
                             >
                                 {range.label}
                             </span>
@@ -3345,6 +3416,11 @@ class Asset extends Component {
             }
 
             const depositedShares = this.calculateDepositShare(asset, null);
+
+            if(depositedShares <= 0 ) {
+                this.setRedeemAmountError("Invalid amount");
+                return;
+            }
 
             if (this.validateInputValMoreThanBalance(amount, depositedShares)) {
                 this.setRedeemAmountError("Exceed available balance");
