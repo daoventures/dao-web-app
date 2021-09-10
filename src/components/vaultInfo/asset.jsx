@@ -2601,15 +2601,18 @@ class Asset extends Component {
                             date,
                             parseFloat(groups[date][0]['lp_performance'].toFixed(4)),
                         ]);
+                        btcAPY.push([
+                            date,
+                            parseFloat((groups[date][0]["btc_performance"]).toFixed(4)),
+                        ]);
+                        ethAPY.push([
+                            date,
+                            parseFloat((groups[date][0]["eth_performance"]).toFixed(4)),
+                        ]);
                     } else if (asset.strategyType === "cuban") {
                         cubanAPY.push([
                             date,
                             parseFloat(groups[date][0]['lp_performance'].toFixed(4)),
-                        ]);
-                    } else if (asset.strategyType === "daoFaang") {
-                        faangAPY.push([
-                            date,
-                            parseFloat((groups[date][0]["lp_performance"]).toFixed(4)),
                         ]);
                         btcAPY.push([
                             date,
@@ -2618,6 +2621,11 @@ class Asset extends Component {
                         ethAPY.push([
                             date,
                             parseFloat((groups[date][0]["eth_performance"]).toFixed(4)),
+                        ]);
+                    } else if (asset.strategyType === "daoFaang") {
+                        faangAPY.push([
+                            date,
+                            parseFloat((groups[date][0]["lp_performance"]).toFixed(4)),
                         ]);
                     } else if (asset.strategyType === "moneyPrinter") {
                         moneyPrinterAPY.push([
@@ -2822,6 +2830,16 @@ class Asset extends Component {
                         data: elonAPY,
                         color: labelColorData[strategyMap.Elon]? labelColorData[strategyMap.Elon]: "#FFFFF"
                     },
+                    {
+                        name: "BTC",
+                        data: btcAPY,
+                        color:  labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.BTC]: "#f7931b",
+                    },
+                    {
+                        name: "ETH",
+                        data: ethAPY,
+                        color: labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.ETH]:"#464a75",
+                    }
                 ],
                 responsive: {
                     rules: [
@@ -2858,6 +2876,16 @@ class Asset extends Component {
                         data: cubanAPY,
                         color: labelColorData[strategyMap.Cuban]? labelColorData[strategyMap.Cuban]: "#FFFFF"
                     },
+                    {
+                        name: "BTC",
+                        data: btcAPY,
+                        color:  labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.BTC]: "#f7931b",
+                    },
+                    {
+                        name: "ETH",
+                        data: ethAPY,
+                        color: labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.ETH]:"#464a75",
+                    }
                 ],
                 responsive: {
                     rules: [
@@ -2893,17 +2921,7 @@ class Asset extends Component {
                         name: "FAANG Stonk",
                         data: faangAPY,
                         color:  labelColorData[strategyMap['FAANG Stonk']]? labelColorData[strategyMap['FAANG Stonk']]: "#FFFFFF",
-                    },
-                    {
-                        name: "BTC",
-                        data: btcAPY,
-                        color:  labelColorData[strategyMap.BTC]? labelColorData[strategyMap.BTC]: "#f7931b",
-                    },
-                    {
-                        name: "ETH",
-                        data: ethAPY,
-                        color: labelColorData[strategyMap.ETH]? labelColorData[strategyMap.ETH]:"#464a75",
-                    },
+                    }
                 ],
                 responsive: {
                     rules: [
