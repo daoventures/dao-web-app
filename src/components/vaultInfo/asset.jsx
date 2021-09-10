@@ -731,7 +731,11 @@ const HtmlTooltip = withStyles((theme) => ({
 const StyledTableCell = withStyles((theme) => ({
     head: {
         color: "#FFFFFF",
-        borderBottom: "none"
+        borderBottom: "none",
+        fontFamily: "Rubik",
+        fontStyle: "normal",
+        fontWeight: "normal",
+         letterSpacing: "1px"
     },
     body: {
         borderBottom: "none",
@@ -1631,7 +1635,7 @@ class Asset extends Component {
                         <Button
                             className={classes.depositActionButton}
                             onClick={this.depositTokenToContract}
-                            disabled={this.state.isApprovalLoading || this.state.isApprovalErrored || this.state.calculatingFees}
+                            disabled={this.state.isApprovalLoading || this.state.isApprovalErrored || this.state.calculatingFees || this.state.needVaultApproval}
                         >
                             {this.state.isDepositLoading ?
                                 <CircularProgress color="#FFFFFF" size="30px"/> : this.state.isDepositCompleted ?
@@ -1986,7 +1990,9 @@ class Asset extends Component {
                                             disabled={
                                                 loading ||
                                                 asset.balance <= 0 ||
-                                                asset.depositDisabled === true
+                                                asset.depositDisabled === true ||
+                                                    this.state.amountError ||
+                                               !this.state.amount
                                             }
                                             onClick={() => this.setOpenModal(true)}
                                         >
@@ -2249,9 +2255,9 @@ class Asset extends Component {
                                             <div className={classes.balances}>
                                                 <Typography
                                                     variant="body1"
-                                                    onClick={() => {
-                                                        this.setRedeemAmount(100);
-                                                    }}
+                                                    // onClick={() => {
+                                                    //     this.setRedeemAmount(100);
+                                                    // }}
                                                     className={classes.value}
                                                     noWrap
                                                 >
@@ -2305,7 +2311,10 @@ class Asset extends Component {
                                             disabled={
                                                 loading ||
                                                 (asset.vaultBalance <= 0 &&
-                                                    asset.earnBalance <= 0 ** asset.strategyBalance <= 0)
+                                                    asset.earnBalance <= 0 ** asset.strategyBalance <= 0) ||
+                                                this.state.redeemAmountError ||
+                                                    !this.state.redeemAmount
+
                                             }
                                             onClick={() => this.setOpenWithdrawModal(true)}
                                             fullWidth
@@ -2356,9 +2365,9 @@ class Asset extends Component {
                         <Table className={classes.table} aria-label="simple table">
                             <TableHead>
                                 <TableRow>
-                                    <StyledTableCell>Coin</StyledTableCell>
-                                    <StyledTableCell align="left">Asset %</StyledTableCell>
-                                    <StyledTableCell align="right">24h change USD</StyledTableCell>
+                                    <StyledTableCell>COIN</StyledTableCell>
+                                    <StyledTableCell align="left">ASSET %</StyledTableCell>
+                                    <StyledTableCell align="right">24H CHANGE</StyledTableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -3407,6 +3416,11 @@ class Asset extends Component {
             }
 
             const depositedShares = this.calculateDepositShare(asset, null);
+
+            if(depositedShares <= 0 ) {
+                this.setRedeemAmountError("Invalid amount");
+                return;
+            }
 
             if (this.validateInputValMoreThanBalance(amount, depositedShares)) {
                 this.setRedeemAmountError("Exceed available balance");

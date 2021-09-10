@@ -609,7 +609,7 @@ const styles = (theme) => ({
         [theme.breakpoints.down("xs")]: {
             padding: "5px 10px",
         },
-        zIndex: 1,
+        zIndex: 0,
     },
     itemTitleText: {
         fontSize: "18px",
@@ -1087,7 +1087,7 @@ class Vault extends Component {
         return showMobile ? (
             <React.Fragment>
                 <Typography variant={"h5"} className={classes.assetLabel2}>
-                    7d PNL
+                    7D PNL
                 </Typography>
                 <Typography variant={"h3"} noWrap className={classes.assetLabel1}>
                     {/* {this.isUsdVault(asset) && (
@@ -1126,7 +1126,7 @@ class Vault extends Component {
             </Typography> */}
 
                         <Typography variant={"h5"} className={classes.assetLabel2}>
-                            P30D PnL
+                            P30D PNL
                         </Typography>
                     </div>
                 </div>
@@ -1222,7 +1222,7 @@ class Vault extends Component {
                     variant={showMobile ? "h5" : "h5"}
                     className={classes.assetLabel2}
                 >
-                    Staked
+                    STAKED
                 </Typography>
                 <Typography
                     variant={showMobile ? "h3" : "h5"}
@@ -1312,7 +1312,7 @@ class Vault extends Component {
                                 {/*        : this.renderPopularIcon(asset)*/}
                                 {/*    : null}*/}
                             </Grid>
-                            {/*<RiskLevelLabel risk={asset.risk}/>*/}
+                            <RiskLevelLabel risk={asset.risk}/>
                         </Grid>
                         <Accordion
                             className={classes.expansionPanel}
@@ -1362,7 +1362,7 @@ class Vault extends Component {
                                                 variant={"h5"}
                                                 className={classes.assetLabel2}
                                             >
-                                                {asset.description}
+                                                STABLECOINS
                                             </Typography>
                                             <Typography
                                                 variant={"h5"}

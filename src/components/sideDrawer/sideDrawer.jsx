@@ -906,7 +906,7 @@ class SideDrawer extends Component {
 
                 {hideNav && (
                     <div style={{marginLeft: "20px", paddingBottom: "40px"}}>
-                        <ToggleTheme></ToggleTheme>
+                        {/*<ToggleTheme></ToggleTheme>*/}
                     </div>
                 )}
 

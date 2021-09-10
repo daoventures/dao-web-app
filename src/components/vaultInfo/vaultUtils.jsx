@@ -64,10 +64,10 @@ export const getAssetData = (assetDistributionData) => {
             label: coinData[0],
             percent: coinData[1].percent,
             y: coinData[1].percent,
-            changePercentage: coinData[1].changePercentage.toFixed(2),
+            changePercentage: coinData[1].changePercentage.toFixed(2) + '%',
             textColorStyle: {color: coinData[1].changePercentage > 0 ? '#15C73E' : 'red'},
             color: pallet[index],
-            changeValue: (coinData[1].changePercentage).toFixed(2)
+            changeValue: (coinData[1].changePercentage).toFixed(2)+ ' %'
         };
     });
 
