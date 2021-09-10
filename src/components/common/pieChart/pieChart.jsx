@@ -13,7 +13,7 @@ class PieChart extends Component {
         super();
 
         this.state = {
-            chartInnerSize: '92%',
+            chartInnerSize: '90%',
             colors: [
                 '#50B432',
                 '#ED561B',
@@ -45,7 +45,7 @@ class PieChart extends Component {
             },
             plotOptions: {
                 pie: {
-                    size: "100%",
+                    size: "80%",
                     innerSize: this.state.chartInnerSize,
                     dataLabels: {
                         enabled: false,
@@ -75,7 +75,7 @@ class PieChart extends Component {
         }
 
         let options = this.getDefaultChartOption();
-        options["series"] = [{data: data}];
+        options["series"] = [{data: data,states: {hover:{halo:{opacity:0}}}}];
 
         // Inner Radius of pie chart
         if(this.props.innerSize !== undefined) {

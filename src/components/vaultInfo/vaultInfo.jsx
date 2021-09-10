@@ -850,8 +850,11 @@ class Vault extends Component {
     networkChanged = (obj) => {
         const account = store.getStore("account");
         const basedOn = localStorage.getItem("yearn.finance-dashboard-basedon");
-
+        let allowedNetworkIds = [1,42,80001,137];
         const networkId = obj.network;
+        if(!allowedNetworkIds.includes(networkId)) {
+            alert('Please switch your wallet Network to Ethereum or Polygon')
+        }
         if (account && account.address) {
             dispatcher.dispatch({
                 type: GET_STRATEGY_BALANCES_FULL,

@@ -4,6 +4,7 @@ import {
     Avatar,
     Button,
     CircularProgress,
+    Checkbox,
     Dialog,
     DialogContent,
     Grid,
@@ -41,7 +42,7 @@ import {
     WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
     WITHDRAW_VAULT_RETURNED,
     WITHDRAW_VAULT_RETURNED_COMPLETED,
-    ERROR_WALLET_APPROVAL, ERROR_DEPOSIT_WALLET
+    ERROR_WALLET_APPROVAL, ERROR_DEPOSIT_WALLET, DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED
 } from "../../constants";
 import React, {Component} from "react";
 
@@ -477,7 +478,10 @@ const styles = (theme) => ({
         lineHeight: "18px"
     },
     operationLabel: {
-        color: theme.themeColors.textT
+        color: theme.themeColors.textT,
+        fontFamily: "Rubik",
+        fontStyle: "normal",
+        fontWeight: "500",
     },
     changeCurrencyContainer: {
         padding: "10px 20px 20px 20px",
@@ -564,15 +568,20 @@ const styles = (theme) => ({
         marginTop: "3px",
     },
     tokenColorKey: {
-        width: "15px",
-        height: "15px",
+        width: "12px",
+        height: "12px",
         left: "32px",
         borderRadius: "50%",
         padding: "5px",
         display: "inline-block",
         lineHeight: "7px",
-        marginRight: "5px"
+        marginRight: "10px"
 
+    },
+    assetRowHover: {
+        "&:hover": {
+            backgroundColor: "#0E0632 !important"
+        }
     },
     approvalDetails: {
         backgroundColor: "#191736",
@@ -583,6 +592,9 @@ const styles = (theme) => ({
     depositWarningDiv: {
         padding: "7% 0 10px 10px",
         color: "#FFFFFF",
+    },
+    warningCheckbox: {
+        color: "#FFFFFF"
     },
     approvalBtnBlock: {
         display: "flex"
@@ -715,6 +727,12 @@ const styles = (theme) => ({
     withdrawMessageBlock: {
         textAlign: "center",
         marginBottom: "5%"
+    },
+    labelMessage: {
+        fontFamily: "Rubik",
+        fontStyle: "normal",
+        fontWeight: "normal",
+        fontSize: "12px"
     }
 });
 
@@ -770,9 +788,9 @@ const StyledTableCellDeposit = withStyles((theme) => ({
 
 const StyledTableRow = withStyles((theme) => ({
     root: {
-        '&:nth-of-type(odd)': {
-            backgroundColor: theme.palette.action.hover,
-        },
+        // '&:nth-of-type(odd)': {
+        //     backgroundColor: theme.palette.action.hover,
+        // },
     },
 }))(TableRow);
 
@@ -823,11 +841,13 @@ class Asset extends Component {
                 label: '1Y',
                 value: '1y'
             }],
-            vaultAssetHistoricalData: {data: []},
+            vaultAssetHistoricalData: {data: [], pnl: 0},
             withdrawErrorMessage: "",
             withdrawEarnErrorMessage: "",
             happyHourWarning: "",
             happyHourMessage: "",
+            highRiskDepositWarningNeeded: false,
+            highRiskDepositAccepted: false,
             openDepositDialogBox: false,
             openWithdrawDialogBox: false,
             isApprovalLoading: false,
@@ -853,6 +873,7 @@ class Asset extends Component {
     componentWillMount() {
         emitter.on(DEPOSIT_CONTRACT_RETURNED_COMPLETED, this.depositReturned); // Trigger function after deposit contract process is completd
         emitter.on(DEPOSIT_ALL_CONTRACT_RETURNED, this.depositReturned);
+        emitter.on(DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED, this.depositReturned);
         emitter.on(WITHDRAW_VAULT_RETURNED_COMPLETED, this.withdrawReturned);
         emitter.on(WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED, this.withdrawReturned);
         emitter.on(WITHDRAW_BOTH_VAULT_FAIL_RETURNED, this.withDrawErrorReturned);
@@ -886,6 +907,10 @@ class Asset extends Component {
             this.depositReturned
         );
         emitter.removeListener(
+            DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED,
+            this.depositReturned
+        );
+        emitter.removeListener(
             WITHDRAW_VAULT_RETURNED_COMPLETED,
             this.withdrawReturned
         );
@@ -915,8 +940,8 @@ class Asset extends Component {
         let apyResponseData = await store.getHistoricDataOfVault(asset.id, value);
 
         if (apyResponseData.success) {
-            let mappedHistoricalData = getMappedData(apyResponseData.data || [], asset.id);
-            this.setState({vaultAssetHistoricalData: mappedHistoricalData});
+            let mappedHistoricalData = getMappedData(apyResponseData.data.chartData || [], asset.id);
+            this.setState({vaultAssetHistoricalData: {...mappedHistoricalData, pnl: apyResponseData.data.performanceHistory}});
         }
     }
 
@@ -1034,7 +1059,9 @@ class Asset extends Component {
             amount: "",
             isDepositLoading: false,
             isDepositCompleted: true,
-            isDepositErrored: false
+            isDepositErrored: false,
+            highRiskDepositWarningNeeded: false,
+            highRiskDepositAccepted: false,
         });
 
         setTimeout(() => {
@@ -1516,14 +1543,23 @@ class Asset extends Component {
        });
     }
 
+    handleRiskAcceptance = (event) => {
+        this.setState({
+            highRiskDepositAccepted: event.target.checked
+        });
+    }
+
     setOpenModal = (modalState) => {
+        let usdWarningLimit = 4000;
         this.setState({
             openDepositDialogBox: modalState,
             isApprovalLoading: false,
             isApprovalErrored: false,
             isApprovalCompleted: false,
             isDepositLoading: false,
-            isDepositCompleted: false
+            isDepositCompleted: false,
+            highRiskDepositWarningNeeded: this.state.amount > usdWarningLimit,
+            highRiskDepositAccepted: false,
         });
         if (modalState) {
             this.checkTheWalletApprovedStatus();
@@ -1611,6 +1647,15 @@ class Asset extends Component {
                     </Grid>
                 </Grid>
             </div>}
+            {this.state.highRiskDepositWarningNeeded && <div className={classes.warningCheckbox}>
+            <Checkbox
+                checked={this.state.highRiskDepositAccepted}
+                onChange={this.handleRiskAcceptance}
+                size="small"
+                color="primary"
+                style={{color: "white"}}
+            /> I understand that my deposit may experience high slippage due to low liquidity
+            </div>}
             {this.state.isCheckingApproval && <div className={classes.erroredMessage}>
                 Checking the wallet connection <CircularProgress color="#FFFFFF" size="25px"/>
             </div>}
@@ -1635,7 +1680,8 @@ class Asset extends Component {
                         <Button
                             className={classes.depositActionButton}
                             onClick={this.depositTokenToContract}
-                            disabled={this.state.isApprovalLoading || this.state.isApprovalErrored || this.state.calculatingFees || this.state.needVaultApproval}
+                            disabled={this.state.isApprovalLoading || this.state.isApprovalErrored || this.state.calculatingFees || this.state.needVaultApproval
+                            || (this.state.highRiskDepositWarningNeeded && !this.state.highRiskDepositAccepted)}
                         >
                             {this.state.isDepositLoading ?
                                 <CircularProgress color="#FFFFFF" size="30px"/> : this.state.isDepositCompleted ?
@@ -1923,7 +1969,7 @@ class Asset extends Component {
                                     {/** Wallet Balance */}
                                     <Typography
                                         variant="body1"
-                                        className={classes.value}
+                                        className={classes.labelMessage}
                                         noWrap
                                         // onClick={() => {
                                         //     this.setAmount(100);
@@ -1937,13 +1983,13 @@ class Asset extends Component {
                                         // onClick={() => {
                                         //     this.setAmount(100);
                                         // }}
-                                        className={classes.value}
+                                        className={classes.labelMessage}
                                         noWrap
                                     >
                                         {/** Wallet Balance */}
                                         {this.isUsdVault(asset) && (
-                                            <div>
-                                                Available {asset.balances
+                                            <React.Fragment>
+                                                AVAILABLE {asset.balances
                                                 ? (
                                                     Math.floor(
                                                         asset.balances[this.state.tokenIndex] * 10000
@@ -1953,7 +1999,7 @@ class Asset extends Component {
                                                 {asset.symbols
                                                     ? asset.symbols[this.state.tokenIndex]
                                                     : ""}
-                                            </div>
+                                            </React.Fragment>
                                         )}
                                         {!this.isUsdVault(asset) && (
                                             <span>
@@ -2258,7 +2304,7 @@ class Asset extends Component {
                                                     // onClick={() => {
                                                     //     this.setRedeemAmount(100);
                                                     // }}
-                                                    className={classes.value}
+                                                    className={classes.labelMessage}
                                                     noWrap
                                                 >
                                                     Withdraw funds from this strategy.
@@ -2281,10 +2327,10 @@ class Asset extends Component {
                                                     // onClick={() => {
                                                     //     this.setAmount(100);
                                                     // }}
-                                                    className={classes.value}
+                                                    className={classes.labelMessage}
                                                     noWrap
                                                 >
-                                                    Available:
+                                                    AVAILABLE:
                                                     {asset.strategyBalance && (
                                                         <span>
 
@@ -2372,7 +2418,7 @@ class Asset extends Component {
                             </TableHead>
                             <TableBody>
                                 {AssetInfo.map((row) => (
-                                    <StyledTableRow key={row.label}>
+                                    <StyledTableRow key={row.label} hover className={classes.assetRowHover}>
                                         <StyledTableCell component="th" scope="row">
                                             <span className={classes.tokenColorKey}
                                                   style={{"backgroundColor": row.color}}>&nbsp;</span>
@@ -2601,15 +2647,18 @@ class Asset extends Component {
                             date,
                             parseFloat(groups[date][0]['lp_performance'].toFixed(4)),
                         ]);
+                        btcAPY.push([
+                            date,
+                            parseFloat((groups[date][0]["btc_performance"]).toFixed(4)),
+                        ]);
+                        ethAPY.push([
+                            date,
+                            parseFloat((groups[date][0]["eth_performance"]).toFixed(4)),
+                        ]);
                     } else if (asset.strategyType === "cuban") {
                         cubanAPY.push([
                             date,
                             parseFloat(groups[date][0]['lp_performance'].toFixed(4)),
-                        ]);
-                    } else if (asset.strategyType === "daoFaang") {
-                        faangAPY.push([
-                            date,
-                            parseFloat((groups[date][0]["lp_performance"]).toFixed(4)),
                         ]);
                         btcAPY.push([
                             date,
@@ -2618,6 +2667,11 @@ class Asset extends Component {
                         ethAPY.push([
                             date,
                             parseFloat((groups[date][0]["eth_performance"]).toFixed(4)),
+                        ]);
+                    } else if (asset.strategyType === "daoFaang") {
+                        faangAPY.push([
+                            date,
+                            parseFloat((groups[date][0]["lp_performance"]).toFixed(4)),
                         ]);
                     } else if (asset.strategyType === "moneyPrinter") {
                         moneyPrinterAPY.push([
@@ -2822,6 +2876,16 @@ class Asset extends Component {
                         data: elonAPY,
                         color: labelColorData[strategyMap.Elon]? labelColorData[strategyMap.Elon]: "#FFFFF"
                     },
+                    {
+                        name: "BTC",
+                        data: btcAPY,
+                        color:  labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.BTC]: "#f7931b",
+                    },
+                    {
+                        name: "ETH",
+                        data: ethAPY,
+                        color: labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.ETH]:"#464a75",
+                    }
                 ],
                 responsive: {
                     rules: [
@@ -2858,6 +2922,16 @@ class Asset extends Component {
                         data: cubanAPY,
                         color: labelColorData[strategyMap.Cuban]? labelColorData[strategyMap.Cuban]: "#FFFFF"
                     },
+                    {
+                        name: "BTC",
+                        data: btcAPY,
+                        color:  labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.BTC]: "#f7931b",
+                    },
+                    {
+                        name: "ETH",
+                        data: ethAPY,
+                        color: labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.ETH]:"#464a75",
+                    }
                 ],
                 responsive: {
                     rules: [
@@ -2893,17 +2967,7 @@ class Asset extends Component {
                         name: "FAANG Stonk",
                         data: faangAPY,
                         color:  labelColorData[strategyMap['FAANG Stonk']]? labelColorData[strategyMap['FAANG Stonk']]: "#FFFFFF",
-                    },
-                    {
-                        name: "BTC",
-                        data: btcAPY,
-                        color:  labelColorData[strategyMap.BTC]? labelColorData[strategyMap.BTC]: "#f7931b",
-                    },
-                    {
-                        name: "ETH",
-                        data: ethAPY,
-                        color: labelColorData[strategyMap.ETH]? labelColorData[strategyMap.ETH]:"#464a75",
-                    },
+                    }
                 ],
                 responsive: {
                     rules: [
@@ -3040,6 +3104,11 @@ class Asset extends Component {
         };
 
         const {classes} = this.props;
+        let pnl = this.state.vaultAssetHistoricalData  && this.state.vaultAssetHistoricalData.pnl ? this.state.vaultAssetHistoricalData.pnl.toFixed(2) : '0.00';
+        const pnlTextColor = parseFloat(pnl) <0?'red':'#15C73E';
+        if(parseFloat(pnl) > 0) {
+            pnl = '+' + pnl;
+        }
         return (
             <>
                 <Grid
@@ -3049,7 +3118,7 @@ class Asset extends Component {
                     <Grid item xs={6} className={classes.pnlDivPosition}>
                         {options.title.text}
                         <span className={classes.pnlVault}
-                              style={{color: asset.pnlTextColor}}>{asset.pnl ? asset.pnl.toFixed(2) : '0.00'}%</span>
+                              style={{color: pnlTextColor}}>{pnl}%</span>
                     </Grid>
                     <Grid item xs={6} className={classes.timeRangeMain}>
                         {this.state.timeRange.map((range, index) => {
