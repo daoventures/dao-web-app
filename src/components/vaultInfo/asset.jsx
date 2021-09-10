@@ -565,7 +565,7 @@ const styles = (theme) => ({
         fontSize: "12px",
         align: "left",
         color: theme.themeColors.formHappyHour,
-        marginTop: "3px",
+        marginTop: "-14px",
     },
     tokenColorKey: {
         width: "12px",
