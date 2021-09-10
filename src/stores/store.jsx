@@ -558,7 +558,12 @@ class Store {
       },
     };
 
-    const vaultAssets = network ? vaultAssetsObj[network] : vaultAssetsObj[1];
+    const vaultAssets = network ? (vaultAssetsObj[network]? vaultAssetsObj[network] :[]): vaultAssetsObj[1];
+
+    if(!vaultAssetsObj[network]) {
+      // alert('Please switch your wallet Network to Ethereum or Polygon');
+    }
+
     const upgradeToken = network
       ? upgradeTokenObj[network]
       : upgradeTokenObj[1];
@@ -6486,7 +6491,7 @@ class Store {
       const result = JSON.parse(resultString);
       return {
         success: true,
-        data: result.body.chartData
+        data: result.body
       };
     } catch (Err) {
       console.log(Err);

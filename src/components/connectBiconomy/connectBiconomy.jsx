@@ -88,6 +88,12 @@ class ConnectBiconomy extends Component {
 
     const happyHourapiKey = this.getBiconomyHappyHourAPIKey(networkId);
     const erc20PaymentapiKey = this.getBiconomyERC20PaymentAPIKey(networkId);
+
+    if(!happyHourapiKey || !erc20PaymentapiKey) {
+      console.log('key not found');
+      return;
+    }
+
     const happyHourbiconomy = new Biconomy(provider, {
       walletProvider: window.ethereum,
       apiKey: happyHourapiKey,
