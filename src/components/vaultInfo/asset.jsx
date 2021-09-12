@@ -1613,7 +1613,7 @@ class Asset extends Component {
                                 </StyledTableRow>
                                 <StyledTableRow key={"approveDepositValue"}>
                                     <StyledTableCellDeposit align="left">Deposit</StyledTableCellDeposit>
-                                    <StyledTableCellDeposit align="right">{this.state.amount}</StyledTableCellDeposit>
+                                    <StyledTableCellDeposit align="right"> {this.state.finalAmount} {asset.symbol}</StyledTableCellDeposit>
                                 </StyledTableRow>
                                 <StyledTableRow key={"approveDepositFee"}>
                                     <StyledTableCellDeposit align="left">Fee({this.state.feePercentage}%)</StyledTableCellDeposit>
@@ -1622,7 +1622,7 @@ class Asset extends Component {
                                 <StyledTableRow key={"approveDepositTotal"}>
                                     <StyledTableCellDeposit align="left">TOTAL</StyledTableCellDeposit>
                                     <StyledTableCellDeposit
-                                        align="right">{this.state.finalAmount} {asset.symbol}</StyledTableCellDeposit>
+                                        align="right">{this.state.amount} {asset.symbol}</StyledTableCellDeposit>
                                 </StyledTableRow>
                             </TableBody>}
                         </Table>
@@ -1680,7 +1680,7 @@ class Asset extends Component {
                         <Button
                             className={classes.depositActionButton}
                             onClick={this.depositTokenToContract}
-                            disabled={this.state.isApprovalLoading || this.state.isApprovalErrored || this.state.calculatingFees || this.state.needVaultApproval
+                            disabled={this.state.isApprovalLoading || this.state.isApprovalErrored || this.state.calculatingFees || (this.state.needVaultApproval && !this.state.isApprovalCompleted)
                             || (this.state.highRiskDepositWarningNeeded && !this.state.highRiskDepositAccepted)}
                         >
                             {this.state.isDepositLoading ?

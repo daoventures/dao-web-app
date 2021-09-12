@@ -1232,7 +1232,7 @@ class Vault extends Component {
                     className={classes.assetLabel1}
                 >
                     <div>
-                        {asset.depositedSharesInUSD? asset.depositedSharesInUSD.toFixed(4): 0} USDT
+                        {asset.depositedSharesInUSD? asset.depositedSharesInUSD.toFixed(4): 0} USD
                     </div>
                 </Typography>
             </React.Fragment>
