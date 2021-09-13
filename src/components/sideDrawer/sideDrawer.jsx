@@ -850,32 +850,33 @@ class SideDrawer extends Component {
 
         const socialMedias = [
             [
-                {
-                    icon: "#iconfacebook",
-                    link: "https://www.facebook.com/DAOventuresCo/",
-                },
+                // {
+                //     icon: "#iconfacebook",
+                //     link: "https://www.facebook.com/DAOventuresCo/",
+                // },
                 {icon: "#icontwitter", link: "https://twitter.com/VenturesDao"},
-                {
-                    icon: "#iconlinked",
-                    link: "https://www.linkedin.com/company/daoventuresco/",
-                },
+                // {
+                //     icon: "#iconlinked",
+                //     link: "https://www.linkedin.com/company/daoventuresco/",
+                // },
                 {icon: "#icondiscord", link: ""},
-                {icon: "#iconmedium", link: "https://daoventuresco.medium.com/"},
-            ],
-            [
-                {icon: "#iconreddit", link: "https://www.reddit.com/r/DAOVentures/"},
                 {icon: "#icontelegram", link: "https://t.me/DAOventures"},
-                {icon: "#iconemail", link: "mailto:support@daoventures.co"},
-                {
-                    icon: "#iconslack",
-                    link: "https://join.slack.com/t/daoventures/shared_invite/zt-k4hmm44g-p5ME~5I~fm0pkfY2U8AUIw",
-                },
-                {icon: "#iconweibo", link: ""},
+                // {icon: "#iconmedium", link: "https://daoventuresco.medium.com/"},
             ],
             [
-                {icon: "#iconweixin1", link: ""},
-                {icon: "#iconcoinMarketCap", link: ""},
-                {icon: "#iconcoingecko", link: ""},
+                // {icon: "#iconweixin1", link: ""},
+                // {icon: "#iconcoinMarketCap", link: "https://coinmarketcap.com/currencies/daoventures/"},
+                // {icon: "#iconcoingecko", link: "https://www.coingecko.com/en/coins/daoventures"},
+            ],
+            [
+                // {icon: "#iconreddit", link: "https://www.reddit.com/r/DAOVentures/"},
+
+                // {icon: "#iconemail", link: "mailto:support@daoventures.co"},
+                // {
+                //     icon: "#iconslack",
+                //     link: "https://join.slack.com/t/daoventures/shared_invite/zt-k4hmm44g-p5ME~5I~fm0pkfY2U8AUIw",
+                // },
+                // {icon: "#iconweibo", link: ""},
             ],
         ];
 
