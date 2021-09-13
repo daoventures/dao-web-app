@@ -685,7 +685,10 @@ const styles = (theme) => ({
         alignItems: "flex-start",
         fontSize: "14px",
         color: "#fff",
-        padding: "0px 24px 0px 24px"
+        padding: "0px 24px 0px 24px",
+        fontFamily: "Rubik",
+        fontStyle: "normal",
+        fontWeight: "normal"
     },
     withdrawTextPadding: {
         padding: "17px",
@@ -1532,7 +1535,8 @@ class Asset extends Component {
         this.setState({
             calculatingFees: true
         });
-       let feeData = await store.getFeeInfo(this.props.asset, this.state.amount * (10 ** this.props.asset.decimals));
+
+       let feeData = await store.getFeeInfo(this.props.asset, this.state.amount * (10 ** this.props.asset.feeDecimals));
        let feeAmount = (this.state.amount * feeData.feePercent/100).toFixed(4);
        let finalAmount = (this.state.amount - feeAmount).toFixed(4);
        this.setState({
@@ -1989,7 +1993,7 @@ class Asset extends Component {
                                         {/** Wallet Balance */}
                                         {this.isUsdVault(asset) && (
                                             <React.Fragment>
-                                                AVAILABLE {asset.balances
+                                                AVAILABLE: {asset.balances
                                                 ? (
                                                     Math.floor(
                                                         asset.balances[this.state.tokenIndex] * 10000
@@ -2330,11 +2334,10 @@ class Asset extends Component {
                                                     className={classes.labelMessage}
                                                     noWrap
                                                 >
-                                                    AVAILABLE:
-                                                    {asset.strategyBalance && (
+                                                    AVAILABLE:&nbsp;
                                                         <span>
 
-                                                            {asset.depositedSharesInUSD
+                                                            {asset.depositedSharesInUSD && asset.strategyBalance
                                                                 ? (
                                                                     asset.depositedSharesInUSD /
                                                                     asset.priceInUSD[this.state.tokenIndex]
@@ -2342,7 +2345,6 @@ class Asset extends Component {
                                                                 : "0.0000"}{" "}
                                                             {asset.symbols[this.state.tokenIndex]}
                             </span>
-                                                    )}
                                                 </Typography>
                                             </div>
                                             {this.renderDepositWithdrawInput(false, asset)}
@@ -2614,7 +2616,6 @@ class Asset extends Component {
                 Object.keys(groups).forEach((date) => {
                     // first attempt
                     labels.push(date);
-
                     if (asset.strategyType === "yearn") {
                         earnAPY.push([
                             date,
@@ -2677,6 +2678,14 @@ class Asset extends Component {
                         moneyPrinterAPY.push([
                             date,
                             parseFloat(groups[date][0]['lp_performance'].toFixed(4)),
+                        ]);
+                        btcAPY.push([
+                            date,
+                            parseFloat((groups[date][0]["btc_performance"]).toFixed(4)),
+                        ]);
+                        ethAPY.push([
+                            date,
+                            parseFloat((groups[date][0]["eth_performance"]).toFixed(4)),
                         ]);
                     }
 
@@ -3003,6 +3012,16 @@ class Asset extends Component {
                         name: "Money Printer",
                         data: moneyPrinterAPY,
                     },
+                    {
+                        name: "BTC",
+                        data: btcAPY,
+                        color:  labelColorData[strategyMap["Money Printer"]]? labelColorData[strategyMap.BTC]: "#f7931b",
+                    },
+                    {
+                        name: "ETH",
+                        data: ethAPY,
+                        color: labelColorData[strategyMap["Money Printer"]]? labelColorData[strategyMap.ETH]:"#464a75",
+                    },
                 ],
                 responsive: {
                     rules: [
@@ -3054,7 +3073,7 @@ class Asset extends Component {
             y: -50,
             style: {
                 fontSize: "14px",
-                color: this.state.interestTheme.themeColors.textT,
+                color: this.state.interestTheme.themeColors.textT
             },
         };
 
