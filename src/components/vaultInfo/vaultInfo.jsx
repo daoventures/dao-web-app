@@ -82,6 +82,7 @@ const styles = (theme) => ({
         alignItems: "center",
         justifyContent: "center",
         position: "relative",
+        width: "82vw"
         // [theme.breakpoints.up('md')]: {
         //   minWidth: 'calc(100% - '+ drawerWidth + 'px)',
         // }
