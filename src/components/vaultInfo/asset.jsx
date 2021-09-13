@@ -1124,7 +1124,8 @@ class Asset extends Component {
             asset.strategyType === "elon" ||
             asset.strategyType === "cuban" ||
             asset.strategyType === "daoFaang" ||
-            asset.strategyType === "moneyPrinter";
+            asset.strategyType === "moneyPrinter" ||
+            asset.strategyType === "metaverse";
     };
 
     // Handle input validation message
@@ -2287,12 +2288,13 @@ class Asset extends Component {
                                         </div>
                                     </div>
                                 )}
-                                {/** Citadel, Elon, Cuban, DAO Faang Strategy*/}
+                                {/** Citadel, Elon, Cuban, DAO Faang, Money Printer, Metaverse Strategy*/}
                                 {(asset.strategyType === "citadel" ||
                                     asset.strategyType === "elon" ||
                                     asset.strategyType === "cuban" ||
                                     asset.strategyType === "daoFaang" ||
-                                    asset.strategyType === "moneyPrinter") && (
+                                    asset.strategyType === "moneyPrinter" ||
+                                    asset.strategyType === "metaverse") && (
                                     <div className={classes.withdrawContainer}>
                                         <div className={classes.tradeContainer}>
                                             <div className={classes.operationLabel}>
@@ -2560,6 +2562,7 @@ class Asset extends Component {
         var cubanAPY = [];
         var faangAPY = [];
         var moneyPrinterAPY = [];
+        var metaverseAPY = [];
         var labels = [];
 
         const {hideNav} = this.state;
@@ -2580,7 +2583,8 @@ class Asset extends Component {
                 asset.strategyType === "daoFaang"  ||
                 asset.strategyType === "cuban"  ||
                 asset.strategyType === "elon"  ||
-                asset.strategyType === "moneyPrinter"
+                asset.strategyType === "moneyPrinter" ||
+                asset.strategyType === "metaverse"
             ) {
 
                 let data = this.state.vaultAssetHistoricalData && this.state.vaultAssetHistoricalData.data && this.state.vaultAssetHistoricalData.data.length ? this.state.vaultAssetHistoricalData.data : asset.historicalPerformance || [];
@@ -2657,6 +2661,19 @@ class Asset extends Component {
                         ]);
                     } else if (asset.strategyType === "cuban") {
                         cubanAPY.push([
+                            date,
+                            parseFloat(groups[date][0]['lp_performance'].toFixed(4)),
+                        ]);
+                        btcAPY.push([
+                            date,
+                            parseFloat((groups[date][0]["btc_performance"]).toFixed(4)),
+                        ]);
+                        ethAPY.push([
+                            date,
+                            parseFloat((groups[date][0]["eth_performance"]).toFixed(4)),
+                        ]);
+                    } else if (asset.strategyType === "metaverse") {
+                        metaverseAPY.push([
                             date,
                             parseFloat(groups[date][0]['lp_performance'].toFixed(4)),
                         ]);
@@ -3022,6 +3039,52 @@ class Asset extends Component {
                     enabled: false,
                 },
             };
+        } else if (asset.strategyType === "metaverse") {
+            options = {
+                chart: {
+                    width: hideNav ? 300 : 420,
+                },
+                title: {
+                    text: "Vault Performance History",
+                },
+                xAxis: {
+                    categories: labels,
+                },
+                series: [
+                    {
+                        name: "Metaverse",
+                        data: metaverseAPY,
+                        color: labelColorData[strategyMap.Metaverse]? labelColorData[strategyMap.Metaverse]: "#FFFFF"
+                    },
+                    {
+                        name: "BTC",
+                        data: btcAPY,
+                        color:  labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.BTC]: "#f7931b",
+                    },
+                    {
+                        name: "ETH",
+                        data: ethAPY,
+                        color: labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.ETH]:"#464a75",
+                    }
+                ],
+                responsive: {
+                    rules: [
+                        {
+                            condition: {
+                                maxWidth: 450,
+                                chartOptions: {
+                                    chart: {
+                                        width: 300,
+                                    },
+                                },
+                            },
+                        },
+                    ],
+                },
+                credits: {
+                    enabled: false,
+                },
+            };
         }
 
         const chartTitle = {
@@ -3032,6 +3095,7 @@ class Asset extends Component {
             cuban: "Vault Performance History",
             daoFaang: "Vault Performance History",
             moneyPrinter: "Vault Performance History",
+            metaverse: "Vault Performance History"
         };
 
         // 调整折线图展示

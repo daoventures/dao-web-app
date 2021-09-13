@@ -78,6 +78,7 @@ export const strategyMap = {
     "Cuban": "lp_performance",
     "Elon": "lp_performance",
     "FAANG Stonk": "lp_performance",
+    "Metaverse": "lp_performance",
     "ETH": "eth_performance",
     "BTC": "btc_performance",
     "Citadel": "lp_performance",

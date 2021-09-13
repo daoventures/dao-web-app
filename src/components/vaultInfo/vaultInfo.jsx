@@ -1034,7 +1034,8 @@ class Vault extends Component {
         asset.strategyType === "elon" ||
         asset.strategyType === "cuban" ||
         asset.strategyType === "daoFaang" ||
-        asset.strategyType === "moneyPrinter"
+        asset.strategyType === "moneyPrinter" ||
+        asset.strategyType === "metaverse"
             ? true
             : false;
     };
@@ -1099,7 +1100,8 @@ class Vault extends Component {
                     {asset.strategyType === "citadel" || asset.strategyType === "daoFaang"  ||
                     asset.strategyType === "elon" ||
                     asset.strategyType === "cuban" ||
-                    asset.strategyType === "moneyPrinter"
+                    asset.strategyType === "moneyPrinter" || 
+                    asset.strategyType === "metaverse"
                         ? this._get7dPNL(asset)
                         : this._getAPY(asset)}
                 </Typography>
@@ -1143,7 +1145,8 @@ class Vault extends Component {
                             asset.strategyType === "daoFaang"  ||
                             asset.strategyType === "elon" ||
                             asset.strategyType === "cuban" ||
-                            asset.strategyType === "moneyPrinter"
+                            asset.strategyType === "moneyPrinter" ||
+                            asset.strategyType === "metaverse"
                                 ? this._getPnl(asset)
                                 : this._getAPY(asset)}{" "}
                         </Typography>

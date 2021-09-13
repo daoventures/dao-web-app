@@ -2171,6 +2171,7 @@ class Store {
       "elon",
       "cuban",
       "moneyPrinter",
+      "metaverse"
     ];
     if (!strategyTypes.includes(asset.strategyType)) {
       callback(null, {
@@ -3729,7 +3730,8 @@ class Store {
     } else if (
       asset.strategyType === "citadel" ||
       asset.strategyType === "elon" ||
-      asset.strategyType === "cuban"
+      asset.strategyType === "cuban" ||
+      asset.strategyType === "metaverse"
     ) {
       const vaultContract = new web3.eth.Contract(
         asset.vaultContractABI,
@@ -3742,8 +3744,12 @@ class Store {
         .balanceOf(account.address)
         .call({ from: account.address });
 
+      const decimals = (asset.strategyType === "metaverse")
+        ? 18
+        : 6;
+
       const depositedSharesInUSD =
-        (depositedShares * pool) / totalSupply / 10 ** 6;
+        (depositedShares * pool) / totalSupply / 10 ** decimals;
 
       callback(null, {
         earnBalance: 0,
