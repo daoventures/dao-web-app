@@ -9,10 +9,12 @@ import {
     WITHDRAW_DAOMINE_RETURNED_COMPLETED,
     EMERGENCY_WITHDRAW_DAOMINE,
     EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,
+    ACTION_EMERGENCY,
+    LEGACY_POOLS,
     ERROR
 } from '../../../../constants/constants';
 import { validateDigit, validateInputMoreThanBalance, validateAmountNotExist } from "../../helper/validation";
-
+import StakeActions from "../stakeActions/stakeActions";
 
 const styles = (theme) => ({
     contentHeader: {
@@ -116,31 +118,6 @@ const styles = (theme) => ({
         background: "none",
         borderColor: theme.themeColors.border,
         color: theme.themeColors.textT,
-        borderWidth: "1px",
-        borderStyle: "solid",
-        marginLeft: "20px",
-        borderRadius: "0px",
-        cursor: "pointer",
-        flex: "1",
-        "&:hover": {
-            background: theme.themeColors.btnBack,
-        },
-        "&.Mui-disabled": {
-            borderColor: theme.themeColors.btnDisabled,
-            cursor: "not-allowed",
-            color: theme.themeColors.textD,
-        },
-        "&:first-child": {
-            marginLeft: "0px",
-        },
-    },
-
-    emergencyWithdrawalActionButton: {
-        height: "42px",
-        margin: "auto",
-        background: "none",
-        borderColor: "#dc0b0c",
-        color: "#dc0b0c",
         borderWidth: "1px",
         borderStyle: "solid",
         marginLeft: "20px",
@@ -322,27 +299,12 @@ class StakeWithdraw extends Component {
         }
     };
 
-    onEmergencyWithdrawal = () => {
-        this.setState({ amountError: false, errorMessage: "" });
-
-        const { startLoading, pool } = this.props;
-        
-        this.setState({ loading: true });
-        startLoading();
-
-        dispatcher.dispatch({
-            type: EMERGENCY_WITHDRAW_DAOMINE,
-            content: {
-                pool,
-            }
-        })
-    };
-
     render() {
         const { amount, loading, amountError, percent, errorMessage } = this.state;
-        const { classes, pool } = this.props;
+        const { classes, pool, startLoading } = this.props;
 
         const { userInfo } = pool;
+        const selectedPoolType = store.getStore("daomineType");
 
         return (
             <div className={classes.withdrawalContainer}>
@@ -361,7 +323,7 @@ class StakeWithdraw extends Component {
                             className={classes.cursor}
                             noWrap
                         >
-                            {userInfo.depositedLPAmount
+                            {userInfo && userInfo.depositedLPAmount
                                 ? (
                                     Math.floor(
                                         (userInfo.depositedLPAmount / 10 ** pool.decimal) * 10000
@@ -384,7 +346,7 @@ class StakeWithdraw extends Component {
                             value={amount}
                             error={amountError}
                             onChange={this.onChange}
-                            disabled={(pool.withdraw && loading) || !pool.withdraw}
+                            disabled={(pool.withdraw && loading) || !pool.withdraw || !userInfo}
                             placeholder="0.00"
                             variant="outlined"
                             onKeyDown={this.inputKeyDown}
@@ -398,7 +360,7 @@ class StakeWithdraw extends Component {
                                         : classes.withdrawalScale
                                 }
                                 variant="text"
-                                disabled={(pool.withdraw && loading) || !pool.withdraw}
+                                disabled={(pool.withdraw && loading) || !pool.withdraw || !userInfo}
                                 onClick={() => {
                                     this.setAmount(100);
                                 }}
@@ -428,16 +390,19 @@ class StakeWithdraw extends Component {
                         </Button>
                     </div>
 
-                    {pool.emergencyWithdraw && 
+                    {/** Will be shown in legacy pool only */}
+                    {
+                        (pool.emergencyWithdraw && selectedPoolType === LEGACY_POOLS) &&
                         <div className={classes.withdrawlButtonBox}>
-                            <Button
-                                disabled={(pool.emergencyWithdraw && loading)}
-                                className={classes.emergencyWithdrawalActionButton}
-                                onClick={this.onEmergencyWithdrawal}
-                            >
-                                <span>{"Confirm MAX withdrawal " + pool.name + " Only" }</span>
-                            </Button>
+                            {/** Emergency Button */}
+                            <StakeActions
+                                type={ACTION_EMERGENCY}
+                                label={`Confirm MAX withdrawal ${pool.name} only`}
+                                pool={pool}
+                                startLoading={startLoading}>
+                            </StakeActions>
                         </div>
+
                     }
                 </div>
             </div>

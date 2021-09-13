@@ -23,6 +23,7 @@ const kovan = [
     balances: [0, 0, 0],
     vaultBalance: 0,
     decimals: 18,
+    feeDecimals: 18,
     deposit: true,
     depositAll: true,
     withdraw: true,
@@ -35,6 +36,8 @@ const kovan = [
     strategy: "DAO Citadel",
     strategyAddress: "0xc9939B0b2af53E8BeCBA22ab153795e168140237",
     strategyContractABI: config.strategyDAOCDVContractABI,
+    strategyInfo: "A balanced crypto portfolio enhanced with yield farming rewards.",
+    strategyDescription: "A market weight strategy that gives an investor a balanced exposure to crypto. Portfolio components are paired up to earn yield farming rewards to boost returns. ",
     historicalPriceId: "daoCDV_price",
     logoFormat: "svg",
     risk: EXPERT,
@@ -68,6 +71,7 @@ const kovan = [
     balances: [0, 0, 0],
     vaultBalance: 0,
     decimals: 18,
+    feeDecimals: 18,
     deposit: true,
     depositAll: true,
     withdraw: true,
@@ -80,6 +84,8 @@ const kovan = [
     strategy: "DAO FAANG Stonk",
     strategyAddress: "0xc0f43b6db13e5988c92aa8c7c286a51f493620d4",
     strategyContractABI: config.strategyDAOSTOContractABI,
+    strategyInfo: "Popular US tech stocks with yield farming rewards and reduced volatility.",
+    strategyDescription: "US tech stock names packaged into a bundle for one-click investment, with only half the volatility of the stock market. High chance of beating Wall Street with yield farming.",
     historicalPriceId: "daoSTO_price",
     logoFormat: "svg",
     risk: ADVANCE,
@@ -112,6 +118,7 @@ const kovan = [
     balances: [0, 0, 0],
     vaultBalance: 0,
     decimals: 18,
+    feeDecimals: 6,
     deposit: true,
     depositAll: true,
     withdraw: true,
@@ -124,6 +131,8 @@ const kovan = [
     strategy: "DAO Elon",
     strategyAddress: "0xa4F71f88bd522b33af3ae515Caafa956BD1bbFa1",
     strategyContractABI: config.strategyDAOELOContractABI,
+    strategyInfo: "A basket of 3 assets associated with Elon Musk: Bitcoin, Dogecoin, and Tesla",
+    strategyDescription: "Invest in a basket of ERC-20 tokens representing the 3 names most commonly associated with Elon Musk: Bitcoin, Dogecoin, and Tesla.",
     historicalPriceId: "daoELO_price",
     logoFormat: "svg",
     risk: DEGEN,
@@ -155,6 +164,7 @@ const kovan = [
     balances: [0, 0, 0],
     vaultBalance: 0,
     decimals: 18,
+    feeDecimals: 6,
     deposit: true,
     depositAll: true,
     withdraw: true,
@@ -167,6 +177,8 @@ const kovan = [
     strategy: "DAO Cuban",
     strategyAddress: "0x998372c8dc70833a7dc687020257302582fa5838",
     strategyContractABI: config.strategyDAOCUBContractABI,
+    strategyInfo: "A basket featuring DeFi and NFT names Mark Cuban has invested in.",
+    strategyDescription: "A basket of 7 DeFi and NFT names that billionaire Mark Cuban has publicly been known to invest in.",
     historicalPriceId: "daoCUB_price",
     logoFormat: "svg",
     risk: DEGEN,
@@ -179,7 +191,7 @@ const kovan = [
     isPopularItem: false,
     // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
   },
-  {
+ /* {
     id: "USDT",
     name: "USDT",
     symbol: "USDT",
@@ -410,7 +422,7 @@ const kovan = [
     tvlKey: "cUSDT_tvl",
     infoLink: INFO_LINK.COMPOUND,
     isPopularItem: false,
-  },
+  },*/
 ];
 
 export default kovan;

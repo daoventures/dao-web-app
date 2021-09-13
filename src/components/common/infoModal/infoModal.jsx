@@ -2,35 +2,9 @@ import React, { Component } from "react";
 import { withNamespaces } from "react-i18next";
 import { withRouter } from "react-router-dom";
 import { withStyles } from "@material-ui/core/styles";
-import {
-    Dialog,
-    DialogContent,
-    IconButton,
-    Typography,
-} from "@material-ui/core";
-import MuiDialogTitle from "@material-ui/core/DialogTitle";
-import CloseIcon from "@material-ui/icons/Close";
+import BasicModal from "../basicModal/basicModal";
 
 const styles = (theme) => ({
-    dialogRoot: {
-        border: "1px solid " + theme.themeColors.border,
-        background: theme.themeColors.itemBack,
-    },
-    dialogTitle: {
-        background: theme.themeColors.menuSel,
-        borderColor: theme.themeColors.blockBorder,
-        color: theme.themeColors.menuSelText,
-        minHeight: "60px",
-    },
-    dialogContent: {
-        background: theme.themeColors.itemBack,
-    },
-    closeButton: {
-        position: "absolute",
-        right: theme.spacing(1),
-        top: theme.spacing(1),
-        color: theme.themeColors.menuSelText,
-    },
     infoLink: {
         width: '14px',
         height: '14px',
@@ -58,35 +32,10 @@ class InfoModal extends Component {
     }
 
     renderModal = () => {
-        const { classes, content, title } = this.props;
+        const { content, title } = this.props;
         const { displayModal } = this.state;
 
-        const division = (<div></div>);
-       
-        return (
-            <Dialog
-                onClose={() => this.handleModalDisplay(false)}
-                fullWidth={true}
-                maxWidth={"sm"}
-                classes={{ paper: classes.dialogRoot }}
-                aria-labelledby="customized-dialog-title"
-                open={displayModal}
-            >
-                <MuiDialogTitle disableTypography className={classes.dialogTitle}>
-                    <Typography variant="h6">{title ? title : ""}</Typography>
-                    <IconButton
-                        aria-label="close"
-                        className={classes.closeButton}
-                        onClick={() => this.handleModalDisplay(false)}
-                    >
-                        <CloseIcon />
-                    </IconButton>
-                </MuiDialogTitle>
-                <DialogContent dividers className={classes.dialogContent}>
-                    {content ? content : division }
-                </DialogContent>
-            </Dialog>
-        );
+        return <BasicModal content={content} title={title} openModal={displayModal} setOpenModal={this.handleModalDisplay}></BasicModal>
     }
 
     render() {
@@ -96,7 +45,7 @@ class InfoModal extends Component {
         return (
             <React.Fragment>
                 {this.renderModal()}
-                <svg aria-hidden="true" className={classes[`infoLink${iconSize}`]} aria-hidden="true" onClick={() => this.handleModalDisplay(true)}>
+                <svg aria-hidden="true" className={classes[`infoLink${iconSize}`]} onClick={() => this.handleModalDisplay(true)}>
                     <use xlinkHref="#iconinformation-day"></use>
                 </svg>
             </React.Fragment>

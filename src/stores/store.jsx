@@ -9,7 +9,11 @@ import {
   BICONOMY_CONNECTED,
   CURRENT_THEME_RETURNED,
   DAOMINE_POOL_RETURNED,
+  DASHBOARD_SNAPSHOT_RETURNED,
+  DAOMINE_POOL_RETURNED_COMPLETED,
   DEGEN,
+  APPROVE_DEPOSIT_CONTRACT,
+  CONFIRM_DEPOSIT_CONTRACT,
   DEPOSIT_ALL_CONTRACT,
   DEPOSIT_CONTRACT,
   DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED,
@@ -21,6 +25,7 @@ import {
   DEPOSIT_DVG_RETURNED,
   DEPOSIT_DVG_RETURNED_COMPLETED,
   DEPOSIT_XDVG,
+  DISABLE_ACTION_BUTTONS_RETURNED,
   DONATE,
   DONATE_RETURNED,
   DRAWER_RETURNED,
@@ -58,6 +63,9 @@ import {
   IDAI_RETURNED,
   INVEST,
   INVEST_RETURNED,
+  LATEST_POOLS,
+  LEGACY_POOLS,
+  UPDATE_SELECTED_POOL_TYPE,
   NETWORK,
   REBALANCE,
   REBALANCE_RETURNED,
@@ -83,8 +91,8 @@ import {
   WITHDRAW_BOTH_VAULT,
   WITHDRAW_BOTH_VAULT_RETURNED,
   WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
-  DASHBOARD_SNAPSHOT_RETURNED,
   ZAP,
+  WITHDRAW_BOTH_VAULT_FAIL_RETURNED,
   WITHDRAW_DAOMINE,
   WITHDRAW_DAOMINE_RETURNED,
   WITHDRAW_DAOMINE_RETURNED_COMPLETED,
@@ -94,6 +102,12 @@ import {
   WITHDRAW_DVG_RETURNED_COMPLETED,
   WITHDRAW_VAULT_RETURNED_COMPLETED,
   ZAP_RETURNED,
+  YIELD_DAOMINE,
+  YIELD_DAOMINE_RETURNED,
+  YIELD_DAOMINE_RETURNED_COMPLETED,
+  APPROVE_DEPOSIT_SUCCESS,
+  ERROR_WALLET_APPROVAL,
+  ERROR_DEPOSIT_WALLET
 } from "../constants";
 
 import BigNumber from "bignumber.js";
@@ -109,6 +123,8 @@ import fromExponential from "from-exponential";
 import { getERC20AbiByNetwork } from "./helper/contractHelper";
 import { injected } from "./connectors";
 
+import contractHelper from './helper/contractHelper';
+
 const rp = require("request-promise");
 const ethers = require("ethers");
 
@@ -117,6 +133,15 @@ const Emitter = require("events").EventEmitter;
 
 const dispatcher = new Dispatcher();
 const emitter = new Emitter();
+
+const networkObj = {
+  1: "ethereum",
+  4: "ethereum",
+  56: "Binance",
+  42: "ethereum",
+  80001: "polygon",
+  137: "polygon"
+}
 
 class Store {
   constructor() {
@@ -318,7 +343,9 @@ class Store {
       ethBalance: 0,
       sCrvBalance: 0,
       openDrawer: false,
-      stakePools: [],
+      stakePools: [], // for legacy
+      daominePools: [], // for latest
+      daomineType: LATEST_POOLS, 
       dvgApr: {},
       performanceIds: ["daoCDV", "daoSTO"],
       executeStrategyBalanceFunction: false,
@@ -378,6 +405,12 @@ class Store {
           case DEPOSIT_CONTRACT:
             this.depositContract(payload);
             break;
+          case APPROVE_DEPOSIT_CONTRACT:
+            this.approveDepositContract(payload);
+            break;
+          case CONFIRM_DEPOSIT_CONTRACT:
+            this.depositAmountContract(payload);
+            break;
           case DEPOSIT_ALL_CONTRACT:
             this.depositAllContract(payload);
             break;
@@ -400,7 +433,7 @@ class Store {
             this.withdrawBoth(payload);
             break;
           case GET_STRATEGY_BALANCES_FULL:
-            this.getStrategyBalancesFull(payload);
+            this.getStrategyBalancesFullV2(payload);
             break;
           // eslint-disable-next-line no-fallthrough
           case TOGGLE_THEME:
@@ -447,6 +480,12 @@ class Store {
             break;
           case UPGRADE_STAKE_TOKEN:
             this.upgradeAndStakeToken();
+            break;
+          case UPDATE_SELECTED_POOL_TYPE: 
+            this.updateSelectedPoolType(payload);
+            break;  
+          case YIELD_DAOMINE:
+            this.yieldDAOmine(payload);
             break;
           default: {
           }
@@ -520,8 +559,12 @@ class Store {
       },
     };
 
-    console.log("🚀 | Store | network", network);
-    const vaultAssets = network ? vaultAssetsObj[network] : vaultAssetsObj[1];
+    const vaultAssets = network ? (vaultAssetsObj[network]? vaultAssetsObj[network] :[]): vaultAssetsObj[1];
+
+    if(!vaultAssetsObj[network]) {
+      // alert('Please switch your wallet Network to Ethereum or Polygon');
+    }
+
     const upgradeToken = network
       ? upgradeTokenObj[network]
       : upgradeTokenObj[1];
@@ -1336,17 +1379,53 @@ class Store {
             }
           });
 
-        callback();
       } else {
-        callback();
+        callback(null, null, true);
       }
     } catch (error) {
       if (error.message) {
         console.log(error.message);
       }
-      // return callback(error);
+      return callback(error);
     }
   };
+
+  checkIsApproved = async (asset, account, amount, contract) => {
+    const web3 = new Web3(store.getStore("web3context").library.provider);
+
+    if (asset.erc20address === "Ethereum") {
+      return {
+        success: false,
+        message: "erc20address not ethereum"
+      }
+    }
+
+    let erc20Contract = new web3.eth.Contract(
+        config.erc20ABI,
+        asset.erc20address
+    );
+
+    try {
+      const allowance = await erc20Contract.methods
+          .allowance(account.address, contract)
+          .call({from: account.address});
+
+      const ethAllowance = web3.utils.fromWei(allowance, "ether");
+      return {
+        success: true,
+        needApproval: parseFloat(ethAllowance) < parseFloat(amount)
+      }
+
+    } catch (error) {
+      if (error.message) {
+        console.log(error.message);
+      }
+      return {
+        success: false,
+        message: error
+      }
+    }
+  }
 
   _checkApprovalCitadel = async (
     asset,
@@ -1379,7 +1458,7 @@ class Store {
     }
 
     const network = store.getStore("network");
-    const erc20ABI = getERC20AbiByNetwork(network);
+    const erc20ABI = contractHelper.getERC20AbiByNetwork(network);
 
     let erc20Contract = new web3.eth.Contract(erc20ABI, asset.erc20address);
 
@@ -1448,9 +1527,9 @@ class Store {
             }
           });
 
-        callback();
+        // callback();
       } else {
-        callback();
+        callback(null, null, true);
       }
     } catch (error) {
       if (error.message) {
@@ -1459,6 +1538,106 @@ class Store {
       callback(error);
     }
   };
+
+  checkIsCitadelApproved = async (  asset,
+                                    account,
+                                    amount,
+                                    contract,
+                                    tokenIndex = null) => {
+
+    const web3 = new Web3(store.getStore("web3context").library.provider);
+
+    if (asset.erc20address === "Ethereum") {
+      return {
+        success: false,
+        message: "erc20address not ethereum"
+      }
+    }
+    // Handle vaults with multi tokens
+    try {
+      if (
+          tokenIndex !== null &&
+          tokenIndex > 0 &&
+          tokenIndex < asset.erc20addresses.length
+      ) {
+        asset.erc20address = asset.erc20addresses[tokenIndex];
+      } else {
+      }
+    } catch (error) {
+      if (error.message) {
+        return {
+          success: false,
+          message: error.message
+        }
+      }
+    }
+
+    const network = store.getStore("network");
+    const erc20ABI = contractHelper.getERC20AbiByNetwork(network);
+
+    let erc20Contract = new web3.eth.Contract(erc20ABI, asset.erc20address);
+
+    try {
+      const allowance = await erc20Contract.methods
+          .allowance(account.address, contract)
+          .call({from: account.address});
+
+      const ethAllowance = web3.utils.fromWei(allowance, "ether");
+      return {
+        success: true,
+        needApproval: parseFloat(ethAllowance) < parseFloat(amount)
+      }
+    } catch (error) {
+      if (error.message) {
+        console.log(error.message);
+      }
+      return {
+        success: false,
+        message: error
+      }
+    }
+
+  }
+
+  checkIsCompoundApproved = async (asset,
+                                   account,
+                                   amount,
+                                   contract) => {
+
+    const web3 = new Web3(store.getStore("web3context").library.provider);
+
+    if (asset.erc20address === "Ethereum") {
+      return {
+        success: false,
+        message: "erc20address not ethereum"
+      }
+    }
+
+    let erc20Contract = new web3.eth.Contract(
+        config.erc20ABI,
+        asset.erc20address
+    );
+
+    try {
+      const allowance = await erc20Contract.methods
+          .allowance(account.address, contract)
+          .call({from: account.address});
+
+      const ethAllowance = web3.utils.fromWei(allowance, "ether");
+      return {
+        success: true,
+        needApproval: parseFloat(ethAllowance) < parseFloat(amount)
+      }
+    } catch (error) {
+      if (error.message) {
+        console.log(error.message);
+      }
+      return {
+        success: false,
+        message: error
+      }
+    }
+  }
 
   _checkApprovalWaitForConfirmation = async (
     asset,
@@ -1964,8 +2143,11 @@ class Store {
       return;
     } else {
       const network = store.getStore("network");
-      const erc20Abi = getERC20AbiByNetwork(network);
-      let erc20Contract = new web3.eth.Contract(erc20Abi, asset.erc20address);
+      const erc20Abi = contractHelper.getERC20AbiByNetwork(network);
+      let erc20Contract = new web3.eth.Contract(
+        erc20Abi,
+        asset.erc20address
+      );
       console.log(`Getting ERC 20 Balance for asset:  ${asset.erc20address}`);
 
       try {
@@ -1981,7 +2163,7 @@ class Store {
     }
   };
 
-  _getERC20Balances = async (web3, asset, account, callback) => {
+  _getERC20Balances = async (web3, asset, account, callback, coinsInUSDPrice) => {
     // Strategy which required to get balances for multiple token
     const strategyTypes = [
       "citadel",
@@ -1991,13 +2173,21 @@ class Store {
       "moneyPrinter",
     ];
     if (!strategyTypes.includes(asset.strategyType)) {
-      return callback(null, {
+      callback(null, {
         balances: [0, 0, 0],
         sumBalances: 0,
       });
+      return {
+        success: false,
+        data: {
+          balances: [0, 0, 0],
+          sumBalances: 0,
+        }
+      }
     }
-
-    const coinsInUSDPrice = await this._getUSDPrices();
+    if(!coinsInUSDPrice) {
+      coinsInUSDPrice = await this._getUSDPrices();
+    }
     let priceInUSD = [];
     for (let i = 0; i < asset.price_id.length; i++) {
       const coinPrice = coinsInUSDPrice[asset.price_id[i]].usd;
@@ -2013,10 +2203,10 @@ class Store {
       );
 
       try {
-        var balance = await erc20Contract.methods
+        let balance = await erc20Contract.methods
           .balanceOf(account.address)
           .call({ from: account.address });
-        var decimals = await erc20Contract.methods
+        let decimals = await erc20Contract.methods
           .decimals()
           .call({ from: account.address });
         balance = parseFloat(balance) / 10 ** decimals;
@@ -2024,7 +2214,11 @@ class Store {
         balances.push(parseFloat(balance));
       } catch (ex) {
         console.log("Asset: " + asset.id, ex);
-        return callback(ex);
+        callback(ex);
+        return {
+          success: false,
+          data: ex
+        }
       }
     }
 
@@ -2034,6 +2228,11 @@ class Store {
       sumBalances: balances.reduce((a, b) => a + b, 0),
     };
     callback(null, returnObj);
+
+    return {
+      success: true,
+      data: returnObj
+    }
   };
 
   _getBalance = async (web3, asset, account, callback) => {
@@ -3435,7 +3634,11 @@ class Store {
 
   _getBalances = async (web3, asset, account, callback) => {
     if (asset.vaultContractAddress === null) {
-      return callback(null, 0);
+       callback(null, 0);
+      return {
+        success: true,
+        data: 0
+      }
     }
     if (asset.strategyType === "yearn") {
       let vaultContract = new web3.eth.Contract(
@@ -3478,6 +3681,19 @@ class Store {
           : parseFloat(vaultBalance),
         strategyBalance: 0,
       });
+
+      return {
+        success: true,
+        data: {
+          earnBalance: isNaN(parseFloat(earnBalance))
+              ? 0
+              : parseFloat(earnBalance),
+          vaultBalance: isNaN(parseFloat(vaultBalance))
+              ? 0
+              : parseFloat(vaultBalance),
+          strategyBalance: 0,
+        }
+      }
     } else if (asset.strategyType === "compound") {
       let compoundContract = new web3.eth.Contract(
         asset.vaultContractABI,
@@ -3501,6 +3717,15 @@ class Store {
         vaultBalance: 0,
         strategyBalance: balance,
       });
+
+      return {
+        success: true,
+        data: {
+          earnBalance: 0,
+          vaultBalance: 0,
+          strategyBalance: balance,
+        }
+      }
     } else if (
       asset.strategyType === "citadel" ||
       asset.strategyType === "elon" ||
@@ -3526,6 +3751,15 @@ class Store {
         strategyBalance: depositedShares,
         depositedSharesInUSD: depositedSharesInUSD,
       });
+      return {
+        success: true,
+        data: {
+          earnBalance: 0,
+          vaultBalance: 0,
+          strategyBalance: depositedShares,
+          depositedSharesInUSD: depositedSharesInUSD,
+        }
+      }
     } else if (asset.strategyType === "daoFaang") {
       const network = store.getStore("network");
       const vaultContract = new web3.eth.Contract(
@@ -3561,6 +3795,16 @@ class Store {
         strategyBalance: depositedShares,
         depositedSharesInUSD: depositedSharesInUSD,
       });
+
+      return {
+        success: true,
+        data: {
+          earnBalance: 0,
+          vaultBalance: 0,
+          strategyBalance: depositedShares,
+          depositedSharesInUSD: depositedSharesInUSD,
+        }
+      }
     } else if (asset.strategyType === "moneyPrinter") {
       const network = store.getStore("network");
       const vaultContract = new web3.eth.Contract(
@@ -3596,6 +3840,17 @@ class Store {
         strategyBalance: depositedShares,
         depositedSharesInUSD: depositedSharesInUSD,
       });
+
+      return {
+        success: true,
+        data: {
+          earnBalance: 0,
+          vaultBalance: 0,
+          strategyBalance: depositedShares,
+          depositedSharesInUSD: depositedSharesInUSD,
+        }
+      }
+
     }
   };
 
@@ -3649,6 +3904,7 @@ class Store {
         strategyAddress,
         (err, txnHash, approvalResult) => {
           if (err) {
+            emitter.emit(ERROR_WALLET_APPROVAL, err);
             return emitter.emit(ERROR, err);
           }
           if (txnHash) {
@@ -3831,6 +4087,7 @@ class Store {
         tokenIndex,
         (err, txnHash, approvalResult) => {
           if (err) {
+            emitter.emit(ERROR_WALLET_APPROVAL, err);
             return emitter.emit(ERROR, err);
           }
           if (txnHash) {
@@ -3849,6 +4106,7 @@ class Store {
         tokenIndex,
         (err, txnHash, depositResult) => {
           if (err) {
+            emitter.emit(ERROR_WALLET_APPROVAL, err);
             return emitter.emit(ERROR, err);
           }
           if (txnHash) {
@@ -3873,6 +4131,7 @@ class Store {
         (err, txnHash, approvalResult) => {
           if (err) {
             approvalErr = err;
+            emitter.emit(ERROR_WALLET_APPROVAL, err);
             return emitter.emit(ERROR, err);
           }
           if (txnHash) {
@@ -3896,6 +4155,7 @@ class Store {
             tokenIndex,
             (err, txnHash, depositResult) => {
               if (err) {
+                emitter.emit(ERROR_WALLET_APPROVAL, err);
                 return emitter.emit(ERROR, err);
               }
               if (txnHash) {
@@ -3917,6 +4177,7 @@ class Store {
             tokenIndex,
             (err, txnHash, depositResult) => {
               if (err) {
+                emitter.emit(ERROR_WALLET_APPROVAL, err);
                 return emitter.emit(ERROR, err);
               }
               if (txnHash) {
@@ -3943,6 +4204,7 @@ class Store {
         (err, txnHash, approvalResult) => {
           if (err) {
             approvalErr = err;
+            emitter.emit(ERROR_WALLET_APPROVAL, err);
             return emitter.emit(ERROR, err);
           }
           if (txnHash) {
@@ -3962,6 +4224,7 @@ class Store {
           tokenIndex,
           (err, txnHash, depositResult) => {
             if (err) {
+              emitter.emit(ERROR_WALLET_APPROVAL, err);
               return emitter.emit(ERROR, err);
             }
             if (txnHash) {
@@ -3978,6 +4241,517 @@ class Store {
       }
     }
   };
+
+  getWalletApprovedStatus = async (payload) => {
+    const account = store.getStore("account");
+
+    //  Token Index USDT = 0, USDC = 1, DAI = 2
+    const {asset, earnAmount, vaultAmount, amount, tokenIndex} =
+        payload;
+
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      return null;
+    }
+
+    const vaultContract = new web3.eth.Contract(
+        asset.vaultContractABI,
+        asset.vaultContractAddress
+    );
+
+    const strategyAddress = await vaultContract.methods
+        .strategy()
+        .call({from: account.address});
+
+    if (asset.strategyType === "yearn") {
+      return this.checkIsApproved( asset,
+          account,
+          earnAmount + vaultAmount,
+          strategyAddress);
+    } else if (asset.strategyType === "compound") {
+      return this.checkIsCompoundApproved(
+          asset,
+          account,
+          amount,
+          strategyAddress,
+          tokenIndex)
+    } else if (asset.strategyType === "citadel") {
+      return this.checkIsCitadelApproved(
+          asset,
+          account,
+          amount,
+          asset.vaultContractAddress,
+          tokenIndex);
+
+    } else if (asset.strategyType === "elon") {
+      return this.checkIsCitadelApproved(
+          asset,
+          account,
+          amount,
+          asset.vaultContractAddress,
+          tokenIndex)
+
+    }  else if (asset.strategyType === "cuban") {
+      return this.checkIsCitadelApproved(
+          asset,
+          account,
+          amount,
+          asset.vaultContractAddress,
+          tokenIndex)
+
+    } else if (asset.strategyType === "daoFaang") {
+      return this.checkIsCitadelApproved(
+          asset,
+          account,
+          amount,
+          asset.vaultContractAddress,
+          tokenIndex)
+
+    } else if (asset.strategyType === "moneyPrinter") {
+      return this.checkIsCitadelApproved(
+          asset,
+          account,
+          amount,
+          asset.vaultContractAddress,
+          tokenIndex)
+
+    }
+  }
+
+  approveDepositContract = async (payload) => {
+    const account = store.getStore("account");
+
+    //  Token Index USDT = 0, USDC = 1, DAI = 2
+    const {asset, earnAmount, vaultAmount, amount, tokenIndex} =
+        payload.content;
+
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      return null;
+    }
+
+    const vaultContract = new web3.eth.Contract(
+        asset.vaultContractABI,
+        asset.vaultContractAddress
+    );
+
+    const strategyAddress = await vaultContract.methods
+        .strategy()
+        .call({from: account.address});
+
+    if (asset.strategyType === "yearn") {
+      await this._checkApproval(
+          asset,
+          account,
+          earnAmount + vaultAmount,
+          strategyAddress,
+          (err, txnHash, approvalResult) => {
+            if (err) {
+              emitter.emit(ERROR_WALLET_APPROVAL, err);
+              return emitter.emit(ERROR, err);
+            }
+            if (txnHash) {
+              return emitter.emit(APPROVE_TRANSACTING, txnHash);
+            }
+            if (approvalResult) {
+              emitter.emit(APPROVE_DEPOSIT_SUCCESS, approvalResult && approvalResult.transactionHash?approvalResult.transactionHash: {
+                success: true
+              });
+            }
+          }
+      );
+    } else if (asset.strategyType === "compound") {
+      await this._checkApproval(
+          asset,
+          account,
+          amount,
+          strategyAddress,
+          (err, txnHash, approvalResult) => {
+            if (err) {
+              emitter.emit(ERROR_WALLET_APPROVAL, err);
+              return emitter.emit(ERROR, err);
+            }
+            if (txnHash) {
+              return emitter.emit(APPROVE_TRANSACTING, txnHash);
+            }
+            if (approvalResult) {
+              emitter.emit(APPROVE_DEPOSIT_SUCCESS, approvalResult && approvalResult.transactionHash?approvalResult.transactionHash: {
+                success: true
+              });
+            }
+          }
+      );
+    } else if (asset.strategyType === "citadel") {
+      await this._checkApprovalCitadel(
+          asset,
+          account,
+          amount,
+          asset.vaultContractAddress,
+          tokenIndex,
+          (err, txnHash, approvalResult) => {
+            if (err) {
+              emitter.emit(ERROR_WALLET_APPROVAL, err);
+              return emitter.emit(ERROR, err);
+            }
+            if (txnHash) {
+              return emitter.emit(APPROVE_TRANSACTING, txnHash);
+            }
+            if (approvalResult) {
+              emitter.emit(APPROVE_DEPOSIT_SUCCESS, approvalResult && approvalResult.transactionHash?approvalResult.transactionHash: {
+                success: true
+              });
+            }
+
+          }
+      );
+
+    } else if (asset.strategyType === "elon") {
+      await this._checkApprovalCitadel(
+          asset,
+          account,
+          amount,
+          asset.vaultContractAddress,
+          tokenIndex,
+          (err, txnHash, approvalResult) => {
+            if (err) {
+              emitter.emit(ERROR_WALLET_APPROVAL, err);
+              return emitter.emit(ERROR, err);
+            }
+            if (txnHash) {
+              return emitter.emit(APPROVE_TRANSACTING, txnHash);
+            }
+            if (approvalResult) {
+              emitter.emit(APPROVE_DEPOSIT_SUCCESS, approvalResult && approvalResult.transactionHash?approvalResult.transactionHash: {
+                success: true
+              });
+            }
+
+          }
+      );
+
+    } else if (asset.strategyType === "cuban") {
+      await this._checkApprovalCitadel(
+          asset,
+          account,
+          amount,
+          asset.vaultContractAddress,
+          tokenIndex,
+          (err, txnHash, approvalResult) => {
+            if (err) {
+              emitter.emit(ERROR_WALLET_APPROVAL, err);
+              return emitter.emit(ERROR, err);
+            }
+            if (txnHash) {
+              return emitter.emit(APPROVE_TRANSACTING, txnHash);
+            }
+            if (approvalResult) {
+              emitter.emit(APPROVE_DEPOSIT_SUCCESS, approvalResult && approvalResult.transactionHash?approvalResult.transactionHash: {
+                success: true
+              });
+            }
+          }
+      );
+
+    } else if (asset.strategyType === "daoFaang") {
+      let approvalErr; // To prevent execution on deposit contract, after user denied for _checkApprovalCitadel()
+      await this._checkApprovalCitadel(
+          asset,
+          account,
+          amount,
+          asset.vaultContractAddress,
+          tokenIndex,
+          (err, txnHash, approvalResult) => {
+            if (err) {
+              approvalErr = err;
+              emitter.emit(ERROR_WALLET_APPROVAL, err);
+              return emitter.emit(ERROR, err);
+            }
+            if (txnHash) {
+              return emitter.emit(APPROVE_TRANSACTING, txnHash);
+            }
+            if (approvalResult) {
+              emitter.emit(APPROVE_DEPOSIT_SUCCESS, approvalResult && approvalResult.transactionHash?approvalResult.transactionHash: {
+                success: true
+              });
+            }
+          }
+      );
+
+      if (!approvalErr) {
+      }
+    } else if (asset.strategyType === "moneyPrinter") {
+      let approvalErr;
+      await this._checkApprovalCitadel(
+          asset,
+          account,
+          amount,
+          asset.vaultContractAddress,
+          tokenIndex,
+          (err, txnHash, approvalResult) => {
+            if (err) {
+              approvalErr = err;
+              emitter.emit(ERROR_WALLET_APPROVAL, err);
+              return emitter.emit(ERROR, err);
+            }
+            if (txnHash) {
+              return emitter.emit(APPROVE_TRANSACTING, txnHash);
+            }
+            if (approvalResult) {
+              emitter.emit(APPROVE_DEPOSIT_SUCCESS, approvalResult && approvalResult.transactionHash?approvalResult.transactionHash: {
+                success: true
+              });
+            }
+          }
+      );
+
+      if (!approvalErr) {
+        return {
+          success: true,
+
+        }
+      }
+
+      return {
+        success: false,
+        error: approvalErr
+      }
+    }
+  }
+
+  depositAmountContract = async (payload) => {
+      const account = store.getStore("account");
+
+      //  Token Index USDT = 0, USDC = 1, DAI = 2
+      const { asset, earnAmount, vaultAmount, amount, tokenIndex } =
+          payload.content;
+
+      const web3 = await this._getWeb3Provider();
+      if (!web3) {
+        return null;
+      }
+
+      const vaultContract = new web3.eth.Contract(
+          asset.vaultContractABI,
+          asset.vaultContractAddress
+      );
+
+      if (asset.strategyType === "yearn") {
+
+        await this._callDepositContract(
+            asset,
+            account,
+            earnAmount,
+            vaultAmount,
+            (err, txnHash, depositResult) => {
+              if (err) {
+                emitter.emit(ERROR_DEPOSIT_WALLET, err);
+                return emitter.emit(ERROR, err);
+              }
+              if (txnHash) {
+                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+              }
+              if (depositResult) {
+                return emitter.emit(
+                    DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                    depositResult.transactionHash
+                );
+              }
+            }
+        );
+      } else if (asset.strategyType === "compound") {
+
+        await this._callDepositAmountContract(
+            asset,
+            account,
+            amount,
+            (err, txnHash, depositResult) => {
+              if (err) {
+                emitter.emit(ERROR_DEPOSIT_WALLET, err);
+                return emitter.emit(ERROR, err);
+              }
+              if (txnHash) {
+                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+              }
+              if (depositResult) {
+                return emitter.emit(
+                    DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                    depositResult.transactionHash
+                );
+              }
+            }
+        );
+      } else if (asset.strategyType === "citadel") {
+
+
+        const happyHour = await this._eventVerifyAmount(amount);
+        // const happyHour = true;
+
+        if (happyHour === true) {
+          await this._callDepositAmountContractCitadelHappyHour(
+              asset,
+              account,
+              amount,
+              tokenIndex,
+              (err, txnHash, depositResult) => {
+                if (err) {
+                  emitter.emit(ERROR_DEPOSIT_WALLET, err);
+                  return emitter.emit(ERROR, err);
+                }
+                if (txnHash) {
+                  return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+                }
+                if (depositResult) {
+                  return emitter.emit(
+                      DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED,
+                      depositResult.transactionHash
+                  );
+                }
+              }
+          );
+        } else {
+          await this._callDepositAmountContractCitadel(
+              asset,
+              account,
+              amount,
+              tokenIndex,
+              (err, txnHash, depositResult) => {
+                if (err) {
+                  emitter.emit(ERROR_DEPOSIT_WALLET, err);
+                  return emitter.emit(ERROR, err);
+                }
+                if (txnHash) {
+                  return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+                }
+                if (depositResult) {
+                  return emitter.emit(
+                      DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                      depositResult.transactionHash
+                  );
+                }
+              }
+          );
+        }
+      } else if (asset.strategyType === "elon") {
+
+        await this._callDepositAmountContractCitadel(
+            asset,
+            account,
+            amount,
+            tokenIndex,
+            (err, txnHash, depositResult) => {
+              if (err) {
+                emitter.emit(ERROR_DEPOSIT_WALLET, err);
+                return emitter.emit(ERROR, err);
+              }
+              if (txnHash) {
+                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+              }
+              if (depositResult) {
+                return emitter.emit(
+                    DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                    depositResult.transactionHash
+                );
+              }
+            }
+        );
+      } else if (asset.strategyType === "cuban") {
+
+
+        await this._callDepositAmountContractCitadel(
+            asset,
+            account,
+            amount,
+            tokenIndex,
+            (err, txnHash, depositResult) => {
+              if (err) {
+                emitter.emit(ERROR_DEPOSIT_WALLET, err);
+                return emitter.emit(ERROR, err);
+              }
+              if (txnHash) {
+                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+              }
+              if (depositResult) {
+                return emitter.emit(
+                    DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                    depositResult.transactionHash
+                );
+              }
+            }
+        );
+      } else if (asset.strategyType === "daoFaang") {
+          const happyHour = await this._eventVerifyAmount(amount);
+          // const happyHour = true;
+
+          if (happyHour === true) {
+            await this._callDepositAmountContractCitadelHappyHour(
+                asset,
+                account,
+                amount,
+                tokenIndex,
+                (err, txnHash, depositResult) => {
+                  if (err) {
+                    emitter.emit(ERROR_DEPOSIT_WALLET, err);
+                    return emitter.emit(ERROR, err);
+                  }
+                  if (txnHash) {
+                    return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+                  }
+                  if (depositResult) {
+                    return emitter.emit(
+                        DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED,
+                        depositResult.transactionHash
+                    );
+                  }
+                }
+            );
+          } else {
+            await this._callDepositAmountContractCitadel(
+                asset,
+                account,
+                amount,
+                tokenIndex,
+                (err, txnHash, depositResult) => {
+                  if (err) {
+                    emitter.emit(ERROR_DEPOSIT_WALLET, err);
+                    return emitter.emit(ERROR, err);
+                  }
+                  if (txnHash) {
+                    return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+                  }
+                  if (depositResult) {
+                    return emitter.emit(
+                        DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                        depositResult.transactionHash
+                    );
+                  }
+                }
+            );
+          }
+      } else if (asset.strategyType === "moneyPrinter") {
+
+          await this._callDepositAmountContractCitadel(
+              asset,
+              account,
+              amount,
+              tokenIndex,
+              (err, txnHash, depositResult) => {
+                if (err) {
+                  emitter.emit(ERROR_DEPOSIT_WALLET, err);
+                  return emitter.emit(ERROR, err);
+                }
+                if (txnHash) {
+                  return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+                }
+                if (depositResult) {
+                  return emitter.emit(
+                      DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                      depositResult.transactionHash
+                  );
+                }
+              }
+          );
+      }
+  }
 
   _checkIfApprovalIsNeeded = async (
     asset,
@@ -4115,7 +4889,7 @@ class Store {
     );
 
     const network = store.getStore("network");
-    const erc20ABI = getERC20AbiByNetwork(network);
+    const erc20ABI = contractHelper.getERC20AbiByNetwork(network);
 
     let erc20Contract = new web3.eth.Contract(
       erc20ABI,
@@ -5228,11 +6002,48 @@ class Store {
     }
   };
 
+  _getCompoundMarketRate = async (web3,
+                                  asset) => {
+    try {
+
+      if(asset.strategyType === "compound") {
+        return {
+          success: true,
+          exchangeRateCurrent: 0
+        };
+      }
+      const cTokenDecimals = 8; // all cTokens have 8 decimal places
+      const compoundContract = new web3.eth.Contract(
+          asset.cAbi,
+          asset.cTokenAddress
+      );
+
+      // Exchange Rate
+      const exchangeRateCurrent = await compoundContract.methods
+          .exchangeRateCurrent()
+          .call();
+
+      const mantissa = 18 + asset.decimals - cTokenDecimals;
+
+      return {
+        success: true,
+        exchangeRateCurrent: parseFloat(exchangeRateCurrent) / Math.pow(10, mantissa)
+      };
+    } catch (Err) {
+      return {
+        success: false,
+        exchangeRateCurrent: 0
+      }
+    }
+
+  }
+
   getUSDPrices = async () => {
     try {
       const priceJSON = await this._getUSDPrices();
       store.setStore({ usdPrices: priceJSON });
-      return emitter.emit(USD_PRICE_RETURNED, priceJSON);
+      emitter.emit(USD_PRICE_RETURNED, priceJSON);
+      return priceJSON
     } catch (e) {
       console.log(e);
     }
@@ -5678,6 +6489,59 @@ class Store {
       callback(null, []);
     }
   };
+
+  getHistoricDataOfVault = async (strategy, interval) => {
+    try {
+      const url = `${config.statsProvider}vaults/performance-apy/${strategy}/${interval}`;
+      const resultString = await rp(url);
+      const result = JSON.parse(resultString);
+      return {
+        success: true,
+        data: result.body
+      };
+    } catch (Err) {
+      console.log(Err);
+      return {
+        success: false,
+      };
+    }
+  }
+
+  getUserDistributionByWalletId = async (farmerId) => {
+    try {
+      const url = `${config.statsProvider}vaults/${farmerId}/distribution`;
+      const resultString = await rp(url);
+      const result = JSON.parse(resultString);
+      return {
+        success: true,
+        data: result.body
+      };
+    } catch (Err) {
+      console.log(Err);
+      return {
+        success: false,
+        message: 'No Account Found'
+      }
+    }
+
+  }
+
+  getAllAssetInformation = async (network) => {
+    try {
+      const url = `${config.statsProvider}vaults/${network}/all`;
+      const resultString = await rp(url);
+      const result = JSON.parse(resultString);
+      return {
+        success: true,
+        data: result.body
+      };
+    } catch (Err) {
+      console.log(Err);
+      return {
+        success: false,
+      };
+    }
+  }
 
   _eventVerifyAmount = async (amount) => {
     const url = `${config.statsProvider}event/verify/${amount}`;
@@ -6191,6 +7055,7 @@ class Store {
           // callback(null, null, receipt);
         })
         .on("error", function (error) {
+          emitter.emit(WITHDRAW_BOTH_VAULT_FAIL_RETURNED);
           if (!error.toString().includes("-32601")) {
             if (error.message) {
               console.log("Error in withdrawBoth", error);
@@ -6409,6 +7274,103 @@ class Store {
     );
   };
 
+  getFeeInfo = async (asset, amount) => {
+    try {
+      const web3 = await this._getWeb3Provider();
+      if (!web3) {
+        return null;
+      }
+      let vaultContract = new web3.eth.Contract(
+          asset.vaultContractABI,
+          asset.vaultContractAddress
+      );
+
+      let percentageRange1 = await vaultContract.methods.networkFeePerc(0).call();
+      let percentageRange2 = await vaultContract.methods.networkFeePerc(1).call();
+      let percentageRange3 = await vaultContract.methods.networkFeePerc(2).call();
+
+      let amountRange1 = await vaultContract.methods.networkFeeTier2(0).call();
+      let amountRange2 = await vaultContract.methods.networkFeeTier2(1).call();
+
+      if(amount < amountRange1) {
+        return {
+          feePercent: percentageRange1/100
+        }
+      } else if(amount>=amountRange1 &&  amount <= amountRange2) {
+        return {
+          feePercent: percentageRange2/100
+        }
+      } else {
+        return {
+          feePercent: percentageRange3/100
+        }
+      }
+
+    } catch (Err) {
+
+    }
+  }
+
+  getStrategyBalancesFullV2 = async () => {
+    const network = store.getStore("network");
+    const account = store.getStore("account");
+    let assets = this._getDefaultValues(network).vaultAssets;
+    store.setStore({ vaultAssets: assets });
+    console.log('start time', new Date());
+    emitter.emit(STRATEGY_BALANCES_FULL_RETURNED, assets);
+
+    if (!account || !account.address) {
+      return false;
+    }
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      return null;
+    }
+    let coinsInUSDPrice = await this.getUSDPrices();
+    let assetApiInfo = await this.getAllAssetInformation(networkObj[network]);
+
+    assets.forEach(async (asset, i) => {
+      let _promises = [];
+      _promises.push(this._getERC20Balances(web3, asset, account, () => {}, coinsInUSDPrice));
+      _promises.push(this._getBalances(web3, asset, account, () => {}));
+
+      let assetApiData = assetApiInfo.data[asset.id] ? assetApiInfo.data[asset.id]: {};
+
+      let data = await Promise.all(_promises);
+
+      let newAssetKeys = {
+        balance: data[0].data.sumBalances,
+        strategyBalance: data[1].data.strategyBalance,
+        vaultBalance: data[1].data.vaultBalance,
+        earnBalance: data[1].data.earnBalance,
+        depositedSharesInUSD: data[1].data.depositedSharesInUSD,
+        stats: {},
+        earnApr: 0,
+        historicalAPY: [],
+        tvl: assetApiData.tvl,
+        balances: data[0].data.balances,
+        priceInUSD: data[0].data.priceInUSD,
+        sumBalances: data[0].data.sumBalances,
+        daomineApy: assetApiData.daomineApy,
+        pnlTextColor: assetApiData.pnl <0 ? 'red': '#15C73E',
+        pnl: assetApiData.pnl || 0,
+        asset_distribution: assetApiData.asset_distribution ? assetApiData.asset_distribution : [],
+        isDepositEnabled: assetApiData.deposit,
+        isWithdrawEnabled: assetApiData.withdraw
+      }
+      asset = {
+        ...asset,
+        ...newAssetKeys
+      }
+      assets[i] = asset;
+      store.setStore({ vaultAssets: assets });
+
+      emitter.emit(STRATEGY_BALANCES_FULL_RETURNED, assets);
+      return asset;
+    })
+
+  }
+
   _getUserDepositForDAOmine = async (
     daoMineContract,
     dvgDecimal,
@@ -6421,22 +7383,24 @@ class Store {
         .user(poolIndex, account.address)
         .call({ from: account.address });
 
-      let pool = await daoMineContract.methods
-        .pool(poolIndex)
-        .call({ from: account.address });
-
-      //  let userPendingDVG = await daoMineContract.methods
-      //     .pendingDVG(poolIndex, account.address)
-      //     .call({ from: account.address });
+      const daomineType = store.getStore("daomineType");
 
       let userPendingDVG = 0;
-      if (pool != null) {
-        userPendingDVG =
-          (Number(userDepositInfo.lpAmount) * Number(pool.accDVGPerLP)) /
-            10 ** 18 -
-          Number(userDepositInfo.finishedDVG);
-      }
+      if(daomineType === LATEST_POOLS) {
+        userPendingDVG = await daoMineContract.methods
+          .pendingDVD(poolIndex, account.address)
+          .call({from : account.address});
+        
+      } else if (daomineType === LEGACY_POOLS) {
+        const pool = await daoMineContract.methods
+          .pool(poolIndex)
+          .call({ from: account.address });
 
+        if (pool != null) {
+          userPendingDVG = (Number(userDepositInfo.lpAmount) * Number(pool.accDVGPerLP) / 10 ** 18) - Number(userDepositInfo.finishedDVG);
+        }
+      }
+      
       const result = { userDepositInfo, userPendingDVG };
       callback(null, result);
     } catch (err) {
@@ -6468,51 +7432,47 @@ class Store {
     }
   };
 
+  // Important, to indicate which DAOmine used for withdrawal
+  updateSelectedPoolType = (payload) => {
+    const type = payload.content.type;
+    store.setStore({ daomineType: type });
+  }
+
   findDAOminePool = async (payload) => {
-    const account = store.getStore("account");
+    const isNewDAOmine = (payload && payload.content) ? payload.content.isNewVersion : false;
 
     try {
       const network = store.getStore("network");
-
-      const web3 = await this._getWeb3Provider();
-
-      if (!web3) {
+      if(!network) {
+        console.error(`findDAOminePool() is missing network.`);
         return null;
       }
 
-      const poolsResponse = await this._findDAOminePool();
-      const pools = poolsResponse.pools;
-
-      let daoMineContract;
-      let dvgContract;
-      let dvgDecimal = 0;
-
-      if (network === 42) {
-        daoMineContract = new web3.eth.Contract(
-          config.daoStakeContractABI,
-          config.daoStakeTestContract
-        );
-
-        dvgContract = new web3.eth.Contract(
-          config.dvgTokenContractABI,
-          config.dvgTokenTestContract
-        );
-
-        dvgDecimal = await dvgContract.methods.decimals().call();
-      } else if (network === 1) {
-        daoMineContract = new web3.eth.Contract(
-          config.daoStakeContractABI,
-          config.daoStakeMainnetContract
-        );
-
-        dvgContract = new web3.eth.Contract(
-          config.dvgTokenContractABI,
-          config.dvgTokenMainnetContract
-        );
-
-        dvgDecimal = await dvgContract.methods.decimals().call();
+      const account = store.getStore("account");
+      if(!account || !account.address) {
+        console.error(`findDAOminePool() is missing account.`);
+        return null;
       }
 
+      const web3 = await this._getWeb3Provider();
+      if (!web3) {
+        console.error(`findDAOminePool() is missing web3.`);
+        return null;
+      }
+
+      let tokenDecimal = 18;
+
+      console.log(`DAOmine type ${store.getStore("daomineType")}`);
+      const daomineType = store.getStore("daomineType");
+
+      const poolResponse = (daomineType === LATEST_POOLS) 
+        ? await this._findNewDAOminePool()
+        : await this._findDAOminePool();
+      const pools = poolResponse.pools;
+      emitter.emit(DAOMINE_POOL_RETURNED, pools);
+      
+      const daoMineContract = await contractHelper.getDAOmineContract(web3, network, daomineType);
+  
       async.map(
         pools,
         (pool, callback) => {
@@ -6521,30 +7481,20 @@ class Store {
             pool.contract_address
           );
 
-          async.parallel(
-            [
-              (callbackInner) => {
-                this._getUserBalanceForLpToken(
-                  poolContract,
-                  account,
-                  callbackInner
-                );
-              },
-              (callbackInner) => {
-                this._getUserDepositForDAOmine(
-                  daoMineContract,
-                  dvgDecimal,
-                  account,
-                  pool.pid,
-                  callbackInner
-                );
-              },
-            ],
-            (err, data) => {
-              if (err) {
-                return callback(err);
-              }
+          const obj = {
+            poolContract,
+            account, 
+            daoMineContract, 
+            tokenDecimal,
+            pool
+          };
 
+
+          this.getDAOmineUserInfo(obj, (err, data) => {
+            if(err) {
+              callback(err, null);
+            }
+            if(data) {
               const userInfo = {};
 
               userInfo.tokenBalance = data[0];
@@ -6557,17 +7507,19 @@ class Store {
               userInfo.pendingDVG = data[1] ? data[1].userPendingDVG : null;
 
               pool.userInfo = userInfo;
-
               callback(null, pool);
             }
-          );
+          });
         },
         (err, pools) => {
+          emitter.emit(DAOMINE_POOL_RETURNED_COMPLETED);
+
           if (err) {
             console.log(err);
             return emitter.emit(ERROR, err);
           }
-          store.setStore({ stakePools: pools });
+          
+          (isNewDAOmine) ? store.setStore({ daominePools: pools }) : store.setStore({ stakePools: pools });
           return emitter.emit(DAOMINE_POOL_RETURNED, pools);
         }
       );
@@ -6576,6 +7528,26 @@ class Store {
     }
   };
 
+  getDAOmineUserInfo = (obj, callback) => {
+    const {
+      poolContract,
+      account, 
+      daoMineContract, 
+      tokenDecimal,
+      pool, 
+    } = obj;
+
+    async.parallel(
+      [
+        (callbackInner) => {
+          this._getUserBalanceForLpToken(poolContract, account, callbackInner);
+        },
+        (callbackInner) => {
+          this._getUserDepositForDAOmine(daoMineContract, tokenDecimal, account, pool.pid, callbackInner);
+        }
+      ], callback);
+  }
+
   _findDAOminePool = async () => {
     try {
       const url = config.statsProvider + "staking/get-pools";
@@ -6583,44 +7555,58 @@ class Store {
       const pools = JSON.parse(poolsString);
       return pools.body;
     } catch (e) {
-      console.log(e);
-      return store.getStore("universalGasPrice");
+      console.err("Error in _findDAOminePool(): ",e);
     }
   };
 
+  _findNewDAOminePool = async() => {
+    try {
+      const url = config.statsProvider + "staking/get-daomine-pools";
+      const poolsString = await rp(url);
+      const pools = JSON.parse(poolsString);
+      return pools.body;
+    } catch (e) {
+      console.err("Error in _findNewDAOminePool(): ",e);
+    }
+  }
+
   depositDAOmine = async (payload) => {
-    const account = store.getStore("account");
-
-    const { pool, amount } = payload.content;
-
     const web3 = await this._getWeb3Provider();
     if (!web3) {
+      console.error(`Missing Web3 in depositDAOmine()`);
       return null;
     }
+
+    const account = store.getStore("account");
+    if(!account || !account.address) {
+      console.error(`Missing account in depositDAOmine()`);
+      return null;
+    }
+
+    const network = store.getStore("network");
+    if(!network) {
+      console.error(`Missing network in depositDAOmine()`);
+      return null;
+    }
+
+    emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, true);
+
+    const { pool, amount } = payload.content;
+    const daomineType = store.getStore("daomineType");
 
     const lpTokenContract = new web3.eth.Contract(
       JSON.parse(pool.abi),
       pool.contract_address
     );
 
-    const network = store.getStore("network");
-
-    let daoMineContractAddress = "";
-    if (network === 42) {
-      daoMineContractAddress = config.daoStakeTestContract;
-    } else if (network === 1) {
-      daoMineContractAddress = config.daoStakeMainnetContract;
-    }
-
-    const daoMineContract = new web3.eth.Contract(
-      config.daoStakeContractABI,
-      daoMineContractAddress
-    );
+    const daoMineContractAddress = contractHelper.getDAOmineAddress(network, daomineType);
+    const daoMineContract = await contractHelper.getDAOmineContract(web3, network, daomineType);
 
     const allowance = await lpTokenContract.methods
       .allowance(account.address, daoMineContractAddress)
       .call({ from: account.address });
     const actualAllowance = allowance / 10 ** pool.decimal;
+    console.log(`Checking allowance for ${daoMineContractAddress} in lp token contract ${pool.contract_address}, Actual allowance:  ${actualAllowance}`);
 
     let approvalError;
     if (parseFloat(amount) > parseFloat(actualAllowance)) {
@@ -6633,6 +7619,7 @@ class Store {
           if (err) {
             console.log(err);
             approvalError = err;
+            emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
             return emitter.emit(ERROR, err);
           }
           if (txnHash) {
@@ -6645,6 +7632,7 @@ class Store {
       );
     }
     if (!approvalError) {
+      console.log(`Deposit to DAOmine: ${daoMineContractAddress}, amount: ${amount}`);
       await this._callDepositAmountDAOmineContract(
         account,
         pool,
@@ -6652,12 +7640,14 @@ class Store {
         amount,
         (err, txnHash, depositResult) => {
           if (err) {
+            emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
             return emitter.emit(ERROR, err);
           }
           if (txnHash) {
             return emitter.emit(DEPOSIT_DAOMINE_RETURNED, txnHash);
           }
           if (depositResult) {
+            emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
             return emitter.emit(
               DEPOSIT_DAOMINE_RETURNED_COMPLETED,
               depositResult.transactionHash
@@ -6798,6 +7788,8 @@ class Store {
       return null;
     }
 
+    emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, true);
+
     // DAOMmine contract address by network
     let daoMineContractAddress = "";
     if (network === 42) {
@@ -6838,6 +7830,7 @@ class Store {
           return emitter.emit(EMERGENCY_WITHDRAW_DAOMINE_RETURNED, txnHash);
         })
         .on("receipt", function (receipt) {
+          emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
           emitter.emit(
             EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,
             receipt.transactionHash
@@ -6847,6 +7840,7 @@ class Store {
           console.log("emergencyWithdrawDAOmine() Error: ", error);
           if (!error.toString().includes("-32601")) {
             if (error.message) {
+              emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
               emitter.emit(ERROR, error.message);
             }
           }
@@ -6865,37 +7859,42 @@ class Store {
   };
 
   withdrawDAOmine = async (payload) => {
-    const account = store.getStore("account");
+    // Get web3
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      console.error(`Missing web3 in withdrawDAOmine()`);
+      return null;
+    }
+
+    // Network
     const network = store.getStore("network");
+    if(!network) {
+      console.error(`Missing network in withdrawDAOmine()`);
+      return null;
+    }
+
+    // Account
+    const account = store.getStore("account");
+    if(!account) {
+      console.error(`Missing account in withdrawDAOmine()`);
+      return null;
+    }
+
+    emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, true);
 
     const { pool, amount } = payload.content;
     const poolDecimal = pool.decimal;
     const poolIndex = pool.pid;
 
-    // Get web3
-    const web3 = await this._getWeb3Provider();
-    if (!web3) {
-      return null;
-    }
-
-    // DAOMmine contract address by network
-    let daoMineContractAddress = "";
-    if (network === 42) {
-      daoMineContractAddress = config.daoStakeTestContract;
-    } else if (network === 1) {
-      daoMineContractAddress = config.daoStakeMainnetContract;
-    }
+    const daomineType = store.getStore("daomineType");
 
     try {
-      const daoMineContract = new web3.eth.Contract(
-        config.daoStakeContractABI,
-        daoMineContractAddress
-      );
+      const daoMineContract = await contractHelper.getDAOmineContract(web3, network, daomineType);
 
-      var amountToWithdraw =
-        poolDecimal !== "18"
+      var amountToWithdraw = poolDecimal !== "18"
           ? web3.utils.toBN(amount * 10 ** poolDecimal).toString()
           : web3.utils.toWei(amount, "ether");
+      console.log(`Withdraw from : ${daomineType}, Amount: ${amountToWithdraw}, Pool Index: ${poolIndex}`);
 
       await daoMineContract.methods
         .withdraw(poolIndex, amountToWithdraw)
@@ -6907,6 +7906,7 @@ class Store {
           return emitter.emit(WITHDRAW_DAOMINE_RETURNED, txnHash);
         })
         .on("receipt", function (receipt) {
+          emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
           emitter.emit(
             WITHDRAW_DAOMINE_RETURNED_COMPLETED,
             receipt.transactionHash
@@ -6914,6 +7914,7 @@ class Store {
         })
         .on("error", function (error) {
           console.log("withdrawDAOmine() Error: ", error);
+          emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
           if (!error.toString().includes("-32601")) {
             if (error.message) {
               emitter.emit(ERROR, error.message);
@@ -6929,9 +7930,69 @@ class Store {
           }
         });
     } catch (err) {
+      emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
       console.log("withdrawDAOmine() Error: ", err);
     }
   };
+
+  yieldDAOmine = async (payload) => {
+    // Get web3
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      console.error(`Missing web3 in yieldDAOmine()`);
+      return null;
+    }
+
+    // Network
+    const network = store.getStore("network");
+    if (!network) {
+      console.error(`Missing network in yieldDAOmine()`);
+      return null;
+    }
+
+    // Account
+    const account = store.getStore("account");
+    if (!account) {
+      console.error(`Missing account in yieldDAOmine()`);
+      return null;
+    }
+
+    if (!payload || !payload.content || payload.content.pid === undefined) {
+      emitter.emit(ERROR, "Missing PID for yieldDAOmine()");
+    }
+
+    emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, true);
+
+    const pid = payload.content.pid;
+    const daomineType = store.getStore("daomineType");
+    const daomineContract = await contractHelper.getDAOmineContract(web3, network, daomineType);
+
+    await daomineContract.methods
+      .yield(pid)
+      .send({
+        from: account.address,
+        gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+      })
+      .on("transactionHash", function (txnHash) {
+        return emitter.emit(YIELD_DAOMINE_RETURNED, txnHash);
+      })
+      .on("receipt", function (receipt) {
+        emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
+        emitter.emit(
+          YIELD_DAOMINE_RETURNED_COMPLETED,
+          receipt.transactionHash
+        );
+      })
+      .on("error", function (error) {
+        console.log("yieldDAOmine() Error: ", error);
+        if (!error.toString().includes("-32601")) {
+          if (error.message) {
+            emitter.emit(DISABLE_ACTION_BUTTONS_RETURNED, false);
+            emitter.emit(ERROR, error.message);
+          }
+        }
+      })
+  }
 
   //stake开始
   //获取vipdvg
@@ -7023,6 +8084,11 @@ class Store {
     const account = store.getStore("account");
 
     const { asset, amount, max, withoutConvert } = payload.content;
+    
+    let autoCompound = payload.content.autoCompound !== undefined 
+      ? payload.content.autoCompound
+      : false;
+   
     const web3 = await this._getWeb3Provider();
     if (!web3) {
       return null;
@@ -7084,28 +8150,21 @@ class Store {
 
     if (!approvalErr) {
       console.log(`Calling Deposit DVG`);
-      await this._callDepositDvg(
-        vipTokenContract,
-        _amount,
-        (err, txnHash, receipt) => {
-          if (err) {
-            return emitter.emit(ERROR, err);
-          }
-          if (txnHash) {
-            return emitter.emit(DEPOSIT_DVG_RETURNED, txnHash);
-          }
-          if (receipt) {
-            return emitter.emit(
-              DEPOSIT_DVG_RETURNED_COMPLETED,
-              receipt.transactionHash
-            );
-          }
+      await this._callDepositDvg(vipTokenContract, _amount, autoCompound, (err, txnHash, receipt) => {
+        if (err) {
+          return emitter.emit(ERROR, err);
         }
-      );
+        if (txnHash) {
+          return emitter.emit(DEPOSIT_DVG_RETURNED, txnHash);
+        }
+        if (receipt) {
+          return emitter.emit(DEPOSIT_DVG_RETURNED_COMPLETED, receipt.transactionHash);
+        }
+      });
     }
   };
 
-  _callDepositDvg = async (vipTokenContract, amount, callback) => {
+  _callDepositDvg = async (vipTokenContract, amount, autoCompound, callback) => {
     const account = this.getStore("account");
     const web3 = await this._getWeb3Provider();
     if (!web3) {
@@ -7113,7 +8172,7 @@ class Store {
     }
 
     await vipTokenContract.methods
-      .deposit(amount)
+      .deposit(amount, autoCompound)
       .send({
         from: account.address,
       })
@@ -7579,7 +8638,8 @@ class Store {
           amount: realBalance,
           max: false,
           withoutConvert: true,
-        },
+          autoCompound: false
+        }
       });
     } else {
       return emitter.emit(

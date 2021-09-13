@@ -737,7 +737,7 @@ class StakeDvdVip extends Component {
         })
     }
 
-    submitStake = () => {
+    submitStake = (autoCompound =  false) => {
         const { amount, type } = this.state;
         this.setState({ amountError: false, errorMessage: "" })
 
@@ -745,24 +745,28 @@ class StakeDvdVip extends Component {
             this.setInputErrorState("Invalid amount");
             return;
         }
-
-        let action, asset;
-        if(type === "stake") {
-            action = DEPOSIT_XDVG;
-            asset = this.state.dvgInfoObj[1]; // DVD Token
-        } else {
-            action = WIDTHDRAW_XDVG;
-            asset = this.state.dvgInfoObj[0]; // xDVD Token
-        }
        
         if(!this.state.amountError && this.state.errorMessage === "") {
             this.setState({ loading: true });
+
+            let action, asset;
+            const content = {};
+
+            if(type === "stake") {
+                action = DEPOSIT_XDVG;
+                asset = this.state.dvgInfoObj[1]; // DVD Token
+                content["autoCompound"] = autoCompound;
+            } else {
+                action = WIDTHDRAW_XDVG;
+                asset = this.state.dvgInfoObj[0]; // xDVD Token
+            }
+
+            content["amount"] = amount.toString();
+            content["asset"] = asset;
+
             dispatcher.dispatch({
                 type: action,
-                content: {
-                    amount: amount.toString(),
-                    asset: asset,
-                }
+                content
             })
         }
     }
@@ -980,6 +984,31 @@ class StakeDvdVip extends Component {
         return <InfoModal content={modalContent} ></InfoModal>
     }
 
+    renderStakeButton = () => {
+        const { classes } = this.props;
+        const { disableStake, loading } = this.state;
+
+        const stakeButton = (
+            <Button disabled={disableStake || (!disableStake && loading)}
+                className={classes.depositActionButton}
+                onClick={() => this.submitStake()}
+            >
+                <span>Approve Staking</span>
+             </Button>
+        );
+
+        const stakeWithAutoCompoundButton = (
+            <Button disabled={disableStake || (!disableStake && loading)}
+                className={classes.depositActionButton}
+                onClick={() => this.submitStake(true)}
+            >
+                <span>Stake With Auto Compound</span>
+            </Button>
+        );
+
+        return <React.Fragment>{stakeButton}{stakeWithAutoCompoundButton}</React.Fragment>
+    }
+
     render() {
         const {
             classes
@@ -1086,15 +1115,7 @@ class StakeDvdVip extends Component {
 
                             {/** Button to trigger stake function */}
                             <div className={classes.depositButtonBox}>
-                                {
-                                    (type === "stake") && 
-                                    <Button disabled={disableStake || (!disableStake && loading)}
-                                            className={classes.depositActionButton}
-                                            onClick={() => this.submitStake()}
-                                    >
-                                        <span>Approve Staking</span>
-                                    </Button>
-                                }
+                                { (type === "stake") && this.renderStakeButton() }
                                 {
                                     (type !== "stake") && 
                                     <Button disabled={disableUnstake || (!disableUnstake && loading)}
@@ -1171,48 +1192,7 @@ class StakeDvdVip extends Component {
                         </div>
                     </div>
                 </div>
-                {/* {isShowApr ?
-                    <div className={classes.share}>
-                        <div className={classes.shareBox}>
-                            <div className={classes.shareTitle}>
-                                <p className={classes.shareTitleText}>Est. ROI</p>
-                                <svg className={classes.closeIcon} aria-hidden="true" onClick={()=>{this.showAprDetail()}}>
-                                    <use xlinkHref="#iconclose"></use>
-                                </svg>
-                            </div>
-                            <div className={classes.shareContent}>
-                                <div className={classes.shareTextTitle}>
-                                    <p className={classes.aprTitle}>TIMEFRAME</p>
-                                    <p className={classes.aprTitle}>Est. ROI</p>
-                                </div>
-                                <div className={classes.shareText}>
-                                    <p className={classes.aprText}>1d</p>
-                                    <p className={classes.aprText}>{aprInfo.aprOneDay.toFixed(2)}%</p>
-                                </div>
-                                <div className={classes.shareText}>
-                                    <p className={classes.aprText}>7d</p>
-                                    <p className={classes.aprText}>{aprInfo.aprOneWeek.toFixed(2)}%</p>
-                                </div>
-                                <div className={classes.shareText}>
-                                    <p className={classes.aprText}>30d</p>
-                                    <p className={classes.aprText}>{aprInfo.aprOneMonth.toFixed(2)}%</p>
-                                </div>
-                                <div className={classes.shareText}>
-                                    <p className={classes.aprText}>365d(APY)</p>
-                                    <p className={classes.aprText}>{aprInfo.aprOneYear.toFixed(2)}%</p>
-                                </div>
-                                <div className={classes.aprIntroduction}>
-                                    Calculated based on current rates. Rates are estimates provided for your convenience and reference only, which does not represent any guaranteed returns.
-                        </div>
-                                <div className={classes.shareBtn}>
-                                    <span onClick={()=>{this.goUrl('https://app.uniswap.org/#/swap?outputCurrency=0x51e00a95748dbd2a3f47bc5c3b3e7b3f0fea666c')}}>Get DVG</span>
-                                    <svg className={classes.shareIcon} aria-hidden="true">
-                                        <use xlinkHref="#iconshare"></use>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                    </div> : null} */}
+        
                 {/** Snackbar */}
                 {this.state.snackbarMessage && this.renderSnackbar()}
             </div>

@@ -531,7 +531,7 @@ class Header extends Component {
               </svg> */}
             </div>
           </div>
-          {!hideNav && <ToggleTheme></ToggleTheme>}
+          {/*{!hideNav && <ToggleTheme></ToggleTheme>}*/}
           {this.renderHappyHourTimer()}
         </div>
         {hideNav ? (

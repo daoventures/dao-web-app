@@ -14,6 +14,7 @@ import {
   CONNECTION_CONNECTED,
   FIND_DAOMINE_POOL,
   DAOMINE_POOL_RETURNED,
+  DAOMINE_POOL_RETURNED_COMPLETED,
   APPROVE_TRANSACTING,
   DEPOSIT_DAOMINE_RETURNED,
   DEPOSIT_DAOMINE_RETURNED_COMPLETED,
@@ -22,15 +23,22 @@ import {
   EMERGENCY_WITHDRAW_DAOMINE_RETURNED,
   EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,
   ERROR,
-  ALL
+  ALL,
+  LATEST_POOLS,
+  LEGACY_POOLS,
+  UPDATE_SELECTED_POOL_TYPE,
+  YIELD_DAOMINE_RETURNED,
+  YIELD_DAOMINE_RETURNED_COMPLETED
 } from "../../constants/constants";
 
 import RiskLevelTab from "../common/riskLevelTab/riskLevelTab";
 import RiskLevelLabel from "../common/riskLevelLabel/riskLevelLabel";
+import CategoryTab from "../common/categoryTab/categoryTab";
 import ConnectWallet from "../common/connectWallet/connectWallet";
 import Snackbar from "../snackbar/snackbar";
 import StakeDeposit from "./component/stakeDeposit/stakeDeposit";
 import StakeWithdrawal from "./component/stakeWithdraw/stakeWithdraw";
+import PendingReward from "./component/pendingReward/pendingReward";
 import Loader from "../loader/loader";
 
 const store = Store.store;
@@ -124,30 +132,16 @@ const styles = (theme) => ({
     display: "flex",
     flex: 1,
     flexDirection: "column",
-    alignItems: "center",
     justifyContent: "center",
     position: "relative",
-    // [theme.breakpoints.up('md')]: {
-    //   minWidth: 'calc(100% - '+ drawerWidth + 'px)',
-    // }
   },
-  investedContainer: {
+  optionsContainer: {
     display: "flex",
-    flex: 1,
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "flex-start",
-    minWidth: "100%",
-    marginTop: "20px",
-    marginBottom: "40px",
-    [theme.breakpoints.up("md")]: {
-      width: "100%",
-      minWidth: "900px",
-    },
+    flexDirection: "row",
+    justifyContent: "space-between",
     [theme.breakpoints.down("sm")]: {
-      minWidth: "90%",
-      margin: "auto",
-      marginTop: "40px",
+      flexDirection: "column",
+      justifyContent: "flex-start",
     },
   },
   poolContainer: {
@@ -294,55 +288,52 @@ class Stake extends Component {
 
     this.state = {
       account: account,
-      address: account.address
-        ? account.address.substring(0, 6) +
-          "..." +
-          account.address.substring(
-            account.address.length - 4,
-            account.address.length
-          )
-        : null,
-      pools: store.getStore("stakePools"),
+      pools: store.getStore("daominePools"),
       currentTab: ALL,
       expanded: "",
       loading: false,
+      selectedPoolType: store.getStore("daomineType"),
+      disablePoolTab: false
     };
 
     if (account && account.address) {
-      dispatcher.dispatch({
-        type: FIND_DAOMINE_POOL,
-      });
+      this.dispatchGetPools();
     }
   }
 
   componentWillMount() {
     emitter.on(CONNECTION_CONNECTED, this.connectionConnected);
-    // emitter.on(CHANGE_NETWORK, this.networkChanged);
     emitter.on(DAOMINE_POOL_RETURNED, this.onDAOminePoolReturned);
+    emitter.on(DAOMINE_POOL_RETURNED_COMPLETED, this.onDAOminePoolReturnComplete);
     emitter.on(APPROVE_TRANSACTING, this.showHashApproval);
     emitter.on(ERROR, this.errorReturned);
     emitter.on(DEPOSIT_DAOMINE_RETURNED, this.showHash);
-    emitter.on(
-      DEPOSIT_DAOMINE_RETURNED_COMPLETED,
-      this.onDepositWithdrawalCompleted
-    );
+    emitter.on(DEPOSIT_DAOMINE_RETURNED_COMPLETED,this.onDepositWithdrawalCompleted);
     emitter.on(WITHDRAW_DAOMINE_RETURNED, this.showHash);
-    emitter.on(
-      WITHDRAW_DAOMINE_RETURNED_COMPLETED,
-      this.onDepositWithdrawalCompleted
-    );
+    emitter.on(WITHDRAW_DAOMINE_RETURNED_COMPLETED,this.onDepositWithdrawalCompleted);
     emitter.on(EMERGENCY_WITHDRAW_DAOMINE_RETURNED, this.showHash);
-    emitter.on(
-      EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,
-      this.onDepositWithdrawalCompleted
-    );
+    emitter.on(EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,this.onDepositWithdrawalCompleted);
+    emitter.on(YIELD_DAOMINE_RETURNED, this.showHash);
+    emitter.on(YIELD_DAOMINE_RETURNED_COMPLETED, this.onDepositWithdrawalCompleted);
   }
 
   componentWillUnmount() {
     emitter.removeListener(CONNECTION_CONNECTED, this.connectionConnected);
-    // emitter.removeListener(CHANGE_NETWORK, this.networkChanged);
     emitter.removeListener(DAOMINE_POOL_RETURNED, this.onDAOminePoolReturned);
+    emitter.removeListener(DAOMINE_POOL_RETURNED_COMPLETED, this.onDAOminePoolReturnComplete);
+    emitter.removeListener(APPROVE_TRANSACTING, this.showHashApproval);
     emitter.removeListener(ERROR, this.errorReturned);
+    emitter.removeListener(DEPOSIT_DAOMINE_RETURNED, this.showHash);
+    emitter.removeListener(DEPOSIT_DAOMINE_RETURNED_COMPLETED,this.onDepositWithdrawalCompleted);
+    emitter.removeListener(WITHDRAW_DAOMINE_RETURNED, this.showHash);
+    emitter.removeListener(WITHDRAW_DAOMINE_RETURNED_COMPLETED,this.onDepositWithdrawalCompleted);
+    emitter.removeListener(EMERGENCY_WITHDRAW_DAOMINE_RETURNED, this.showHash);
+    emitter.removeListener(EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,this.onDepositWithdrawalCompleted);
+    emitter.removeListener(YIELD_DAOMINE_RETURNED, this.showHash);
+    emitter.removeListener(YIELD_DAOMINE_RETURNED_COMPLETED, this.onDepositWithdrawalCompleted);
+    
+    // Reset selected pool tab to Latest pools
+    this.dispatchUpdateDAOmineType(LATEST_POOLS); 
   }
 
   /** Handler function when wallet successfully connected */
@@ -350,23 +341,10 @@ class Stake extends Component {
     const { t } = this.props;
     const account = store.getStore("account");
 
-    this.setState({
-      loading: true,
-      account: account,
-      address: account.address
-        ? account.address.substring(0, 6) +
-          "..." +
-          account.address.substring(
-            account.address.length - 4,
-            account.address.length
-          )
-        : null,
-    });
+    this.setState({ loading: true, account: account});
 
     if (account && account.address) {
-      dispatcher.dispatch({
-        type: FIND_DAOMINE_POOL,
-      });
+      this.dispatchGetPools();
     }
 
     const that = this;
@@ -381,36 +359,39 @@ class Stake extends Component {
 
   /** Handler function when wallet disconnected */
   connectionDisconnected = () => {
-    this.setState({
-      account: null,
-      address: null,
-    });
+    this.setState({ account: null,});
   };
-
-  // networkChanged = (obj) => {
-  //   const account = store.getStore("account");
-  //   const basedOn = localStorage.getItem("yearn.finance-dashboard-basedon");
-
-  //   const networkId = obj.network;
-
-  //   this.setState({
-  //     networkId: networkId,
-  //   });
-  // };
 
   startLoading = () => {
     this.setState({ loading: true });
   };
 
+  dispatchGetPools = () => {
+    dispatcher.dispatch({
+      type: FIND_DAOMINE_POOL,
+      content: { isNewVersion: this.state.selectedPoolType === LATEST_POOLS }
+    });
+  }
+
+  dispatchUpdateDAOmineType = (type) => {
+    const poolType = (type === undefined) ? this.state.selectedPoolType : type;
+    dispatcher.dispatch({
+      type: UPDATE_SELECTED_POOL_TYPE,
+      content: { type: poolType }
+    })
+  }
+
   onDAOminePoolReturned = (pools) => {
     this.setState({ pools });
   };
 
+  onDAOminePoolReturnComplete = () => {
+    this.setState({ disablePoolTab: false });
+  }
+
   // Handler once deposit or withdrawal completed
   onDepositWithdrawalCompleted = (txHash) => {
-    dispatcher.dispatch({
-      type: FIND_DAOMINE_POOL,
-    });
+    this.dispatchGetPools();
 
     const snackbarObj = { snackbarMessage: null, snackbarType: null };
     this.setState(snackbarObj);
@@ -460,7 +441,7 @@ class Stake extends Component {
     const that = this;
     setTimeout(() => {
       const snackbarObj = {
-        snackbarMessage: "Approving...",
+        snackbarMessage: txHash,
         snackbarType: "Hash",
       };
       that.setState(snackbarObj);
@@ -487,9 +468,70 @@ class Stake extends Component {
     );
   };
 
+  renderBanner = () => {
+    const { classes } = this.props;
+    return (
+      <div className={classes.banner}>
+        <div>
+          <Typography variant={"h3"} className={classes.bannerTit}>
+            Create DVG-ETH UNI-V2 LP tokens
+          </Typography>
+          <p className={classes.bannerCon}>
+            Provide liquidity in Uniswap to get LP tokens.
+          </p>
+        </div>
+        <div>
+          <img
+            alt="banner"
+            className={classes.bannerImg}
+            src={require("../../assets/img_new/active_banner@2x.png")}
+          />
+        </div>
+        <div>
+          <a
+            href="https://info.uniswap.org/#/pools/0xa58262270521d7732fccbbdcdf9fcd1fc70d47e5"
+            target="_blank"
+            className={classes.addLiquidity}
+          >
+            Add Liquidity
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  renderPoolType = () => {
+    const items = [
+      { label: LATEST_POOLS, value: LATEST_POOLS },
+      { label: LEGACY_POOLS, value: LEGACY_POOLS }
+    ];
+
+    return (
+      <CategoryTab items={items} selectedTab={this.handleSelectedPoolType} disableAllTab={this.state.disablePoolTab}></CategoryTab>
+    )
+  }
+
   handleSelectedRisk = (risk) => {
     this.setState({ currentTab: risk });
   };
+
+  handleSelectedPoolType = (type) => {
+    this.setState({ selectedPoolType: type, disablePoolTab: true }, () => {
+      this.dispatchUpdateDAOmineType(type);
+
+      const pools = (type === LEGACY_POOLS) 
+        ? store.getStore("stakePools")
+        : store.getStore("daominePools");
+
+      // Get from store, if there's any existing pools stored in store
+      if(pools.length > 0) {
+        this.setState({pools, disablePoolTab: false});
+        return;
+      }
+
+      this.dispatchGetPools();
+    });
+  }
 
   render() {
     const { classes } = this.props;
@@ -502,42 +544,20 @@ class Stake extends Component {
     return (
       <div className={classes.root}>
         {/** Banner */}
-        <div className={classes.banner}>
-          <div>
-            <Typography variant={"h3"} className={classes.bannerTit}>
-              Create DVG-ETH UNI-V2 LP tokens
-            </Typography>
-            <p className={classes.bannerCon}>
-              Provide liquidity in Uniswap to get LP tokens.
-            </p>
-          </div>
-          <div>
-            <img
-              alt="banner"
-              className={classes.bannerImg}
-              src={require("../../assets/img_new/active_banner@2x.png")}
-            />
-          </div>
-          <div>
-            <a
-              href="https://info.uniswap.org/#/pools/0xa58262270521d7732fccbbdcdf9fcd1fc70d47e5"
-              target="_blank"
-              className={classes.addLiquidity}
-            >
-              Add Liquidity
-            </a>
-          </div>
-        </div>
+        {/* { this.renderBanner() } */}
 
         {/** Content */}
         <div className={classes.contentContainer}>
-          <div className={classes.investedContainer}>
+          <div className={classes.optionsContainer}>
             {/** Risk Type Tabs */}
-            {this.renderRiskTypeTab()}
+            <div>{this.renderRiskTypeTab()}</div>
 
-            {/** Display Pool List */}
-            {this.renderPools()}
+            {/** Render Pool Type */}
+            <div>{this.renderPoolType()}</div>
           </div>
+
+          {/** Display Pool List */}
+          {this.renderPools()}
         </div>
 
         {/** Loading */}
@@ -554,7 +574,7 @@ class Stake extends Component {
   };
 
   renderPools = () => {
-    const { pools, currentTab, expanded } = this.state;
+    const { pools, currentTab, expanded, selectedPoolType } = this.state;
     const { classes } = this.props;
     const width = window.innerWidth;
 
@@ -621,11 +641,6 @@ class Stake extends Component {
                           >
                             {pool.label}
                           </Typography>
-                          {/* <Typography
-                                variant={"body1"}
-                                className={classes.assetLabel2}>
-                                {asset.description}
-                              </Typography> */}
                         </Grid>
 
                         {/** Pending DVG */}
@@ -642,7 +657,7 @@ class Stake extends Component {
                             }}
                             className={classes.assetLabel1}
                           >
-                            {pool.userInfo.pendingDVG
+                            {pool.userInfo && pool.userInfo.pendingDVG
                               ? (Number(pool.userInfo.pendingDVG) / 10 ** 18)
                                   .toFixed(2)
                                   .toLocaleString(undefined, {
@@ -650,7 +665,7 @@ class Stake extends Component {
                                     maximumFractionDigits: 2,
                                   })
                               : "0.00"}
-                            {" DVG"}
+                            { selectedPoolType === LATEST_POOLS ? " DVD" : " DVG"}
                           </Typography>
                           <Typography
                             variant={"body1"}
@@ -674,7 +689,7 @@ class Stake extends Component {
                             }}
                             className={classes.assetLabel1}
                           >
-                            { pool.userInfo.depositedLPAmount 
+                            { pool.userInfo && pool.userInfo.depositedLPAmount 
                               ? (
                                   Number(pool.userInfo.depositedLPAmount) /
                                   10 ** pool.decimal
@@ -737,31 +752,6 @@ class Stake extends Component {
                             Multiplier
                           </Typography>
                         </Grid>
-
-                        {/** TVL */}
-                        {/* <Grid
-                          item
-                          sm={2}
-                          xs={6}
-                          className={classes.gridItemColumn}
-                        >
-                          <Typography
-                            variant={"h5"}
-                            style={{
-                              wordWrap: "break-word",
-                            }}
-                            className={classes.assetLabel1}
-                          >
-                            {"$ "}
-                            {pool.tvl ? Number(pool.tvl).toFixed(2) : "0.00"}
-                          </Typography>
-                          <Typography
-                            variant={"body1"}
-                            className={classes.assetLabel2}
-                          >
-                            Liquidity
-                          </Typography>
-                        </Grid> */}
                       </Grid>
                     </div>
                   </AccordionSummary>
@@ -775,10 +765,17 @@ class Stake extends Component {
                       </div>
                       <hr className={classes.divider}></hr>
                       <div className={classes.yearnEarnAndVaultItem}>
-                        <StakeWithdrawal
-                          pool={pool}
-                          startLoading={this.startLoading}
-                        ></StakeWithdrawal>
+                        {
+                          (selectedPoolType === LATEST_POOLS) 
+                            ? <PendingReward
+                                pool={pool}
+                                startLoading={this.startLoading}
+                              ></PendingReward>
+                            : <StakeWithdrawal
+                                  pool={pool}
+                                  startLoading={this.startLoading}
+                              ></StakeWithdrawal>
+                        }
                       </div>
                     </div>
                   </AccordionDetails>
@@ -806,6 +803,7 @@ class Stake extends Component {
       daoELO: { filename: "citadel", format: "svg" },
       daoCUB: { filename: "citadel", format: "svg" },
       daoSTO: { filename: "citadel", format: "svg" },
+      vipDVD: { filename: "vipDVD", format: "png" },
     };
 
     const poolImage = images[pool.name];
