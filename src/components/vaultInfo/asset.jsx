@@ -829,9 +829,6 @@ class Asset extends Component {
             amountAboveThreshold: false,
             scales: [0, 25, 50, 75, 100],
             timeRange: [{
-                label: '1D',
-                value: '1d'
-            }, {
                 label: '1W',
                 value: '7d'
             }, {
