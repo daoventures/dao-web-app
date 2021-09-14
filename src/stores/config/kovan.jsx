@@ -81,7 +81,7 @@ const kovan = [
     price_id: ["tether", "usd-coin", "dai"],
     priceInUSD: [0, 0, 0],
     strategyName: "DAO FAANG Stonk: USDT USDC DAI",
-    strategy: "DAO FAANG Stonk",
+    strategy: "DAO FAANG Stonks",
     strategyAddress: "0xc0f43b6db13e5988c92aa8c7c286a51f493620d4",
     strategyContractABI: config.strategyDAOSTOContractABI,
     strategyInfo: "Popular US tech stocks with yield farming rewards and reduced volatility.",

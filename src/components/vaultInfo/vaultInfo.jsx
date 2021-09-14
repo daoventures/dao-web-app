@@ -82,7 +82,6 @@ const styles = (theme) => ({
         alignItems: "center",
         justifyContent: "center",
         position: "relative",
-        width: "82vw"
         // [theme.breakpoints.up('md')]: {
         //   minWidth: 'calc(100% - '+ drawerWidth + 'px)',
         // }
@@ -1345,12 +1344,8 @@ class Vault extends Component {
                                             <div className={classes.assetIcon}>
                                                 <img
                                                     alt=""
-                                                    src={require("../../assets/img_new/" +
-                                                        (this.isLogoVault(asset)
-                                                            ? asset.strategyType
-                                                            : asset.symbol) +
-                                                        "-logo." +
-                                                        asset.logoFormat)}
+                                                    src={require("../../assets/img_new/vaults/" +
+                                                        asset.id + '.png')}
                                                     // height={ '50px' }
                                                     className={classes.assetIconImg}
                                                     style={

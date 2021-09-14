@@ -1277,7 +1277,6 @@ class Asset extends Component {
                                 {this.renderCurrencyModal(asset.symbols)}
                             </React.Fragment>
                         )}
-                        }
                     </div>
                     <div className={classes.floatRightItems}>
                         {scales.length > 0 &&
