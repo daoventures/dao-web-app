@@ -1035,7 +1035,8 @@ class Vault extends Component {
         asset.strategyType === "elon" ||
         asset.strategyType === "cuban" ||
         asset.strategyType === "daoFaang" ||
-        asset.strategyType === "moneyPrinter"
+        asset.strategyType === "moneyPrinter" ||
+        asset.strategyType === "metaverse"
             ? true
             : false;
     };
@@ -1100,7 +1101,8 @@ class Vault extends Component {
                     {asset.strategyType === "citadel" || asset.strategyType === "daoFaang"  ||
                     asset.strategyType === "elon" ||
                     asset.strategyType === "cuban" ||
-                    asset.strategyType === "moneyPrinter"
+                    asset.strategyType === "moneyPrinter" || 
+                    asset.strategyType === "metaverse"
                         ? this._get7dPNL(asset)
                         : this._getAPY(asset)}
                 </Typography>
@@ -1144,7 +1146,8 @@ class Vault extends Component {
                             asset.strategyType === "daoFaang"  ||
                             asset.strategyType === "elon" ||
                             asset.strategyType === "cuban" ||
-                            asset.strategyType === "moneyPrinter"
+                            asset.strategyType === "moneyPrinter" ||
+                            asset.strategyType === "metaverse"
                                 ? this._getPnl(asset)
                                 : this._getAPY(asset)}{" "}
                         </Typography>
@@ -1233,7 +1236,14 @@ class Vault extends Component {
                     className={classes.assetLabel1}
                 >
                     <div>
-                        {asset.depositedSharesInUSD? asset.depositedSharesInUSD.toFixed(4): 0} USD
+                        {
+                            (asset.depositedSharesInUSD) 
+                                ?  (asset.strategyType === "metaverse")
+                                    ? `${(asset.depositedSharesInUSD + asset.pendingBalance).toFixed(4)} USD`
+                                    : asset.depositedSharesInUSD 
+                                : 0
+                        }
+                        {/* {asset.depositedSharesInUSD? asset.depositedSharesInUSD.toFixed(4): 0} USD */}
                     </div>
                 </Typography>
             </React.Fragment>
