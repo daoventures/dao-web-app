@@ -67,6 +67,7 @@ import BasicModal from '../common/basicModal';
 import DoneMark from '../../assets/done.png';
 
 import fromExponential from "from-exponential";
+import InfoModal from "../common/infoModal/infoModal";
 
 const emitter = Store.emitter;
 const dispatcher = Store.dispatcher;
@@ -472,6 +473,20 @@ const styles = (theme) => ({
         alignItems: "end",
         justifyContent: "space-between",
         color: theme.themeColors.textT,
+    },
+    alignCenter: {
+        alignItems: "center",
+    },
+    pendingContainer: {
+        display: "flex",
+        alignItems: "center"
+    },
+    pendingInfo: {
+        lineHeight: "1.6"
+    },
+    modalInfo: {
+        color: theme.themeColors.textT,
+        padding: "15px",
     },
     labelFonts: {
         fontFamily: "Rubik",
@@ -1885,6 +1900,18 @@ class Asset extends Component {
         }
     }
 
+    renderPendingInfo = () => {
+        const { classes } = this.props;
+        const modalContent = (
+            <div className={classes.modalInfo}>
+                <Typography variant={"h5"} className={classes.pendingInfo}>
+                    Funds being deployed therefore cannot be withdrawn. Please check back in 24-48 hrs.
+                </Typography>
+            </div>
+        );
+        return <InfoModal content={modalContent}></InfoModal>;
+    }
+
     render() {
         const {classes, asset} = this.props;
         const {
@@ -1993,12 +2020,12 @@ class Asset extends Component {
                                         {this.isUsdVault(asset) && (
                                             <React.Fragment>
                                                 AVAILABLE {asset.balances
-                                                ? (
-                                                    Math.floor(
-                                                        asset.balances[this.state.tokenIndex] * 10000
-                                                    ) / 10000
-                                                ).toFixed(4)
-                                                : "0.0000"}{" "}
+                                                    ? (
+                                                        Math.floor(
+                                                            asset.balances[this.state.tokenIndex] * 10000
+                                                        ) / 10000
+                                                    ).toFixed(4)
+                                                    : "0.0000"}{" "}
                                                 {asset.symbols
                                                     ? asset.symbols[this.state.tokenIndex]
                                                     : ""}
@@ -2006,13 +2033,13 @@ class Asset extends Component {
                                         )}
                                         {!this.isUsdVault(asset) && (
                                             <span>
-                        {asset.balance
-                            ? (Math.floor(asset.balance * 10000) / 10000).toFixed(
-                                4
-                            )
-                            : "0.0000"}{" "}
+                                                {asset.balance
+                                                    ? (Math.floor(asset.balance * 10000) / 10000).toFixed(
+                                                        4
+                                                    )
+                                                    : "0.0000"}{" "}
                                                 {asset.tokenSymbol ? asset.tokenSymbol : asset.symbol}
-                      </span>
+                                            </span>
                                         )}
                                     </Typography>
 
@@ -2302,7 +2329,7 @@ class Asset extends Component {
                                             <div className={classes.operationLabel}>
                                                 Withdrawal
                                             </div>
-                                            <div className={classes.balances}>
+                                            <div className={`${classes.balances} ${classes.alignCenter}`}>
                                                 <Typography
                                                     variant="body1"
                                                     // onClick={() => {
@@ -2313,41 +2340,49 @@ class Asset extends Component {
                                                 >
                                                     Withdraw funds from this strategy.
                                                     {/*{(asset.strategyBalance*/}
-                                                    {/*    ? (*/}
-                                                    {/*        Math.floor(*/}
-                                                    {/*            (asset.strategyBalance /*/}
-                                                    {/*                10 ** asset.decimals) **/}
-                                                    {/*            10000*/}
-                                                    {/*        ) / 10000*/}
-                                                    {/*    ).toFixed(4)*/}
-                                                    {/*    : "0.0000") +*/}
-                                                    {/*" " +*/}
-                                                    {/*asset.id}{" "}*/}
-
                                                 </Typography>
 
-                                                <Typography
-                                                    variant="body2"
-                                                    // onClick={() => {
-                                                    //     this.setAmount(100);
-                                                    // }}
-                                                    className={classes.labelMessage}
-                                                    noWrap
-                                                >
-                                                    AVAILABLE:
-                                                    {asset.strategyBalance && (
-                                                        <span>
+                                                <div>
+                                                    {/** Pending Balance */}
+                                                    {
+                                                        (Number(asset.pendingBalance) > 0) &&
+                                                        <div className={classes.pendingContainer}>
+                                                            {this.renderPendingInfo()}
+                                                            <Typography
+                                                                variant="body2"
+                                                                className={classes.labelMessage}
+                                                                noWrap
+                                                            >
+                                                                PROCESSING:
+                                                            {asset.pendingBalance.toFixed(4)} USD
+                                                            </Typography>
+                                                        </div> 
+                                                    }
 
-                                                            {asset.depositedSharesInUSD
-                                                                ? (
-                                                                    asset.depositedSharesInUSD /
-                                                                    asset.priceInUSD[this.state.tokenIndex]
-                                                                ).toFixed(4)
-                                                                : "0.0000"}{" "}
-                                                            {asset.symbols[this.state.tokenIndex]}
-                            </span>
-                                                    )}
-                                                </Typography>
+                                                    {/** Available for deposit */}
+                                                    <Typography
+                                                        variant="body2"
+                                                        // onClick={() => {
+                                                        //     this.setAmount(100);
+                                                        // }}
+                                                        className={classes.labelMessage}
+                                                        noWrap
+                                                    >
+                                                        AVAILABLE:
+                                                        {asset.strategyBalance && (
+                                                            <span>
+
+                                                                {asset.depositedSharesInUSD
+                                                                    ? (
+                                                                        asset.depositedSharesInUSD /
+                                                                        asset.priceInUSD[this.state.tokenIndex]
+                                                                    ).toFixed(4)
+                                                                    : "0.0000"}{" "}
+                                                                {asset.symbols[this.state.tokenIndex]}
+                                                            </span>
+                                                        )}
+                                                    </Typography>
+                                                </div>
                                             </div>
                                             {this.renderDepositWithdrawInput(false, asset)}
                                         </div>

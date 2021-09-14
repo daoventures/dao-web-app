@@ -3743,6 +3743,12 @@ class Store {
         .balanceOf(account.address)
         .call({ from: account.address });
 
+      let pendingBalance = 0;
+      if(asset.strategyType === "metaverse") {
+        pendingBalance = await vaultContract.methods.depositAmt(account.address).call({from: account.address});
+        pendingBalance = pendingBalance / 10 ** 18;
+      }
+     
       const decimals = (asset.strategyType === "metaverse")
         ? 18
         : 6;
@@ -3763,6 +3769,7 @@ class Store {
           vaultBalance: 0,
           strategyBalance: depositedShares,
           depositedSharesInUSD: depositedSharesInUSD,
+          pendingBalance: pendingBalance
         }
       }
     } else if (asset.strategyType === "daoFaang") {
@@ -7495,6 +7502,7 @@ class Store {
         vaultBalance: data[1].data.vaultBalance,
         earnBalance: data[1].data.earnBalance,
         depositedSharesInUSD: data[1].data.depositedSharesInUSD,
+        pendingBalance: data[1].data.pendingBalance !== undefined ? data[1].data.pendingBalance : 0,
         stats: {},
         earnApr: 0,
         historicalAPY: [],

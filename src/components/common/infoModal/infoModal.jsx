@@ -35,7 +35,7 @@ class InfoModal extends Component {
         const { content, title } = this.props;
         const { displayModal } = this.state;
 
-        return <BasicModal content={content} title={title} openModal={displayModal} setOpenModal={this.handleModalDisplay}></BasicModal>
+        return <BasicModal contentTemplate={content} title={title} openModal={displayModal} setOpenModal={this.handleModalDisplay}></BasicModal>
     }
 
     render() {

@@ -1235,7 +1235,14 @@ class Vault extends Component {
                     className={classes.assetLabel1}
                 >
                     <div>
-                        {asset.depositedSharesInUSD? asset.depositedSharesInUSD.toFixed(4): 0} USD
+                        {
+                            (asset.depositedSharesInUSD) 
+                                ?  (asset.strategyType === "metaverse")
+                                    ? `${(asset.depositedSharesInUSD + asset.pendingBalance).toFixed(4)} USD`
+                                    : asset.depositedSharesInUSD 
+                                : 0
+                        }
+                        {/* {asset.depositedSharesInUSD? asset.depositedSharesInUSD.toFixed(4): 0} USD */}
                     </div>
                 </Typography>
             </React.Fragment>
