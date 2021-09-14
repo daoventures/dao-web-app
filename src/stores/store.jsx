@@ -6990,6 +6990,7 @@ class Store {
           // callback(null, null, receipt);
         })
         .on("error", function (error) {
+          emitter.emit(WITHDRAW_BOTH_VAULT_FAIL_RETURNED);
           if (!error.toString().includes("-32601")) {
             if (error.message) {
               emitter.emit(ERROR, error);
@@ -6999,6 +7000,7 @@ class Store {
           }
         })
         .catch((error) => {
+          emitter.emit(WITHDRAW_BOTH_VAULT_FAIL_RETURNED);
           if (!error.toString().includes("-32601")) {
             if (error.message) {
               // return callback(error.message);
@@ -7072,6 +7074,8 @@ class Store {
             }
             // callback(error, null, null);
           }
+          emitter.emit(WITHDRAW_BOTH_VAULT_FAIL_RETURNED);
+
         });
       // } else {
       //   return emitter.emit(WITHDRAW_BOTH_VAULT_FAIL_RETURNED);
