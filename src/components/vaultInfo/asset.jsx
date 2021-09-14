@@ -651,6 +651,7 @@ const styles = (theme) => ({
         color: "red",
         display: "flex",
         justifyContent: "center",
+        textAlign: "center",
         padding: "0 0 10px 0"
     },
     chartTitle: {
@@ -1737,7 +1738,7 @@ class Asset extends Component {
                     justifyContent="center"
                     alignItems="center"
                 >
-                    {true && <Grid item sm={12} xs={12}>
+                    {this.state.isWithdrawError && !this.state.isWithdrawCompleted && <Grid item sm={12} xs={12}>
                         <span className={classes.erroredMessage}>Failed to withdraw {this.state.selectedCurrency}
                             <br/> from {asset.strategy} Strategy. <br/>Please try again</span>
                     </Grid>}
