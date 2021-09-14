@@ -478,8 +478,10 @@ const styles = (theme) => ({
         alignItems: "center",
     },
     pendingContainer: {
-        display: "flex",
-        alignItems: "center"
+        // display: "flex",
+        // alignItems: "center",
+        textAlign: "right",
+        marginTop: "-20px"
     },
     pendingInfo: {
         lineHeight: "1.6"
@@ -750,6 +752,9 @@ const styles = (theme) => ({
         fontStyle: "normal",
         fontWeight: "normal",
         fontSize: "12px"
+    },
+    padding4Span: {
+        padding: "4px"
     }
 });
 
@@ -2328,6 +2333,21 @@ class Asset extends Component {
                                         <div className={classes.tradeContainer}>
                                             <div className={classes.operationLabel}>
                                                 Withdrawal
+                                                {
+                                                    (Number(asset.pendingBalance) > 0) &&
+                                                    <div className={classes.pendingContainer}>
+
+                                                        <Typography
+                                                            variant="body2"
+                                                            className={classes.labelMessage}
+                                                            noWrap
+                                                        >
+                                                            <span className={classes.padding4Span}>{this.renderPendingInfo()}</span>
+                                                            PROCESSING:&nbsp;
+                                                            {asset.pendingBalance.toFixed(4)} USD
+                                                        </Typography>
+                                                    </div>
+                                                }
                                             </div>
                                             <div className={`${classes.balances} ${classes.alignCenter}`}>
                                                 <Typography
@@ -2344,20 +2364,6 @@ class Asset extends Component {
 
                                                 <div>
                                                     {/** Pending Balance */}
-                                                    {
-                                                        (Number(asset.pendingBalance) > 0) &&
-                                                        <div className={classes.pendingContainer}>
-                                                            {this.renderPendingInfo()}
-                                                            <Typography
-                                                                variant="body2"
-                                                                className={classes.labelMessage}
-                                                                noWrap
-                                                            >
-                                                                PROCESSING:
-                                                            {asset.pendingBalance.toFixed(4)} USD
-                                                            </Typography>
-                                                        </div> 
-                                                    }
 
                                                     {/** Available for deposit */}
                                                     <Typography
@@ -2368,7 +2374,7 @@ class Asset extends Component {
                                                         className={classes.labelMessage}
                                                         noWrap
                                                     >
-                                                        AVAILABLE:
+                                                        AVAILABLE:&nbsp;
                                                         {asset.strategyBalance && (
                                                             <span>
 

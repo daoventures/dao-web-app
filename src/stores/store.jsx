@@ -6831,7 +6831,7 @@ class Store {
         FAANGAsset[0].vaultContractAddress
       );
 
-      const happyHourContractMetaverse = happyHourWeb3.eth.Contract(
+      const happyHourContractMetaverse = new happyHourWeb3.eth.Contract(
         metaverseAsset[0].vaultContractABI,
         metaverseAsset[0].vaultContractAddress
       );
