@@ -66,6 +66,8 @@ import {
 import BasicModal from '../common/basicModal';
 import DoneMark from '../../assets/done.png';
 
+import fromExponential from "from-exponential";
+
 const emitter = Store.emitter;
 const dispatcher = Store.dispatcher;
 const store = Store.store;
@@ -3340,7 +3342,6 @@ class Asset extends Component {
         val[event.target.id] = event.target.value;
 
         let assetTokenAmount = event.target.value * ((balance / 10 ** decimals) / priceInUsd);
-
         assetTokenAmount = (
             Math.floor(assetTokenAmount * 10 ** 8) /
             10 ** 8
@@ -3434,8 +3435,9 @@ class Asset extends Component {
     };
 
     validateDigit = (amount) => {
+        let finalAmount = fromExponential(amount);
         const digitRegex = /^[0-9]\d*(\.\d+)?$/;
-        return digitRegex.test(amount);
+        return digitRegex.test(finalAmount);
     };
 
     validateAmount = (amount) => {
