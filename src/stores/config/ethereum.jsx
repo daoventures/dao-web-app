@@ -81,7 +81,7 @@ const ethereum = [
     price_id: ["tether", "usd-coin", "dai"],
     priceInUSD: [0, 0, 0],
     strategyName: "DAO FAANG Stonk: USDT USDC DAI",
-    strategy: "DAO FAANG Stonk",
+    strategy: "DAO FAANG Stonks",
     strategyAddress: "0x4a73dd597b8257e651ef12fd04a91a8819c89416",
     strategyContractABI: config.strategyDAOSTOContractABI,
     strategyInfo: "Popular US tech stocks with yield farming rewards and reduced volatility.",
