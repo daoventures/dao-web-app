@@ -82,6 +82,13 @@ const styles = (theme) => ({
         alignItems: "center",
         justifyContent: "center",
         position: "relative",
+        width: "82vw",
+        [theme.breakpoints.up('md')] : {
+            width: "75vw",
+        },
+        [theme.breakpoints.up('sm')] : {
+             width: "65vw",
+        }
         // [theme.breakpoints.up('md')]: {
         //   minWidth: 'calc(100% - '+ drawerWidth + 'px)',
         // }
@@ -99,8 +106,7 @@ const styles = (theme) => ({
         marginTop: "20px",
         marginBottom: "40px",
         [theme.breakpoints.up("md")]: {
-            width: "100%",
-            minWidth: "900px",
+            minWidth: "700px",
         },
         [theme.breakpoints.down("sm")]: {
             minWidth: "90%",
@@ -1371,7 +1377,7 @@ class Vault extends Component {
                                                 variant={"h5"}
                                                 className={classes.assetLabel2}
                                             >
-                                                STABLECOINS
+                                                ACCEPTED COINS
                                             </Typography>
                                             <Typography
                                                 variant={"h5"}

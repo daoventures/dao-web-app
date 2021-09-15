@@ -669,7 +669,9 @@ const styles = (theme) => ({
     erroredMessage: {
         color: "red",
         display: "flex",
-        alignItems: "center"
+        justifyContent: "center",
+        textAlign: "center",
+        padding: "0 0 10px 0"
     },
     chartTitle: {
         fontFamily: "Rubik",
@@ -2056,7 +2058,7 @@ class Asset extends Component {
                                 <div>
                                     <BasicModal
                                         title={this.state.openDepositDialogBox ? "Approve Deposit": "Confirm Withdraw"}
-                                        subTitle={(this.state.openDepositDialogBox ? "In ": "from") + asset.strategyName}
+                                        subTitle={(this.state.openDepositDialogBox ? "In ": "from ") + asset.strategyName}
                                         contentTemplate={this.state.openDepositDialogBox ? this.depositModalTemplate(classes, asset) : this.withdrawModalTemplate(classes, asset)}
                                         openModal={this.state.openDepositDialogBox || this.state.openWithdrawDialogBox}
                                         setOpenModal={this.state.openDepositDialogBox ? this.setOpenModal : this.setOpenWithdrawModal}
