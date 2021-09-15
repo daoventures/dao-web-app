@@ -1238,11 +1238,11 @@ class Vault extends Component {
                         {
                             (asset.depositedSharesInUSD) 
                                 ?  (asset.strategyType === "metaverse")
-                                    ? `${(Number(asset.depositedSharesInUSD) + Number(asset.pendingBalance)).toFixed(4)} USD`
-                                    : `${asset.depositedSharesInUSD.toFixed(4)} USD`
+                                    ? `$${(Number(asset.depositedSharesInUSD) + Number(asset.pendingBalance)).toFixed(4)}`
+                                    : `$${asset.depositedSharesInUSD.toFixed(4)}`
                                 :  (asset.strategyType === "metaverse")
-                                    ? `${asset.pendingBalance ? (Number(asset.pendingBalance)).toFixed(4) : 0} USD` 
-                                    : `0 USD`
+                                    ? `$${asset.pendingBalance ? (Number(asset.pendingBalance)).toFixed(4) : 0}` 
+                                    : `$0`
                         }
                         {/* {asset.depositedSharesInUSD? asset.depositedSharesInUSD.toFixed(4): 0} USD */}
                     </div>
