@@ -95,7 +95,7 @@ const ethereum = [
   //   tvlKey: "daoMVF_tvl",
   //   infoLink: INFO_LINK.METAVERSE,
   //   isPopularItem: true,
-  //   happyHourEnabled: false,
+  //   happyHourEnabled: true,
   //   performanceId: "daoMVF",
   //   // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
   // },
