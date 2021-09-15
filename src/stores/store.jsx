@@ -7454,20 +7454,43 @@ class Store {
       let amountRange1 = await vaultContract.methods.networkFeeTier2(0).call();
       let amountRange2 = await vaultContract.methods.networkFeeTier2(1).call();
 
-      if(amount < amountRange1) {
-        return {
-          feePercent: percentageRange1/100
+      if(asset.strateyType === "metaverse") {
+        let amountRange3 = await vaultContract.methods.customNetworkFeeTier().call();
+        let percentageRange4 = await vaultContract.methods.customNetworkFeePerc().call();
+        
+        if(amount < amountRange1) {
+          return {
+            feePercent: percentageRange1/100
+          }
+        } else if (amount <= amountRange2) {
+          return {
+            feePercent: percentageRange2/100
+          }
+        } else if (amount < amountRange3) {
+          return {
+            feePercent: percentageRange3/100
+          }
+        } else {
+          return {
+            feePercent: percentageRange4/100
+          }
         }
-      } else if(amount>=amountRange1 &&  amount <= amountRange2) {
-        return {
-          feePercent: percentageRange2/100
-        }
+
       } else {
-        return {
-          feePercent: percentageRange3/100
+        if(amount < amountRange1) {
+          return {
+            feePercent: percentageRange1/100
+          }
+        } else if(amount>=amountRange1 &&  amount <= amountRange2) {
+          return {
+            feePercent: percentageRange2/100
+          }
+        } else {
+          return {
+            feePercent: percentageRange3/100
+          }
         }
       }
-
     } catch (Err) {
 
     }
