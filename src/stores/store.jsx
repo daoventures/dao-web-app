@@ -7454,7 +7454,7 @@ class Store {
         let amountRange3 = await vaultContract.methods.customNetworkFeeTier().call();
         let percentageRange4 = await vaultContract.methods.customNetworkFeePerc().call();
         
-        if(amount < amountRange1 && amount > amountRange2) {
+        if(amount < amountRange1) {
           return {
             feePercent: percentageRange1/100
           }
@@ -7487,7 +7487,6 @@ class Store {
           }
         }
       }
-
     } catch (Err) {
 
     }
