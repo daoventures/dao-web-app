@@ -64,7 +64,7 @@ const kovan = [
       "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
     ],
     erc20address: "0x07de306ff27a2b630b1141956844eb1552b956b5",
-    vaultContractAddress: "0xCCEA249aA4F105e1A48E50895Fa619Af61dC07e0",
+    vaultContractAddress: "0xA4eBc7f70618Bb47984a21417f2B726E93DeF9eE",
     vaultContractABI: config.vaultDAOMVFContractABI,
     balance: 0, // Stores balance of selectedERC20Address
     balances: [0, 0, 0],
@@ -80,7 +80,7 @@ const kovan = [
     priceInUSD: [0, 0, 0],
     strategyName: "DAO Metaverse: USDT USDC DAI",
     strategy: "DAO Metaverse",
-    strategyAddress: "0x16FF7C51Bf31F870904E6A864d20068568c2F0c3",
+    strategyAddress: "0xf4655e971cc76b6daa78b4615dc2be4446e67e53",
     strategyContractABI: config.vaultDAOMVFStrategyABI,
     strategyInfo: "Ride the growth of NFT and gamefi ecosystems.",
     strategyDescription: " Investors can gain exposure to the booming NFT and gaming sector with this product that invests in the most successful metaverse tokens.",
