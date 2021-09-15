@@ -1239,7 +1239,7 @@ class Vault extends Component {
                             (asset.depositedSharesInUSD) 
                                 ?  (asset.strategyType === "metaverse")
                                     ? `${(asset.depositedSharesInUSD + asset.pendingBalance).toFixed(4)} USD`
-                                    : asset.depositedSharesInUSD 
+                                    : `${asset.depositedSharesInUSD.toFixed(4)} USD`
                                 : 0
                         }
                         {/* {asset.depositedSharesInUSD? asset.depositedSharesInUSD.toFixed(4): 0} USD */}
