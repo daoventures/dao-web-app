@@ -64,7 +64,7 @@ const kovan = [
       "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
     ],
     erc20address: "0x07de306ff27a2b630b1141956844eb1552b956b5",
-    vaultContractAddress: "0xA4eBc7f70618Bb47984a21417f2B726E93DeF9eE",
+    vaultContractAddress: "0xcBb69E3621ce4EB0d99B60f0E0430dCD5f52fC95",
     vaultContractABI: config.vaultDAOMVFContractABI,
     balance: 0, // Stores balance of selectedERC20Address
     balances: [0, 0, 0],
