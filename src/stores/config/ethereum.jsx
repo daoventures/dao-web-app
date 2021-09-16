@@ -70,6 +70,7 @@ const ethereum = [
   //   balances: [0, 0, 0],
   //   vaultBalance: 0,
   //   decimals: 18,
+  //   feeDecimals: 18,
   //   deposit: true,
   //   depositAll: true,
   //   withdraw: true,

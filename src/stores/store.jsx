@@ -7450,7 +7450,7 @@ class Store {
       let amountRange1 = await vaultContract.methods.networkFeeTier2(0).call();
       let amountRange2 = await vaultContract.methods.networkFeeTier2(1).call();
 
-      if(asset.strateyType === "metaverse") {
+      if(asset.strategyType === "metaverse") {
         let amountRange3 = await vaultContract.methods.customNetworkFeeTier().call();
         let percentageRange4 = await vaultContract.methods.customNetworkFeePerc().call();
         
