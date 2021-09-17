@@ -52,6 +52,8 @@ import { withNamespaces } from "react-i18next";
 import { withRouter } from "react-router-dom";
 import { withStyles } from "@material-ui/core/styles";
 
+import Celebrate from '../../assets/img_new/vaults/celebrate.svg';
+
 const emitter = Store.emitter;
 const dispatcher = Store.dispatcher;
 const store = Store.store;
@@ -82,7 +84,13 @@ const styles = (theme) => ({
         alignItems: "center",
         justifyContent: "center",
         position: "relative",
-        width: "82vw"
+        width: "82vw",
+        [theme.breakpoints.up('md')] : {
+            width: "75vw",
+        },
+        [theme.breakpoints.up('sm')] : {
+             width: "65vw",
+        }
         // [theme.breakpoints.up('md')]: {
         //   minWidth: 'calc(100% - '+ drawerWidth + 'px)',
         // }
@@ -100,8 +108,7 @@ const styles = (theme) => ({
         marginTop: "20px",
         marginBottom: "40px",
         [theme.breakpoints.up("md")]: {
-            width: "100%",
-            minWidth: "900px",
+            minWidth: "700px",
         },
         [theme.breakpoints.down("sm")]: {
             minWidth: "90%",
@@ -720,6 +727,27 @@ const styles = (theme) => ({
     },
     TabText: {
         color: "#FFFFFF"
+    },
+    happyHourLabel: {
+        right: "8rem",
+        top: "0px",
+        width: "120px",
+        height: "32px",
+        position: "absolute",
+        background: "rgba(255, 191, 65, 0.2)",
+        borderRadius: "0px 0px 4px 4px"
+    },
+    happyHourText: {
+        fontFamily: "Rubik",
+        fontStyle: "normal",
+        fontWeight: "600",
+        fontSize: "15px",
+        lineHeight: "2.5",
+        color: "#FFBF41",
+    },
+    happyHourSVG: {
+        height: "17px",
+        padding: "2px 0 0 5px"
     }
 });
 
@@ -1035,7 +1063,8 @@ class Vault extends Component {
         asset.strategyType === "elon" ||
         asset.strategyType === "cuban" ||
         asset.strategyType === "daoFaang" ||
-        asset.strategyType === "moneyPrinter"
+        asset.strategyType === "moneyPrinter" ||
+        asset.strategyType === "metaverse"
             ? true
             : false;
     };
@@ -1100,7 +1129,8 @@ class Vault extends Component {
                     {asset.strategyType === "citadel" || asset.strategyType === "daoFaang"  ||
                     asset.strategyType === "elon" ||
                     asset.strategyType === "cuban" ||
-                    asset.strategyType === "moneyPrinter"
+                    asset.strategyType === "moneyPrinter" || 
+                    asset.strategyType === "metaverse"
                         ? this._get7dPNL(asset)
                         : this._getAPY(asset)}
                 </Typography>
@@ -1144,7 +1174,8 @@ class Vault extends Component {
                             asset.strategyType === "daoFaang"  ||
                             asset.strategyType === "elon" ||
                             asset.strategyType === "cuban" ||
-                            asset.strategyType === "moneyPrinter"
+                            asset.strategyType === "moneyPrinter" ||
+                            asset.strategyType === "metaverse"
                                 ? this._getPnl(asset)
                                 : this._getAPY(asset)}{" "}
                         </Typography>
@@ -1233,7 +1264,16 @@ class Vault extends Component {
                     className={classes.assetLabel1}
                 >
                     <div>
-                        {asset.depositedSharesInUSD? asset.depositedSharesInUSD.toFixed(4): 0} USD
+                        {
+                            (asset.depositedSharesInUSD) 
+                                ?  (asset.strategyType === "metaverse")
+                                    ? `$${(Number(asset.depositedSharesInUSD) + Number(asset.pendingBalance)).toFixed(4)}`
+                                    : `$${asset.depositedSharesInUSD.toFixed(4)}`
+                                :  (asset.strategyType === "metaverse")
+                                    ? `$${asset.pendingBalance ? (Number(asset.pendingBalance)).toFixed(4) : 0}` 
+                                    : `$0`
+                        }
+                        {/* {asset.depositedSharesInUSD? asset.depositedSharesInUSD.toFixed(4): 0} USD */}
                     </div>
                 </Typography>
             </React.Fragment>
@@ -1316,6 +1356,8 @@ class Vault extends Component {
                                 {/*        : this.renderPopularIcon(asset)*/}
                                 {/*    : null}*/}
                             </Grid>
+                            {this.state.happyHour && asset.happyHourEnabled && <div className={classes.happyHourLabel}><span className={classes.happyHourText}><img className={classes.happyHourSVG} src={Celebrate} alt=""/> Happy Hour</span></div>
+                            }
                             <RiskLevelLabel risk={asset.risk}/>
                         </Grid>
                         <Accordion
@@ -1345,12 +1387,8 @@ class Vault extends Component {
                                             <div className={classes.assetIcon}>
                                                 <img
                                                     alt=""
-                                                    src={require("../../assets/img_new/" +
-                                                        (this.isLogoVault(asset)
-                                                            ? asset.strategyType
-                                                            : asset.symbol) +
-                                                        "-logo." +
-                                                        asset.logoFormat)}
+                                                    src={require("../../assets/img_new/vaults/" +
+                                                        asset.id + '.png')}
                                                     // height={ '50px' }
                                                     className={classes.assetIconImg}
                                                     style={
@@ -1366,7 +1404,7 @@ class Vault extends Component {
                                                 variant={"h5"}
                                                 className={classes.assetLabel2}
                                             >
-                                                STABLECOINS
+                                                ACCEPTED COINS
                                             </Typography>
                                             <Typography
                                                 variant={"h5"}

@@ -859,7 +859,7 @@ class SideDrawer extends Component {
                 //     icon: "#iconlinked",
                 //     link: "https://www.linkedin.com/company/daoventuresco/",
                 // },
-                {icon: "#icondiscord", link: ""},
+                {icon: "#icondiscord", link: "https://discord.com/invite/UJaCPMkb6q"},
                 {icon: "#icontelegram", link: "https://t.me/DAOventures"},
                 // {icon: "#iconmedium", link: "https://daoventuresco.medium.com/"},
             ],

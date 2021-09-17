@@ -30,4 +30,5 @@ export const INFO_LINK = {
     MONEY_PRINTER: "https://daoventures.gitbook.io/daoventures/products/strategies/money-printer-goes-brrrrr",
     YEARN: "https://daoventures.gitbook.io/daoventures/products/strategies/yearn-fighter",
     COMPOUND: "https://daoventures.gitbook.io/daoventures/products/strategies/compound-fighter",
+    METAVERSE: "https://daoventures.gitbook.io/daoventures/products/strategies/dao-citadel-vault"
 }

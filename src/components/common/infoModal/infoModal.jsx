@@ -9,13 +9,14 @@ const styles = (theme) => ({
         width: '14px',
         height: '14px',
         fill: theme.themeColors.iconGray,
-        marginLeft: '5px'
+        marginLeft: '5px',
+        marginBottom: "-2px"
     },
     infoLinkLarge: {
         width: "20px",
         height: "20px",
         fill: theme.themeColors.iconGray,
-        marginLeft: "8px",
+        marginLeft: "8px"
     },
 });
 
@@ -35,7 +36,7 @@ class InfoModal extends Component {
         const { content, title } = this.props;
         const { displayModal } = this.state;
 
-        return <BasicModal content={content} title={title} openModal={displayModal} setOpenModal={this.handleModalDisplay}></BasicModal>
+        return <BasicModal contentTemplate={content} title={title} openModal={displayModal} setOpenModal={this.handleModalDisplay}></BasicModal>
     }
 
     render() {

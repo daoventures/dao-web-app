@@ -966,7 +966,8 @@ class Vault extends Component {
       asset.strategyType === "elon" ||
       asset.strategyType === "cuban" ||
       asset.strategyType === "daoFaang" || 
-      asset.strategyType === "moneyPrinter"
+      asset.strategyType === "moneyPrinter" || 
+      asset.strategyType === "metaverse"
       ? true
       : false;
   };

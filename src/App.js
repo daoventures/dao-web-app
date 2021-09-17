@@ -197,7 +197,7 @@ class App extends Component {
                 <Header />
                 <SideDrawer keyName="invest"/>
                 <MainContainer />
-                <BrowserView>
+                <BrowserView style={{width: '100%'}}>
                   <VaultsInfo />
                 </BrowserView>
                 <MobileView>
