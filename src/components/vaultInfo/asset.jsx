@@ -66,6 +66,9 @@ import {
 import BasicModal from '../common/basicModal';
 import DoneMark from '../../assets/done.png';
 
+import fromExponential from "from-exponential";
+import InfoModal from "../common/infoModal/infoModal";
+
 const emitter = Store.emitter;
 const dispatcher = Store.dispatcher;
 const store = Store.store;
@@ -471,6 +474,22 @@ const styles = (theme) => ({
         justifyContent: "space-between",
         color: theme.themeColors.textT,
     },
+    alignCenter: {
+        alignItems: "center",
+    },
+    pendingContainer: {
+        // display: "flex",
+        // alignItems: "center",
+        textAlign: "right",
+        marginTop: "-20px"
+    },
+    pendingInfo: {
+        lineHeight: "1.6"
+    },
+    modalInfo: {
+        color: theme.themeColors.textT,
+        padding: "15px",
+    },
     labelFonts: {
         fontFamily: "Rubik",
         fontStyle: "normal",
@@ -736,6 +755,9 @@ const styles = (theme) => ({
         fontStyle: "normal",
         fontWeight: "normal",
         fontSize: "12px"
+    },
+    padding4Span: {
+        padding: "4px"
     }
 });
 
@@ -1124,7 +1146,8 @@ class Asset extends Component {
             asset.strategyType === "elon" ||
             asset.strategyType === "cuban" ||
             asset.strategyType === "daoFaang" ||
-            asset.strategyType === "moneyPrinter";
+            asset.strategyType === "moneyPrinter" ||
+            asset.strategyType === "metaverse";
     };
 
     // Handle input validation message
@@ -1882,6 +1905,18 @@ class Asset extends Component {
         }
     }
 
+    renderPendingInfo = () => {
+        const { classes } = this.props;
+        const modalContent = (
+            <div className={classes.modalInfo}>
+                <Typography variant={"h5"} className={classes.pendingInfo}>
+                    Funds being deployed therefore cannot be withdrawn. Please check back in 24-48 hrs.
+                </Typography>
+            </div>
+        );
+        return <InfoModal content={modalContent}></InfoModal>;
+    }
+
     render() {
         const {classes, asset} = this.props;
         const {
@@ -1989,13 +2024,13 @@ class Asset extends Component {
                                         {/** Wallet Balance */}
                                         {this.isUsdVault(asset) && (
                                             <React.Fragment>
-                                                AVAILABLE: {asset.balances
-                                                ? (
-                                                    Math.floor(
-                                                        asset.balances[this.state.tokenIndex] * 10000
-                                                    ) / 10000
-                                                ).toFixed(4)
-                                                : "0.0000"}{" "}
+                                                AVAILABLE {asset.balances
+                                                    ? (
+                                                        Math.floor(
+                                                            asset.balances[this.state.tokenIndex] * 10000
+                                                        ) / 10000
+                                                    ).toFixed(4)
+                                                    : "0.0000"}{" "}
                                                 {asset.symbols
                                                     ? asset.symbols[this.state.tokenIndex]
                                                     : ""}
@@ -2003,13 +2038,13 @@ class Asset extends Component {
                                         )}
                                         {!this.isUsdVault(asset) && (
                                             <span>
-                        {asset.balance
-                            ? (Math.floor(asset.balance * 10000) / 10000).toFixed(
-                                4
-                            )
-                            : "0.0000"}{" "}
+                                                {asset.balance
+                                                    ? (Math.floor(asset.balance * 10000) / 10000).toFixed(
+                                                        4
+                                                    )
+                                                    : "0.0000"}{" "}
                                                 {asset.tokenSymbol ? asset.tokenSymbol : asset.symbol}
-                      </span>
+                                            </span>
                                         )}
                                     </Typography>
 
@@ -2287,18 +2322,34 @@ class Asset extends Component {
                                         </div>
                                     </div>
                                 )}
-                                {/** Citadel, Elon, Cuban, DAO Faang Strategy*/}
+                                {/** Citadel, Elon, Cuban, DAO Faang, Money Printer, Metaverse Strategy*/}
                                 {(asset.strategyType === "citadel" ||
                                     asset.strategyType === "elon" ||
                                     asset.strategyType === "cuban" ||
                                     asset.strategyType === "daoFaang" ||
-                                    asset.strategyType === "moneyPrinter") && (
+                                    asset.strategyType === "moneyPrinter" ||
+                                    asset.strategyType === "metaverse") && (
                                     <div className={classes.withdrawContainer}>
                                         <div className={classes.tradeContainer}>
                                             <div className={classes.operationLabel}>
                                                 Withdrawal
+                                                {
+                                                    (Number(asset.pendingBalance) > 0) &&
+                                                    <div className={classes.pendingContainer}>
+
+                                                        <Typography
+                                                            variant="body2"
+                                                            className={classes.labelMessage}
+                                                            noWrap
+                                                        >
+                                                            <span className={classes.padding4Span}>{this.renderPendingInfo()}</span>
+                                                            PROCESSING:&nbsp;
+                                                            {asset.pendingBalance.toFixed(4)} USD
+                                                        </Typography>
+                                                    </div>
+                                                }
                                             </div>
-                                            <div className={classes.balances}>
+                                            <div className={`${classes.balances} ${classes.alignCenter}`}>
                                                 <Typography
                                                     variant="body1"
                                                     // onClick={() => {
@@ -2309,39 +2360,35 @@ class Asset extends Component {
                                                 >
                                                     Withdraw funds from this strategy.
                                                     {/*{(asset.strategyBalance*/}
-                                                    {/*    ? (*/}
-                                                    {/*        Math.floor(*/}
-                                                    {/*            (asset.strategyBalance /*/}
-                                                    {/*                10 ** asset.decimals) **/}
-                                                    {/*            10000*/}
-                                                    {/*        ) / 10000*/}
-                                                    {/*    ).toFixed(4)*/}
-                                                    {/*    : "0.0000") +*/}
-                                                    {/*" " +*/}
-                                                    {/*asset.id}{" "}*/}
-
                                                 </Typography>
 
-                                                <Typography
-                                                    variant="body2"
-                                                    // onClick={() => {
-                                                    //     this.setAmount(100);
-                                                    // }}
-                                                    className={classes.labelMessage}
-                                                    noWrap
-                                                >
-                                                    AVAILABLE:&nbsp;
-                                                        <span>
+                                                <div>
+                                                    {/** Pending Balance */}
 
-                                                            {asset.depositedSharesInUSD && asset.strategyBalance
-                                                                ? (
-                                                                    asset.depositedSharesInUSD /
-                                                                    asset.priceInUSD[this.state.tokenIndex]
-                                                                ).toFixed(4)
-                                                                : "0.0000"}{" "}
-                                                            {asset.symbols[this.state.tokenIndex]}
-                            </span>
-                                                </Typography>
+                                                    {/** Available for deposit */}
+                                                    <Typography
+                                                        variant="body2"
+                                                        // onClick={() => {
+                                                        //     this.setAmount(100);
+                                                        // }}
+                                                        className={classes.labelMessage}
+                                                        noWrap
+                                                    >
+                                                        AVAILABLE:&nbsp;
+                                                        {asset.strategyBalance && (
+                                                            <span>
+
+                                                                {asset.depositedSharesInUSD
+                                                                    ? (
+                                                                        asset.depositedSharesInUSD /
+                                                                        asset.priceInUSD[this.state.tokenIndex]
+                                                                    ).toFixed(4)
+                                                                    : "0.0000"}{" "}
+                                                                {asset.symbols[this.state.tokenIndex]}
+                                                            </span>
+                                                        )}
+                                                    </Typography>
+                                                </div>
                                             </div>
                                             {this.renderDepositWithdrawInput(false, asset)}
                                         </div>
@@ -2558,6 +2605,7 @@ class Asset extends Component {
         var cubanAPY = [];
         var faangAPY = [];
         var moneyPrinterAPY = [];
+        var metaverseAPY = [];
         var labels = [];
 
         const {hideNav} = this.state;
@@ -2578,7 +2626,8 @@ class Asset extends Component {
                 asset.strategyType === "daoFaang"  ||
                 asset.strategyType === "cuban"  ||
                 asset.strategyType === "elon"  ||
-                asset.strategyType === "moneyPrinter"
+                asset.strategyType === "moneyPrinter" ||
+                asset.strategyType === "metaverse"
             ) {
 
                 let data = this.state.vaultAssetHistoricalData && this.state.vaultAssetHistoricalData.data && this.state.vaultAssetHistoricalData.data.length ? this.state.vaultAssetHistoricalData.data : asset.historicalPerformance || [];
@@ -2654,6 +2703,19 @@ class Asset extends Component {
                         ]);
                     } else if (asset.strategyType === "cuban") {
                         cubanAPY.push([
+                            date,
+                            parseFloat(groups[date][0]['lp_performance'].toFixed(4)),
+                        ]);
+                        btcAPY.push([
+                            date,
+                            parseFloat((groups[date][0]["btc_performance"]).toFixed(4)),
+                        ]);
+                        ethAPY.push([
+                            date,
+                            parseFloat((groups[date][0]["eth_performance"]).toFixed(4)),
+                        ]);
+                    } else if (asset.strategyType === "metaverse") {
+                        metaverseAPY.push([
                             date,
                             parseFloat(groups[date][0]['lp_performance'].toFixed(4)),
                         ]);
@@ -3037,6 +3099,52 @@ class Asset extends Component {
                     enabled: false,
                 },
             };
+        } else if (asset.strategyType === "metaverse") {
+            options = {
+                chart: {
+                    width: hideNav ? 300 : 420,
+                },
+                title: {
+                    text: "Vault Performance History",
+                },
+                xAxis: {
+                    categories: labels,
+                },
+                series: [
+                    {
+                        name: "Metaverse",
+                        data: metaverseAPY,
+                        color: labelColorData[strategyMap.Metaverse]? labelColorData[strategyMap.Metaverse]: "#FFFFF"
+                    },
+                    {
+                        name: "BTC",
+                        data: btcAPY,
+                        color:  labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.BTC]: "#f7931b",
+                    },
+                    {
+                        name: "ETH",
+                        data: ethAPY,
+                        color: labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.ETH]:"#464a75",
+                    }
+                ],
+                responsive: {
+                    rules: [
+                        {
+                            condition: {
+                                maxWidth: 450,
+                                chartOptions: {
+                                    chart: {
+                                        width: 300,
+                                    },
+                                },
+                            },
+                        },
+                    ],
+                },
+                credits: {
+                    enabled: false,
+                },
+            };
         }
 
         const chartTitle = {
@@ -3047,6 +3155,7 @@ class Asset extends Component {
             cuban: "Vault Performance History",
             daoFaang: "Vault Performance History",
             moneyPrinter: "Vault Performance History",
+            metaverse: "Vault Performance History"
         };
 
         // 调整折线图展示
@@ -3291,7 +3400,6 @@ class Asset extends Component {
         val[event.target.id] = event.target.value;
 
         let assetTokenAmount = event.target.value * ((balance / 10 ** decimals) / priceInUsd);
-
         assetTokenAmount = (
             Math.floor(assetTokenAmount * 10 ** 8) /
             10 ** 8
@@ -3385,8 +3493,9 @@ class Asset extends Component {
     };
 
     validateDigit = (amount) => {
+        let finalAmount = fromExponential(amount);
         const digitRegex = /^[0-9]\d*(\.\d+)?$/;
-        return digitRegex.test(amount);
+        return digitRegex.test(finalAmount);
     };
 
     validateAmount = (amount) => {
