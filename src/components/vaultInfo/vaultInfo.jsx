@@ -52,6 +52,8 @@ import { withNamespaces } from "react-i18next";
 import { withRouter } from "react-router-dom";
 import { withStyles } from "@material-ui/core/styles";
 
+import Celebrate from '../../assets/img_new/vaults/celebrate.svg';
+
 const emitter = Store.emitter;
 const dispatcher = Store.dispatcher;
 const store = Store.store;
@@ -82,6 +84,13 @@ const styles = (theme) => ({
         alignItems: "center",
         justifyContent: "center",
         position: "relative",
+        width: "82vw",
+        [theme.breakpoints.up('md')] : {
+            width: "75vw",
+        },
+        [theme.breakpoints.up('sm')] : {
+             width: "65vw",
+        }
         // [theme.breakpoints.up('md')]: {
         //   minWidth: 'calc(100% - '+ drawerWidth + 'px)',
         // }
@@ -99,8 +108,7 @@ const styles = (theme) => ({
         marginTop: "20px",
         marginBottom: "40px",
         [theme.breakpoints.up("md")]: {
-            width: "100%",
-            minWidth: "900px",
+            minWidth: "700px",
         },
         [theme.breakpoints.down("sm")]: {
             minWidth: "90%",
@@ -719,6 +727,27 @@ const styles = (theme) => ({
     },
     TabText: {
         color: "#FFFFFF"
+    },
+    happyHourLabel: {
+        right: "8rem",
+        top: "0px",
+        width: "120px",
+        height: "32px",
+        position: "absolute",
+        background: "rgba(255, 191, 65, 0.2)",
+        borderRadius: "0px 0px 4px 4px"
+    },
+    happyHourText: {
+        fontFamily: "Rubik",
+        fontStyle: "normal",
+        fontWeight: "600",
+        fontSize: "15px",
+        lineHeight: "2.5",
+        color: "#FFBF41",
+    },
+    happyHourSVG: {
+        height: "17px",
+        padding: "2px 0 0 5px"
     }
 });
 
@@ -1327,6 +1356,8 @@ class Vault extends Component {
                                 {/*        : this.renderPopularIcon(asset)*/}
                                 {/*    : null}*/}
                             </Grid>
+                            {this.state.happyHour && asset.happyHourEnabled && <div className={classes.happyHourLabel}><span className={classes.happyHourText}><img className={classes.happyHourSVG} src={Celebrate} alt=""/> Happy Hour</span></div>
+                            }
                             <RiskLevelLabel risk={asset.risk}/>
                         </Grid>
                         <Accordion
@@ -1373,7 +1404,7 @@ class Vault extends Component {
                                                 variant={"h5"}
                                                 className={classes.assetLabel2}
                                             >
-                                                STABLECOINS
+                                                ACCEPTED COINS
                                             </Typography>
                                             <Typography
                                                 variant={"h5"}

@@ -73,7 +73,19 @@ code {
   min-width: 1280px;
 }
 
-@media screen and (max-width: 750px) {
+@media screen and (max-width: 1200px) {
+  .app-container {
+    min-width: 1000px;
+  }
+}
+
+@media screen and (max-width: 1000px) {
+  .app-container {
+    min-width: 850px;
+  }
+}
+
+@media screen and (max-width: 760px) {
   .app-container {
     min-width: 100%;
   }
