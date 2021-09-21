@@ -7121,7 +7121,7 @@ class Store {
         .getTotalValueInPool()
         .call();
       pool = (totalValueInPool * usdtToUsdPrice) / 10 ** 20;
-    } else if(asset.strategyType === "metaverse") {
+    } else if(asset.strategyType === "metaverse" || asset.strategyType === "citadelv2") {
       pool = await vaultContract.methods.getAllPoolInUSD().call() / 10 ** 12; //default in 18 decimals, make it as 6 decimals
     } else {
       pool = await vaultContract.methods.getAllPoolInUSD().call();
@@ -7340,7 +7340,12 @@ class Store {
         );
       }
       
-      const token = (asset.strategyType === "daoFaang" || asset.strategyType === "moneyPrinter" || asset.strategyType === "metaverse") ? asset.erc20addresses[tokenIndex] : tokenIndex;
+      const token = (asset.strategyType === "daoFaang" || 
+          asset.strategyType === "moneyPrinter" || 
+          asset.strategyType === "metaverse" ||
+          asset.strategyType === "citadelv2") 
+        ? asset.erc20addresses[tokenIndex] 
+        : tokenIndex;
       const amountToSend = fromExponential(parseFloat(amount));
 
       await vaultContract.methods
@@ -8685,7 +8690,8 @@ class Store {
       asset.strategyType === "cuban" ||
       asset.strategyType === "daoFaang" ||
       asset.strategyType === "moneyPrinter" ||
-      asset.strategyType === "metaverse"
+      asset.strategyType === "metaverse" || 
+      asset.strategyType === "citadelv2"
       ? true
       : false;
   };
