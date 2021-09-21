@@ -24,6 +24,7 @@ export const UPGPRADE = 'UPGRADE';
 // Info link
 export const INFO_LINK = {
     CITADEL: "https://daoventures.gitbook.io/daoventures/products/strategies/dao-citadel-vault",
+    CITADELV2: "https://daoventures.gitbook.io/daoventures/products/strategies/dao-citadel-vault",
     FAANG: "https://daoventures.gitbook.io/daoventures/products/strategies/dao-stonks",
     ELON: "https://daoventures.gitbook.io/daoventures/products/strategies/elons-ape",
     CUBAN: "https://daoventures.gitbook.io/daoventures/products/strategies/cubans-ape",
