@@ -82,6 +82,7 @@ export const strategyMap = {
     "ETH": "eth_performance",
     "BTC": "btc_performance",
     "Citadel": "lp_performance",
+    "Citadel V2": "lp_performance",
     "Money Printer": "lp_performance",
     "Compound": "compoundApy",
 

@@ -2170,7 +2170,8 @@ class Store {
       "elon",
       "cuban",
       "moneyPrinter",
-      "metaverse"
+      "metaverse",
+      "citadelv2"
     ];
     if (!strategyTypes.includes(asset.strategyType)) {
       callback(null, {
@@ -3730,7 +3731,8 @@ class Store {
       asset.strategyType === "citadel" ||
       asset.strategyType === "elon" ||
       asset.strategyType === "cuban" ||
-      asset.strategyType === "metaverse"
+      asset.strategyType === "metaverse" ||
+      asset.strategyType === "citadelv2"
     ) {
       const vaultContract = new web3.eth.Contract(
         asset.vaultContractABI,
@@ -3744,12 +3746,12 @@ class Store {
         .call({ from: account.address });
 
       let pendingBalance = 0;
-      if(asset.strategyType === "metaverse") {
+      if(asset.strategyType === "metaverse" || asset.strategyType === "citadelv2") {
         pendingBalance = await vaultContract.methods.depositAmt(account.address).call({from: account.address});
         pendingBalance = pendingBalance / 10 ** 18;
       }
      
-      const decimals = (asset.strategyType === "metaverse")
+      const decimals = (asset.strategyType === "metaverse" || asset.strategyType === "citadelv2") 
         ? 18
         : 6;
 

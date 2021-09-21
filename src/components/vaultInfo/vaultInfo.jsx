@@ -1175,7 +1175,8 @@ class Vault extends Component {
                             asset.strategyType === "elon" ||
                             asset.strategyType === "cuban" ||
                             asset.strategyType === "moneyPrinter" ||
-                            asset.strategyType === "metaverse"
+                            asset.strategyType === "metaverse" ||
+                            asset.strategyType === "citadelv2"
                                 ? this._getPnl(asset)
                                 : this._getAPY(asset)}{" "}
                         </Typography>
@@ -1266,10 +1267,10 @@ class Vault extends Component {
                     <div>
                         {
                             (asset.depositedSharesInUSD) 
-                                ?  (asset.strategyType === "metaverse")
+                                ?  (asset.strategyType === "metaverse" || asset.strategyType === "citadelv2")
                                     ? `$${(Number(asset.depositedSharesInUSD) + Number(asset.pendingBalance)).toFixed(4)}`
                                     : `$${asset.depositedSharesInUSD.toFixed(4)}`
-                                :  (asset.strategyType === "metaverse")
+                                :  (asset.strategyType === "metaverse" || asset.strategyType === "citadelv2")
                                     ? `$${asset.pendingBalance ? (Number(asset.pendingBalance)).toFixed(4) : 0}` 
                                     : `$0`
                         }
@@ -1742,7 +1743,8 @@ class Vault extends Component {
             asset.strategyType === "daoFaang" ||
             asset.strategyType === "elon" ||
             asset.strategyType === "cuban" ||
-            asset.strategyType === "moneyPrinter")
+            asset.strategyType === "moneyPrinter" ||
+            asset.strategyType === "citadelv2")
         ) {
 
             return (asset.pnl).toFixed(2) + "%";
