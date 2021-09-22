@@ -1167,15 +1167,13 @@ class Vault extends Component {
                 <div style={{ display: "flex" }}>
                     <div>
                         <Typography variant={"h5"} className={classes.assetLabel1}>
-                            {/* {this.isUsdVault(asset) && (
-                <Typography variant={"caption"}>est.&nbsp;</Typography>
-              )} */}
                             {asset.strategyType === "citadel" ||
                             asset.strategyType === "daoFaang"  ||
                             asset.strategyType === "elon" ||
                             asset.strategyType === "cuban" ||
                             asset.strategyType === "moneyPrinter" ||
-                            asset.strategyType === "metaverse"
+                            asset.strategyType === "metaverse" ||
+                            asset.strategyType === "daoStonks"
                                 ? this._getPnl(asset)
                                 : this._getAPY(asset)}{" "}
                         </Typography>
@@ -1266,7 +1264,7 @@ class Vault extends Component {
                     <div>
                         {
                             (asset.depositedSharesInUSD) 
-                                ?  (asset.strategyType === "metaverse")
+                                ?  (asset.strategyType === "metaverse" || asset.strategyType === "daoStonks")
                                     ? `$${(Number(asset.depositedSharesInUSD) + Number(asset.pendingBalance)).toFixed(4)}`
                                     : `$${asset.depositedSharesInUSD.toFixed(4)}`
                                 :  (asset.strategyType === "metaverse")
@@ -1737,17 +1735,19 @@ class Vault extends Component {
     };
 
     _getPnl = (asset) => {
-        if ( asset.pnl && (
-            asset.strategyType === "citadel" ||
-            asset.strategyType === "daoFaang" ||
-            asset.strategyType === "elon" ||
-            asset.strategyType === "cuban" ||
-            asset.strategyType === "moneyPrinter")
-        ) {
+        // if ( asset.pnl && (
+        //     asset.strategyType === "citadel" ||
+        //     asset.strategyType === "daoFaang" ||
+        //     asset.strategyType === "elon" ||
+        //     asset.strategyType === "cuban" ||
+        //     asset.strategyType === "moneyPrinter" ||
+        //     asset.strategyType === "")
+        // ) {
 
-            return (asset.pnl).toFixed(2) + "%";
-        }
-        return '0.00 %';
+        //     return (asset.pnl).toFixed(2) + "%";
+        // }
+        // return '0.00 %';
+        return `${(asset && asset.pnl) ? (asset.pnl).toFixed(2) : 0.00 } %`;
     }
 
     calculateYearnAPY = (earnAPR, vaultAPY) => {

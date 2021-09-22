@@ -84,7 +84,7 @@ export const strategyMap = {
     "Citadel": "lp_performance",
     "Money Printer": "lp_performance",
     "Compound": "compoundApy",
-
+    "DAO Stonks": "lp_performance"
 }
 
 export const getDataByStrategy = (strategyInfo) => {
