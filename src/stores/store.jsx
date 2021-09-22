@@ -4382,6 +4382,13 @@ class Store {
           amount,
           asset.vaultContractAddress,
           tokenIndex)
+    } else if (asset.strategyType === "daoStonks") {
+      return this.checkIsCitadelApproved(
+        asset,
+        account,
+        amount,
+        asset.vaultContractAddress,
+        tokenIndex)
     }
   }
 
@@ -4583,6 +4590,42 @@ class Store {
         error: approvalErr
       }
     } else if (asset.strategyType === "metaverse") {
+      let approvalErr;
+      await this._checkApprovalCitadel(
+          asset,
+          account,
+          amount,
+          asset.vaultContractAddress,
+          tokenIndex,
+          (err, txnHash, approvalResult) => {
+            if (err) {
+              approvalErr = err;
+              emitter.emit(ERROR_WALLET_APPROVAL, err);
+              return emitter.emit(ERROR, err);
+            }
+            if (txnHash) {
+              return emitter.emit(APPROVE_TRANSACTING, txnHash);
+            }
+            if (approvalResult) {
+              emitter.emit(APPROVE_DEPOSIT_SUCCESS, approvalResult && approvalResult.transactionHash?approvalResult.transactionHash: {
+                success: true
+              });
+            }
+          }
+      );
+
+      if (!approvalErr) {
+        return {
+          success: true,
+
+        }
+      }
+
+      return {
+        success: false,
+        error: approvalErr
+      }
+    } else if (asset.strategyType === "daoStonks") {
       let approvalErr;
       await this._checkApprovalCitadel(
           asset,
@@ -4900,6 +4943,54 @@ class Store {
             }
           );
         }
+      } else if (asset.strategyType === "daoStonks") {
+        const happyHour = await this._eventVerifyAmount(amount);
+
+        if (happyHour === true) {
+          await this._callDepositAmountContractCitadelHappyHour(
+              asset,
+              account,
+              amount,
+              tokenIndex,
+              (err, txnHash, depositResult) => {
+                if (err) {
+                  emitter.emit(ERROR_DEPOSIT_WALLET, err);
+                  return emitter.emit(ERROR, err);
+                }
+                if (txnHash) {
+                  return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+                }
+                if (depositResult) {
+                  return emitter.emit(
+                      DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED,
+                      depositResult.transactionHash
+                  );
+                }
+              }
+          );
+        } else {
+          await this._callDepositAmountContractCitadel(
+            asset,
+            account,
+            amount,
+            tokenIndex,
+            (err, txnHash, depositResult) => {
+              if (err) {
+                emitter.emit(ERROR_DEPOSIT_WALLET, err);
+                return emitter.emit(ERROR, err);
+              }
+              if (txnHash) {
+                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+              }
+              if (depositResult) {
+                return emitter.emit(
+                    DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                    depositResult.transactionHash
+                );
+              }
+            }
+          );
+        }
       }
   }
 
@@ -5055,7 +5146,10 @@ class Store {
 
     // Citadel, Elon, and Cuban pass token's index for deposit, while FAANG pass token address
     const tokenToSent =
-      asset.strategyType === "daoFaang" || asset.strategyType === "moneyPrinter" || asset.strategyType === "metaverse"
+      asset.strategyType === "daoFaang" || 
+      asset.strategyType === "moneyPrinter" || 
+      asset.strategyType === "metaverse" || 
+      asset.strategyType === "daoStonks"
         ? asset.erc20addresses[tokenIndex]
         : tokenIndex;
   
@@ -5120,6 +5214,8 @@ class Store {
       vaultContract = store.getStore("happyHourContractFAANG");
     } else if (asset.strategyType === "metaverse") {
       vaultContract = store.getStore("happyHourContractMetaverse");
+    } else if (asset.strategyType === "daoStonks") {
+      vaultContract = store.getStore("happyHourContractDAOStonks")
     }
 
     const web3 = new Web3(store.getStore("web3context").library.provider);
@@ -6821,6 +6917,7 @@ class Store {
     const citadelAsset = assets.filter((el) => el.id === "daoCDV");
     const FAANGAsset = assets.filter((el) => el.id === "daoSTO");
     const metaverseAsset = assets.filter((el) => el.id === "daoMVF");
+    const daoStonksAsset = assets.filter((el) => el.id === "daoStonks");
     
     if (happyHourWeb3) {
       // Initialize Contract
@@ -6839,10 +6936,16 @@ class Store {
         metaverseAsset[0].vaultContractAddress
       );
 
+      const happyHourContractDAOStonks = new happyHourWeb3.eth.Contract(
+        daoStonksAsset[0].vaultContractABI,
+        daoStonksAsset[0].vaultContractAddress
+      );
+
       store.setStore({
         happyHourContract: happyHourContract,
         happyHourContractFAANG: happyHourContractFAANG,
-        happyHourContractMetaverse: happyHourContractMetaverse
+        happyHourContractMetaverse: happyHourContractMetaverse,
+        happyHourContractDAOStonks: happyHourContractDAOStonks
       });
     }
 
@@ -7457,7 +7560,7 @@ class Store {
       let amountRange1 = await vaultContract.methods.networkFeeTier2(0).call();
       let amountRange2 = await vaultContract.methods.networkFeeTier2(1).call();
 
-      if(asset.strategyType === "metaverse") {
+      if(asset.strategyType === "metaverse" || asset.strategyType === "daoStonks") {
         let amountRange3 = await vaultContract.methods.customNetworkFeeTier().call();
         let percentageRange4 = await vaultContract.methods.customNetworkFeePerc().call();
         
