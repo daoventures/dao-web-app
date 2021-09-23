@@ -87,7 +87,7 @@ const ethereum = [
   //   strategyInfo: "A balanced crypto portfolio enhanced with yield farming rewards.",
   //   strategyDescription: "A market weight strategy that gives an investor a balanced exposure to crypto. Portfolio components are paired up to earn yield farming rewards to boost returns. ",
   //   historicalPriceId: "daoCDV2_price",
-  //   logoFormat: "svg",
+  //   logoFormat: "png",
   //   risk: EXPERT,
   //   strategyType: "citadelv2",
   //   cTokenAddress: "",
