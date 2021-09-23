@@ -1150,7 +1150,8 @@ class Asset extends Component {
             asset.strategyType === "daoFaang" ||
             asset.strategyType === "moneyPrinter" ||
             asset.strategyType === "metaverse" || 
-            asset.strategyType === "citadelv2";
+            asset.strategyType === "citadelv2" || 
+            asset.strategyType === "daoStonks";
     };
 
     // Handle input validation message
@@ -2332,7 +2333,8 @@ class Asset extends Component {
                                     asset.strategyType === "daoFaang" ||
                                     asset.strategyType === "moneyPrinter" ||
                                     asset.strategyType === "metaverse" || 
-                                    asset.strategyType === "citadelv2") && (
+                                    asset.strategyType === "citadelv2" || 
+                                    asset.strategyType === "daoStonks") && (
                                     <div className={classes.withdrawContainer}>
                                         <div className={classes.tradeContainer}>
                                             <div className={classes.operationLabel}>
@@ -2611,6 +2613,7 @@ class Asset extends Component {
         var moneyPrinterAPY = [];
         var metaverseAPY = [];
         var citadelv2APY = [];
+        var daoStonksAPY = [];
         var labels = [];
 
         const {hideNav} = this.state;
@@ -2633,7 +2636,8 @@ class Asset extends Component {
                 asset.strategyType === "elon"  ||
                 asset.strategyType === "moneyPrinter" ||
                 asset.strategyType === "metaverse" || 
-                asset.strategyType === "citadelv2" 
+                asset.strategyType === "citadelv2" || 
+                asset.strategyType === "daoStonks"
             ) {
 
                 let data = this.state.vaultAssetHistoricalData && this.state.vaultAssetHistoricalData.data && this.state.vaultAssetHistoricalData.data.length ? this.state.vaultAssetHistoricalData.data : asset.historicalPerformance || [];
@@ -2753,6 +2757,19 @@ class Asset extends Component {
                         ]);
                     } else if (asset.strategyType === "moneyPrinter") {
                         moneyPrinterAPY.push([
+                            date,
+                            parseFloat(groups[date][0]['lp_performance'].toFixed(4)),
+                        ]);
+                        btcAPY.push([
+                            date,
+                            parseFloat((groups[date][0]["btc_performance"]).toFixed(4)),
+                        ]);
+                        ethAPY.push([
+                            date,
+                            parseFloat((groups[date][0]["eth_performance"]).toFixed(4)),
+                        ]);
+                    } else if (asset.strategyType === "daoStonks") {
+                        daoStonksAPY.push([
                             date,
                             parseFloat(groups[date][0]['lp_performance'].toFixed(4)),
                         ]);
@@ -3210,6 +3227,52 @@ class Asset extends Component {
                     enabled: false,
                 },
             };
+        } else if (asset.strategyType === "daoStonks") {
+            options = {
+                chart: {
+                    width: hideNav ? 300 : 420,
+                },
+                title: {
+                    text: "Vault Performance History",
+                },
+                xAxis: {
+                    categories: labels,
+                },
+                series: [
+                    {
+                        name: "DAO Stonks",
+                        data: daoStonksAPY,
+                        color: labelColorData[strategyMap["DAO Stonks"]]? labelColorData[strategyMap["DAO Stonks"]]: "#FFFFF"
+                    },
+                    {
+                        name: "BTC",
+                        data: btcAPY,
+                        color:  labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.BTC]: "#f7931b",
+                    },
+                    {
+                        name: "ETH",
+                        data: ethAPY,
+                        color: labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.ETH]:"#464a75",
+                    }
+                ],
+                responsive: {
+                    rules: [
+                        {
+                            condition: {
+                                maxWidth: 450,
+                                chartOptions: {
+                                    chart: {
+                                        width: 300,
+                                    },
+                                },
+                            },
+                        },
+                    ],
+                },
+                credits: {
+                    enabled: false,
+                },
+            };
         }
 
         const chartTitle = {
@@ -3221,7 +3284,8 @@ class Asset extends Component {
             daoFaang: "Vault Performance History",
             moneyPrinter: "Vault Performance History",
             metaverse: "Vault Performance History",
-            citadelv2: "Vault Performance History"
+            citadelv2: "Vault Performance History",
+            daoStonks: "Vault Performance History"
         };
 
         // 调整折线图展示
