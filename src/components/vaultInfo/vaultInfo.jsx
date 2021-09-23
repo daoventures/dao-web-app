@@ -1386,7 +1386,7 @@ class Vault extends Component {
                                                 <img
                                                     alt=""
                                                     src={require("../../assets/img_new/vaults/" +
-                                                        asset.id + '.png')}
+                                                        asset.id + '.' + asset.logoFormat)}
                                                     // height={ '50px' }
                                                     className={classes.assetIconImg}
                                                     style={
