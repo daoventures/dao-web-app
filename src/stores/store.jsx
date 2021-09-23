@@ -7707,7 +7707,7 @@ class Store {
         strategyBalance: data[1].data.strategyBalance,
         vaultBalance: data[1].data.vaultBalance,
         earnBalance: data[1].data.earnBalance,
-        depositedSharesInUSD: data[1].data.depositedSharesInUSD,
+        depositedSharesInUSD: data[1].data.depositedSharesInUSD !== undefined ? data[1].data.depositedSharesInUSD : 0,
         pendingBalance: data[1].data.pendingBalance !== undefined ? data[1].data.pendingBalance : 0,
         stats: {},
         earnApr: 0,
