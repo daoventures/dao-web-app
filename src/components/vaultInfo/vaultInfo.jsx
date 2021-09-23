@@ -1267,7 +1267,7 @@ class Vault extends Component {
                                 ?  (asset.strategyType === "metaverse" || asset.strategyType === "daoStonks")
                                     ? `$${(Number(asset.depositedSharesInUSD) + Number(asset.pendingBalance)).toFixed(4)}`
                                     : `$${asset.depositedSharesInUSD.toFixed(4)}`
-                                :  (asset.strategyType === "metaverse")
+                                :  (asset.strategyType === "metaverse" || asset.strategyType === "daoStonks")
                                     ? `$${asset.pendingBalance ? (Number(asset.pendingBalance)).toFixed(4) : 0}` 
                                     : `$0`
                         }
@@ -1735,18 +1735,6 @@ class Vault extends Component {
     };
 
     _getPnl = (asset) => {
-        // if ( asset.pnl && (
-        //     asset.strategyType === "citadel" ||
-        //     asset.strategyType === "daoFaang" ||
-        //     asset.strategyType === "elon" ||
-        //     asset.strategyType === "cuban" ||
-        //     asset.strategyType === "moneyPrinter" ||
-        //     asset.strategyType === "")
-        // ) {
-
-        //     return (asset.pnl).toFixed(2) + "%";
-        // }
-        // return '0.00 %';
         return `${(asset && asset.pnl) ? (asset.pnl).toFixed(2) : 0.00 } %`;
     }
 
