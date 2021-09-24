@@ -412,10 +412,8 @@ class Store {
             this.depositAmountContract(payload);
             break;
           case DEPOSIT_ALL_CONTRACT:
-            this.depositAllContract(payload);
             break;
           case WITHDRAW_VAULT:
-            this.withdrawVault(payload);
             break;
           case WITHDRAW_BOTH_VAULT:
             this.withdrawBothAll(payload);
@@ -1538,65 +1536,7 @@ class Store {
     }
   };
 
-  checkIsCitadelApproved = async (  asset,
-                                    account,
-                                    amount,
-                                    contract,
-                                    tokenIndex = null) => {
-
-    const web3 = new Web3(store.getStore("web3context").library.provider);
-
-    if (asset.erc20address === "Ethereum") {
-      return {
-        success: false,
-        message: "erc20address not ethereum"
-      }
-    }
-    // Handle vaults with multi tokens
-    try {
-      if (
-          tokenIndex !== null &&
-          tokenIndex > 0 &&
-          tokenIndex < asset.erc20addresses.length
-      ) {
-        asset.erc20address = asset.erc20addresses[tokenIndex];
-      } else {
-      }
-    } catch (error) {
-      if (error.message) {
-        return {
-          success: false,
-          message: error.message
-        }
-      }
-    }
-
-    const network = store.getStore("network");
-    const erc20ABI = contractHelper.getERC20AbiByNetwork(network);
-
-    let erc20Contract = new web3.eth.Contract(erc20ABI, asset.erc20address);
-
-    try {
-      const allowance = await erc20Contract.methods
-          .allowance(account.address, contract)
-          .call({from: account.address});
-
-      const ethAllowance = web3.utils.fromWei(allowance, "ether");
-      return {
-        success: true,
-        needApproval: parseFloat(ethAllowance) < parseFloat(amount)
-      }
-    } catch (error) {
-      if (error.message) {
-        console.log(error.message);
-      }
-      return {
-        success: false,
-        message: error
-      }
-    }
-
-  }
+ 
 
   checkIsCompoundApproved = async (asset,
                                    account,
@@ -4350,374 +4290,135 @@ class Store {
     }
   };
 
+  // Check allowance
   getWalletApprovedStatus = async (payload) => {
     const account = store.getStore("account");
 
-    //  Token Index USDT = 0, USDC = 1, DAI = 2
-    const {asset, earnAmount, vaultAmount, amount, tokenIndex} =
-        payload;
+    const {asset, amount, tokenIndex} = payload;
 
     const web3 = await this._getWeb3Provider();
     if (!web3) {
+      console.error(`Missing web3 in getWalletApprovedStatus()`);
       return null;
     }
 
-    const vaultContract = new web3.eth.Contract(
-        asset.vaultContractABI,
-        asset.vaultContractAddress
+    return this.checkIsCitadelApproved(
+          asset,
+          account,
+          amount,
+          asset.vaultContractAddress,
+          tokenIndex
     );
-
-    const strategyAddress = await vaultContract.methods
-        .strategy()
-        .call({from: account.address});
-
-    if (asset.strategyType === "yearn") {
-      return this.checkIsApproved( asset,
-          account,
-          earnAmount + vaultAmount,
-          strategyAddress);
-    } else if (asset.strategyType === "compound") {
-      return this.checkIsCompoundApproved(
-          asset,
-          account,
-          amount,
-          strategyAddress,
-          tokenIndex)
-    } else if (asset.strategyType === "citadel") {
-      return this.checkIsCitadelApproved(
-          asset,
-          account,
-          amount,
-          asset.vaultContractAddress,
-          tokenIndex);
-
-    } else if (asset.strategyType === "elon") {
-      return this.checkIsCitadelApproved(
-          asset,
-          account,
-          amount,
-          asset.vaultContractAddress,
-          tokenIndex)
-
-    }  else if (asset.strategyType === "cuban") {
-      return this.checkIsCitadelApproved(
-          asset,
-          account,
-          amount,
-          asset.vaultContractAddress,
-          tokenIndex)
-
-    } else if (asset.strategyType === "daoFaang") {
-      return this.checkIsCitadelApproved(
-          asset,
-          account,
-          amount,
-          asset.vaultContractAddress,
-          tokenIndex)
-
-    } else if (asset.strategyType === "moneyPrinter") {
-      return this.checkIsCitadelApproved(
-          asset,
-          account,
-          amount,
-          asset.vaultContractAddress,
-          tokenIndex)
-    } else if (asset.strategyType === "metaverse") {
-      return this.checkIsCitadelApproved(
-          asset,
-          account,
-          amount,
-          asset.vaultContractAddress,
-          tokenIndex)
-    } else if (asset.strategyType === "citadelv2") {
-      return this.checkIsCitadelApproved(
-          asset,
-          account,
-          amount,
-          asset.vaultContractAddress,
-          tokenIndex)
-    } else if (asset.strategyType === "daoStonks") {
-      return this.checkIsCitadelApproved(
-        asset,
-        account,
-        amount,
-        asset.vaultContractAddress,
-        tokenIndex)
-    }
   }
 
+  checkIsCitadelApproved = async (asset,
+    account,
+    amount,
+    contract,
+    tokenIndex = null) => {
+
+    const web3 = new Web3(store.getStore("web3context").library.provider);
+
+    if (asset.erc20address === "Ethereum") {
+      return {
+        success: false,
+        message: "erc20address not ethereum"
+      }
+    }
+    // Handle vaults with multi tokens
+    try {
+      if (
+        tokenIndex !== null &&
+        tokenIndex > 0 &&
+        tokenIndex < asset.erc20addresses.length
+      ) {
+        asset.erc20address = asset.erc20addresses[tokenIndex];
+      } else {
+      }
+    } catch (error) {
+      if (error.message) {
+        return {
+          success: false,
+          message: error.message
+        }
+      }
+    }
+
+    const network = store.getStore("network");
+    const erc20ABI = contractHelper.getERC20AbiByNetwork(network);
+
+    let erc20Contract = new web3.eth.Contract(erc20ABI, asset.erc20address);
+
+    try {
+      const allowance = await erc20Contract.methods
+        .allowance(account.address, contract)
+        .call({ from: account.address });
+
+      const ethAllowance = web3.utils.fromWei(allowance, "ether");
+
+      return {
+        success: true,
+        needApproval: parseFloat(ethAllowance) < parseFloat(amount)
+      }
+    } catch (error) {
+      if (error.message) {
+        console.log(error.message);
+      }
+      return {
+        success: false,
+        message: error
+      }
+    }
+
+  }
+
+  // Getting approval from ERC20 to spend on strategy
   approveDepositContract = async (payload) => {
     const account = store.getStore("account");
 
-    //  Token Index USDT = 0, USDC = 1, DAI = 2
-    const {asset, earnAmount, vaultAmount, amount, tokenIndex} =
-        payload.content;
+    const {asset, amount, tokenIndex} = payload.content;
 
     const web3 = await this._getWeb3Provider();
     if (!web3) {
+      console.error(`Web 3 is undefined at approveDepositContract()`);
       return null;
     }
 
-    const vaultContract = new web3.eth.Contract(
-        asset.vaultContractABI,
-        asset.vaultContractAddress
+    let approvalErr;
+    await this._checkApprovalCitadel(
+      asset,
+      account,
+      amount,
+      asset.vaultContractAddress,
+      tokenIndex,
+      (err, txnHash, approvalResult) => {
+        if (err) {
+          emitter.emit(ERROR_WALLET_APPROVAL, err);
+          return emitter.emit(ERROR, err);
+        }
+        if (txnHash) {
+          return emitter.emit(APPROVE_TRANSACTING, txnHash);
+        }
+        if (approvalResult) {
+          emitter.emit(APPROVE_DEPOSIT_SUCCESS, approvalResult && approvalResult.transactionHash ? approvalResult.transactionHash : {
+            success: true
+          });
+        }
+      }
     );
 
-    const strategyAddress = await vaultContract.methods
-        .strategy()
-        .call({from: account.address});
-
-    if (asset.strategyType === "yearn") {
-      await this._checkApproval(
-          asset,
-          account,
-          earnAmount + vaultAmount,
-          strategyAddress,
-          (err, txnHash, approvalResult) => {
-            if (err) {
-              emitter.emit(ERROR_WALLET_APPROVAL, err);
-              return emitter.emit(ERROR, err);
-            }
-            if (txnHash) {
-              return emitter.emit(APPROVE_TRANSACTING, txnHash);
-            }
-            if (approvalResult) {
-              emitter.emit(APPROVE_DEPOSIT_SUCCESS, approvalResult && approvalResult.transactionHash?approvalResult.transactionHash: {
-                success: true
-              });
-            }
-          }
-      );
-    } else if (asset.strategyType === "compound") {
-      await this._checkApproval(
-          asset,
-          account,
-          amount,
-          strategyAddress,
-          (err, txnHash, approvalResult) => {
-            if (err) {
-              emitter.emit(ERROR_WALLET_APPROVAL, err);
-              return emitter.emit(ERROR, err);
-            }
-            if (txnHash) {
-              return emitter.emit(APPROVE_TRANSACTING, txnHash);
-            }
-            if (approvalResult) {
-              emitter.emit(APPROVE_DEPOSIT_SUCCESS, approvalResult && approvalResult.transactionHash?approvalResult.transactionHash: {
-                success: true
-              });
-            }
-          }
-      );
-    } else if (asset.strategyType === "citadel") {
-      await this._checkApprovalCitadel(
-          asset,
-          account,
-          amount,
-          asset.vaultContractAddress,
-          tokenIndex,
-          (err, txnHash, approvalResult) => {
-            if (err) {
-              emitter.emit(ERROR_WALLET_APPROVAL, err);
-              return emitter.emit(ERROR, err);
-            }
-            if (txnHash) {
-              return emitter.emit(APPROVE_TRANSACTING, txnHash);
-            }
-            if (approvalResult) {
-              emitter.emit(APPROVE_DEPOSIT_SUCCESS, approvalResult && approvalResult.transactionHash?approvalResult.transactionHash: {
-                success: true
-              });
-            }
-
-          }
-      );
-
-    } else if (asset.strategyType === "elon") {
-      await this._checkApprovalCitadel(
-          asset,
-          account,
-          amount,
-          asset.vaultContractAddress,
-          tokenIndex,
-          (err, txnHash, approvalResult) => {
-            if (err) {
-              emitter.emit(ERROR_WALLET_APPROVAL, err);
-              return emitter.emit(ERROR, err);
-            }
-            if (txnHash) {
-              return emitter.emit(APPROVE_TRANSACTING, txnHash);
-            }
-            if (approvalResult) {
-              emitter.emit(APPROVE_DEPOSIT_SUCCESS, approvalResult && approvalResult.transactionHash?approvalResult.transactionHash: {
-                success: true
-              });
-            }
-
-          }
-      );
-
-    } else if (asset.strategyType === "cuban") {
-      await this._checkApprovalCitadel(
-          asset,
-          account,
-          amount,
-          asset.vaultContractAddress,
-          tokenIndex,
-          (err, txnHash, approvalResult) => {
-            if (err) {
-              emitter.emit(ERROR_WALLET_APPROVAL, err);
-              return emitter.emit(ERROR, err);
-            }
-            if (txnHash) {
-              return emitter.emit(APPROVE_TRANSACTING, txnHash);
-            }
-            if (approvalResult) {
-              emitter.emit(APPROVE_DEPOSIT_SUCCESS, approvalResult && approvalResult.transactionHash?approvalResult.transactionHash: {
-                success: true
-              });
-            }
-          }
-      );
-
-    } else if (asset.strategyType === "daoFaang") {
-      let approvalErr; // To prevent execution on deposit contract, after user denied for _checkApprovalCitadel()
-      await this._checkApprovalCitadel(
-          asset,
-          account,
-          amount,
-          asset.vaultContractAddress,
-          tokenIndex,
-          (err, txnHash, approvalResult) => {
-            if (err) {
-              approvalErr = err;
-              emitter.emit(ERROR_WALLET_APPROVAL, err);
-              return emitter.emit(ERROR, err);
-            }
-            if (txnHash) {
-              return emitter.emit(APPROVE_TRANSACTING, txnHash);
-            }
-            if (approvalResult) {
-              emitter.emit(APPROVE_DEPOSIT_SUCCESS, approvalResult && approvalResult.transactionHash?approvalResult.transactionHash: {
-                success: true
-              });
-            }
-          }
-      );
-
-      if (!approvalErr) {
-      }
-    } else if (asset.strategyType === "moneyPrinter") {
-      let approvalErr;
-      await this._checkApprovalCitadel(
-          asset,
-          account,
-          amount,
-          asset.vaultContractAddress,
-          tokenIndex,
-          (err, txnHash, approvalResult) => {
-            if (err) {
-              approvalErr = err;
-              emitter.emit(ERROR_WALLET_APPROVAL, err);
-              return emitter.emit(ERROR, err);
-            }
-            if (txnHash) {
-              return emitter.emit(APPROVE_TRANSACTING, txnHash);
-            }
-            if (approvalResult) {
-              emitter.emit(APPROVE_DEPOSIT_SUCCESS, approvalResult && approvalResult.transactionHash?approvalResult.transactionHash: {
-                success: true
-              });
-            }
-          }
-      );
-
-      if (!approvalErr) {
-        return {
-          success: true,
-
-        }
-      }
-
+    if (!approvalErr) {
       return {
-        success: false,
-        error: approvalErr
+        success: true,
       }
-    } else if (asset.strategyType === "metaverse") {
-      let approvalErr;
-      await this._checkApprovalCitadel(
-          asset,
-          account,
-          amount,
-          asset.vaultContractAddress,
-          tokenIndex,
-          (err, txnHash, approvalResult) => {
-            if (err) {
-              approvalErr = err;
-              emitter.emit(ERROR_WALLET_APPROVAL, err);
-              return emitter.emit(ERROR, err);
-            }
-            if (txnHash) {
-              return emitter.emit(APPROVE_TRANSACTING, txnHash);
-            }
-            if (approvalResult) {
-              emitter.emit(APPROVE_DEPOSIT_SUCCESS, approvalResult && approvalResult.transactionHash?approvalResult.transactionHash: {
-                success: true
-              });
-            }
-          }
-      );
-
-      if (!approvalErr) {
-        return {
-          success: true,
-
-        }
-      }
-
-      return {
-        success: false,
-        error: approvalErr
-      }
-    } else if (asset.strategyType === "citadelv2" || asset.strategyType === "daoStonks") {
-      let approvalErr;
-      await this._checkApprovalCitadel(
-          asset,
-          account,
-          amount,
-          asset.vaultContractAddress,
-          tokenIndex,
-          (err, txnHash, approvalResult) => {
-            if (err) {
-              approvalErr = err;
-              emitter.emit(ERROR_WALLET_APPROVAL, err);
-              return emitter.emit(ERROR, err);
-            }
-            if (txnHash) {
-              return emitter.emit(APPROVE_TRANSACTING, txnHash);
-            }
-            if (approvalResult) {
-              emitter.emit(APPROVE_DEPOSIT_SUCCESS, approvalResult && approvalResult.transactionHash?approvalResult.transactionHash: {
-                success: true
-              });
-            }
-          }
-      );
-
-      if (!approvalErr) {
-        return {
-          success: true,
-
-        }
-      }
-
-      return {
-        success: false,
-        error: approvalErr
-      }
+    }
+    return {
+      success: false,
+      error: approvalErr
     }
   }
 
+  // Deposit into Strategy
   depositAmountContract = async (payload) => {
       const account = store.getStore("account");
 
@@ -4735,56 +4436,16 @@ class Store {
           asset.vaultContractAddress
       );
 
-      if (asset.strategyType === "yearn") {
+      const happyHourStrategy = [
+        "citadel",
+        "citadelv2",
+        "daoFaang",
+        "daoStonks",
+        "metaverse"
+      ];
 
-        await this._callDepositContract(
-            asset,
-            account,
-            earnAmount,
-            vaultAmount,
-            (err, txnHash, depositResult) => {
-              if (err) {
-                emitter.emit(ERROR_DEPOSIT_WALLET, err);
-                return emitter.emit(ERROR, err);
-              }
-              if (txnHash) {
-                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-              }
-              if (depositResult) {
-                return emitter.emit(
-                    DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                    depositResult.transactionHash
-                );
-              }
-            }
-        );
-      } else if (asset.strategyType === "compound") {
-
-        await this._callDepositAmountContract(
-            asset,
-            account,
-            amount,
-            (err, txnHash, depositResult) => {
-              if (err) {
-                emitter.emit(ERROR_DEPOSIT_WALLET, err);
-                return emitter.emit(ERROR, err);
-              }
-              if (txnHash) {
-                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-              }
-              if (depositResult) {
-                return emitter.emit(
-                    DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                    depositResult.transactionHash
-                );
-              }
-            }
-        );
-      } else if (asset.strategyType === "citadel") {
-
-
-        const happyHour = await this._eventVerifyAmount(amount);
-        // const happyHour = true;
+      if(happyHourStrategy.includes(asset.strategyType)) {
+        const happyHour = await this._eventVerifyAmount(amount); 
 
         if (happyHour === true) {
           await this._callDepositAmountContractCitadelHappyHour(
@@ -4808,349 +4469,31 @@ class Store {
                 }
               }
           );
-        } else {
-          await this._callDepositAmountContractCitadel(
-              asset,
-              account,
-              amount,
-              tokenIndex,
-              (err, txnHash, depositResult) => {
-                if (err) {
-                  emitter.emit(ERROR_DEPOSIT_WALLET, err);
-                  return emitter.emit(ERROR, err);
-                }
-                if (txnHash) {
-                  return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-                }
-                if (depositResult) {
-                  return emitter.emit(
-                      DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                      depositResult.transactionHash
-                  );
-                }
-              }
-          );
         }
-      } else if (asset.strategyType === "elon") {
+      }
 
-        await this._callDepositAmountContractCitadel(
-            asset,
-            account,
-            amount,
-            tokenIndex,
-            (err, txnHash, depositResult) => {
-              if (err) {
-                emitter.emit(ERROR_DEPOSIT_WALLET, err);
-                return emitter.emit(ERROR, err);
-              }
-              if (txnHash) {
-                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-              }
-              if (depositResult) {
-                return emitter.emit(
-                    DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                    depositResult.transactionHash
-                );
-              }
-            }
-        );
-      } else if (asset.strategyType === "cuban") {
-
-
-        await this._callDepositAmountContractCitadel(
-            asset,
-            account,
-            amount,
-            tokenIndex,
-            (err, txnHash, depositResult) => {
-              if (err) {
-                emitter.emit(ERROR_DEPOSIT_WALLET, err);
-                return emitter.emit(ERROR, err);
-              }
-              if (txnHash) {
-                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-              }
-              if (depositResult) {
-                return emitter.emit(
-                    DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                    depositResult.transactionHash
-                );
-              }
-            }
-        );
-      } else if (asset.strategyType === "daoFaang") {
-          const happyHour = await this._eventVerifyAmount(amount);
-          // const happyHour = true;
-
-          if (happyHour === true) {
-            await this._callDepositAmountContractCitadelHappyHour(
-                asset,
-                account,
-                amount,
-                tokenIndex,
-                (err, txnHash, depositResult) => {
-                  if (err) {
-                    emitter.emit(ERROR_DEPOSIT_WALLET, err);
-                    return emitter.emit(ERROR, err);
-                  }
-                  if (txnHash) {
-                    return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-                  }
-                  if (depositResult) {
-                    return emitter.emit(
-                        DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED,
-                        depositResult.transactionHash
-                    );
-                  }
-                }
-            );
-          } else {
-            await this._callDepositAmountContractCitadel(
-                asset,
-                account,
-                amount,
-                tokenIndex,
-                (err, txnHash, depositResult) => {
-                  if (err) {
-                    emitter.emit(ERROR_DEPOSIT_WALLET, err);
-                    return emitter.emit(ERROR, err);
-                  }
-                  if (txnHash) {
-                    return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-                  }
-                  if (depositResult) {
-                    return emitter.emit(
-                        DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                        depositResult.transactionHash
-                    );
-                  }
-                }
+      await this._callDepositAmountContractCitadel(
+        asset,
+        account,
+        amount,
+        tokenIndex,
+        (err, txnHash, depositResult) => {
+          if (err) {
+            emitter.emit(ERROR_DEPOSIT_WALLET, err);
+            return emitter.emit(ERROR, err);
+          }
+          if (txnHash) {
+            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+          }
+          if (depositResult) {
+            return emitter.emit(
+                DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                depositResult.transactionHash
             );
           }
-      } else if (asset.strategyType === "moneyPrinter") {
-          await this._callDepositAmountContractCitadel(
-              asset,
-              account,
-              amount,
-              tokenIndex,
-              (err, txnHash, depositResult) => {
-                if (err) {
-                  emitter.emit(ERROR_DEPOSIT_WALLET, err);
-                  return emitter.emit(ERROR, err);
-                }
-                if (txnHash) {
-                  return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-                }
-                if (depositResult) {
-                  return emitter.emit(
-                      DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                      depositResult.transactionHash
-                  );
-                }
-              }
-          );
-      } else if (asset.strategyType === "metaverse") {
-        const happyHour = await this._eventVerifyAmount(amount);
-
-        if (happyHour === true) {
-          await this._callDepositAmountContractCitadelHappyHour(
-              asset,
-              account,
-              amount,
-              tokenIndex,
-              (err, txnHash, depositResult) => {
-                if (err) {
-                  emitter.emit(ERROR_DEPOSIT_WALLET, err);
-                  return emitter.emit(ERROR, err);
-                }
-                if (txnHash) {
-                  return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-                }
-                if (depositResult) {
-                  return emitter.emit(
-                      DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED,
-                      depositResult.transactionHash
-                  );
-                }
-              }
-          );
-        } else {
-          await this._callDepositAmountContractCitadel(
-            asset,
-            account,
-            amount,
-            tokenIndex,
-            (err, txnHash, depositResult) => {
-              if (err) {
-                emitter.emit(ERROR_DEPOSIT_WALLET, err);
-                return emitter.emit(ERROR, err);
-              }
-              if (txnHash) {
-                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-              }
-              if (depositResult) {
-                return emitter.emit(
-                    DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                    depositResult.transactionHash
-                );
-              }
-            }
-          );
         }
-      } else if (asset.strategyType === "citadelv2" || asset.strategyType === "daoStonks") {
-        const happyHour = await this._eventVerifyAmount(amount);
-
-        if (happyHour === true) {
-          await this._callDepositAmountContractCitadelHappyHour(
-              asset,
-              account,
-              amount,
-              tokenIndex,
-              (err, txnHash, depositResult) => {
-                if (err) {
-                  emitter.emit(ERROR_DEPOSIT_WALLET, err);
-                  return emitter.emit(ERROR, err);
-                }
-                if (txnHash) {
-                  return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-                }
-                if (depositResult) {
-                  return emitter.emit(
-                      DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED,
-                      depositResult.transactionHash
-                  );
-                }
-              }
-          );
-        } else {
-          await this._callDepositAmountContractCitadel(
-            asset,
-            account,
-            amount,
-            tokenIndex,
-            (err, txnHash, depositResult) => {
-              if (err) {
-                emitter.emit(ERROR_DEPOSIT_WALLET, err);
-                return emitter.emit(ERROR, err);
-              }
-              if (txnHash) {
-                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-              }
-              if (depositResult) {
-                return emitter.emit(
-                    DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                    depositResult.transactionHash
-                );
-              }
-            }
-          );
-        }
-      }
+    );
   }
-
-  _checkIfApprovalIsNeeded = async (
-    asset,
-    account,
-    amount,
-    contract,
-    callback
-  ) => {
-    const web3 = new Web3(store.getStore("web3context").library.provider);
-    let erc20Contract = new web3.eth.Contract(
-      config.erc20ABI,
-      asset.erc20address
-    );
-    const allowance = await erc20Contract.methods
-      .allowance(account.address, contract)
-      .call({ from: account.address });
-
-    const ethAllowance = web3.utils.fromWei(allowance, "ether");
-    if (parseFloat(ethAllowance) < parseFloat(amount)) {
-      asset.amount = amount;
-      callback(null, asset);
-    } else {
-      callback(null, false);
-    }
-  };
-
-  _callApproval = async (asset, account, amount, contract, last, callback) => {
-    const web3 = new Web3(store.getStore("web3context").library.provider);
-    let erc20Contract = new web3.eth.Contract(
-      config.erc20ABI,
-      asset.erc20address
-    );
-    try {
-      if (
-        [
-          "crvV1",
-          "crvV2",
-          "crvV3",
-          "crvV4",
-          "USDTv1",
-          "USDTv2",
-          "USDTv3",
-          "USDT",
-        ].includes(asset.id)
-      ) {
-        const allowance = await erc20Contract.methods
-          .allowance(account.address, contract)
-          .call({ from: account.address });
-        const ethAllowance = web3.utils.fromWei(allowance, "ether");
-        if (ethAllowance > 0) {
-          erc20Contract.methods
-            .approve(contract, web3.utils.toWei("0", "ether"))
-            .send({
-              from: account.address,
-              gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-            })
-            .on("transactionHash", function (hash) {
-              //success...
-            })
-            .on("error", function (error) {
-              if (!error.toString().includes("-32601")) {
-                if (error.message) {
-                  return callback(error.message);
-                }
-                callback(error);
-              }
-            });
-        }
-      }
-
-      if (last) {
-        await erc20Contract.methods
-          .approve(contract, web3.utils.toWei(amount, "ether"))
-          .send({
-            from: account.address,
-            gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-          });
-        callback();
-      } else {
-        erc20Contract.methods
-          .approve(contract, web3.utils.toWei(amount, "ether"))
-          .send({
-            from: account.address,
-            gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-          })
-          .on("transactionHash", function (hash) {
-            callback();
-          })
-          .on("error", function (error) {
-            if (!error.toString().includes("-32601")) {
-              if (error.message) {
-                return callback(error.message);
-              }
-              callback(error);
-            }
-          });
-      }
-    } catch (error) {
-      if (error.message) {
-        return callback(error.message);
-      }
-      callback(error);
-    }
-  };
 
   // For Citadel
   _callDepositAmountContractCitadel = async (
@@ -5193,21 +4536,19 @@ class Store {
 
     let decimals = await erc20Contract.methods.decimals().call();
 
-    var amountToSend =
-      decimals !== "18"
+    var amountToSend = decimals !== "18"
         ? web3.utils.toBN(Math.floor(amount * 10 ** decimals)).toString()
         : web3.utils.toWei(amount, "ether");
 
-    // Citadel, Elon, and Cuban pass token's index for deposit, while FAANG pass token address
-    const tokenToSent =
-      asset.strategyType === "daoFaang" || 
-      asset.strategyType === "moneyPrinter" || 
-      asset.strategyType === "metaverse" || 
-      asset.strategyType === "citadelv2" ||
-      asset.strategyType === "daoStonks"
-        ? asset.erc20addresses[tokenIndex]
-        : tokenIndex;
-  
+    const strategyWhichUseTokenIndex = [
+      "citadel",
+      "elon",
+      "cuban"
+    ];
+    const tokenToSent = strategyWhichUseTokenIndex.includes(asset.strategyType)
+      ? tokenIndex
+      : asset.erc20addresses[tokenIndex];
+
     vaultContract.methods
       .deposit(amountToSend, tokenToSent)
       .send({
@@ -5289,11 +4630,15 @@ class Store {
         ? web3.utils.toBN(amount * 10 ** decimals).toString()
         : web3.utils.toWei(amount, "ether");
 
-    // Citadel, Elon, and Cuban pass token's index for deposit, while FAANG pass token address
-    const tokenToSent =
-      asset.strategyType === "daoFaang" || asset.strategyType === "metaverse" || asset.strategyType === "citadelv2"
-        ? asset.erc20addresses[tokenIndex]
-        : tokenIndex;
+    const strategyWhichUseTokenIndex = [
+      "citadel",
+      "elon",
+      "cuban"
+    ];
+
+    const tokenToSent = strategyWhichUseTokenIndex.includes(asset.strategyType) 
+      ? tokenIndex
+      : asset.erc20addresses[tokenIndex];
 
     let tx = vaultContract.methods.deposit(amountToSend, tokenToSent).send({
       from: account.address,
@@ -5444,350 +4789,6 @@ class Store {
       });
   };
 
-  depositAllContract = async (payload) => {
-    const account = store.getStore("account");
-    const { asset, earnAmount, vaultAmount, amount, tokenIndex } =
-      payload.content;
-
-    const web3 = await this._getWeb3Provider();
-    if (!web3) {
-      return null;
-    }
-
-    const vaultContract = new web3.eth.Contract(
-      asset.vaultContractABI,
-      asset.vaultContractAddress
-    );
-
-    if (asset.strategyType === "yearn") {
-      await this._checkApproval(
-        asset,
-        account,
-        amount,
-        asset.vaultContractAddress,
-        (err, txnHash, approvalResult) => {
-          if (err) {
-            return emitter.emit(ERROR, err);
-          }
-          if (txnHash) {
-            return emitter.emit(APPROVE_TRANSACTING, txnHash);
-          }
-          if (approvalResult) {
-            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
-          }
-        }
-      );
-
-      await this._callDepositContract(
-        asset,
-        account,
-        earnAmount,
-        vaultAmount,
-        (err, txnHash, depositResult) => {
-          if (err) {
-            return emitter.emit(ERROR, err);
-          }
-          if (txnHash) {
-            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-          }
-          if (depositResult) {
-            return emitter.emit(
-              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-              depositResult.transactionHash
-            );
-          }
-        }
-      );
-    } else if (asset.strategyType === "compound") {
-      await this._checkApproval(
-        asset,
-        account,
-        amount,
-        asset.vaultContractAddress,
-        (err, txnHash, approvalResult) => {
-          if (err) {
-            return emitter.emit(ERROR, err);
-          }
-          if (txnHash) {
-            return emitter.emit(APPROVE_TRANSACTING, txnHash);
-          }
-          if (approvalResult) {
-            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
-          }
-        }
-      );
-
-      await this._callDepositAmountContract(
-        asset,
-        account,
-        amount,
-        (err, txnHash, depositResult) => {
-          if (err) {
-            return emitter.emit(ERROR, err);
-          }
-          if (txnHash) {
-            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-          }
-          if (depositResult) {
-            return emitter.emit(
-              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-              depositResult.transactionHash
-            );
-          }
-        }
-      );
-    } else if (asset.strategyType === "citadel") {
-      await this._checkApprovalCitadel(
-        asset,
-        account,
-        amount,
-        asset.vaultContractAddress,
-        tokenIndex,
-        (err, txnHash, approvalResult) => {
-          if (err) {
-            return emitter.emit(ERROR, err);
-          }
-          if (txnHash) {
-            return emitter.emit(APPROVE_TRANSACTING, txnHash);
-          }
-          if (approvalResult) {
-            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
-          }
-        }
-      );
-      const happyHour = await this._eventVerifyAmount(amount);
-
-      // TODO: Call backend api for happy hour condition
-      if (happyHour === true) {
-        console.log("HappyHour");
-        await this._callDepositAmountContractCitadelHappyHour(
-          asset,
-          account,
-          amount,
-          tokenIndex,
-          (err, txnHash, depositResult) => {
-            if (err) {
-              return emitter.emit(ERROR, err);
-            }
-            if (txnHash) {
-              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-            }
-            if (depositResult) {
-              return emitter.emit(
-                DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                depositResult.transactionHash
-              );
-            }
-          }
-        );
-      } else {
-        await this._callDepositAmountContractCitadel(
-          asset,
-          account,
-          amount,
-          tokenIndex,
-          (err, txnHash, depositResult) => {
-            if (err) {
-              return emitter.emit(ERROR, err);
-            }
-            if (txnHash) {
-              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-            }
-            if (depositResult) {
-              return emitter.emit(
-                DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                depositResult.transactionHash
-              );
-            }
-          }
-        );
-      }
-    } else if (asset.strategyType === "elon") {
-      await this._checkApprovalCitadel(
-        asset,
-        account,
-        amount,
-        asset.vaultContractAddress,
-        tokenIndex,
-        (err, txnHash, approvalResult) => {
-          if (err) {
-            return emitter.emit(ERROR, err);
-          }
-          if (txnHash) {
-            return emitter.emit(APPROVE_TRANSACTING, txnHash);
-          }
-          if (approvalResult) {
-            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
-          }
-        }
-      );
-
-      await this._callDepositAmountContractCitadel(
-        asset,
-        account,
-        amount,
-        tokenIndex,
-        (err, txnHash, depositResult) => {
-          if (err) {
-            return emitter.emit(ERROR, err);
-          }
-          if (txnHash) {
-            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-          }
-          if (depositResult) {
-            return emitter.emit(
-              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-              depositResult.transactionHash
-            );
-          }
-        }
-      );
-    } else if (asset.strategyType === "cuban") {
-      await this._checkApprovalCitadel(
-        asset,
-        account,
-        amount,
-        asset.vaultContractAddress,
-        tokenIndex,
-        (err, txnHash, approvalResult) => {
-          if (err) {
-            return emitter.emit(ERROR, err);
-          }
-          if (txnHash) {
-            return emitter.emit(APPROVE_TRANSACTING, txnHash);
-          }
-          if (approvalResult) {
-            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
-          }
-        }
-      );
-
-      await this._callDepositAmountContractCitadel(
-        asset,
-        account,
-        amount,
-        tokenIndex,
-        (err, txnHash, depositResult) => {
-          if (err) {
-            return emitter.emit(ERROR, err);
-          }
-          if (txnHash) {
-            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-          }
-          if (depositResult) {
-            return emitter.emit(
-              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-              depositResult.transactionHash
-            );
-          }
-        }
-      );
-    } else if (asset.strategyType === "daoFaang") {
-      let approvalErr;
-      await this._checkApprovalCitadel(
-        asset,
-        account,
-        amount,
-        asset.vaultContractAddress,
-        tokenIndex,
-        (err, txnHash, approvalResult) => {
-          if (err) {
-            approvalErr = err;
-            return emitter.emit(ERROR, err);
-          }
-          if (txnHash) {
-            return emitter.emit(APPROVE_TRANSACTING, txnHash);
-          }
-          if (approvalResult) {
-            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
-          }
-        }
-      );
-
-      if (!approvalErr) {
-        await this._callDepositAmountContractCitadel(
-          asset,
-          account,
-          amount,
-          tokenIndex,
-          (err, txnHash, depositResult) => {
-            if (err) {
-              return emitter.emit(ERROR, err);
-            }
-            if (txnHash) {
-              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-            }
-            if (depositResult) {
-              return emitter.emit(
-                DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                depositResult.transactionHash
-              );
-            }
-          }
-        );
-      }
-    }
-  };
-
-  withdrawVault = (payload) => {
-    const account = store.getStore("account");
-    const { asset, amount, tokenIndex } = payload.content;
-
-    if (asset.yVaultCheckAddress) {
-      this._checkApprovalForProxy(
-        asset,
-        account,
-        amount,
-        asset.yVaultCheckAddress,
-        (err) => {
-          if (err) {
-            return emitter.emit(ERROR, err);
-          }
-
-          this._callWithdrawVaultProxy(
-            asset,
-            account,
-            amount,
-            (err, txnHash, withdrawalResult) => {
-              if (err) {
-                return emitter.emit(ERROR, err);
-              }
-              if (txnHash) {
-                return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
-              }
-              if (withdrawalResult) {
-                return emitter.emit(
-                  WITHDRAW_VAULT_RETURNED_COMPLETED,
-                  withdrawalResult.transactionHash
-                );
-              }
-            }
-          );
-        }
-      );
-    } else {
-      this._callWithdrawVault(
-        asset,
-        account,
-        amount,
-        tokenIndex,
-        (err, txnHash, withdrawalResult) => {
-          if (err) {
-            return emitter.emit(ERROR, err);
-          }
-          if (txnHash) {
-            return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
-          }
-          if (withdrawalResult) {
-            return emitter.emit(
-              WITHDRAW_VAULT_RETURNED_COMPLETED,
-              withdrawalResult.transactionHash
-            );
-          }
-        }
-      );
-    }
-  };
 
   _callWithdrawVaultProxy = async (
     asset,
