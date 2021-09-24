@@ -72,6 +72,7 @@ import {
   REDEEM_RETURNED,
   STATISTICS_RETURNED,
   STRATEGY_BALANCES_FULL_RETURNED,
+  STRATEGIES_USE_TOKEN_INDEX,
   SWAP,
   SWAP_RETURNED,
   TOGGLE_DRAWER,
@@ -403,7 +404,7 @@ class Store {
             this.getVaultBalancesFull(payload);
             break;
           case DEPOSIT_CONTRACT:
-            this.depositContract(payload);
+            // this.depositContract(payload);
             break;
           case APPROVE_DEPOSIT_CONTRACT:
             this.approveDepositContract(payload);
@@ -416,7 +417,7 @@ class Store {
           case WITHDRAW_VAULT:
             break;
           case WITHDRAW_BOTH_VAULT:
-            this.withdrawBothAll(payload);
+            // this.withdrawBothAll(payload);
             break;
           case GET_DASHBOARD_SNAPSHOT:
             this.getDashboardSnapshot(payload);
@@ -3831,464 +3832,7 @@ class Store {
     }
   };
 
-  depositContract = async (payload) => {
-    const account = store.getStore("account");
-
-    //  Token Index USDT = 0, USDC = 1, DAI = 2
-    const { asset, earnAmount, vaultAmount, amount, tokenIndex } =
-      payload.content;
-
-    const web3 = await this._getWeb3Provider();
-    if (!web3) {
-      return null;
-    }
-
-    const vaultContract = new web3.eth.Contract(
-      asset.vaultContractABI,
-      asset.vaultContractAddress
-    );
-
-    const strategyAddress = await vaultContract.methods
-      .strategy()
-      .call({ from: account.address });
-
-    if (asset.strategyType === "yearn") {
-      await this._checkApproval(
-        asset,
-        account,
-        earnAmount + vaultAmount,
-        strategyAddress,
-        (err, txnHash, approvalResult) => {
-          if (err) {
-            emitter.emit(ERROR_WALLET_APPROVAL, err);
-            return emitter.emit(ERROR, err);
-          }
-          if (txnHash) {
-            return emitter.emit(APPROVE_TRANSACTING, txnHash);
-          }
-          if (approvalResult) {
-            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
-          }
-        }
-      );
-      await this._callDepositContract(
-        asset,
-        account,
-        earnAmount,
-        vaultAmount,
-        (err, txnHash, depositResult) => {
-          if (err) {
-            return emitter.emit(ERROR, err);
-          }
-          if (txnHash) {
-            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-          }
-          if (depositResult) {
-            return emitter.emit(
-              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-              depositResult.transactionHash
-            );
-          }
-        }
-      );
-    } else if (asset.strategyType === "compound") {
-      await this._checkApproval(
-        asset,
-        account,
-        amount,
-        strategyAddress,
-        (err, txnHash, approvalResult) => {
-          if (err) {
-            return emitter.emit(ERROR, err);
-          }
-          if (txnHash) {
-            return emitter.emit(APPROVE_TRANSACTING, txnHash);
-          }
-          if (approvalResult) {
-            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
-          }
-        }
-      );
-      await this._callDepositAmountContract(
-        asset,
-        account,
-        amount,
-        (err, txnHash, depositResult) => {
-          if (err) {
-            return emitter.emit(ERROR, err);
-          }
-          if (txnHash) {
-            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-          }
-          if (depositResult) {
-            return emitter.emit(
-              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-              depositResult.transactionHash
-            );
-          }
-        }
-      );
-    } else if (asset.strategyType === "citadel") {
-      await this._checkApprovalCitadel(
-        asset,
-        account,
-        amount,
-        asset.vaultContractAddress,
-        tokenIndex,
-        (err, txnHash, approvalResult) => {
-          if (err) {
-            return emitter.emit(ERROR, err);
-          }
-          if (txnHash) {
-            return emitter.emit(APPROVE_TRANSACTING, txnHash);
-          }
-          if (approvalResult) {
-            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
-          }
-        }
-      );
-
-      const happyHour = await this._eventVerifyAmount(amount);
-      // const happyHour = true;
-
-      if (happyHour === true) {
-        await this._callDepositAmountContractHappyHour(
-          asset,
-          account,
-          amount,
-          tokenIndex,
-          (err, txnHash, depositResult) => {
-            if (err) {
-              return emitter.emit(ERROR, err);
-            }
-            if (txnHash) {
-              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-            }
-            if (depositResult) {
-              return emitter.emit(
-                DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED,
-                depositResult.transactionHash
-              );
-            }
-          }
-        );
-      } else {
-        await this._callDepositAmountContract(
-          asset,
-          account,
-          amount,
-          tokenIndex,
-          (err, txnHash, depositResult) => {
-            if (err) {
-              return emitter.emit(ERROR, err);
-            }
-            if (txnHash) {
-              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-            }
-            if (depositResult) {
-              return emitter.emit(
-                DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                depositResult.transactionHash
-              );
-            }
-          }
-        );
-      }
-    } else if (asset.strategyType === "elon") {
-      await this._checkApprovalCitadel(
-        asset,
-        account,
-        amount,
-        asset.vaultContractAddress,
-        tokenIndex,
-        (err, txnHash, approvalResult) => {
-          if (err) {
-            return emitter.emit(ERROR, err);
-          }
-          if (txnHash) {
-            return emitter.emit(APPROVE_TRANSACTING, txnHash);
-          }
-          if (approvalResult) {
-            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
-          }
-        }
-      );
-
-      await this._callDepositAmountContract(
-        asset,
-        account,
-        amount,
-        tokenIndex,
-        (err, txnHash, depositResult) => {
-          if (err) {
-            return emitter.emit(ERROR, err);
-          }
-          if (txnHash) {
-            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-          }
-          if (depositResult) {
-            return emitter.emit(
-              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-              depositResult.transactionHash
-            );
-          }
-        }
-      );
-    } else if (asset.strategyType === "cuban") {
-      await this._checkApprovalCitadel(
-        asset,
-        account,
-        amount,
-        asset.vaultContractAddress,
-        tokenIndex,
-        (err, txnHash, approvalResult) => {
-          if (err) {
-            emitter.emit(ERROR_WALLET_APPROVAL, err);
-            return emitter.emit(ERROR, err);
-          }
-          if (txnHash) {
-            return emitter.emit(APPROVE_TRANSACTING, txnHash);
-          }
-          if (approvalResult) {
-            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
-          }
-        }
-      );
-
-      await this._callDepositAmountContract(
-        asset,
-        account,
-        amount,
-        tokenIndex,
-        (err, txnHash, depositResult) => {
-          if (err) {
-            emitter.emit(ERROR_WALLET_APPROVAL, err);
-            return emitter.emit(ERROR, err);
-          }
-          if (txnHash) {
-            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-          }
-          if (depositResult) {
-            return emitter.emit(
-              DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-              depositResult.transactionHash
-            );
-          }
-        }
-      );
-    } else if (asset.strategyType === "daoFaang") {
-      let approvalErr; // To prevent execution on deposit contract, after user denied for _checkApprovalCitadel()
-      await this._checkApprovalCitadel(
-        asset,
-        account,
-        amount,
-        asset.vaultContractAddress,
-        tokenIndex,
-        (err, txnHash, approvalResult) => {
-          if (err) {
-            approvalErr = err;
-            emitter.emit(ERROR_WALLET_APPROVAL, err);
-            return emitter.emit(ERROR, err);
-          }
-          if (txnHash) {
-            return emitter.emit(APPROVE_TRANSACTING, txnHash);
-          }
-          if (approvalResult) {
-            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
-          }
-        }
-      );
-
-      if (!approvalErr) {
-        const happyHour = await this._eventVerifyAmount(amount);
-        // const happyHour = true;
-
-        if (happyHour === true) {
-          await this._callDepositAmountContractHappyHour(
-            asset,
-            account,
-            amount,
-            tokenIndex,
-            (err, txnHash, depositResult) => {
-              if (err) {
-                emitter.emit(ERROR_WALLET_APPROVAL, err);
-                return emitter.emit(ERROR, err);
-              }
-              if (txnHash) {
-                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-              }
-              if (depositResult) {
-                return emitter.emit(
-                  DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED,
-                  depositResult.transactionHash
-                );
-              }
-            }
-          );
-        } else {
-          await this._callDepositAmountContract(
-            asset,
-            account,
-            amount,
-            tokenIndex,
-            (err, txnHash, depositResult) => {
-              if (err) {
-                emitter.emit(ERROR_WALLET_APPROVAL, err);
-                return emitter.emit(ERROR, err);
-              }
-              if (txnHash) {
-                return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-              }
-              if (depositResult) {
-                return emitter.emit(
-                  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                  depositResult.transactionHash
-                );
-              }
-            }
-          );
-        }
-      }
-    } else if (asset.strategyType === "moneyPrinter") {
-      let approvalErr;
-      await this._checkApprovalCitadel(
-        asset,
-        account,
-        amount,
-        asset.vaultContractAddress,
-        tokenIndex,
-        (err, txnHash, approvalResult) => {
-          if (err) {
-            approvalErr = err;
-            emitter.emit(ERROR_WALLET_APPROVAL, err);
-            return emitter.emit(ERROR, err);
-          }
-          if (txnHash) {
-            return emitter.emit(APPROVE_TRANSACTING, txnHash);
-          }
-          if (approvalResult) {
-            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
-          }
-        }
-      );
-
-      if (!approvalErr) {
-        await this._callDepositAmountContract(
-          asset,
-          account,
-          amount,
-          tokenIndex,
-          (err, txnHash, depositResult) => {
-            if (err) {
-              emitter.emit(ERROR_WALLET_APPROVAL, err);
-              return emitter.emit(ERROR, err);
-            }
-            if (txnHash) {
-              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-            }
-            if (depositResult) {
-              return emitter.emit(
-                DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                depositResult.transactionHash
-              );
-            }
-          }
-        );
-      }
-    } else if (asset.strategyType === "metaverse") {
-      let approvalErr;
-      await this._checkApprovalCitadel(
-        asset,
-        account,
-        amount,
-        asset.vaultContractAddress,
-        tokenIndex,
-        (err, txnHash, approvalResult) => {
-          if (err) {
-            approvalErr = err;
-            emitter.emit(ERROR_WALLET_APPROVAL, err);
-            return emitter.emit(ERROR, err);
-          }
-          if (txnHash) {
-            return emitter.emit(APPROVE_TRANSACTING, txnHash);
-          }
-          if (approvalResult) {
-            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
-          }
-        }
-      );
-
-      if (!approvalErr) {
-        await this._callDepositAmountContract(
-          asset,
-          account,
-          amount,
-          tokenIndex,
-          (err, txnHash, depositResult) => {
-            if (err) {
-              emitter.emit(ERROR_WALLET_APPROVAL, err);
-              return emitter.emit(ERROR, err);
-            }
-            if (txnHash) {
-              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-            }
-            if (depositResult) {
-              return emitter.emit(
-                DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                depositResult.transactionHash
-              );
-            }
-          }
-        );
-      }
-    } else if (asset.strategyType === "citadelv2") {
-      let approvalErr;
-      await this._checkApprovalCitadel(
-        asset,
-        account,
-        amount,
-        asset.vaultContractAddress,
-        tokenIndex,
-        (err, txnHash, approvalResult) => {
-          if (err) {
-            approvalErr = err;
-            emitter.emit(ERROR_WALLET_APPROVAL, err);
-            return emitter.emit(ERROR, err);
-          }
-          if (txnHash) {
-            return emitter.emit(APPROVE_TRANSACTING, txnHash);
-          }
-          if (approvalResult) {
-            emitter.emit(APPROVE_COMPLETED, approvalResult.transactionHash);
-          }
-        }
-      );
-
-      if (!approvalErr) {
-        await this._callDepositAmountContract(
-          asset,
-          account,
-          amount,
-          tokenIndex,
-          (err, txnHash, depositResult) => {
-            if (err) {
-              emitter.emit(ERROR_WALLET_APPROVAL, err);
-              return emitter.emit(ERROR, err);
-            }
-            if (txnHash) {
-              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-            }
-            if (depositResult) {
-              return emitter.emit(
-                DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                depositResult.transactionHash
-              );
-            }
-          }
-        );
-      }
-    }
-  };
+  /******** DEPOSIT APPROVAL START ********************/
 
   // Check allowance
   getWalletApprovedStatus = async (payload) => {
@@ -4495,7 +4039,6 @@ class Store {
     );
   }
 
-  // For Citadel
   _callDepositAmountContract = async (
     asset,
     account,
@@ -4672,298 +4215,8 @@ class Store {
       });
   };
 
+  /******** DEPOSIT APPROVAL END ********************/
  
- 
-  
-  _callWithdrawVaultProxy = async (
-    asset,
-    account,
-    amount,
-    tokenIndex = null,
-    callback
-  ) => {
-    const web3 = new Web3(store.getStore("web3context").library.provider);
-
-    let yVaultCheckContract = new web3.eth.Contract(
-      config.yVaultCheckABI,
-      asset.yVaultCheckAddress
-    );
-
-    var amountSend = web3.utils.toWei(amount, "ether");
-    if (asset.decimals !== 18) {
-      amountSend = Math.round(amount * 10 ** asset.decimals);
-    }
-
-    yVaultCheckContract.methods
-      .withdraw(amountSend)
-      .send({
-        from: account.address,
-        gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-      })
-      .on("transactionHash", function (txnHash) {
-        console.log(txnHash);
-        callback(null, txnHash, null);
-      })
-      .on("receipt", function (receipt) {
-        console.log("Reciept", receipt);
-        callback(null, null, receipt);
-      })
-      .on("error", function (error) {
-        if (!error.toString().includes("-32601")) {
-          if (error.message) {
-            return callback(error.message);
-          }
-          callback(error, null, null);
-        }
-      })
-      .catch((error) => {
-        if (!error.toString().includes("-32601")) {
-          if (error.message) {
-            return callback(error.message);
-          }
-          callback(error, null, null);
-        }
-      });
-  };
-
-  _callWithdrawVault = async (asset, account, amount, callback) => {
-    const web3 = new Web3(store.getStore("web3context").library.provider);
-
-    let vaultContract = new web3.eth.Contract(
-      asset.vaultContractABI,
-      asset.vaultContractAddress
-    );
-
-    var amountSend = web3.utils.toWei(amount, "ether");
-    if (asset.decimals !== 18) {
-      amountSend = Math.round(amount * 10 ** asset.decimals);
-    }
-
-    let functionCall = vaultContract.methods.withdrawVault(amountSend);
-    if (asset.erc20address === "Ethereum") {
-      functionCall = vaultContract.methods.withdrawETH(amountSend);
-    }
-
-    functionCall
-      .send({
-        from: account.address,
-        gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-      })
-      .on("transactionHash", function (txnHash) {
-        console.log(txnHash);
-        callback(null, txnHash, null);
-      })
-      .on("receipt", function (receipt) {
-        console.log("Reciept", receipt);
-        callback(null, null, receipt);
-      })
-      .on("error", function (error) {
-        if (!error.toString().includes("-32601")) {
-          if (error.message) {
-            return callback(error.message);
-          }
-          callback(error, null, null);
-        }
-      })
-      .catch((error) => {
-        if (!error.toString().includes("-32601")) {
-          if (error.message) {
-            return callback(error.message);
-          }
-          callback(error, null, null);
-        }
-      });
-  };
-
-  withdrawAllVault = (payload) => {
-    const account = store.getStore("account");
-    const { asset, tokenIndex } = payload.content;
-
-    if (asset.yVaultCheckAddress) {
-      this._checkApprovalForProxy(
-        asset,
-        account,
-        asset.vaultBalance,
-        asset.yVaultCheckAddress,
-        (err) => {
-          if (err) {
-            return emitter.emit(ERROR, err);
-          }
-
-          this._callWithdrawAllVaultProxy(
-            asset,
-            account,
-            (err, txnHash, withdrawalResult) => {
-              if (err) {
-                return emitter.emit(ERROR, err);
-              }
-              if (txnHash) {
-                return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
-              }
-              if (withdrawalResult) {
-                return emitter.emit(
-                  WITHDRAW_VAULT_RETURNED_COMPLETED,
-                  withdrawalResult.transactionHash
-                );
-              }
-            }
-          );
-        }
-      );
-    } else {
-      if (this.isUsdVault(asset)) {
-        this._callWithdrawAllVaultCitadel(
-          asset,
-          account,
-          tokenIndex,
-          (err, withdrawResult) => {
-            if (err) {
-              return emitter.emit(ERROR, err);
-            }
-            return emitter.emit(WITHDRAW_BOTH_VAULT_RETURNED, withdrawResult);
-          }
-        );
-      } else {
-        this._callWithdrawAllVault(asset, account, (err, withdrawResult) => {
-          if (err) {
-            return emitter.emit(ERROR, err);
-          }
-          return emitter.emit(WITHDRAW_BOTH_VAULT_RETURNED, withdrawResult);
-        });
-      }
-    }
-  };
-
-  _callWithdrawAllVaultProxy = async (asset, account, callback) => {
-    const web3 = new Web3(store.getStore("web3context").library.provider);
-
-    let vaultContract = new web3.eth.Contract(
-      config.yVaultCheckABI,
-      asset.yVaultCheckAddress
-    );
-
-    vaultContract.methods
-      .withdrawAll()
-      .send({
-        from: account.address,
-        gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-      })
-      .on("transactionHash", function (txnHash) {
-        console.log(txnHash);
-        callback(null, txnHash, null);
-      })
-      .on("receipt", function (receipt) {
-        console.log("Reciept", receipt);
-        callback(null, null, receipt);
-      })
-      .on("error", function (error) {
-        if (!error.toString().includes("-32601")) {
-          if (error.message) {
-            return callback(error.message);
-          }
-          callback(error, null, null);
-        }
-      })
-      .catch((error) => {
-        if (!error.toString().includes("-32601")) {
-          if (error.message) {
-            return callback(error.message);
-          }
-          callback(error, null, null);
-        }
-      });
-  };
-
-  _callWithdrawAllVault = async (asset, account, callback) => {
-    const web3 = new Web3(store.getStore("web3context").library.provider);
-
-    let vaultContract = new web3.eth.Contract(
-      asset.vaultContractABI,
-      asset.vaultContractAddress
-    );
-
-    let functionCall = vaultContract.methods.withdrawAll();
-    if (asset.erc20address === "Ethereum") {
-      functionCall = vaultContract.methods.withdrawAllETH();
-    }
-
-    functionCall
-      .send({
-        from: account.address,
-        gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-      })
-      .on("transactionHash", function (txnHash) {
-        console.log(txnHash);
-        callback(null, txnHash, null);
-      })
-      .on("receipt", function (receipt) {
-        console.log("Reciept", receipt);
-        callback(null, null, receipt);
-      })
-      .on("error", function (error) {
-        if (!error.toString().includes("-32601")) {
-          if (error.message) {
-            return callback(error.message);
-          }
-          callback(error, null, null);
-        }
-      })
-      .catch((error) => {
-        if (!error.toString().includes("-32601")) {
-          if (error.message) {
-            return callback(error.message);
-          }
-          callback(error, null, null);
-        }
-      });
-  };
-
-  _callWithdrawAllVaultCitadel = async (
-    asset,
-    account,
-    tokenIndex,
-    callback
-  ) => {
-    const web3 = new Web3(store.getStore("web3context").library.provider);
-
-    let vaultContract = new web3.eth.Contract(
-      asset.vaultContractABI,
-      asset.vaultContractAddress
-    );
-
-    let maxBalance = await vaultContract.balanceOf(account.address);
-
-    let functionCall = vaultContract.methods
-      .withdraw(maxBalance, tokenIndex)
-      .send({
-        from: account.address,
-        gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-      })
-      .on("transactionHash", function (txnHash) {
-        console.log(txnHash);
-        callback(null, txnHash, null);
-      })
-      .on("receipt", function (receipt) {
-        console.log("Reciept", receipt);
-        callback(null, null, receipt);
-      })
-      .on("error", function (error) {
-        if (!error.toString().includes("-32601")) {
-          if (error.message) {
-            return callback(error.message);
-          }
-          callback(error, null, null);
-        }
-      })
-      .catch((error) => {
-        if (!error.toString().includes("-32601")) {
-          if (error.message) {
-            return callback(error.message);
-          }
-          callback(error, null, null);
-        }
-      });
-  };
 
   _getVaultAPY = async (web3, asset, account, callback) => {
     try {
@@ -5947,50 +5200,71 @@ class Store {
     return emitter.emit(DRAWER_RETURNED);
   };
 
-  withdrawBothAll = (payload) => {
-    let { asset, tokenIndex } = payload.content;
-    this.withdrawBoth({
-      content: {
-        earnAmount: asset.earnBalance.toString(),
-        vaultAmount: asset.vaultBalance.toString(),
-        amount: asset.strategyBalance.toString(),
-        tokenIndex: tokenIndex,
-        asset,
-      },
-    });
-  };
-
-  _isSufficientLiquidityCitadel = async (
-    asset,
-    citadelContract,
-    withdrawAmount,
-    tokenIndex
-  ) => {
+  /***************** WITHDRAWAL START *****************/
+  // TODO: REFACTOR: Currently all 3 types of vaults use this
+  withdrawBoth = async (payload) => {
+    const { asset, amount, tokenIndex } =
+      payload.content;
+    const account = store.getStore("account");
     const web3 = new Web3(store.getStore("web3context").library.provider);
 
-    let erc20Contract = new web3.eth.Contract(
-      config.erc20ABI,
-      asset.erc20addresses[tokenIndex]
+    let vaultContract = new web3.eth.Contract(
+      asset.vaultContractABI,
+      asset.vaultContractAddress
     );
 
-    let balance = parseFloat(
-      await erc20Contract.methods.balanceOf(asset.vaultContractAddress).call()
-    );
-
-    const decimals = parseInt(await erc20Contract.methods.decimals().call());
-    const pool = await citadelContract.methods.getAllPoolInUSD().call();
-    const totalSupply = await citadelContract.methods.totalSupply().call();
-
-    const withdrawAmountUSD =
-      ((withdrawAmount * pool) / totalSupply) * 10 ** (decimals - 6);
-    const withdawAmountInToken =
-      withdrawAmountUSD / asset.priceInUSD[tokenIndex];
-
-    if (withdawAmountInToken > balance) {
-      alert(
-        "Due to insufficient liquidity of the selected token in the Vault for withdrawal, gas fees may be very high. To reduce gas fee, please select a different currency or try a smaller amount. \n\n Are you sure you wish to proceed with the withdrawal using the selected currency?"
+    // Soft Check for sufficient liquidity
+    if(asset.strategyType !== "moneyPrinter") {
+      await this._isSufficientLiquidityUsd(
+        asset,
+        vaultContract,
+        amount,
+        tokenIndex
       );
     }
+
+    // strategies which using token index
+    const strategiesWhichUseTokenIndex = STRATEGIES_USE_TOKEN_INDEX;
+    const token = strategiesWhichUseTokenIndex.includes(asset.strategyType)
+      ? tokenIndex
+      : asset.erc20addresses[tokenIndex];
+  
+    const amountToSend = fromExponential(parseFloat(amount));
+
+    await vaultContract.methods
+      .withdraw(amountToSend, token)
+      .send({
+        from: account.address,
+        gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+      })
+      .on("transactionHash", function (txnHash) {
+        console.log(txnHash);
+        return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
+      })
+      .on("receipt", function (receipt) {
+        console.log("Reciept", receipt);
+        emitter.emit(
+          WITHDRAW_VAULT_RETURNED_COMPLETED,
+          receipt.transactionHash
+        );
+      })
+      .on("error", function (error) {
+        emitter.emit(WITHDRAW_BOTH_VAULT_FAIL_RETURNED);
+        if (!error.toString().includes("-32601")) {
+          if (error.message) {
+            emitter.emit(ERROR, error.message);
+          }
+        }
+      })
+      .catch((error) => {
+        if (!error.toString().includes("-32601")) {
+          if (error.message) {
+            console.error("Error in withdrawBoth", error);
+            emitter.emit(ERROR, error.message);
+          }
+        }
+        emitter.emit(WITHDRAW_BOTH_VAULT_FAIL_RETURNED);
+      });
   };
 
   _isSufficientLiquidityUsd = async (
@@ -6009,8 +5283,16 @@ class Store {
     let balance = parseFloat(
       await erc20Contract.methods.balanceOf(asset.vaultContractAddress).call()
     );
+    
+    // Strategy where total pool in USD is in 6 decimals
+    const strategy = [
+      "cuban",
+      "elon",
+      "citadel"
+    ];
 
     let pool = 0;
+
     if (asset.strategyType === "daoFaang") {
       const network = store.getStore("network");
       const usdtUsdPriceFeedContract = new web3.eth.Contract(
@@ -6029,10 +5311,10 @@ class Store {
         .getTotalValueInPool()
         .call();
       pool = (totalValueInPool * usdtToUsdPrice) / 10 ** 20;
-    } else if(asset.strategyType === "metaverse" || asset.strategyType === "citadelv2" || asset.strategyType === "daoStonks") {
-      pool = await vaultContract.methods.getAllPoolInUSD().call() / 10 ** 12; //default in 18 decimals, make it as 6 decimals
-    } else {
+    } else if(strategy.includes(asset.strategyType)) {
       pool = await vaultContract.methods.getAllPoolInUSD().call();
+    } else {
+      pool = await vaultContract.methods.getAllPoolInUSD().call() / 10 ** 12; //default in 18 decimals, make it as 6 decimals
     }
 
     const decimals = parseInt(await erc20Contract.methods.decimals().call());
@@ -6050,263 +5332,7 @@ class Store {
     }
   };
 
-  // TODO: REFACTOR: Currently all 3 types of vaults use this
-  withdrawBoth = async (payload) => {
-    const { earnAmount, vaultAmount, asset, amount, tokenIndex } =
-      payload.content;
-    const account = store.getStore("account");
-    const web3 = new Web3(store.getStore("web3context").library.provider);
-
-    let vaultContract = new web3.eth.Contract(
-      asset.vaultContractABI,
-      asset.vaultContractAddress
-    );
-
-    if (asset.strategyType === "yearn") {
-      let earnAmountSend, vaultAmountSend;
-
-      if (asset.decimals !== 18) {
-        earnAmountSend = web3.utils
-          .toBN(Math.floor(earnAmount * 10 ** asset.decimals))
-          .toString();
-        vaultAmountSend = web3.utils
-          .toBN(Math.floor(vaultAmount * 10 ** asset.decimals))
-          .toString();
-      } else {
-        const earnAmt = fromExponential(parseFloat(earnAmount));
-        const vaultAmt = fromExponential(parseFloat(vaultAmount));
-
-        earnAmountSend = web3.utils.toWei(earnAmt, "ether");
-        vaultAmountSend = web3.utils.toWei(vaultAmt, "ether");
-      }
-
-      const functionCall = vaultContract.methods.withdraw([
-        earnAmountSend,
-        vaultAmountSend,
-      ]);
-
-      functionCall
-        .send({
-          from: account.address,
-          gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-        })
-        .on("transactionHash", function (txnHash) {
-          console.log(txnHash);
-          return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
-          // callback(null, txnHash, null);
-        })
-        .on("receipt", function (receipt) {
-          console.log("Reciept", receipt);
-          emitter.emit(
-            WITHDRAW_VAULT_RETURNED_COMPLETED,
-            receipt.transactionHash
-          );
-          // callback(null, null, receipt);
-        })
-        .on("error", function (error) {
-          if (!error.toString().includes("-32601")) {
-            if (error.message) {
-              emitter.emit(ERROR, error);
-              // return callback(error.message);
-            }
-            // callback(error, null, null);
-          }
-        })
-        .catch((error) => {
-          if (!error.toString().includes("-32601")) {
-            if (error.message) {
-              // return callback(error.message);
-              emitter.emit(ERROR, error);
-            }
-            // callback(error, null, null);
-          }
-        });
-    } else if (asset.strategyType === "compound") {
-      let amountSend;
-      if (asset.decimals !== 18) {
-        amountSend = web3.utils
-          .toBN(Math.floor(amount * 10 ** asset.decimals))
-          .toString();
-      } else {
-        const amt = fromExponential(parseFloat(amount));
-        amountSend = web3.utils.toWei(amt, "ether");
-      }
-
-      const functionCall = vaultContract.methods.withdraw(amountSend);
-      functionCall
-        .send({
-          from: account.address,
-          gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-        })
-        .on("transactionHash", function (txnHash) {
-          console.log(txnHash);
-          return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
-          // callback(null, txnHash, null);
-        })
-        .on("receipt", function (receipt) {
-          console.log("Reciept", receipt);
-          emitter.emit(
-            WITHDRAW_VAULT_RETURNED_COMPLETED,
-            receipt.transactionHash
-          );
-          // callback(null, null, receipt);
-        })
-        .on("error", function (error) {
-          if (!error.toString().includes("-32601")) {
-            if (error.message) {
-              emitter.emit(ERROR, error);
-              // return callback(error.message);
-            }
-            // callback(error, null, null);
-          }
-        })
-        .catch((error) => {
-          if (!error.toString().includes("-32601")) {
-            if (error.message) {
-              // return callback(error.message);
-              emitter.emit(ERROR, error);
-            }
-            // callback(error, null, null);
-          }
-        });
-    } else if (asset.strategyType === "citadel") {
-      // We are withdrawing daoCDV and exchanging for Stablecoin
-      let erc20Contract = new web3.eth.Contract(
-        config.erc20ABI,
-        asset.vaultContractAddress
-      );
-
-      const citadelContract = new web3.eth.Contract(
-        asset.vaultContractABI,
-        asset.vaultContractAddress
-      );
-
-      // Soft Check for sufficient liquidity
-      // if (
-      await this._isSufficientLiquidityCitadel(
-        asset,
-        citadelContract,
-        amount,
-        tokenIndex
-      );
-      // ) {
-      await vaultContract.methods
-        .withdraw(amount, tokenIndex)
-        .send({
-          from: account.address,
-          gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-        })
-        .on("transactionHash", function (txnHash) {
-          console.log(txnHash);
-          return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
-          // callback(null, txnHash, null);
-        })
-        .on("receipt", function (receipt) {
-          console.log("Reciept", receipt);
-          emitter.emit(
-            WITHDRAW_VAULT_RETURNED_COMPLETED,
-            receipt.transactionHash
-          );
-          // callback(null, null, receipt);
-        })
-        .on("error", function (error) {
-          emitter.emit(WITHDRAW_BOTH_VAULT_FAIL_RETURNED);
-          if (!error.toString().includes("-32601")) {
-            if (error.message) {
-              emitter.emit(ERROR, error);
-              // return callback(error.message);
-            }
-            // callback(error, null, null);
-          }
-        })
-        .catch((error) => {
-          emitter.emit(WITHDRAW_BOTH_VAULT_FAIL_RETURNED);
-          if (!error.toString().includes("-32601")) {
-            if (error.message) {
-              // return callback(error.message);
-              emitter.emit(ERROR, error);
-            }
-            // callback(error, null, null);
-          }
-        });
-      // } else {
-      //   return emitter.emit(WITHDRAW_BOTH_VAULT_FAIL_RETURNED);
-      // }
-    } else if (this.isUsdVault(asset)) {
-      const vaultContract = new web3.eth.Contract(
-        asset.vaultContractABI,
-        asset.vaultContractAddress
-      );
-
-      // Soft Check for sufficient liquidity
-      if(asset.strategyType !== "moneyPrinter") {
-        await this._isSufficientLiquidityUsd(
-          asset,
-          vaultContract,
-          amount,
-          tokenIndex
-        );
-      }
-
-      // strategies which using token address
-      const strategies = [
-        "daoFaang",
-        "moneyPrinter",
-        "metaverse",
-        "citadelv2",
-        "daoStonks"
-      ];
-      
-      const token = strategies.includes(asset.strategyType) ? asset.erc20addresses[tokenIndex] : tokenIndex;
-      const amountToSend = fromExponential(parseFloat(amount));
-
-      await vaultContract.methods
-        .withdraw(amountToSend, token)
-        .send({
-          from: account.address,
-          gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-        })
-        .on("transactionHash", function (txnHash) {
-          console.log(txnHash);
-          return emitter.emit(WITHDRAW_VAULT_RETURNED, txnHash);
-          // callback(null, txnHash, null);
-        })
-        .on("receipt", function (receipt) {
-          console.log("Reciept", receipt);
-          emitter.emit(
-            WITHDRAW_VAULT_RETURNED_COMPLETED,
-            receipt.transactionHash
-          );
-          // callback(null, null, receipt);
-        })
-        .on("error", function (error) {
-          emitter.emit(WITHDRAW_BOTH_VAULT_FAIL_RETURNED);
-          if (!error.toString().includes("-32601")) {
-            if (error.message) {
-              console.log("Error in withdrawBoth", error);
-              emitter.emit(ERROR, error.message);
-              // return callback(error.message);
-            }
-            // callback(error, null, null);
-          }
-        })
-        .catch((error) => {
-          if (!error.toString().includes("-32601")) {
-            if (error.message) {
-              // return callback(error.message);
-              console.log("Error in withdrawBoth", error);
-              emitter.emit(ERROR, error.message);
-            }
-            // callback(error, null, null);
-          }
-          emitter.emit(WITHDRAW_BOTH_VAULT_FAIL_RETURNED);
-
-        });
-      // } else {
-      //   return emitter.emit(WITHDRAW_BOTH_VAULT_FAIL_RETURNED);
-      // }
-    }
-  };
+  /***************** WITHDRAWAL END *****************/
 
   _getVaultDAOmineAPY = (asset, pools, callback) => {
     if (pools.length <= 0) {
