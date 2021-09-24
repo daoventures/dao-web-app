@@ -13,34 +13,26 @@ import {
     ListItem,
     ListItemAvatar,
     ListItemText,
-    Slider,
     TextField,
-    Tooltip,
     Typography,
     Table,
     TableBody,
     TableCell,
-    TableContainer,
     TableHead,
     TableRow,
 } from "@material-ui/core";
 import {
-    APPROVE_COMPLETED,
     APPROVE_DEPOSIT_CONTRACT,
     APPROVE_DEPOSIT_SUCCESS,
     CONFIRM_DEPOSIT_CONTRACT,
-    DEPOSIT_ALL_CONTRACT,
     DEPOSIT_ALL_CONTRACT_RETURNED,
     DEPOSIT_ALL_CONTRACT_RETURNED_COMPLETED,
-    DEPOSIT_CONTRACT,
     DEPOSIT_CONTRACT_RETURNED_COMPLETED,
     ERROR,
     HAPPY_HOUR_VERIFY,
     WITHDRAW_BOTH,
-    WITHDRAW_BOTH_VAULT,
     WITHDRAW_BOTH_VAULT_FAIL_RETURNED,
     WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
-    WITHDRAW_VAULT_RETURNED,
     WITHDRAW_VAULT_RETURNED_COMPLETED,
     ERROR_WALLET_APPROVAL, ERROR_DEPOSIT_WALLET, DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED
 } from "../../constants";
@@ -50,11 +42,9 @@ import ArrowDropDownCircleIcon from "@material-ui/icons/ArrowDropDownCircle";
 import CloseIcon from "@material-ui/icons/Close";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
-import InfoIcon from "@material-ui/icons/Info";
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import Store from "../../stores";
 import {getTheme} from "../../theme";
-import SimpleTabs from "./Tabs";
 import {withRouter} from "react-router-dom";
 import {withStyles} from "@material-ui/core/styles";
 import PieChart from '../common/pieChart';
@@ -66,7 +56,8 @@ import {
 import BasicModal from '../common/basicModal';
 import DoneMark from '../../assets/done.png';
 
-import fromExponential from "from-exponential";
+import InputValidation from "../../utils/inputValidation";
+
 import InfoModal from "../common/infoModal/infoModal";
 
 const emitter = Store.emitter;
@@ -763,16 +754,6 @@ const styles = (theme) => ({
     }
 });
 
-const HtmlTooltip = withStyles((theme) => ({
-    tooltip: {
-        backgroundColor: "#f5f5f9",
-        color: "rgba(0, 0, 0, 0.87)",
-        maxWidth: 220,
-        fontSize: theme.typography.pxToRem(12),
-        border: "1px solid #dadde9",
-    },
-}))(Tooltip);
-
 const StyledTableCell = withStyles(() => ({
     head: {
         color: "#FFFFFF",
@@ -980,7 +961,7 @@ class Asset extends Component {
         } = this.state;
         const {asset} = this.props;
 
-        if (this.validateAmount(amount)) {
+        if (InputValidation.validateAmountNotExist(amount)) {
             this.setState({
                 amountError: true,
                 errorMessage: "Invalid amount",
@@ -1143,7 +1124,6 @@ class Asset extends Component {
         }
     };
 
-    // Handle input validation message
     renderErrorMessage = (classes) => {
         const {
             errorMessage,
@@ -1582,6 +1562,7 @@ class Asset extends Component {
         </div>
     }
 
+    // Dispatch ERC20 Approval Action
     getDepositApproval = () => {
         const {
             amount,
@@ -1594,7 +1575,7 @@ class Asset extends Component {
         const {asset, startLoading} = this.props;
 
 
-        if (this.validateAmount(amount)) {
+        if (InputValidation.validateAmountNotExist(amount)) {
             this.setState({
                 amountError: true,
                 errorMessage: "Invalid amount",
@@ -1622,18 +1603,17 @@ class Asset extends Component {
         }
     }
 
+    // Dispatch Deposit action
     depositTokenToContract = () => {
         const {
             amount,
-            earnRatio,
-            vaultRatio,
             tokenIndex,
             amountError,
             errorMessage,
         } = this.state;
         const {asset, startLoading} = this.props;
 
-        if (this.validateAmount(amount)) {
+        if (InputValidation.validateAmountNotExist(amount)) {
             this.setState({
                 amountError: true,
                 errorMessage: "Invalid amount",
@@ -1658,6 +1638,41 @@ class Asset extends Component {
         }
     }
 
+    // Dispatch withdraw action
+    onWithdraw = () => {
+        let {redeemEarnAmount, redeemAmount, tokenIndex} = this.state;
+
+        const {asset, startLoading} = this.props;
+
+        if (InputValidation.validateAmountNotExist(redeemAmount)) {
+            this.setState({
+                redeemAmountError: true,
+                withdrawErrorMessage: "Invalid amount",
+            });
+            return;
+        }
+
+        if (!this.state.redeemAmountError && this.withdrawErrorMessage !== "") {
+            redeemAmount = (Math.floor(redeemAmount * 10000) / 10000).toFixed(4);
+            let shares = (redeemAmount * 10 ** asset.decimals).toString();
+
+            this.setState({loading: true, isWithdrawing: true});
+            startLoading();
+
+            dispatcher.dispatch({
+                type: WITHDRAW_BOTH,
+                content: {
+                    earnAmount: "0",
+                    vaultAmount: "0",
+                    amount: shares,
+                    asset: asset,
+                    tokenIndex: tokenIndex,
+                },
+            });
+        }
+    };
+
+    // Pending balance info modal renderring
     renderPendingInfo = () => {
         const { classes } = this.props;
         const modalContent = (
@@ -2708,6 +2723,7 @@ class Asset extends Component {
         );
     };
 
+    // Withdraw Input On Change
     onChange = (event) => {
         let val = [];
         let asset = this.props.asset;
@@ -2723,20 +2739,17 @@ class Asset extends Component {
             10 ** 8
         ).toFixed(8)
 
-        this.verifyWithdrawInput(assetTokenAmount, event.target.id);
+        this.verifyWithdrawInput(assetTokenAmount, event.target.value);
 
-        if (event.target.id === "redeemEarnAmount") {
-            this.setState({redeemEarnAmount: val[event.target.id], earnPercent: 0});
-        } else {
-            this.setState({
-                redeemAmountInUsd: val[event.target.id],
-                vaultPercent: 0,
-                redeemAmountPercent: 0,
-                redeemAmount: assetTokenAmount,
-            });
-        }
+        this.setState({
+            redeemAmountInUsd: val[event.target.id],
+            vaultPercent: 0,
+            redeemAmountPercent: 0,
+            redeemAmount: assetTokenAmount,
+        });
     };
 
+    // Deposit Input On Change
     onChangeDeposit = (event) => {
         let val = [];
         val[event.target.id] = event.target.value;
@@ -2747,192 +2760,65 @@ class Asset extends Component {
         }
     };
 
-    verifyInput = (amount) => {
-        // const { amount } = this.state;
-        const {asset, happyHour, happyHourThreshold} = this.props;
+    // Verify amount on Withdraw Input
+    verifyWithdrawInput = (shareAmount, inputAmount) => {
+        const {asset} = this.props;
 
-        let assetBalance = asset.balances[this.state.tokenIndex];
+        const depositedShares = (
+            Math.floor((asset.strategyBalance / 10 ** asset.decimals) * 10 ** 8) / 
+            10 ** 8
+        ).toFixed(8);
 
-        assetBalance = (Math.floor(assetBalance * 10000) / 10000).toFixed(4);
+        const displayBalance = (asset.depositedSharesInUSD)
+            ? (asset.depositedSharesInUSD / asset.priceInUSD[this.state.tokenIndex]).toFixed(4)
+            : 0;
 
-        const digitRegex = /^[0-9]\d*(\.\d+)?$/;
-
-        if (!digitRegex.test(amount)) {
-            this.setState({amountError: true, errorMessage: "Invalid amount"});
-            return;
+        if( !InputValidation.validateDigit(shareAmount) || 
+            InputValidation.validateAmountNotExist(shareAmount) ||
+            parseFloat(depositedShares) <= 0
+        ) {
+          this.setState({
+            redeemAmountError: true,
+            withdrawErrorMessage: `Invalid amount`,
+          });
+          return;
         }
-
-        if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
-            this.setState({amountError: true, errorMessage: "Invalid amount"});
-            return;
-        }
-
-        if (parseFloat(amount) > assetBalance) {
+  
+        if (
+            InputValidation.validateInputMoreThanBalance(inputAmount, displayBalance) ||  
+            InputValidation.validateInputMoreThanBalance(shareAmount, depositedShares)
+        ) {
             this.setState({
-                amountError: true,
-                errorMessage: "Exceed available balance",
+                redeemAmountError: true,
+                withdrawErrorMessage: `Exceed available balance`,
             });
             return;
         }
 
-        if (
-            parseFloat(amount) <= parseFloat("0.0") ||
-            parseFloat(amount) > assetBalance
-        ) {
-            this.setState({amountError: true});
-            // return false;
-        } else {
-            this.setState({amountError: false, errorMessage: ""});
-        }
-
-        if (asset.happyHourEnabled === true && happyHour === true) {
-            if (parseFloat(amount) < parseFloat(happyHourThreshold)) {
-                this.setState({
-                    // amountError: true,
-                    happyHourWarning: `Below required deposit ${happyHourThreshold} USD for Happy Hour. Gas fee will be required.`,
-                    happyHourMessage: "",
-                });
-            } else {
-                this.setState({
-                    // amountError: true,
-                    happyHourWarning: "",
-                    happyHourMessage: "Gas fee is on us!",
-                });
-            }
-        }
+        this.setState({redeemAmountError: false, withdrawErrorMessage: ""});
     };
 
-    validateDigit = (amount) => {
-        let finalAmount = fromExponential(amount);
-        const digitRegex = /^[0-9]\d*(\.\d+)?$/;
-        return digitRegex.test(finalAmount);
-    };
-
-    validateAmount = (amount) => {
-        return !amount || isNaN(amount) || parseFloat(amount) <= 0;
-    };
-
-    validateInputValMoreThanBalance = (amount, balance) => {
-        return parseFloat(amount) > parseFloat(balance);
-    };
-
-    calculateDepositShare = (asset, type) => {
-        return (
-            Math.floor((asset.strategyBalance / 10 ** asset.decimals) * 10000) /
-            10000
-        ).toFixed(4);
-    };
-
-    setRedeemAmountError = (message) => {
-        this.setState({redeemAmountError: true, withdrawErrorMessage: message});
-    };
-
-    verifyWithdrawInput = (amount, divId) => {
-        const {asset} = this.props;
-
-        if (asset.strategyType === "yearn") {
-            if (!this.validateDigit(amount)) {
-                const errorMessage = "Invalid amount";
-                divId === "redeemEarnAmount"
-                    ? this.setState({
-                        redeemEarnAmountError: true,
-                        withdrawEarnErrorMessage: errorMessage,
-                    })
-                    : this.setState({
-                        redeemAmountError: true,
-                        withdrawErrorMessage: errorMessage,
-                    });
-                return;
-            }
-
-            // No need to validate 0 input, as either one of them can be 0
-            if (!amount || isNaN(amount) || parseFloat(amount) < 0) {
-                const errorMessage = "Invalid amount";
-                divId === "redeemEarnAmount"
-                    ? this.setState({
-                        redeemEarnAmountError: true,
-                        withdrawEarnErrorMessage: errorMessage,
-                    })
-                    : this.setState({
-                        redeemAmountError: true,
-                        withdrawErrorMessage: errorMessage,
-                    });
-                return;
-            }
-
-            const depositedShares = this.calculateDepositShare(
-                asset,
-                divId === "redeemEarnAmount" ? "earn" : "vault"
-            );
-
-            if (this.validateInputValMoreThanBalance(amount, depositedShares)) {
-                const errorMessage = "Exceed Available Balance";
-                divId === "redeemEarnAmount"
-                    ? this.setState({
-                        redeemEarnAmountError: true,
-                        withdrawEarnErrorMessage: errorMessage,
-                    })
-                    : this.setState({
-                        redeemAmountError: true,
-                        withdrawErrorMessage: errorMessage,
-                    });
-                return;
-            }
-
-            divId === "redeemEarnAmount"
-                ? this.setState({
-                    redeemEarnAmountError: false,
-                    withdrawEarnErrorMessage: "",
-                })
-                : this.setState({redeemAmountError: false, withdrawErrorMessage: ""});
-        } else {
-            if (!this.validateDigit(amount)) {
-                this.setRedeemAmountError("Invalid amount");
-                return;
-            }
-
-            if (this.validateAmount(amount)) {
-                this.setRedeemAmountError("Invalid amount");
-                return;
-            }
-
-            const depositedShares = this.calculateDepositShare(asset, null);
-
-            if(depositedShares <= 0 ) {
-                this.setRedeemAmountError("Invalid amount");
-                return;
-            }
-
-            if (this.validateInputValMoreThanBalance(amount, depositedShares)) {
-                this.setRedeemAmountError("Exceed available balance");
-                return;
-            }
-
-            this.setState({redeemAmountError: false, withdrawErrorMessage: ""});
-        }
-    };
-
+    // Verify amount on Deposit Input
     verifyInput = (amount) => {
         const {asset, happyHour, happyHourThreshold} = this.props;
 
         let assetBalance = asset.balances[this.state.tokenIndex];
-
         assetBalance = (Math.floor(assetBalance * 10000) / 10000).toFixed(4);
 
-        if (!this.validateDigit(amount)) {
-            this.setState({amountError: true, errorMessage: "Invalid amount"});
-            return;
+        if( !InputValidation.validateDigit(amount) || 
+            InputValidation.validateAmountNotExist(amount)
+        ) {
+          this.setState({
+            redeemAmountError: true,
+            withdrawErrorMessage: `Invalid amount`,
+          });
+          return;
         }
 
-        if (this.validateAmount(amount)) {
-            this.setState({amountError: true, errorMessage: "Invalid amount"});
-            return;
-        }
-
-        if (this.validateInputValMoreThanBalance(amount, assetBalance)) {
+        if ( InputValidation.validateInputMoreThanBalance(amount, assetBalance)) {
             this.setState({
-                amountError: true,
-                errorMessage: "Exceed available balance",
+                redeemAmountError: true,
+                withdrawErrorMessage: `Exceed available balance`,
             });
             return;
         }
@@ -2956,39 +2842,7 @@ class Asset extends Component {
         }
     };
 
-    onWithdraw = () => {
-        let {redeemEarnAmount, redeemAmount, tokenIndex} = this.state;
-
-        const {asset, startLoading} = this.props;
-
-        if (this.validateAmount(redeemAmount)) {
-            this.setState({
-                redeemAmountError: true,
-                withdrawErrorMessage: "Invalid amount",
-            });
-            return;
-        }
-
-        if (!this.state.redeemAmountError && this.withdrawErrorMessage !== "") {
-            redeemAmount = (Math.floor(redeemAmount * 10000) / 10000).toFixed(4);
-            let shares = (redeemAmount * 10 ** asset.decimals).toString();
-
-            this.setState({loading: true, isWithdrawing: true});
-            startLoading();
-
-            dispatcher.dispatch({
-                type: WITHDRAW_BOTH,
-                content: {
-                    earnAmount: "0",
-                    vaultAmount: "0",
-                    amount: shares,
-                    asset: asset,
-                    tokenIndex: tokenIndex,
-                },
-            });
-        }
-    };
-
+    // Auto Deposit amount calculation when click on percentage on input
     setAmount = (percent) => {
         if (this.state.loading) {
             return;
@@ -3006,20 +2860,7 @@ class Asset extends Component {
         this.setState({amount, percent, amountError: false, errorMessage: ""});
     };
 
-    setCurrency = (tokenIndex) => {
-        if (this.state.loading) {
-            return;
-        }
-
-        const {asset} = this.props;
-
-        asset.symbol = asset.symbols[tokenIndex];
-        asset.balance = asset.balances[tokenIndex];
-        asset.erc20address = asset.erc20addresses[tokenIndex];
-
-        this.setState({tokenIndex: tokenIndex});
-    };
-
+    // Auto withdraw amount calculation when click on percentage on input
     setRedeemAmount = (percent) => {
         if (this.state.loading) {
             return;
@@ -3028,7 +2869,6 @@ class Asset extends Component {
         const balance = asset.strategyBalance;
         const decimals = asset.decimals;
         const priceInUsd = asset.depositedSharesInUSD;
-
 
         let amount;
 
@@ -3044,6 +2884,22 @@ class Asset extends Component {
             withdrawErrorMessage: "",
         });
     };
+
+    // Handle selected currency
+    setCurrency = (tokenIndex) => {
+        if (this.state.loading) {
+            return;
+        }
+
+        const {asset} = this.props;
+
+        asset.symbol = asset.symbols[tokenIndex];
+        asset.balance = asset.balances[tokenIndex];
+        asset.erc20address = asset.erc20addresses[tokenIndex];
+
+        this.setState({tokenIndex: tokenIndex});
+    };
+
 }
 
 export default withRouter(withStyles(styles, {withTheme: true})(Asset));
