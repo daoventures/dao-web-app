@@ -1143,17 +1143,6 @@ class Asset extends Component {
         }
     };
 
-    isUsdVault = (asset) => {
-        return asset.strategyType === "citadel" ||
-            asset.strategyType === "elon" ||
-            asset.strategyType === "cuban" ||
-            asset.strategyType === "daoFaang" ||
-            asset.strategyType === "moneyPrinter" ||
-            asset.strategyType === "metaverse" || 
-            asset.strategyType === "citadelv2" || 
-            asset.strategyType === "daoStonks";
-    };
-
     // Handle input validation message
     renderErrorMessage = (classes) => {
         const {
@@ -1268,38 +1257,34 @@ class Asset extends Component {
                         variant="outlined"
                     />
                     <div className={classes.depositScaleContainer}>
-                        {this.isUsdVault(asset) && (
-                            <React.Fragment>
-                                <div className={classes.accountInfoBlock}>
-                                    <div
-                                        className={classes.accountInfo}
-                                        onClick={() => {
-                                            this.handleModalDisplay(true);
-                                        }}
-                                    >
-                                        <img
-                                            alt=""
-                                            src={require("../../assets/" +
-                                                this.state.selectedCurrency +
-                                                "-logo.png")}
-                                            className={classes.assetIconImg}
-                                            style={
-                                                asset.disabled
-                                                    ? {filter: "grayscale(100%)"}
-                                                    : {}
-                                            }
-                                        />
-                                        <span className={classes.addressSpan}>
-                            {this.state.selectedCurrency}
-                          </span>
-                                        <ArrowDropDownCircleIcon
-                                            className={classes.arrowDropdownIcon}
-                                        />
-                                    </div>
-                                </div>
-                                {this.renderCurrencyModal(asset.symbols)}
-                            </React.Fragment>
-                        )}
+                        <div className={classes.accountInfoBlock}>
+                            <div
+                                className={classes.accountInfo}
+                                onClick={() => {
+                                    this.handleModalDisplay(true);
+                                }}
+                            >
+                                <img
+                                    alt=""
+                                    src={require("../../assets/" +
+                                        this.state.selectedCurrency +
+                                        "-logo.png")}
+                                    className={classes.assetIconImg}
+                                    style={
+                                        asset.disabled
+                                            ? { filter: "grayscale(100%)" }
+                                            : {}
+                                    }
+                                />
+                                <span className={classes.addressSpan}>
+                                    {this.state.selectedCurrency}
+                                </span>
+                                <ArrowDropDownCircleIcon
+                                    className={classes.arrowDropdownIcon}
+                                />
+                            </div>
+                        </div>
+                        {this.renderCurrencyModal(asset.symbols)}
                     </div>
                     <div className={classes.floatRightItems}>
                         {scales.length > 0 &&
@@ -1624,38 +1609,16 @@ class Asset extends Component {
             });
             startLoading();
 
-            if (asset.strategyType === "yearn") {
-                dispatcher.dispatch({
-                    type: APPROVE_DEPOSIT_CONTRACT,
-                    content: {
-                        earnAmount: ((amount * earnRatio) / 100).toString(),
-                        vaultAmount: ((amount * vaultRatio) / 100).toString(),
-                        amount: "0",
-                        asset,
-                    },
-                });
-            } else if (asset.strategyType === "compound") {
-                dispatcher.dispatch({
-                    type: APPROVE_DEPOSIT_CONTRACT,
-                    content: {
-                        earnAmount: 0,
-                        vaultAmount: 0,
-                        amount: amount.toString(),
-                        asset,
-                    },
-                });
-            } else if (this.isUsdVault(asset)) {
-                dispatcher.dispatch({
-                    type: APPROVE_DEPOSIT_CONTRACT,
-                    content: {
-                        earnAmount: 0,
-                        vaultAmount: 0,
-                        amount: amount.toString(),
-                        tokenIndex: tokenIndex, // TODO: Change to state variable
-                        asset,
-                    },
-                });
-            }
+            dispatcher.dispatch({
+                type: APPROVE_DEPOSIT_CONTRACT,
+                content: {
+                    earnAmount: 0,
+                    vaultAmount: 0,
+                    amount: amount.toString(),
+                    tokenIndex: tokenIndex, // TODO: Change to state variable
+                    asset,
+                },
+            });
         }
     }
 
@@ -1682,38 +1645,16 @@ class Asset extends Component {
             this.setState({loading: true, isDepositLoading: true});
             startLoading();
 
-            if (asset.strategyType === "yearn") {
-                dispatcher.dispatch({
-                    type: CONFIRM_DEPOSIT_CONTRACT,
-                    content: {
-                        earnAmount: ((amount * earnRatio) / 100).toString(),
-                        vaultAmount: ((amount * vaultRatio) / 100).toString(),
-                        amount: "0",
-                        asset,
-                    },
-                });
-            } else if (asset.strategyType === "compound") {
-                dispatcher.dispatch({
-                    type: CONFIRM_DEPOSIT_CONTRACT,
-                    content: {
-                        earnAmount: 0,
-                        vaultAmount: 0,
-                        amount: amount.toString(),
-                        asset,
-                    },
-                });
-            } else if (this.isUsdVault(asset)) {
-                dispatcher.dispatch({
-                    type: CONFIRM_DEPOSIT_CONTRACT,
-                    content: {
-                        earnAmount: 0,
-                        vaultAmount: 0,
-                        amount: amount.toString(),
-                        tokenIndex: tokenIndex, // TODO: Change to state variable
-                        asset,
-                    },
-                });
-            }
+            dispatcher.dispatch({
+                type: CONFIRM_DEPOSIT_CONTRACT,
+                content: {
+                    earnAmount: 0,
+                    vaultAmount: 0,
+                    amount: amount.toString(),
+                    tokenIndex: tokenIndex, // TODO: Change to state variable
+                    asset,
+                },
+            });
         }
     }
 
@@ -2810,9 +2751,7 @@ class Asset extends Component {
         // const { amount } = this.state;
         const {asset, happyHour, happyHourThreshold} = this.props;
 
-        let assetBalance = !this.isUsdVault(asset)
-            ? asset.balance
-            : asset.balances[this.state.tokenIndex];
+        let assetBalance = asset.balances[this.state.tokenIndex];
 
         assetBalance = (Math.floor(assetBalance * 10000) / 10000).toFixed(4);
 
@@ -2878,32 +2817,10 @@ class Asset extends Component {
     };
 
     calculateDepositShare = (asset, type) => {
-        if (asset.strategyType === "compound") {
-            return (
-                Math.floor(asset.strategyBalance * asset.compoundExchangeRate * 10000) /
-                10000
-            ).toFixed(4);
-        } else if (this.isUsdVault(asset)) {
-            return (
-                Math.floor((asset.strategyBalance / 10 ** asset.decimals) * 10000) /
-                10000
-            ).toFixed(4);
-        } else if (asset.strategyType === "yearn") {
-            if (type === "earn") {
-                return (
-                    Math.floor(asset.earnBalance * asset.earnPricePerFullShare * 10000) /
-                    10000
-                ).toFixed(4);
-            } else {
-                return (
-                    Math.floor(
-                        asset.vaultBalance * asset.vaultPricePerFullShare * 10000
-                    ) / 10000
-                ).toFixed(4);
-            }
-        } else {
-            return 0;
-        }
+        return (
+            Math.floor((asset.strategyBalance / 10 ** asset.decimals) * 10000) /
+            10000
+        ).toFixed(4);
     };
 
     setRedeemAmountError = (message) => {
@@ -2998,9 +2915,7 @@ class Asset extends Component {
     verifyInput = (amount) => {
         const {asset, happyHour, happyHourThreshold} = this.props;
 
-        let assetBalance = !this.isUsdVault(asset)
-            ? asset.balance
-            : asset.balances[this.state.tokenIndex];
+        let assetBalance = asset.balances[this.state.tokenIndex];
 
         assetBalance = (Math.floor(assetBalance * 10000) / 10000).toFixed(4);
 
@@ -3046,100 +2961,31 @@ class Asset extends Component {
 
         const {asset, startLoading} = this.props;
 
-        if (asset.strategyType === "yearn") {
-            // Both input field are blank
-            if (
-                (!redeemAmount || isNaN(redeemAmount)) &&
-                (!redeemEarnAmount || isNaN(redeemEarnAmount))
-            ) {
-                this.setState({
-                    redeemAmountError: true,
-                    redeemEarnAmountError: true,
-                    withdrawErrorMessage: "Invalid amount",
-                    withdrawEarnErrorMessage: "Invalid amount",
-                });
-                return;
-            }
+        if (this.validateAmount(redeemAmount)) {
+            this.setState({
+                redeemAmountError: true,
+                withdrawErrorMessage: "Invalid amount",
+            });
+            return;
+        }
 
-            if (
-                !this.state.redeemAmountError &&
-                this.state.withdrawErrorMessage === "" &&
-                !this.state.redeemEarnAmountError &&
-                this.state.withdrawEarnErrorMessage === ""
-            ) {
-                redeemAmount = redeemAmount
-                    ? (Math.floor(redeemAmount * 10000) / 10000).toFixed(4)
-                    : 0;
-                redeemEarnAmount = redeemEarnAmount
-                    ? (Math.floor(redeemEarnAmount * 10000) / 10000).toFixed(4)
-                    : 0;
+        if (!this.state.redeemAmountError && this.withdrawErrorMessage !== "") {
+            redeemAmount = (Math.floor(redeemAmount * 10000) / 10000).toFixed(4);
+            let shares = (redeemAmount * 10 ** asset.decimals).toString();
 
-                this.setState({loading: true, isWithdrawing: true});
-                startLoading();
+            this.setState({loading: true, isWithdrawing: true});
+            startLoading();
 
-                dispatcher.dispatch({
-                    type: WITHDRAW_BOTH,
-                    content: {
-                        earnAmount: redeemEarnAmount.toString(),
-                        vaultAmount: redeemAmount.toString(),
-                        amount: "0",
-                        asset: asset,
-                        tokenIndex
-                    },
-                });
-            }
-        } else if (asset.strategyType === "compound") {
-            if (this.validateAmount(redeemAmount)) {
-                this.setState({
-                    redeemAmountError: true,
-                    withdrawErrorMessage: "Invalid amount",
-                });
-                return;
-            }
-
-            if (!this.state.redeemAmountError && this.withdrawErrorMessage !== "") {
-                this.setState({loading: true, isWithdrawing: true});
-                startLoading();
-
-                redeemAmount = (Math.floor(redeemAmount * 10000) / 10000).toFixed(4);
-
-                dispatcher.dispatch({
-                    type: WITHDRAW_BOTH,
-                    content: {
-                        earnAmount: "0",
-                        vaultAmount: "0",
-                        amount: redeemAmount.toString(),
-                        asset: asset,
-                    },
-                });
-            }
-        } else if (this.isUsdVault(asset)) {
-            if (this.validateAmount(redeemAmount)) {
-                this.setState({
-                    redeemAmountError: true,
-                    withdrawErrorMessage: "Invalid amount",
-                });
-                return;
-            }
-
-            if (!this.state.redeemAmountError && this.withdrawErrorMessage !== "") {
-                redeemAmount = (Math.floor(redeemAmount * 10000) / 10000).toFixed(4);
-                let shares = (redeemAmount * 10 ** asset.decimals).toString();
-
-                this.setState({loading: true, isWithdrawing: true});
-                startLoading();
-
-                dispatcher.dispatch({
-                    type: WITHDRAW_BOTH,
-                    content: {
-                        earnAmount: "0",
-                        vaultAmount: "0",
-                        amount: shares,
-                        asset: asset,
-                        tokenIndex: tokenIndex,
-                    },
-                });
-            }
+            dispatcher.dispatch({
+                type: WITHDRAW_BOTH,
+                content: {
+                    earnAmount: "0",
+                    vaultAmount: "0",
+                    amount: shares,
+                    asset: asset,
+                    tokenIndex: tokenIndex,
+                },
+            });
         }
     };
 
@@ -3152,12 +2998,7 @@ class Asset extends Component {
 
         let amount = 0.0;
 
-        if (this.isUsdVault(asset)) {
-            amount = (asset.balances[this.state.tokenIndex] * percent) / 100;
-        } else {
-            const balance = asset.balance;
-            amount = (balance * percent) / 100;
-        }
+        amount = (asset.balances[this.state.tokenIndex] * percent) / 100;
 
         amount = (Math.floor(amount * 10000) / 10000).toFixed(4);
         this.verifyInput(amount);
@@ -3191,13 +3032,8 @@ class Asset extends Component {
 
         let amount;
 
-        if (this.isUsdVault(asset)) {
-            amount = (balance * percent) / 100;
-            amount = Math.floor((amount / 10 ** decimals) * 10000) / 10000;
-        } else {
-            amount = (balance * percent) / 100;
-            amount = Math.floor(amount * 10000) / 10000;
-        }
+        amount = (balance * percent) / 100;
+        amount = Math.floor((amount / 10 ** decimals) * 10000) / 10000;
 
         this.setState({
             redeemAmount: amount.toFixed(4),
