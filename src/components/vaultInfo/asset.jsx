@@ -1266,7 +1266,6 @@ class Asset extends Component {
                         disabled={loading || (!(isDeposit ? asset.isDepositEnabled : asset.isWithdrawEnabled))}
                         placeholder="0.00"
                         variant="outlined"
-                        onKeyDown={isDeposit ? this.inputKeyDown : this.inputRedeemKeyDown}
                     />
                     <div className={classes.depositScaleContainer}>
                         {this.isUsdVault(asset) && (
@@ -1362,194 +1361,6 @@ class Asset extends Component {
             </React.Fragment>
         );
     };
-
-    renderYearnRatio = (isYEarn) => {
-        const {classes, asset} = this.props;
-        const {openEarnInfo, openVaultInfo, earnRatio, vaultRatio} = this.state;
-
-        return (
-            <React.Fragment>
-                <Typography
-                    variant="h4"
-                    style={{
-                        color: isYEarn ? "#7B25D2" : "#027AFF",
-                        display: "flex",
-                        alignItems: "center",
-                    }}
-                >
-                    <HtmlTooltip
-                        placement={"top"}
-                        title={
-                            <React.Fragment>
-                                <Typography>
-                                    See{" "}
-                                    <a
-                                        href="https://daoventures.gitbook.io/daoventures/"
-                                        target="_blank"
-                                    >
-                                        FAQ: Product
-                                    </a>{" "}
-                                    for more information
-                                </Typography>
-                            </React.Fragment>
-                        }
-                        open={isYEarn ? openEarnInfo : openVaultInfo}
-                        onClose={
-                            isYEarn
-                                ? this.handleTooltipEarnClose
-                                : this.handleTooltipVaultClose
-                        }
-                        PopperProps={{
-                            disablePortal: true,
-                            style: {
-                                pointerEvents: "auto",
-                            },
-                        }}
-                        disableFocusListener
-                        disableHoverListener
-                        disableTouchListener
-                    >
-                        <InfoIcon
-                            style={{
-                                verticalAlign: "text-top",
-                                cursor: "pointer",
-                                width: "16px",
-                                height: "16px",
-                            }}
-                            onClick={() =>
-                                isYEarn
-                                    ? this.handleTooltipEarnClose()
-                                    : this.handleTooltipVaultClose()
-                            }
-                        />
-                    </HtmlTooltip>
-                    &nbsp;
-                    {isYEarn ? "yEarn: " + earnRatio : "yVault: " + vaultRatio}
-                    {" %"}
-                </Typography>
-            </React.Fragment>
-        );
-    };
-
-    renderStrategy() {
-        const {classes, asset} = this.props;
-        const {
-            redeemEarnAmount,
-            redeemEarnAmountError,
-            redeemAmount,
-            redeemAmountError,
-            loading,
-            ratio,
-            earnPercent,
-            vaultPercent,
-            scales,
-        } = this.state;
-        if (asset.strategyType === "citadel" || asset.strategyType === "daoFaang") {
-            return (
-                <div>
-                    <Typography variant={"h4"} className={classes.subtitle} noWrap>
-                        STRATEGY
-                    </Typography>
-                    <Grid container style={{marginTop: "1rem"}}>
-                        <Grid item sm={3} xs={6}>
-                            <Typography variant={"h5"} className={classes.grey}>
-                                Currently Active:
-                            </Typography>
-                            <div className={classes.flexy}>
-                                <Typography variant={"h4"} styles={{wordWrap: "break-word"}}>
-                                    {asset.strategy}
-                                </Typography>
-                            </div>
-                        </Grid>
-                        <Grid item sm={3} xs={6}>
-                            <Typography variant={"h5"} className={classes.grey}>
-                                Inception PnL:
-                            </Typography>
-                            <div className={classes.flexy}>
-                                <Typography variant={"h4"} noWrap>
-                                    {(this._getPNL(asset)["inception"] * 100).toFixed(2)}%{" "}
-                                </Typography>
-                            </div>
-                        </Grid>
-                        <Grid item sm={3} xs={6}>
-                            <Typography variant={"h5"} className={classes.grey}>
-                                Monthly PnL:
-                            </Typography>
-                            <div className={classes.flexy}>
-                                <Typography variant={"h4"} noWrap>
-                                    {(this._getPNL(asset)["30d"] * 100).toFixed(2)}%{" "}
-                                </Typography>
-                            </div>
-                        </Grid>
-                        <Grid item sm={3} xs={6}>
-                            <Typography variant={"h5"} className={classes.grey}>
-                                Weekly PnL:
-                            </Typography>
-                            <div className={classes.flexy}>
-                                <Typography variant={"h4"} noWrap>
-                                    {(this._getPNL(asset)["7d"] * 100).toFixed(2)}%{" "}
-                                </Typography>
-                            </div>
-                        </Grid>
-                    </Grid>
-
-                    <div className={classes.fullWidth}></div>
-                </div>
-            );
-        } else {
-            return (
-                <div>
-                    <Typography variant={"h4"} className={classes.subtitle} noWrap>
-                        STRATEGY
-                    </Typography>
-                    <Grid container style={{marginTop: "1rem"}}>
-                        <Grid item sm={3} xs={6}>
-                            <Typography variant={"h5"} className={classes.grey}>
-                                Currently Active:
-                            </Typography>
-                            <div className={classes.flexy}>
-                                <Typography variant={"h4"} styles={{wordWrap: "break-word"}}>
-                                    {asset.strategy}
-                                </Typography>
-                            </div>
-                        </Grid>
-                        <Grid item sm={3} xs={6}>
-                            <Typography variant={"h5"} className={classes.grey}>
-                                Yearly Growth:
-                            </Typography>
-                            <div className={classes.flexy}>
-                                <Typography variant={"h4"} noWrap>
-                                    {(this._getAPY(asset) / 1).toFixed(2)}%{" "}
-                                </Typography>
-                            </div>
-                        </Grid>
-                        <Grid item sm={3} xs={6}>
-                            <Typography variant={"h5"} className={classes.grey}>
-                                Monthly Growth:
-                            </Typography>
-                            <div className={classes.flexy}>
-                                <Typography variant={"h4"} noWrap>
-                                    {(this._getAPY(asset) / 12).toFixed(2)}%{" "}
-                                </Typography>
-                            </div>
-                        </Grid>
-                        <Grid item sm={3} xs={6}>
-                            <Typography variant={"h5"} className={classes.grey}>
-                                Weekly Growth:
-                            </Typography>
-                            <div className={classes.flexy}>
-                                <Typography variant={"h4"} noWrap>
-                                    {(this._getAPY(asset) / 52).toFixed(2)}%{" "}
-                                </Typography>
-                            </div>
-                        </Grid>
-                    </Grid>
-
-                    <div className={classes.fullWidth}></div>
-                </div>
-            );
-        }
-    }
 
     calculateFeeAmount = async () => {
         this.setState({
@@ -2057,7 +1868,7 @@ class Asset extends Component {
                                             </Typography>
 
                                             <div>
-                                                {/** Avalilable balance for withdraw */}
+                                                {/** Available balance for withdraw */}
                                                 <Typography
                                                     variant="body2"
                                                     className={classes.labelMessage}
@@ -2956,130 +2767,6 @@ class Asset extends Component {
         );
     };
 
-    _getAPY = (asset) => {
-        const {basedOn} = this.props;
-        // To calculate APY (Vault + Earn divide by 2 : Estimated)
-        // Compound APY is using compoundApy
-        if (asset && asset.stats) {
-            if (asset.strategyType === "compound") {
-                if (asset.stats.compoundApy) {
-                    return asset.stats.compoundApy;
-                }
-            } else if (asset.strategyType === "yearn") {
-                switch (basedOn) {
-                    case 1:
-                        return (
-                            (asset.stats.apyOneWeekSample + parseFloat(asset.earnApr) * 100) /
-                            2
-                        );
-                    case 2:
-                        return (
-                            (asset.stats.apyOneMonthSample +
-                                parseFloat(asset.earnApr) * 100) /
-                            2
-                        );
-                    case 3:
-                        return (
-                            (asset.stats.apyInceptionSample +
-                                parseFloat(asset.earnApr) * 100) /
-                            2
-                        );
-                    default:
-                        return (asset.apy + parseFloat(asset.earnApr) * 100) / 2;
-                }
-            } else if (asset.strategyType === "citadel") {
-                return asset.stats.citadelApy;
-            } else if (asset.strategyType === "elon") {
-                if (asset.stats.elonApy) {
-                    return asset.stats.elonApy;
-                }
-            } else if (asset.strategyType === "cuban") {
-                if (asset.stats.cubanApy) {
-                    return asset.stats.cubanApy;
-                }
-            } else if (asset.strategyType === "daoFaang") {
-                return asset.stats.faangApy;
-            } else if (asset.strategyType === "moneyPrinter") {
-                return asset.stats.moneyPrinterApy;
-            }
-        }
-        return 0;
-    };
-
-    _getPNL = (asset) => {
-        const {basedOn} = this.props;
-        // To calculate APY (Vault + Earn divide by 2 : Estimated)
-        // Compound APY is using compoundApy
-        if (asset && asset.stats) {
-            // if (asset.strategyType === "compound") {
-            //   if (asset.stats.compoundApy) {
-            //     return asset.stats.compoundApy;
-            //   }
-            // } else if (asset.strategyType === "yearn") {
-            //   switch (basedOn) {
-            //     case 1:
-            //       return (
-            //         (asset.stats.apyOneWeekSample + parseFloat(asset.earnApr) * 100) /
-            //         2
-            //       );
-            //     case 2:
-            //       return (
-            //         (asset.stats.apyOneMonthSample +
-            //           parseFloat(asset.earnApr) * 100) /
-            //         2
-            //       );
-            //     case 3:
-            //       return (
-            //         (asset.stats.apyInceptionSample +
-            //           parseFloat(asset.earnApr) * 100) /
-            //         2
-            //       );
-            //     default:
-            //       return (asset.apy + parseFloat(asset.earnApr) * 100) / 2;
-            //   }
-            // } else if (asset.strategyType === "citadel") {
-            if (
-                asset.strategyType === "citadel" ||
-                asset.strategyType === "daoFaang"
-            ) {
-                // console.log("🚀 | Asset | asset.stats.pnl", asset.stats.pnl);
-
-                return asset.stats.pnl;
-            }
-            // else if (asset.strategyType === "elon") {
-            //   if (asset.stats.elonApy) {
-            //     return asset.stats.elonApy;
-            //   }
-            // } else if (asset.strategyType === "cuban") {
-            //   if (asset.stats.cubanApy) {
-            //     return asset.stats.cubanApy;
-            //   }
-            // } else if (asset.strategyType === "daoFaang") {
-            //   return asset.stats.faangApy;
-            // }
-        }
-        return 0;
-    };
-
-    _getEstimatedAPY = (asset) => {
-        const {earnRatio, vaultRatio} = this.state;
-
-        const earnAPY = asset.earnApr ? parseFloat(asset.earnApr) * 100 : 0;
-        const vaultAPY = asset && asset.stats ? asset.stats.apyInceptionSample : 0;
-        return (
-            (earnAPY * earnRatio) / 100 +
-            (vaultAPY * vaultRatio) / 100
-        ).toFixed(2);
-    };
-
-    handleSliderChange = (event, newValue) => {
-        this.setState({
-            ratio: newValue,
-            earnRatio: 100 - newValue,
-            vaultRatio: newValue,
-        });
-    };
-
     onChange = (event) => {
         let val = [];
         let asset = this.props.asset;
@@ -3173,12 +2860,6 @@ class Asset extends Component {
                     happyHourMessage: "Gas fee is on us!",
                 });
             }
-        }
-    };
-
-    inputKeyDown = (event) => {
-        if (event.which === 13) {
-            this.onInvest();
         }
     };
 
@@ -3360,124 +3041,6 @@ class Asset extends Component {
         }
     };
 
-    inputKeyDown = (event) => {
-        if (event.which === 13) {
-            this.onInvest();
-        }
-    };
-
-    sliderValueText = (value) => {
-        return value;
-    };
-
-    onDeposit = () => {
-        const {
-            amount,
-            earnRatio,
-            vaultRatio,
-            tokenIndex,
-            amountError,
-            errorMessage,
-        } = this.state;
-        const {asset, startLoading} = this.props;
-
-        if (this.validateAmount(amount)) {
-            this.setState({
-                amountError: true,
-                errorMessage: "Invalid amount",
-            });
-            return;
-        }
-
-        if (!amountError && errorMessage === "") {
-            this.setState({loading: true});
-            startLoading();
-
-            if (asset.strategyType === "yearn") {
-                dispatcher.dispatch({
-                    type: DEPOSIT_CONTRACT,
-                    content: {
-                        earnAmount: ((amount * earnRatio) / 100).toString(),
-                        vaultAmount: ((amount * vaultRatio) / 100).toString(),
-                        amount: "0",
-                        asset,
-                    },
-                });
-            } else if (asset.strategyType === "compound") {
-                dispatcher.dispatch({
-                    type: DEPOSIT_CONTRACT,
-                    content: {
-                        earnAmount: 0,
-                        vaultAmount: 0,
-                        amount: amount.toString(),
-                        asset,
-                    },
-                });
-            } else if (this.isUsdVault(asset)) {
-                dispatcher.dispatch({
-                    type: DEPOSIT_CONTRACT,
-                    content: {
-                        earnAmount: 0,
-                        vaultAmount: 0,
-                        amount: amount.toString(),
-                        tokenIndex: tokenIndex, // TODO: Change to state variable
-                        asset,
-                    },
-                });
-            }
-        }
-    };
-
-    onDepositAll = () => {
-        const {asset, startLoading} = this.props;
-        const {earnRatio, vaultRatio, tokenIndex} = this.state;
-        this.setState({loading: true});
-        startLoading();
-        let amount;
-
-        if (this.isUsdVault(asset)) {
-            amount = (asset.balances[this.state.tokenIndex] * 100) / 100;
-        } else {
-            const balance = asset.balance;
-            amount = (balance * 100) / 100;
-            amount = Math.floor(amount * 10000) / 10000;
-        }
-
-        amount = amount.toFixed(4);
-
-        if (asset.strategyType === "yearn") {
-            dispatcher.dispatch({
-                type: DEPOSIT_ALL_CONTRACT,
-                content: {
-                    asset,
-                    earnAmount: ((asset.balance * earnRatio) / 100).toString(),
-                    vaultAmount: ((asset.balance * vaultRatio) / 100).toString(),
-                },
-            });
-        } else if (asset.strategyType === "compound") {
-            dispatcher.dispatch({
-                type: DEPOSIT_ALL_CONTRACT,
-                content: {
-                    earnAmount: 0,
-                    vaultAmount: 0,
-                    amount: amount,
-                    asset,
-                },
-            });
-        } else if (this.isUsdVault(asset)) {
-            dispatcher.dispatch({
-                type: DEPOSIT_ALL_CONTRACT,
-                content: {
-                    earnAmount: 0,
-                    vaultAmount: 0,
-                    amount: amount,
-                    tokenIndex: tokenIndex,
-                    asset,
-                },
-            });
-        }
-    };
-
     onWithdraw = () => {
         let {redeemEarnAmount, redeemAmount, tokenIndex} = this.state;
 
@@ -3580,18 +3143,6 @@ class Asset extends Component {
         }
     };
 
-    onWithdrawAll = () => {
-        const {asset, startLoading} = this.props;
-        const {tokenIndex} = this.state;
-
-        this.setState({loading: true});
-        startLoading();
-        dispatcher.dispatch({
-            type: WITHDRAW_BOTH_VAULT,
-            content: {asset: asset, tokenIndex: tokenIndex},
-        });
-    };
-
     setAmount = (percent) => {
         if (this.state.loading) {
             return;
@@ -3655,53 +3206,6 @@ class Asset extends Component {
             redeemAmountInUsd: (priceInUsd * percent / 100).toFixed(4),
             redeemAmountError: false,
             withdrawErrorMessage: "",
-        });
-    };
-
-    setRedeemVaultAmount = (percent) => {
-        if (this.state.loading) {
-            return;
-        }
-
-        const balance = this.props.asset.vaultBalance;
-
-        let amount = (balance * percent) / 100;
-        amount = Math.floor(amount * 10000) / 10000;
-
-        this.setState({
-            redeemAmount: amount.toFixed(4),
-            redeemAmountError: false,
-            withdrawErrorMessage: "",
-            vaultPercent: percent,
-        });
-    };
-
-    setRedeemEarnAmount = (percent) => {
-        if (this.state.loading) {
-            return;
-        }
-
-        const balance = this.props.asset.earnBalance;
-        let amount = (balance * percent) / 100;
-        amount = Math.floor(amount * 10000) / 10000;
-
-        this.setState({
-            redeemEarnAmountError: false,
-            withdrawEarnErrorMessage: "",
-            redeemEarnAmount: amount.toFixed(4),
-            earnPercent: percent,
-        });
-    };
-
-    handleTooltipEarnClose = () => {
-        this.setState({
-            openEarnInfo: !this.state.openEarnInfo,
-        });
-    };
-
-    handleTooltipVaultClose = () => {
-        this.setState({
-            openVaultInfo: !this.state.openVaultInfo,
         });
     };
 }
