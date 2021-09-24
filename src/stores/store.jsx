@@ -3952,7 +3952,7 @@ class Store {
       // const happyHour = true;
 
       if (happyHour === true) {
-        await this._callDepositAmountContractCitadelHappyHour(
+        await this._callDepositAmountContractHappyHour(
           asset,
           account,
           amount,
@@ -3973,7 +3973,7 @@ class Store {
           }
         );
       } else {
-        await this._callDepositAmountContractCitadel(
+        await this._callDepositAmountContract(
           asset,
           account,
           amount,
@@ -4014,7 +4014,7 @@ class Store {
         }
       );
 
-      await this._callDepositAmountContractCitadel(
+      await this._callDepositAmountContract(
         asset,
         account,
         amount,
@@ -4055,7 +4055,7 @@ class Store {
         }
       );
 
-      await this._callDepositAmountContractCitadel(
+      await this._callDepositAmountContract(
         asset,
         account,
         amount,
@@ -4104,7 +4104,7 @@ class Store {
         // const happyHour = true;
 
         if (happyHour === true) {
-          await this._callDepositAmountContractCitadelHappyHour(
+          await this._callDepositAmountContractHappyHour(
             asset,
             account,
             amount,
@@ -4126,7 +4126,7 @@ class Store {
             }
           );
         } else {
-          await this._callDepositAmountContractCitadel(
+          await this._callDepositAmountContract(
             asset,
             account,
             amount,
@@ -4173,7 +4173,7 @@ class Store {
       );
 
       if (!approvalErr) {
-        await this._callDepositAmountContractCitadel(
+        await this._callDepositAmountContract(
           asset,
           account,
           amount,
@@ -4219,7 +4219,7 @@ class Store {
       );
 
       if (!approvalErr) {
-        await this._callDepositAmountContractCitadel(
+        await this._callDepositAmountContract(
           asset,
           account,
           amount,
@@ -4265,7 +4265,7 @@ class Store {
       );
 
       if (!approvalErr) {
-        await this._callDepositAmountContractCitadel(
+        await this._callDepositAmountContract(
           asset,
           account,
           amount,
@@ -4448,7 +4448,7 @@ class Store {
         const happyHour = await this._eventVerifyAmount(amount); 
 
         if (happyHour === true) {
-          await this._callDepositAmountContractCitadelHappyHour(
+          await this._callDepositAmountContractHappyHour(
               asset,
               account,
               amount,
@@ -4472,7 +4472,7 @@ class Store {
         }
       }
 
-      await this._callDepositAmountContractCitadel(
+      await this._callDepositAmountContract(
         asset,
         account,
         amount,
@@ -4496,7 +4496,7 @@ class Store {
   }
 
   // For Citadel
-  _callDepositAmountContractCitadel = async (
+  _callDepositAmountContract = async (
     asset,
     account,
     amount,
@@ -4581,7 +4581,7 @@ class Store {
       });
   };
 
-  _callDepositAmountContractCitadelHappyHour = async (
+  _callDepositAmountContractHappyHour = async (
     asset,
     account,
     amount,
@@ -4672,124 +4672,9 @@ class Store {
       });
   };
 
-  _callDepositAmountContract = async (asset, account, amount, callback) => {
-    const web3 = new Web3(store.getStore("web3context").library.provider);
-
-    let vaultContract = new web3.eth.Contract(
-      asset.vaultContractABI,
-      asset.vaultContractAddress
-    );
-
-    var amountToSend = web3.utils.toWei(amount, "ether");
-    if (parseInt(asset.decimals) !== 18) {
-      amountToSend = web3.utils
-        .toBN(Math.floor(amount * 10 ** asset.decimals))
-        .toString();
-    }
-
-    vaultContract.methods
-      .deposit(amountToSend)
-      .send({
-        from: account.address,
-        gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-      })
-      .on("transactionHash", function (txnHash) {
-        console.log(txnHash);
-        callback(null, txnHash, null);
-      })
-      .on("confirmation", function (confirmationNumber, receipt) {
-        console.log("Confirmation", confirmationNumber, receipt);
-        // callback(null, null, receipt);
-      })
-      .on("receipt", function (receipt) {
-        console.log(receipt);
-        callback(null, null, receipt);
-      })
-      .on("error", function (error) {
-        if (!error.toString().includes("-32601")) {
-          if (error.message) {
-            return callback(error.message);
-          }
-          callback(error);
-        }
-      })
-      .catch((error) => {
-        if (!error.toString().includes("-32601")) {
-          if (error.message) {
-            return callback(error.message);
-          }
-          callback(error);
-        }
-      });
-  };
-
-  // For Yearn
-  _callDepositContract = async (
-    asset,
-    account,
-    earnAmount,
-    vaultAmount,
-    callback
-  ) => {
-    const web3 = new Web3(store.getStore("web3context").library.provider);
-
-    let vaultContract = new web3.eth.Contract(
-      asset.vaultContractABI,
-      asset.vaultContractAddress
-    );
-
-    var earnAmountToSend = web3.utils.toWei(earnAmount, "ether");
-    if (parseInt(asset.decimals) !== 18) {
-      earnAmountToSend = web3.utils
-        .toBN(Math.floor(earnAmount * 10 ** asset.decimals))
-        .toString();
-    }
-
-    var vaultAmountToSend = web3.utils.toWei(vaultAmount, "ether");
-    if (parseInt(asset.decimals) !== 18) {
-      vaultAmountToSend = web3.utils
-        .toBN(Math.floor(vaultAmount * 10 ** asset.decimals))
-        .toString();
-    }
-
-    console.log([earnAmountToSend, vaultAmountToSend]);
-    vaultContract.methods
-      .deposit([earnAmountToSend, vaultAmountToSend])
-      .send({
-        from: account.address,
-        gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-      })
-      .on("transactionHash", function (txnHash) {
-        console.log(txnHash);
-        callback(null, txnHash, null);
-      })
-      .on("confirmation", function (confirmationNumber, receipt) {
-        console.log("Confirmation", confirmationNumber, receipt);
-        // callback(null, null, receipt);
-      })
-      .on("receipt", function (receipt) {
-        console.log("Reciept", receipt);
-        callback(null, null, receipt);
-      })
-      .on("error", function (error) {
-        if (!error.toString().includes("-32601")) {
-          if (error.message) {
-            return callback(error.message);
-          }
-          callback(error, null, null);
-        }
-      })
-      .catch((error) => {
-        if (!error.toString().includes("-32601")) {
-          if (error.message) {
-            return callback(error.message);
-          }
-          callback(error, null, null);
-        }
-      });
-  };
-
-
+ 
+ 
+  
   _callWithdrawVaultProxy = async (
     asset,
     account,
