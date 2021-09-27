@@ -383,7 +383,7 @@ class Store {
             //this.zap(payload);
             break;
           case IDAI:
-            this.idai(payload);
+            // this.idai(payload);
             break;
           case SWAP:
             this.swap(payload);
@@ -392,7 +392,7 @@ class Store {
             this.trade(payload);
             break;
           case GET_CURV_BALANCE:
-            this.getCurveBalances(payload);
+            // this.getCurveBalances(payload);
             break;
           case GET_BEST_PRICE:
             this.getBestPrice(payload);
@@ -2209,109 +2209,6 @@ class Store {
     return tx;
   };
   
-  idai = (payload) => {
-    const account = store.getStore("account");
-    const { sendAsset, receiveAsset, amount } = payload.content;
-
-    this._checkApproval(
-      sendAsset,
-      account,
-      amount,
-      config.iDAIZapSwapAddress,
-      (err) => {
-        if (err) {
-          return emitter.emit(ERROR, err);
-        }
-
-        this._callIDAI(
-          sendAsset,
-          receiveAsset,
-          account,
-          amount,
-          (err, zapResult) => {
-            if (err) {
-              return emitter.emit(ERROR, err);
-            }
-
-            return emitter.emit(IDAI_RETURNED, zapResult);
-          }
-        );
-      }
-    );
-  };
-
-  _callIDAI = async (sendAsset, receiveAsset, account, amount, callback) => {
-    const web3 = new Web3(store.getStore("web3context").library.provider);
-
-    var amountToSend = web3.utils.toWei(amount, "ether");
-    if (sendAsset.decimals !== 18) {
-      amountToSend = amount * 10 ** sendAsset.decimals;
-    }
-
-    let call = "swapiDAItoyDAI";
-
-    let iDAIZapSwapContract = new web3.eth.Contract(
-      config.iDAIZapSwapABI,
-      config.iDAIZapSwapAddress
-    );
-    iDAIZapSwapContract.methods[call](amountToSend)
-      .send({
-        from: account.address,
-        gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-      })
-      .on("transactionHash", function (hash) {
-        console.log(hash);
-        callback(null, hash);
-      })
-      .on("confirmation", function (confirmationNumber, receipt) {
-        console.log(confirmationNumber, receipt);
-      })
-      .on("receipt", function (receipt) {
-        console.log(receipt);
-      })
-      .on("error", function (error) {
-        if (!error.toString().includes("-32601")) {
-          if (error.message) {
-            return callback(error.message);
-          }
-          callback(error);
-        }
-      })
-      .catch((error) => {
-        if (!error.toString().includes("-32601")) {
-          if (error.message) {
-            return callback(error.message);
-          }
-          callback(error);
-        }
-      });
-  };
-
-  getCurveBalances = (payload) => {
-    const account = store.getStore("account");
-
-    const web3 = new Web3(store.getStore("web3context").library.provider);
-    const curveContracts = store.getStore("curveContracts");
-
-    async.map(
-      curveContracts,
-      (curv, callback) => {
-        this._getERC20Balance(web3, curv, account, (err, balance) => {
-          if (err) {
-            return callback(err);
-          }
-          curv.balance = balance;
-
-          callback(null, curv);
-        });
-      },
-      (err, result) => {
-        store.setStore({ curveContracts: result });
-
-        return emitter.emit(GET_CURV_BALANCE_RETURNED, result);
-      }
-    );
-  };
 
   getVaultBalancesFull = async (interval) => {
     const network = store.getStore("network");
