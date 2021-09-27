@@ -355,75 +355,11 @@ class Store {
     dispatcher.register(
       function (payload) {
         switch (payload.type) {
-          case GET_BALANCES_LIGHT:
-            this.getBalancesLight(payload);
-            break;
-          case GET_BALANCES:
-            this.getBalances(payload);
-            break;
-          case INVEST:
-            // this.invest(payload);
-            break;
-          case REDEEM:
-            this.redeem(payload);
-            break;
-          case REBALANCE:
-            this.rebalance(payload);
-            break;
-          case DONATE:
-            this.donate(payload);
-            break;
-          case GET_AGGREGATED_YIELD:
-            this.getAPR(payload);
-            break;
-          case GET_CONTRACT_EVENTS:
-            this.getContractEvents(payload);
-            break;
-          case ZAP:
-            //this.zap(payload);
-            break;
-          case IDAI:
-            // this.idai(payload);
-            break;
-          case SWAP:
-            // this.swap(payload);
-            break;
-          case TRADE:
-            // this.trade(payload);
-            break;
-          case GET_CURV_BALANCE:
-            // this.getCurveBalances(payload);
-            break;
-          case GET_BEST_PRICE:
-            // this.getBestPrice(payload);
-            break;
-          case GET_VAULT_BALANCES:
-            this.getVaultBalances(payload);
-            break;
-          case GET_VAULT_BALANCES_FULL:
-            this.getVaultBalancesFull(payload);
-            break;
-          case DEPOSIT_CONTRACT:
-            // this.depositContract(payload);
-            break;
           case APPROVE_DEPOSIT_CONTRACT:
             this.approveDepositContract(payload);
             break;
           case CONFIRM_DEPOSIT_CONTRACT:
             this.depositAmountContract(payload);
-            break;
-          case DEPOSIT_ALL_CONTRACT:
-            break;
-          case WITHDRAW_VAULT:
-            break;
-          case WITHDRAW_BOTH_VAULT:
-            // this.withdrawBothAll(payload);
-            break;
-          case GET_DASHBOARD_SNAPSHOT:
-            this.getDashboardSnapshot(payload);
-            break;
-          case GET_STATISTICS:
-            this.getStatistics(payload);
             break;
           case TOGGLE_DRAWER:
             this.toggleDrawer(payload);
@@ -437,9 +373,6 @@ class Store {
           // eslint-disable-next-line no-fallthrough
           case TOGGLE_THEME:
             this.toggleTheme(payload);
-            break;
-          case GET_VAULT_INFO:
-            this.getVaultInfo(payload);
             break;
           case FIND_DAOMINE_POOL:
             this.findDAOminePool(payload);
@@ -1057,329 +990,58 @@ class Store {
     }
   };
 
-  rebalance = (payload) => {
-    const account = store.getStore("account");
-    const { asset } = payload.content;
+  // donate = (payload) => {
+  //   const account = store.getStore("account");
+  //   const { asset, amount } = payload.content;
 
-    this._callRebalance(asset, account, (err, result) => {
-      if (err) {
-        return emitter.emit(ERROR, err);
-      }
+  //   this._callDonate(asset, account, amount, (err, result) => {
+  //     if (err) {
+  //       return emitter.emit(ERROR, err);
+  //     }
 
-      return emitter.emit(REBALANCE_RETURNED, result);
-    });
-  };
+  //     return emitter.emit(DONATE_RETURNED, result);
+  //   });
+  // };
 
-  _callRebalance = async (asset, account, callback) => {
-    const web3 = new Web3(store.getStore("web3context").library.provider);
+  // _callDonate = async (asset, account, amount, callback) => {
+  //   const web3 = new Web3(store.getStore("web3context").library.provider);
 
-    let iEarnContract = new web3.eth.Contract(
-      config.IEarnERC20ABI,
-      asset.iEarnContract
-    );
+  //   let iEarnContract = new web3.eth.Contract(
+  //     config.IEarnERC20ABI,
+  //     asset.erc20address
+  //   );
 
-    iEarnContract.methods
-      .rebalance()
-      .send({
-        from: account.address,
-        gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-      })
-      .on("transactionHash", function (hash) {
-        console.log(hash);
-        callback(null, hash);
-      })
-      .on("confirmation", function (confirmationNumber, receipt) {
-        console.log(confirmationNumber, receipt);
-      })
-      .on("receipt", function (receipt) {
-        console.log(receipt);
-      })
-      .on("error", function (error) {
-        console.log(error);
-        if (!error.toString().includes("-32601")) {
-          if (error.message) {
-            return callback(error.message);
-          }
-          callback(error);
-        }
-      });
-  };
+  //   var amountSend = web3.utils.toWei(amount, "ether");
+  //   if (asset.decimals !== 18) {
+  //     amountSend = Math.round(amount * 10 ** asset.decimals);
+  //   }
 
-  donate = (payload) => {
-    const account = store.getStore("account");
-    const { asset, amount } = payload.content;
-
-    this._callDonate(asset, account, amount, (err, result) => {
-      if (err) {
-        return emitter.emit(ERROR, err);
-      }
-
-      return emitter.emit(DONATE_RETURNED, result);
-    });
-  };
-
-  _callDonate = async (asset, account, amount, callback) => {
-    const web3 = new Web3(store.getStore("web3context").library.provider);
-
-    let iEarnContract = new web3.eth.Contract(
-      config.IEarnERC20ABI,
-      asset.erc20address
-    );
-
-    var amountSend = web3.utils.toWei(amount, "ether");
-    if (asset.decimals !== 18) {
-      amountSend = Math.round(amount * 10 ** asset.decimals);
-    }
-
-    iEarnContract.methods
-      .transfer(asset.iEarnContract, amountSend)
-      .send({
-        from: account.address,
-        gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-      })
-      .on("transactionHash", function (hash) {
-        console.log(hash);
-        callback(null, hash);
-      })
-      .on("confirmation", function (confirmationNumber, receipt) {
-        console.log(confirmationNumber, receipt);
-      })
-      .on("receipt", function (receipt) {
-        console.log(receipt);
-      })
-      .on("error", function (error) {
-        console.log(error);
-        if (!error.toString().includes("-32601")) {
-          if (error.message) {
-            return callback(error.message);
-          }
-          callback(error);
-        }
-      });
-  };
-
-  redeem = (payload) => {
-    const account = store.getStore("account");
-    const { asset, amount } = payload.content;
-
-    this._callRedeem(asset, account, amount, (err, redeemResult) => {
-      if (err) {
-        return emitter.emit(ERROR, err);
-      }
-      return emitter.emit(REDEEM_RETURNED, redeemResult);
-    });
-  };
-
-  _callRedeem = async (asset, account, amount, callback) => {
-    const web3 = new Web3(store.getStore("web3context").library.provider);
-
-    let iEarnContract = new web3.eth.Contract(asset.abi, asset.iEarnContract);
-
-    var amountSend = web3.utils.toWei(amount, "ether");
-    if (asset.decimals !== 18) {
-      amountSend = Math.round(amount * 10 ** asset.decimals);
-    }
-
-    iEarnContract.methods[asset.redeem](amountSend)
-      .send({
-        from: account.address,
-        gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-      })
-      .on("transactionHash", function (hash) {
-        console.log(hash);
-        callback(null, hash);
-      })
-      .on("confirmation", function (confirmationNumber, receipt) {
-        console.log(confirmationNumber, receipt);
-      })
-      .on("receipt", function (receipt) {
-        console.log(receipt);
-      })
-      .on("error", function (error) {
-        console.log(error);
-        if (!error.toString().includes("-32601")) {
-          if (error.message) {
-            return callback(error.message);
-          }
-          callback(error);
-        }
-      });
-  };
-
-  getBalancesLight = async () => {
-    const account = store.getStore("account");
-
-    const assets = store.getStore("assets");
-
-    if (!account || !account.address) {
-      return false;
-    }
-
-    const web3 = await this._getWeb3Provider();
-    if (!web3) {
-      return null;
-    }
-
-    async.map(
-      assets,
-      (asset, callback) => {
-        async.parallel(
-          [
-            (callbackInner) => {
-              this._getERC20Balance(web3, asset, account, callbackInner);
-            },
-            (callbackInner) => {
-              this._getInvestedBalance(web3, asset, account, callbackInner);
-            },
-            (callbackInner) => {
-              this._getPoolPrice(web3, asset, account, callbackInner);
-            },
-            (callbackInner) => {
-              this._getMaxAPR(web3, asset, account, callbackInner);
-            },
-          ],
-          (err, data) => {
-            asset.balance = data[0];
-            asset.investedBalance = data[1];
-            asset.price = data[2];
-            asset.maxApr = data[3];
-            callback(null, asset);
-          }
-        );
-      },
-      (err, assets) => {
-        if (err) {
-          return emitter.emit(ERROR, err);
-        }
-
-        store.setStore({ assets: assets });
-        return emitter.emit(BALANCES_LIGHT_RETURNED, assets);
-      }
-    );
-  };
-
-  getBalances = async () => {
-    const account = store.getStore("account");
-
-    const assets = store.getStore("assets");
-    if (!account || !account.address) {
-      return false;
-    }
-    const web3 = new Web3(store.getStore("web3context").library.provider);
-
-    async.map(
-      assets,
-      (asset, callback) => {
-        if (this.isUsdVault(asset)) {
-          async.parallel(
-            [
-              (callbackInner) => {
-                this._getERC20Balances(web3, asset, account, callbackInner);
-              },
-              (callbackInner) => {
-                this._getInvestedBalance(web3, asset, account, callbackInner);
-              },
-            ],
-            (err, data) => {
-              asset.balances = data[0].balances;
-              asset.sumBalances = data[0].sumBalances;
-              asset.investedBalance = data[1];
-
-              callback(null, asset);
-            }
-          );
-          async.parallel(
-            [
-              (callbackInner) => {
-                this._getPoolPrice(web3, asset, account, callbackInner);
-              },
-              (callbackInner) => {
-                this._getMaxAPR(web3, asset, account, callbackInner);
-              },
-              (callbackInner) => {
-                this._getPoolValue(web3, asset, account, callbackInner);
-              },
-              (callbackInner) => {
-                this._getAPY(web3, asset, account, callbackInner);
-              },
-              (callbackInner) => {
-                this._getCurrentLender(web3, asset, account, callbackInner);
-              },
-              (callbackInner) => {
-                this._getRecommendedLender(web3, asset, account, callbackInner);
-              },
-              (callbackInner) => {
-                this._getBalance(web3, asset, account, callbackInner);
-              },
-            ],
-            (err, data) => {
-              asset.price = data[2];
-              asset.maxApr = data[3];
-              asset.poolValue = data[4];
-              asset.apy = data[5];
-              asset.current = data[6];
-              asset.recommended = data[7];
-              asset.tokenBalance = data[8];
-
-              callback(null, asset);
-            }
-          );
-        } else {
-          async.parallel(
-            [
-              (callbackInner) => {
-                this._getERC20Balance(web3, asset, account, callbackInner);
-              },
-              (callbackInner) => {
-                this._getInvestedBalance(web3, asset, account, callbackInner);
-              },
-              (callbackInner) => {
-                this._getPoolPrice(web3, asset, account, callbackInner);
-              },
-              (callbackInner) => {
-                this._getMaxAPR(web3, asset, account, callbackInner);
-              },
-              (callbackInner) => {
-                this._getPoolValue(web3, asset, account, callbackInner);
-              },
-              (callbackInner) => {
-                this._getAPY(web3, asset, account, callbackInner);
-              },
-              (callbackInner) => {
-                this._getCurrentLender(web3, asset, account, callbackInner);
-              },
-              (callbackInner) => {
-                this._getRecommendedLender(web3, asset, account, callbackInner);
-              },
-              (callbackInner) => {
-                this._getBalance(web3, asset, account, callbackInner);
-              },
-            ],
-            (err, data) => {
-              asset.balance = data[0];
-              asset.investedBalance = data[1];
-              asset.price = data[2];
-              asset.maxApr = data[3];
-              asset.poolValue = data[4];
-              asset.apy = data[5];
-              asset.current = data[6];
-              asset.recommended = data[7];
-              asset.tokenBalance = data[8];
-
-              callback(null, asset);
-            }
-          );
-        }
-      },
-      (err, assets) => {
-        if (err) {
-          return emitter.emit(ERROR, err);
-        }
-        store.setStore({ assets: assets });
-        return emitter.emit(BALANCES_RETURNED, assets);
-      }
-    );
-  };
+  //   iEarnContract.methods
+  //     .transfer(asset.iEarnContract, amountSend)
+  //     .send({
+  //       from: account.address,
+  //       gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+  //     })
+  //     .on("transactionHash", function (hash) {
+  //       console.log(hash);
+  //       callback(null, hash);
+  //     })
+  //     .on("confirmation", function (confirmationNumber, receipt) {
+  //       console.log(confirmationNumber, receipt);
+  //     })
+  //     .on("receipt", function (receipt) {
+  //       console.log(receipt);
+  //     })
+  //     .on("error", function (error) {
+  //       console.log(error);
+  //       if (!error.toString().includes("-32601")) {
+  //         if (error.message) {
+  //           return callback(error.message);
+  //         }
+  //         callback(error);
+  //       }
+  //     });
+  // };
 
   _getERC20Balance = async (web3, asset, account, callback) => {
     if (asset.erc20address === "Ethereum") {
@@ -1723,107 +1385,6 @@ class Store {
     }
   };
 
-  getAPR = (payload) => {
-    var value = 0;
-    if (payload.content && payload.content.amount) {
-      value = payload.content.amount;
-    }
-    const web3 = new Web3(
-      new Web3.providers.HttpProvider(config.infuraProvider)
-    );
-
-    async.map(
-      store.getStore("aprs"),
-      (apr, callback) => {
-        apr.value = value.toString();
-        this._getAPR(web3, apr, callback);
-      },
-      (err, yields) => {
-        if (err) {
-          return emitter.emit(ERROR, err);
-        }
-        //get all headers
-        if (yields && yields.length > 0 && yields[0].apr) {
-          const headers = Object.keys(yields[0].apr);
-          store.setStore({
-            aggregatedYields: yields,
-            aggregatedHeaders: headers,
-          });
-        }
-        return emitter.emit(GET_AGGREGATED_YIELD_RETURNED, yields);
-      }
-    );
-  };
-
-  _getAPR = async (web3, apr, callback) => {
-    let contract = new web3.eth.Contract(
-      config.aprContractABI,
-      config.aprContractAddress
-    );
-    var value = apr.value;
-    if (apr.decimals === 6) {
-      value = web3.utils.toWei(apr.value, "picoether");
-    } else {
-      value = web3.utils.toWei(apr.value, "ether");
-    }
-    try {
-      const val = await contract.methods["getAPROptionsAdjusted"](
-        apr.address,
-        value
-      ).call();
-      const keys = Object.keys(val);
-
-      const vals = keys
-        .filter((key) => {
-          return isNaN(key);
-        })
-        .map((key) => {
-          const obj = {};
-          obj[key] = web3.utils.fromWei(val[key].toString(), "ether");
-          return obj;
-        });
-
-      let output = {};
-
-      for (let i = 0; i < vals.length; i++) {
-        const keys = Object.keys(vals[i]);
-        if (
-          keys[0] === "_unifulcrum" ||
-          keys[0] === "_uniaave" ||
-          keys[0] === "_unicompound" ||
-          keys[0] === "_uniswap"
-        ) {
-          // skip
-        } else {
-          output[keys[0]] = vals[i][keys[0]];
-        }
-      }
-
-      let iearn = 0;
-      if (apr.earnAddress !== "") {
-        let block = await web3.eth.getBlockNumber();
-        let earn = new web3.eth.Contract(config.IEarnABI, apr.earnAddress);
-        let balance = await earn.methods.getPricePerFullShare().call();
-
-        balance = balance - apr.measurement;
-        balance = balance / 1e18;
-        let diff = block - apr.lastMeasurement;
-
-        balance = balance / diff;
-        balance = balance * 2425846;
-        iearn = balance;
-      }
-      output["iearn.finance \n(APY)"] = iearn;
-      apr.apr = output;
-
-      callback(null, apr);
-    } catch (ex) {
-      console.log(ex);
-      // return callback(ex)
-      callback(null, false);
-    }
-  };
-
   _getAggregatedYield = async (web3, call, callback) => {
     let uniswapContract = new web3.eth.Contract(
       config.aggregatedContractABI,
@@ -1861,78 +1422,6 @@ class Store {
       // return callback(ex)
       callback(null, false);
     }
-  };
-
-  getContractEvents = (payload) => {
-    const web3 = new Web3(store.getStore("web3context").library.provider);
-    let iEarnContract = new web3.eth.Contract(
-      config.IEarnABI,
-      config.iEarnContract
-    );
-
-    iEarnContract
-      .getPastEvents("allEvents", { fromBlock: 1, toBlock: "latest" })
-      .then((res) => {
-        const sorted = res
-          .sort((a, b) => {
-            return parseFloat(a.blockNumber) - parseFloat(b.blockNumber);
-          })
-          .filter((tx) => {
-            if (tx.event !== "Transfer") {
-              return false;
-            }
-
-            if (!tx.returnValues.value || tx.returnValues.value === 0) {
-              return false;
-            }
-
-            if (
-              tx.returnValues.from !==
-              "0x0000000000000000000000000000000000000000"
-            ) {
-              return false;
-            }
-
-            return true;
-          })
-          .map(async (tx) => {
-            const rawTx = await this._getTransaction(web3, tx.transactionHash);
-
-            return {
-              blockNumber: tx.blockNumber,
-              transactionHash: tx.transactionHash,
-              eth: web3.utils.fromWei(rawTx.value, "ether"),
-              iEth: web3.utils.fromWei(tx.returnValues.value, "ether"),
-              ethRatio: (tx.returnValues.value * 100) / rawTx.value,
-              address: rawTx.from,
-            };
-          });
-
-        Promise.all(sorted).then(async (transactions) => {
-          const pricePerFullShare = await this._getPricePerFullShare(
-            web3,
-            iEarnContract
-          );
-
-          const trxs = transactions.map(async (tx) => {
-            //console.log(tx.address)
-            const balance = await this._getIEthBalance(
-              web3,
-              iEarnContract,
-              tx.address
-            );
-
-            tx.ethRedeem = parseFloat(pricePerFullShare) * parseFloat(balance);
-            tx.growth = (parseFloat(tx.ethRedeem) * 100) / parseFloat(tx.eth);
-            return tx;
-          });
-
-          Promise.all(trxs).then(async (txs) => {
-            store.setStore({ events: txs });
-            return emitter.emit(GET_CONTRACT_EVENTS_RETURNED, txs);
-          });
-        });
-      });
   };
 
   _getTransaction = async (web3, hash) => {
@@ -2000,131 +1489,6 @@ class Store {
     // let tx = await ethersWallet.sendTransaction(transaction);
     let tx = await web3.eth.sendTransaction(transaction);
     console.log(tx);
-  };
-
-
-  getVaultBalancesFull = async (interval) => {
-    const network = store.getStore("network");
-    const account = store.getStore("account");
-    // const assets = store.getStore('vaultAssets')
-    const assets = this._getDefaultValues(network).vaultAssets;
-    if (!account || !account.address) {
-      return false;
-    }
-    const web3 = await this._getWeb3Provider();
-    if (!web3) {
-      return null;
-    }
-    const vaultStatistics = await this._getStatistics();
-    const addressStatistics = await this._getAddressStatistics(account.address);
-    const addressTXHitory = await this._getAddressTxHistory(account.address);
-    const usdPrices = await this._getUSDPrices();
-
-    async.map(
-      assets,
-      (asset, callback) => {
-        async.parallel(
-          [
-            (callbackInner) => {
-              // 0
-              this._getERC20Balance(web3, asset, account, callbackInner);
-            },
-            // (callbackInner) => { this._getVaultBalance(web3, asset, account, callbackInner) },
-            (callbackInner) => {
-              // 1
-              this._getBalances(web3, asset, account, callbackInner);
-            },
-            // (callbackInner) => { this._getStrategy(web3, asset, account, callbackInner) },
-            (callbackInner) => {
-              // 2
-              this._getStatsAPY(vaultStatistics, asset, callbackInner);
-            },
-            (callbackInner) => {
-              // 3
-              this._getVaultHoldings(web3, asset, account, callbackInner);
-            },
-            (callbackInner) => {
-              // 4
-              this._getAssetUSDPrices(
-                web3,
-                asset,
-                account,
-                usdPrices,
-                callbackInner
-              );
-            },
-            (callbackInner) => {
-              // 5
-              this._getVaultAPY(web3, asset, account, callbackInner);
-            },
-            (callbackInner) => {
-              // 6
-              this._getAddressStats(addressStatistics, asset, callbackInner);
-            },
-            (callbackInner) => {
-              // 7
-              this._getAddressTransactions(
-                addressTXHitory,
-                asset,
-                callbackInner
-              );
-            },
-            (callbackInner) => {
-              // 8
-              this._getMaxAPR(web3, asset, account, callbackInner);
-            },
-            (callbackInner) => {
-              // 9
-              this._getHistoricalPrice(
-                asset.historicalPriceId,
-                interval,
-                callbackInner
-              );
-            },
-            (callbackInner) => {
-              // 10
-              this._getHistoricalPerformance(
-                asset.id,
-                "7d", // TODO: Remove hardcode and refactor, default interval is 1d
-                callbackInner
-              );
-            },
-          ],
-          (err, data) => {
-            if (err) {
-              return callback(err);
-            }
-            asset.balance = data[0];
-            asset.vaultBalance = data[1].vaultBalance;
-            asset.earnBalance = data[1].earnBalance;
-            asset.strategyBalance = data[1].strategyBalance;
-            asset.depositedSharesInUSD = data[1].depositedSharesInUSD
-              ? data[1].depositedSharesInUSD
-              : null;
-            asset.stats = data[2];
-            asset.vaultHoldings = data[3];
-            asset.usdPrice = data[4].usdPrice;
-            asset.earnPricePerFullShare = data[5].earnPricePerFullShare;
-            asset.vaultPricePerFullShare = data[5].vaultPricePerFullShare;
-            asset.compoundExchangeRate = data[5].compoundExchangeRate;
-            asset.apy = data[5].apy;
-            asset.addressStatistics = data[6];
-            asset.addressTransactions = data[7];
-            asset.earnApr = data[8];
-            asset.historicalPrice = data[9];
-            callback(null, asset);
-          }
-        );
-      },
-      (err, assets) => {
-        if (err) {
-          console.log(err);
-          return emitter.emit(ERROR, err);
-        }
-        store.setStore({ vaultAssets: assets });
-        return emitter.emit(VAULT_BALANCES_FULL_RETURNED, assets);
-      }
-    );
   };
 
   _getAssetUSDPrices = async (web3, asset, account, usdPrices, callback) => {
@@ -2359,56 +1723,6 @@ class Store {
     } catch (ex) {
       console.log(ex);
     }
-  };
-
-  getVaultBalances = async () => {
-    const account = store.getStore("account");
-
-    const assets = store.getStore("vaultAssets");
-
-    if (!account || !account.address) {
-      return false;
-    }
-
-    const web3 = new Web3(store.getStore("web3context").library.provider);
-
-    async.map(
-      assets,
-      (asset, callback) => {
-        async.parallel(
-          [
-            (callbackInner) => {
-              this._getERC20Balance(web3, asset, account, callbackInner);
-            },
-            (callbackInner) => {
-              this._getVaultBalance(web3, asset, account, callbackInner);
-            },
-            (callbackInner) => {
-              this._getVaultAPY(web3, asset, account, callbackInner);
-            },
-          ],
-          (err, data) => {
-            if (err) {
-              return callback(err);
-            }
-
-            asset.balance = data[0];
-            asset.vaultBalance = data[1];
-            asset.pricePerFullShare = data[2].pricePerFullShare;
-            asset.apy = data[2].apy;
-
-            callback(null, asset);
-          }
-        );
-      },
-      (err, assets) => {
-        if (err) {
-          return emitter.emit(ERROR, err);
-        }
-        store.setStore({ vaultAssets: assets });
-        return emitter.emit(VAULT_BALANCES_RETURNED, assets);
-      }
-    );
   };
 
   _getVaultBalance = async (web3, asset, account, callback) => {
@@ -3359,311 +2673,6 @@ class Store {
     }
   };
 
-  getDashboardSnapshot = async (payload) => {
-    const { interval } = payload.content;
-    emitter.on(VAULT_BALANCES_FULL_RETURNED, this._calculateDashboard);
-    // emitter.on(BALANCES_LIGHT_RETURNED, this._calculateDashboard)
-    emitter.on(USD_PRICE_RETURNED, this._calculateDashboard);
-    emitter.on(STATISTICS_RETURNED, this._calculateDashboard);
-
-    await this.getVaultBalancesFull(interval);
-    // this.getBalancesLight()
-    await this.getUSDPrices();
-    await this.getStatistics();
-    return emitter.emit(GET_DASHBOARD_SNAPSHOT);
-  };
-
-  _calculateDashboard = () => {
-    const vaults = store.getStore("vaultAssets");
-    const prices = store.getStore("usdPrices");
-    const statistics = store.getStore("statistics");
-
-    if (
-      vaults &&
-      vaults.length > 0 &&
-      prices !== null &&
-      statistics &&
-      statistics.length > 0
-    ) {
-      let basedOn = localStorage.getItem("yearn.finance-dashboard-basedon");
-
-      if (!basedOn) {
-        basedOn = "3";
-      }
-      // FILTER USED VAULTS AND CALCULATE VAULT ASSET BALANCES
-      const farmersInUse = vaults
-        .filter((farmer) => {
-          if (farmer.id === "ETH") {
-            return false;
-          } else if (farmer.strategyType === "compound") {
-            return farmer.strategyBalance > 0.0001;
-          }
-          return farmer.earnBalance + farmer.vaultBalance > 0.0001;
-        })
-        .map((farmer) => {
-          let apy = 0;
-
-          const vaultStats = statistics.filter((stats) => {
-            if (farmer.strategyType === "yearn") {
-              return (
-                stats.tokenAddress.toLowerCase() ===
-                farmer.erc20address.toLowerCase()
-              );
-            } else if (farmer.strategyType === "compound") {
-              return (
-                stats.address.toLowerCase() ===
-                farmer.vaultContractAddress.toLowerCase()
-              );
-            }
-            return false;
-          });
-
-          if (vaultStats.length === 0) {
-            apy = farmer.apy;
-          } else {
-            if (farmer.strategyType === "yearn") {
-              switch (basedOn) {
-                case "1":
-                  apy = (vaultStats[0].apyOneWeekSample + farmer.earnApr) / 2;
-                  break;
-                case "2":
-                  apy = (vaultStats[0].apyOneMonthSample + farmer.earnApr) / 2;
-                  break;
-                case "3":
-                  apy = (vaultStats[0].apyInceptionSample + farmer.earnApr) / 2;
-                  break;
-                default:
-                  apy = farmer.apy;
-              }
-            } else if (farmer.strategyType === "compound") {
-              apy = vaultStats[0].compoundApy;
-            }
-          }
-
-          const price = prices[farmer.price_id];
-          farmer.prices = price;
-          if (farmer.strategyType === "yearn") {
-            farmer.tokenBalance =
-              farmer.vaultBalance * farmer.vaultPricePerFullShare +
-              farmer.earnBalance * farmer.earnPricePerFullShare;
-          } else if (farmer.strategyType === "compound") {
-            farmer.tokenBalance =
-              farmer.strategyBalance * farmer.compoundExchangeRate;
-          }
-
-          farmer.usdBalance = farmer.tokenBalance * farmer.prices.usd;
-          farmer.vaultGrowth_daily_usd =
-            farmer.tokenBalance * (apy / 36500) * farmer.prices.usd;
-          farmer.vaultGrowth_weekly_usd =
-            farmer.tokenBalance * (apy / 5200) * farmer.prices.usd;
-          farmer.vaultGrowth_yearly_usd =
-            ((farmer.tokenBalance * apy) / 100) * farmer.prices.usd;
-
-          farmer.ethBalance = farmer.tokenBalance * farmer.prices.eth;
-          farmer.vaultGrowth_daily_eth =
-            farmer.tokenBalance * (apy / 36500) * farmer.prices.eth;
-          farmer.vaultGrowth_weekly_eth =
-            farmer.tokenBalance * (apy / 5200) * farmer.prices.eth;
-          farmer.vaultGrowth_yearly_eth =
-            ((farmer.tokenBalance * apy) / 100) * farmer.prices.eth;
-
-          if (farmer.historicalPrice) {
-            farmer.portfolioBalance = [];
-            const sortByTimestamp = (a, b) => {
-              if (a.timestamp > b.timestamp) return 1;
-              if (a.timestamp < b.timestamp) return -1;
-              return 0;
-            };
-
-            if (farmer.strategyType === "yearn") {
-              farmer.historicalPrice.sort(sortByTimestamp).forEach((price) => {
-                farmer.portfolioBalance.push([
-                  price.timestamp,
-                  (parseFloat(price.earnPrice) / 10 ** 18) *
-                    farmer.earnBalance +
-                    (parseFloat(price.vaultPrice) / 10 ** 18) *
-                      farmer.vaultBalance,
-                ]);
-              });
-            } else if (farmer.strategyType === "compound") {
-              farmer.historicalPrice.sort(sortByTimestamp).forEach((price) => {
-                farmer.portfolioBalance.push([
-                  price.timestamp,
-                  (parseFloat(price.compoundExchangeRate) / 10 ** 18) *
-                    farmer.strategyBalance,
-                ]);
-              });
-            }
-          }
-
-          return farmer;
-        });
-
-      // CALCULATE VAULT BALANCES AND DAILY GROWTH
-      const vaultBalances = farmersInUse.reduce(
-        (accumulator, vault) => {
-          accumulator.vaultBalance_usd =
-            accumulator.vaultBalance_usd + vault.usdBalance;
-          accumulator.vaultGrowth_daily_usd =
-            accumulator.vaultGrowth_daily_usd + vault.vaultGrowth_daily_usd;
-          accumulator.vaultGrowth_weekly_usd =
-            accumulator.vaultGrowth_weekly_usd + vault.vaultGrowth_weekly_usd;
-          accumulator.vaultGrowth_yearly_usd =
-            accumulator.vaultGrowth_yearly_usd + vault.vaultGrowth_yearly_usd;
-
-          accumulator.vaultBalance_eth =
-            accumulator.vaultBalance_eth + vault.ethBalance;
-          accumulator.vaultGrowth_daily_eth =
-            accumulator.vaultGrowth_daily_eth + vault.vaultGrowth_daily_eth;
-          accumulator.vaultGrowth_weekly_eth =
-            accumulator.vaultGrowth_weekly_eth + vault.vaultGrowth_weekly_eth;
-          accumulator.vaultGrowth_yearly_eth =
-            accumulator.vaultGrowth_yearly_eth + vault.vaultGrowth_yearly_eth;
-          if (
-            !accumulator.totalPortfolioBalance ||
-            accumulator.totalPortfolioBalance.length === 0
-          ) {
-            accumulator.totalPortfolioBalance = vault.portfolioBalance;
-          } else {
-            vault.portfolioBalance.forEach((balance) => {
-              accumulator.totalPortfolioBalance.forEach((totalBalance) => {
-                if (balance[0] === totalBalance[0]) {
-                  totalBalance[1] += balance[1];
-                }
-              });
-            });
-          }
-          return accumulator;
-        },
-        {
-          vaultBalance_usd: 0,
-          vaultGrowth_daily_usd: 0,
-          vaultGrowth_weekly_usd: 0,
-          vaultGrowth_yearly_usd: 0,
-          vaultBalance_eth: 0,
-          vaultGrowth_daily_eth: 0,
-          vaultGrowth_weekly_eth: 0,
-          vaultGrowth_yearly_eth: 0,
-        }
-      );
-
-      // CALCULATE VAULT GROWth PERCENTAGES
-      const vaultGrowthDailyPerc_usd =
-        (vaultBalances.vaultGrowth_daily_usd * 100) /
-        vaultBalances.vaultBalance_usd;
-      const vaultGrowthWeeklyPerc_usd =
-        (vaultBalances.vaultGrowth_weekly_usd * 100) /
-        vaultBalances.vaultBalance_usd;
-      const vaultGrowthYearlyPerc_usd =
-        (vaultBalances.vaultGrowth_yearly_usd * 100) /
-        vaultBalances.vaultBalance_usd;
-
-      const vaultGrowthDailyPerc_eth =
-        (vaultBalances.vaultGrowth_daily_eth * 100) /
-        vaultBalances.vaultBalance_eth;
-      const vaultGrowthWeeklyPerc_eth =
-        (vaultBalances.vaultGrowth_weekly_eth * 100) /
-        vaultBalances.vaultBalance_eth;
-      const vaultGrowthYearlyPerc_eth =
-        (vaultBalances.vaultGrowth_yearly_eth * 100) /
-        vaultBalances.vaultBalance_eth;
-
-      // CALCULATE PORTFOLIO (earn + vault) BALANCES
-      const portfolioBalance_usd = vaultBalances.vaultBalance_usd;
-      const portfolioGrowthDaily_usd = vaultBalances.vaultGrowth_daily_usd;
-      const portfolioGrowthWeekly_usd = vaultBalances.vaultGrowth_weekly_usd;
-      const portfolioGrowthYearly_usd = vaultBalances.vaultGrowth_yearly_usd;
-      const portfolioGrowthDailyPerc_usd =
-        (vaultBalances.vaultGrowth_daily_usd * 100) /
-        vaultBalances.vaultBalance_usd;
-      const portfolioGrowthWeeklyPerc_usd =
-        (vaultBalances.vaultGrowth_weekly_usd * 100) /
-        vaultBalances.vaultBalance_usd;
-      const portfolioGrowthYearlyPerc_usd =
-        (vaultBalances.vaultGrowth_yearly_usd * 100) /
-        vaultBalances.vaultBalance_usd;
-
-      const portfolioBalance_eth = vaultBalances.vaultBalance_eth;
-      const portfolioGrowthDaily_eth = vaultBalances.vaultGrowth_daily_eth;
-      const portfolioGrowthWeekly_eth = vaultBalances.vaultGrowth_weekly_eth;
-      const portfolioGrowthYearly_eth = vaultBalances.vaultGrowth_yearly_eth;
-      const portfolioGrowthDailyPerc_eth =
-        (vaultBalances.vaultGrowth_daily_eth * 100) /
-        vaultBalances.vaultBalance_eth;
-      const portfolioGrowthWeeklyPerc_eth =
-        (vaultBalances.vaultGrowth_weekly_eth * 100) /
-        vaultBalances.vaultBalance_eth;
-      const portfolioGrowthYearlyPerc_eth =
-        (vaultBalances.vaultGrowth_yearly_eth * 100) /
-        vaultBalances.vaultBalance_eth;
-
-      let dashboard = {
-        vault_balance_usd: vaultBalances.vaultBalance_usd,
-        vault_growth_usd_daily: vaultBalances.vaultGrowth_daily_usd,
-        vault_growth_usd_weekly: vaultBalances.vaultGrowth_weekly_usd,
-        vault_growth_usd_yearly: vaultBalances.vaultGrowth_yearly_usd,
-        vault_growth_usd_daily_perc: vaultGrowthDailyPerc_usd,
-        vault_growth_usd_weekly_perc: vaultGrowthWeeklyPerc_usd,
-        vault_growth_usd_yearly_perc: vaultGrowthYearlyPerc_usd,
-
-        vault_balance_eth: vaultBalances.vaultBalance_eth,
-        vault_growth_eth_daily: vaultBalances.vaultGrowth_daily_eth,
-        vault_growth_eth_weekly: vaultBalances.vaultGrowth_weekly_eth,
-        vault_growth_eth_yearly: vaultBalances.vaultGrowth_yearly_eth,
-        vault_growth_eth_daily_perc: vaultGrowthDailyPerc_eth,
-        vault_growth_eth_weekly_perc: vaultGrowthWeeklyPerc_eth,
-        vault_growth_eth_yearly_perc: vaultGrowthYearlyPerc_eth,
-
-        portfolio_balance_usd: portfolioBalance_usd,
-        portfolio_growth_usd_daily: portfolioGrowthDaily_usd,
-        portfolio_growth_usd_weekly: portfolioGrowthWeekly_usd,
-        portfolio_growth_usd_yearly: portfolioGrowthYearly_usd,
-        portfolio_growth_usd_daily_perc: portfolioGrowthDailyPerc_usd,
-        portfolio_growth_usd_weekly_perc: portfolioGrowthWeeklyPerc_usd,
-        portfolio_growth_usd_yearly_perc: portfolioGrowthYearlyPerc_usd,
-
-        portfolio_balance_eth: portfolioBalance_eth,
-        portfolio_growth_eth_daily: portfolioGrowthDaily_eth,
-        portfolio_growth_eth_weekly: portfolioGrowthWeekly_eth,
-        portfolio_growth_eth_yearly: portfolioGrowthYearly_eth,
-        portfolio_growth_eth_daily_perc: portfolioGrowthDailyPerc_eth,
-        portfolio_growth_eth_weekly_perc: portfolioGrowthWeeklyPerc_eth,
-        portfolio_growth_eth_yearly_perc: portfolioGrowthYearlyPerc_eth,
-
-        vaults: farmersInUse,
-        statistics: statistics,
-        totalPerformance: vaultBalances.totalPortfolioBalance,
-      };
-
-      store.setStore({ dashboard: dashboard });
-      emitter.emit(DASHBOARD_SNAPSHOT_RETURNED, dashboard);
-    }
-  };
-
-  getStatistics = async () => {
-    try {
-      const statistics = await this._getStatistics();
-
-      store.setStore({ statistics: statistics });
-      emitter.emit(STATISTICS_RETURNED, statistics);
-    } catch (e) {
-      console.log(e);
-      return store.getStore("universalGasPrice");
-    }
-  };
-
-  _getStatistics = async () => {
-    try {
-      const url = config.statsProvider + "vaults/apy";
-      const statisticsString = await rp(url);
-      const statistics = JSON.parse(statisticsString);
-      return statistics.body;
-    } catch (e) {
-      console.log(e);
-      return store.getStore("universalGasPrice");
-    }
-  };
-
   _getHistoricalPrice = async (price_id, interval, callback) => {
     try {
       const url = `${config.statsProvider}vaults/price/${price_id}/${interval}`;
@@ -3926,35 +2935,6 @@ class Store {
       console.log(e);
       // return store.getStore('universalGasPrice')
     }
-  };
-
-  getVaultInfo = async () => {
-    const vaultApiInfo = store.getStore("vaultApiInfo");
-    // const web3 = await this._getWeb3Provider()
-    // if(!web3) {
-    //   console.log('我在这跳出了2')
-    //   return null
-    // }
-    const totalValue = await this._getTotalValueStatistic();
-    // async.map(vaultApiInfo, (vaultApiInfo, callback) => {
-    //   async.parallel([
-    //     (callbackInner) => { this._getTotalValue(totalValue, vaultApiInfo, callbackInner) },
-    //   ], (err, data) => {
-    //     if(err) {
-    //       return callback(err)
-    //     }
-    //     vaultApiInfo.totalValue = '11'
-    //     callback(null, vaultApiInfo)
-    //   })
-    // }, (err, vaultApiInfo) => {
-    //   if(err) {
-    //     console.log(err)
-    //     return emitter.emit(ERROR, err)
-    //   }
-    const val = totalValue[0].tvl;
-    store.setStore({ totalValue: val });
-    return emitter.emit(GET_VAULT_INFO, val);
-    // })
   };
 
   saveBiconomyProvider = async (payload) => {
