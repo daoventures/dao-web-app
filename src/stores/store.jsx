@@ -64,7 +64,7 @@ import {
   APPROVE_DEPOSIT_SUCCESS,
   ERROR_WALLET_APPROVAL,
   ERROR_DEPOSIT_WALLET
-} from "../constants";
+} from "../constants/constants";
 
 import Ethereum from "./config/ethereum";
 import Kovan from "./config/kovan";
@@ -73,7 +73,7 @@ import Mumbai from "./config/mumbai";
 import Web3 from "web3";
 import async from "async";
 import citadelABI from "./citadelABI.json";
-import config from "../config";
+import config from "../config/config";
 import fromExponential from "from-exponential";
 import { injected } from "./connectors";
 
@@ -684,6 +684,41 @@ class Store {
     return {
       success: true,
       data: returnObj
+    }
+  };
+
+  _getERC20Balance = async (web3, asset, account, callback) => {
+    if (asset.erc20address === "Ethereum") {
+      try {
+        const eth_balance = web3.utils.fromWei(
+          await web3.eth.getBalance(account.address),
+          "ether"
+        );
+        callback(null, parseFloat(eth_balance));
+      } catch (ex) {
+        console.log(ex);
+        return callback(ex);
+      }
+      return;
+    } else {
+      const network = store.getStore("network");
+      const erc20Abi = contractHelper.getERC20AbiByNetwork(network);
+      let erc20Contract = new web3.eth.Contract(
+        erc20Abi,
+        asset.erc20address
+      );
+      console.log(`Getting ERC 20 Balance for asset:  ${asset.erc20address}`);
+
+      try {
+        var balance = await erc20Contract.methods
+          .balanceOf(account.address)
+          .call({ from: account.address });
+        balance = parseFloat(balance) / 10 ** asset.decimals;
+        callback(null, parseFloat(balance));
+      } catch (ex) {
+        console.error("Error in getting ERC 20 Balance for asset: ", ex);
+        // return callback(ex);
+      }
     }
   };
 
