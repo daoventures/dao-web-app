@@ -362,7 +362,7 @@ class Store {
             this.getBalances(payload);
             break;
           case INVEST:
-            this.invest(payload);
+            // this.invest(payload);
             break;
           case REDEEM:
             this.redeem(payload);
@@ -613,81 +613,6 @@ class Store {
       ],
       upgradeToken,
     };
-  };
-
-  invest = (payload) => {
-    const account = store.getStore("account");
-    const { asset, amount } = payload.content;
-
-    if (asset.erc20address !== "Ethereum") {
-      this._checkApproval(
-        asset,
-        account,
-        amount,
-        asset.iEarnContract,
-        (err) => {
-          if (err) {
-            return emitter.emit(ERROR, err);
-          }
-
-          this._callInvest(asset, account, amount, (err, investResult) => {
-            if (err) {
-              return emitter.emit(ERROR, err);
-            }
-
-            return emitter.emit(INVEST_RETURNED, investResult);
-          });
-        }
-      );
-    } else {
-      this._callInvest(asset, account, amount, (err, investResult) => {
-        if (err) {
-          return emitter.emit(ERROR, err);
-        }
-
-        return emitter.emit(INVEST_RETURNED, investResult);
-      });
-    }
-  };
-
-  _checkApprovalForProxy = async (
-    asset,
-    account,
-    amount,
-    contract,
-    callback
-  ) => {
-    const web3 = new Web3(store.getStore("web3context").library.provider);
-
-    const vaultContract = new web3.eth.Contract(
-      asset.vaultContractABI,
-      asset.vaultContractAddress
-    );
-    try {
-      const allowance = await vaultContract.methods
-        .allowance(account.address, contract)
-        .call({ from: account.address });
-
-      const ethAllowance = web3.utils.fromWei(allowance, "ether");
-
-      if (parseFloat(ethAllowance) < parseFloat(amount)) {
-        await vaultContract.methods
-          .approve(contract, web3.utils.toWei("999999999999", "ether"))
-          .send({
-            from: account.address,
-            gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-          });
-
-        callback();
-      } else {
-        callback();
-      }
-    } catch (error) {
-      if (error.message) {
-        return callback(error.message);
-      }
-      callback(error);
-    }
   };
 
   _checkApproval = async (asset, account, amount, contract, callback) => {
