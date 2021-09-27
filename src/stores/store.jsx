@@ -548,128 +548,42 @@ class Store {
     };
   };
 
-  _checkApproval = async (asset, account, amount, contract, callback) => {
-    const web3 = new Web3(store.getStore("web3context").library.provider);
+  // checkIsApproved = async (asset, account, amount, contract) => {
+  //   const web3 = new Web3(store.getStore("web3context").library.provider);
 
-    if (asset.erc20address === "Ethereum") {
-      callback();
-    }
+  //   if (asset.erc20address === "Ethereum") {
+  //     return {
+  //       success: false,
+  //       message: "erc20address not ethereum"
+  //     }
+  //   }
 
-    let erc20Contract = new web3.eth.Contract(
-      config.erc20ABI,
-      asset.erc20address
-    );
+  //   let erc20Contract = new web3.eth.Contract(
+  //       config.erc20ABI,
+  //       asset.erc20address
+  //   );
 
-    try {
-      const allowance = await erc20Contract.methods
-        .allowance(account.address, contract)
-        .call({ from: account.address });
-      const ethAllowance = web3.utils.fromWei(allowance, "ether");
-      if (parseFloat(ethAllowance) < parseFloat(amount)) {
-        /*
-          code to accomodate for "assert _value == 0 or self.allowances[msg.sender][_spender] == 0" in contract
-          We check to see if the allowance is > 0. If > 0 set to 0 before we set it to the correct amount.
-        */
-        if (
-          [
-            "crvV1",
-            "crvV2",
-            "crvV3",
-            "crvV4",
-            "USDTv1",
-            "USDTv2",
-            "USDTv3",
-            "USDT",
-            "sCRV",
-          ].includes(asset.id) &&
-          ethAllowance > 0
-        ) {
-          await erc20Contract.methods
-            .approve(contract, web3.utils.toWei("0", "ether"))
-            .send({
-              from: account.address,
-              gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-            });
-        }
+  //   try {
+  //     const allowance = await erc20Contract.methods
+  //         .allowance(account.address, contract)
+  //         .call({from: account.address});
 
-        await erc20Contract.methods
-          .approve(contract, web3.utils.toWei("999999999999", "ether"))
-          .send({
-            from: account.address,
-            gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-          })
-          .on("transactionHash", function (txnHash) {
-            console.log(txnHash);
-            callback(null, txnHash, null);
-          })
-          .on("receipt", function (receipt) {
-            console.log(receipt);
-            callback(null, null, receipt);
-          })
-          .on("error", function (error) {
-            if (!error.toString().includes("-32601")) {
-              if (error.message) {
-                return callback(error.message);
-              }
-              callback(error);
-            }
-          })
-          .catch((error) => {
-            if (!error.toString().includes("-32601")) {
-              if (error.message) {
-                return callback(error.message);
-              }
-              callback(error);
-            }
-          });
+  //     const ethAllowance = web3.utils.fromWei(allowance, "ether");
+  //     return {
+  //       success: true,
+  //       needApproval: parseFloat(ethAllowance) < parseFloat(amount)
+  //     }
 
-      } else {
-        callback(null, null, true);
-      }
-    } catch (error) {
-      if (error.message) {
-        console.log(error.message);
-      }
-      return callback(error);
-    }
-  };
-
-  checkIsApproved = async (asset, account, amount, contract) => {
-    const web3 = new Web3(store.getStore("web3context").library.provider);
-
-    if (asset.erc20address === "Ethereum") {
-      return {
-        success: false,
-        message: "erc20address not ethereum"
-      }
-    }
-
-    let erc20Contract = new web3.eth.Contract(
-        config.erc20ABI,
-        asset.erc20address
-    );
-
-    try {
-      const allowance = await erc20Contract.methods
-          .allowance(account.address, contract)
-          .call({from: account.address});
-
-      const ethAllowance = web3.utils.fromWei(allowance, "ether");
-      return {
-        success: true,
-        needApproval: parseFloat(ethAllowance) < parseFloat(amount)
-      }
-
-    } catch (error) {
-      if (error.message) {
-        console.log(error.message);
-      }
-      return {
-        success: false,
-        message: error
-      }
-    }
-  }
+  //   } catch (error) {
+  //     if (error.message) {
+  //       console.log(error.message);
+  //     }
+  //     return {
+  //       success: false,
+  //       message: error
+  //     }
+  //   }
+  // }
 
   _checkApprovalCitadel = async (
     asset,
@@ -785,298 +699,134 @@ class Store {
 
  
 
-  checkIsCompoundApproved = async (asset,
-                                   account,
-                                   amount,
-                                   contract) => {
+  // checkIsCompoundApproved = async (asset,
+  //                                  account,
+  //                                  amount,
+  //                                  contract) => {
 
-    const web3 = new Web3(store.getStore("web3context").library.provider);
-
-    if (asset.erc20address === "Ethereum") {
-      return {
-        success: false,
-        message: "erc20address not ethereum"
-      }
-    }
-
-    let erc20Contract = new web3.eth.Contract(
-        config.erc20ABI,
-        asset.erc20address
-    );
-
-    try {
-      const allowance = await erc20Contract.methods
-          .allowance(account.address, contract)
-          .call({from: account.address});
-
-      const ethAllowance = web3.utils.fromWei(allowance, "ether");
-      return {
-        success: true,
-        needApproval: parseFloat(ethAllowance) < parseFloat(amount)
-      }
-    } catch (error) {
-      if (error.message) {
-        console.log(error.message);
-      }
-      return {
-        success: false,
-        message: error
-      }
-    }
-  }
-
-  _checkApprovalWaitForConfirmation = async (
-    asset,
-    account,
-    amount,
-    contract,
-    callback
-  ) => {
-    const web3 = new Web3(store.getStore("web3context").library.provider);
-    let erc20Contract = new web3.eth.Contract(
-      config.erc20ABI,
-      asset.erc20address
-    );
-    const allowance = await erc20Contract.methods
-      .allowance(account.address, contract)
-      .call({ from: account.address });
-
-    const ethAllowance = web3.utils.fromWei(allowance, "ether");
-
-    if (parseFloat(ethAllowance) < parseFloat(amount)) {
-      if (
-        [
-          "crvV1",
-          "crvV2",
-          "crvV3",
-          "crvV4",
-          "USDTv1",
-          "USDTv2",
-          "USDTv3",
-          "sCRV",
-        ].includes(asset.id) &&
-        ethAllowance > 0
-      ) {
-        erc20Contract.methods
-          .approve(contract, web3.utils.toWei("0", "ether"))
-          .send({
-            from: account.address,
-            gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-          })
-          .on("transactionHash", async function (hash) {
-            erc20Contract.methods
-              .approve(contract, web3.utils.toWei(amount, "ether"))
-              .send({
-                from: account.address,
-                gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-              })
-              .on("transactionHash", function (hash) {
-                callback();
-              })
-              .on("error", function (error) {
-                if (!error.toString().includes("-32601")) {
-                  if (error.message) {
-                    return callback(error.message);
-                  }
-                  callback(error);
-                }
-              });
-          })
-          .on("error", function (error) {
-            if (!error.toString().includes("-32601")) {
-              if (error.message) {
-                return callback(error.message);
-              }
-              callback(error);
-            }
-          });
-      } else {
-        erc20Contract.methods
-          .approve(contract, web3.utils.toWei(amount, "ether"))
-          .send({
-            from: account.address,
-            gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-          })
-          .on("transactionHash", function (hash) {
-            callback();
-          })
-          .on("error", function (error) {
-            if (!error.toString().includes("-32601")) {
-              if (error.message) {
-                return callback(error.message);
-              }
-              callback(error);
-            }
-          });
-      }
-    } else {
-      callback();
-    }
-  };
-
-  _callInvest = async (asset, account, amount, callback) => {
-    const web3 = new Web3(store.getStore("web3context").library.provider);
-
-    let iEarnContract = new web3.eth.Contract(asset.abi, asset.iEarnContract);
-    if (asset.erc20address === "Ethereum") {
-      iEarnContract.methods[asset.invest]()
-        .send({
-          from: account.address,
-          value: web3.utils.toWei(amount, "ether"),
-          gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-        })
-        .on("transactionHash", function (hash) {
-          console.log(hash);
-          callback(null, hash);
-        })
-        .on("confirmation", function (confirmationNumber, receipt) {
-          console.log(confirmationNumber, receipt);
-        })
-        .on("receipt", function (receipt) {
-          console.log(receipt);
-        })
-        .on("error", function (error) {
-          if (!error.toString().includes("-32601")) {
-            if (error.message) {
-              return callback(error.message);
-            }
-            callback(error);
-          }
-        })
-        .catch((error) => {
-          if (!error.toString().includes("-32601")) {
-            if (error.message) {
-              return callback(error.message);
-            }
-            callback(error);
-          }
-        });
-    } else {
-      var amountToSend = web3.utils.toWei(amount, "ether");
-      if (asset.decimals !== 18) {
-        amountToSend = amount * 10 ** asset.decimals;
-      }
-      iEarnContract.methods[asset.invest](amountToSend)
-        .send({
-          from: account.address,
-          gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-        })
-        .on("transactionHash", function (hash) {
-          console.log(hash);
-          callback(null, hash);
-        })
-        .on("confirmation", function (confirmationNumber, receipt) {
-          console.log(confirmationNumber, receipt);
-        })
-        .on("receipt", function (receipt) {
-          console.log(receipt);
-        })
-        .on("error", function (error) {
-          if (!error.toString().includes("-32601")) {
-            if (error.message) {
-              return callback(error.message);
-            }
-            callback(error);
-          }
-        })
-        .catch((error) => {
-          if (!error.toString().includes("-32601")) {
-            if (error.message) {
-              return callback(error.message);
-            }
-            callback(error);
-          }
-        });
-    }
-  };
-
-  // donate = (payload) => {
-  //   const account = store.getStore("account");
-  //   const { asset, amount } = payload.content;
-
-  //   this._callDonate(asset, account, amount, (err, result) => {
-  //     if (err) {
-  //       return emitter.emit(ERROR, err);
-  //     }
-
-  //     return emitter.emit(DONATE_RETURNED, result);
-  //   });
-  // };
-
-  // _callDonate = async (asset, account, amount, callback) => {
   //   const web3 = new Web3(store.getStore("web3context").library.provider);
 
-  //   let iEarnContract = new web3.eth.Contract(
-  //     config.IEarnERC20ABI,
-  //     asset.erc20address
-  //   );
-
-  //   var amountSend = web3.utils.toWei(amount, "ether");
-  //   if (asset.decimals !== 18) {
-  //     amountSend = Math.round(amount * 10 ** asset.decimals);
+  //   if (asset.erc20address === "Ethereum") {
+  //     return {
+  //       success: false,
+  //       message: "erc20address not ethereum"
+  //     }
   //   }
 
-  //   iEarnContract.methods
-  //     .transfer(asset.iEarnContract, amountSend)
-  //     .send({
-  //       from: account.address,
-  //       gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-  //     })
-  //     .on("transactionHash", function (hash) {
-  //       console.log(hash);
-  //       callback(null, hash);
-  //     })
-  //     .on("confirmation", function (confirmationNumber, receipt) {
-  //       console.log(confirmationNumber, receipt);
-  //     })
-  //     .on("receipt", function (receipt) {
-  //       console.log(receipt);
-  //     })
-  //     .on("error", function (error) {
-  //       console.log(error);
-  //       if (!error.toString().includes("-32601")) {
-  //         if (error.message) {
-  //           return callback(error.message);
-  //         }
-  //         callback(error);
-  //       }
-  //     });
+  //   let erc20Contract = new web3.eth.Contract(
+  //       config.erc20ABI,
+  //       asset.erc20address
+  //   );
+
+  //   try {
+  //     const allowance = await erc20Contract.methods
+  //         .allowance(account.address, contract)
+  //         .call({from: account.address});
+
+  //     const ethAllowance = web3.utils.fromWei(allowance, "ether");
+  //     return {
+  //       success: true,
+  //       needApproval: parseFloat(ethAllowance) < parseFloat(amount)
+  //     }
+  //   } catch (error) {
+  //     if (error.message) {
+  //       console.log(error.message);
+  //     }
+  //     return {
+  //       success: false,
+  //       message: error
+  //     }
+  //   }
+  // }
+
+  // _checkApprovalWaitForConfirmation = async (
+  //   asset,
+  //   account,
+  //   amount,
+  //   contract,
+  //   callback
+  // ) => {
+  //   const web3 = new Web3(store.getStore("web3context").library.provider);
+  //   let erc20Contract = new web3.eth.Contract(
+  //     config.erc20ABI,
+  //     asset.erc20address
+  //   );
+  //   const allowance = await erc20Contract.methods
+  //     .allowance(account.address, contract)
+  //     .call({ from: account.address });
+
+  //   const ethAllowance = web3.utils.fromWei(allowance, "ether");
+
+  //   if (parseFloat(ethAllowance) < parseFloat(amount)) {
+  //     if (
+  //       [
+  //         "crvV1",
+  //         "crvV2",
+  //         "crvV3",
+  //         "crvV4",
+  //         "USDTv1",
+  //         "USDTv2",
+  //         "USDTv3",
+  //         "sCRV",
+  //       ].includes(asset.id) &&
+  //       ethAllowance > 0
+  //     ) {
+  //       erc20Contract.methods
+  //         .approve(contract, web3.utils.toWei("0", "ether"))
+  //         .send({
+  //           from: account.address,
+  //           gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+  //         })
+  //         .on("transactionHash", async function (hash) {
+  //           erc20Contract.methods
+  //             .approve(contract, web3.utils.toWei(amount, "ether"))
+  //             .send({
+  //               from: account.address,
+  //               gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+  //             })
+  //             .on("transactionHash", function (hash) {
+  //               callback();
+  //             })
+  //             .on("error", function (error) {
+  //               if (!error.toString().includes("-32601")) {
+  //                 if (error.message) {
+  //                   return callback(error.message);
+  //                 }
+  //                 callback(error);
+  //               }
+  //             });
+  //         })
+  //         .on("error", function (error) {
+  //           if (!error.toString().includes("-32601")) {
+  //             if (error.message) {
+  //               return callback(error.message);
+  //             }
+  //             callback(error);
+  //           }
+  //         });
+  //     } else {
+  //       erc20Contract.methods
+  //         .approve(contract, web3.utils.toWei(amount, "ether"))
+  //         .send({
+  //           from: account.address,
+  //           gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+  //         })
+  //         .on("transactionHash", function (hash) {
+  //           callback();
+  //         })
+  //         .on("error", function (error) {
+  //           if (!error.toString().includes("-32601")) {
+  //             if (error.message) {
+  //               return callback(error.message);
+  //             }
+  //             callback(error);
+  //           }
+  //         });
+  //     }
+  //   } else {
+  //     callback();
+  //   }
   // };
-
-  _getERC20Balance = async (web3, asset, account, callback) => {
-    if (asset.erc20address === "Ethereum") {
-      try {
-        const eth_balance = web3.utils.fromWei(
-          await web3.eth.getBalance(account.address),
-          "ether"
-        );
-        callback(null, parseFloat(eth_balance));
-      } catch (ex) {
-        console.log(ex);
-        return callback(ex);
-      }
-      return;
-    } else {
-      const network = store.getStore("network");
-      const erc20Abi = contractHelper.getERC20AbiByNetwork(network);
-      let erc20Contract = new web3.eth.Contract(
-        erc20Abi,
-        asset.erc20address
-      );
-      console.log(`Getting ERC 20 Balance for asset:  ${asset.erc20address}`);
-
-      try {
-        var balance = await erc20Contract.methods
-          .balanceOf(account.address)
-          .call({ from: account.address });
-        balance = parseFloat(balance) / 10 ** asset.decimals;
-        callback(null, parseFloat(balance));
-      } catch (ex) {
-        console.error("Error in getting ERC 20 Balance for asset: ", ex);
-        // return callback(ex);
-      }
-    }
-  };
 
   _getERC20Balances = async (web3, asset, account, callback, coinsInUSDPrice) => {
     // Strategy which required to get balances for multiple token
@@ -1151,594 +901,6 @@ class Store {
       success: true,
       data: returnObj
     }
-  };
-
-  _getBalance = async (web3, asset, account, callback) => {
-    if (asset.iEarnContract === null) {
-      return callback(null, 0);
-    }
-
-    if (asset.erc20address === "Ethereum") {
-      try {
-        const eth_balance = web3.utils.fromWei(
-          await web3.eth.getBalance(asset.iEarnContract),
-          "ether"
-        );
-        callback(null, parseFloat(eth_balance));
-      } catch (ex) {
-        console.log(ex);
-        return callback(ex);
-      }
-    } else {
-      let erc20Contract = new web3.eth.Contract(
-        config.erc20ABI,
-        asset.erc20address
-      );
-
-      try {
-        var balance = await erc20Contract.methods
-          .balanceOf(asset.iEarnContract)
-          .call({ from: account.address });
-        balance = parseFloat(balance) / 10 ** asset.decimals;
-        callback(null, parseFloat(balance));
-      } catch (ex) {
-        console.log(ex);
-        return callback(ex);
-      }
-    }
-  };
-
-  _getAPY = async (web3, asset, account, callback) => {
-    if (asset.iEarnContract === null) {
-      return callback(null, 0);
-    }
-    if (asset.measurement == null) {
-      return callback(null, 0);
-    }
-    try {
-      let block = await web3.eth.getBlockNumber();
-      let earn = new web3.eth.Contract(config.IEarnABI, asset.iEarnContract);
-      let balance = await earn.methods.getPricePerFullShare().call();
-
-      balance = balance - asset.measurement;
-      balance = balance / 1e18;
-      let diff = block - asset.lastMeasurement;
-
-      balance = balance / diff;
-      balance = balance * 2425846;
-
-      callback(null, parseFloat(balance));
-    } catch (e) {
-      console.log(e);
-      callback(null, 0);
-    }
-  };
-
-  _getCurrentLender = async (web3, asset, account, callback) => {
-    if (asset.iEarnContract === null) {
-      return callback(null, 0);
-    }
-
-    try {
-      let iEarnContract = new web3.eth.Contract(asset.abi, asset.iEarnContract);
-      let value = 0;
-
-      if (asset.erc20address === "Ethereum" || asset.id === "CRVv1") {
-        value = 0;
-      } else {
-        value = await iEarnContract.methods
-          .provider()
-          .call({ from: account.address });
-      }
-      callback(null, parseFloat(value));
-    } catch (e) {
-      console.log(e);
-      callback(null, 0);
-    }
-  };
-
-  _getRecommendedLender = async (web3, asset, account, callback) => {
-    if (asset.iEarnContract === null) {
-      return callback(null, 0);
-    }
-
-    try {
-      let iEarnContract = new web3.eth.Contract(asset.abi, asset.iEarnContract);
-      let value = 0;
-
-      if (asset.erc20address === "Ethereum" || asset.id === "CRVv1") {
-        value = 0;
-      } else {
-        value = await iEarnContract.methods
-          .recommend()
-          .call({ from: account.address });
-      }
-      callback(null, parseFloat(value));
-    } catch (e) {
-      console.log(e);
-      callback(null, 0);
-    }
-  };
-
-  _getPoolValue = async (web3, asset, account, callback) => {
-    if (asset.iEarnContract === null) {
-      return callback(null, 0);
-    }
-
-    try {
-      let iEarnContract = new web3.eth.Contract(asset.abi, asset.iEarnContract);
-      let value = 0;
-
-      if (asset.erc20address === "Ethereum") {
-        value = web3.utils.fromWei(
-          await iEarnContract.methods
-            .calcPoolValueInETH()
-            .call({ from: account.address }),
-          "ether"
-        );
-      } else {
-        value = await iEarnContract.methods
-          .calcPoolValueInToken()
-          .call({ from: account.address });
-        if (asset.decimals === 18) {
-          value = web3.utils.fromWei(value, "ether");
-        } else {
-          value = value / 10 ** asset.decimals;
-        }
-      }
-      callback(null, parseFloat(value));
-    } catch (e) {
-      console.log(e);
-      callback(null, 0);
-    }
-  };
-
-  _getPoolPrice = async (web3, asset, account, callback) => {
-    if (asset.iEarnContract === null) {
-      return callback(null, 0);
-    }
-
-    let iEarnContract = new web3.eth.Contract(
-      config.IEarnABI,
-      asset.iEarnContract
-    );
-    const balance = web3.utils.fromWei(
-      await iEarnContract.methods
-        .getPricePerFullShare()
-        .call({ from: account.address }),
-      "ether"
-    );
-    callback(null, parseFloat(balance));
-  };
-
-  _getInvestedBalance = async (web3, asset, account, callback) => {
-    if (asset.iEarnContract === null) {
-      return callback(null, 0);
-    }
-
-    let iEarnContract = new web3.eth.Contract(
-      config.IEarnABI,
-      asset.iEarnContract
-    );
-    var balance = await iEarnContract.methods
-      .balanceOf(account.address)
-      .call({ from: account.address });
-    balance = parseFloat(balance) / 10 ** asset.decimals;
-    callback(null, parseFloat(balance));
-  };
-
-  _getMaxAPR = async (web3, asset, account, callback) => {
-    if (asset.iEarnContract === null) {
-      return callback(null, 0);
-    }
-
-    try {
-      if (asset.symbol === "CRV") {
-        let aprContract = new web3.eth.Contract(
-          config.crvContractABI,
-          config.crvAddress
-        );
-        const call = "crvapr";
-        const aprs = await aprContract.methods[call]().call();
-        return callback(
-          null,
-          web3.utils.fromWei(parseFloat(aprs).toFixed(0), "ether")
-        );
-      }
-
-      if (asset.strategyType === "yearn") {
-        let aprContract = new web3.eth.Contract(
-          config.aggregatedContractABI,
-          config.aggregatedContractAddress
-        );
-
-        var call = "getAPROptions"; //+asset.symbol
-        var address = asset.erc20address;
-        var aprs = 0;
-        if (asset.erc20address === "Ethereum") {
-          call = "getETH";
-          aprs = await aprContract.methods[call]().call();
-        } else {
-          aprs = await aprContract.methods[call](address).call();
-        }
-
-        const keys = Object.keys(aprs);
-        const workKeys = keys.filter((key) => {
-          return isNaN(key);
-        });
-        const maxApr = Math.max.apply(
-          Math,
-          workKeys.map(function (o) {
-            if (o === "uniapr" || o === "unicapr" || o === "iapr") {
-              return aprs[o] - 100000000000000000000;
-            }
-            return aprs[o];
-          })
-        );
-
-        callback(null, web3.utils.fromWei(maxApr.toFixed(0), "ether"));
-      } else {
-        return callback(null, 0);
-      }
-    } catch (ex) {
-      return callback(null, 0);
-    }
-  };
-
-  _getAggregatedYield = async (web3, call, callback) => {
-    let uniswapContract = new web3.eth.Contract(
-      config.aggregatedContractABI,
-      config.aggregatedContractAddress
-    );
-
-    try {
-      const val = await uniswapContract.methods[call.name]().call();
-
-      const keys = Object.keys(val);
-
-      const vals = keys
-        .filter((key) => {
-          return isNaN(key);
-        })
-        .map((key) => {
-          const obj = {};
-          obj[key] = web3.utils.fromWei(val[key].toString(), "ether");
-          return obj;
-        });
-
-      let output = {};
-
-      for (let i = 0; i < vals.length; i++) {
-        const keys = Object.keys(vals[i]);
-        output[keys[0]] = vals[i][keys[0]];
-      }
-
-      call.token = call.name.replace("get", "");
-      call.apr = output;
-
-      callback(null, call);
-    } catch (ex) {
-      // console.log(ex)
-      // return callback(ex)
-      callback(null, false);
-    }
-  };
-
-  _getTransaction = async (web3, hash) => {
-    const rawTx = await web3.eth.getTransaction(hash);
-    return rawTx;
-  };
-
-  _getPricePerFullShare = async (web3, iEarnContract) => {
-    const balance = web3.utils.fromWei(
-      await iEarnContract.methods.getPricePerFullShare().call({}),
-      "ether"
-    );
-    return balance;
-  };
-
-  _getIEthBalance = async (web3, iEarnContract, address) => {
-    const balance = web3.utils.fromWei(
-      await iEarnContract.methods.balanceOf(address).call({}),
-      "ether"
-    );
-    return balance;
-  };
- 
-  _approveToken = async (token, spender, amount, account, web3) => {
-    // First 4 bytes of the hash of "fee()" for the sighash selector
-    let funcHash = ethers.utils.hexDataSlice(
-      ethers.utils.id("approve(address,uint256)"),
-      0,
-      4
-    );
-
-    let abi = new ethers.utils.AbiCoder();
-    let inputs = [
-      {
-        name: "spender",
-        type: "address",
-      },
-      {
-        name: "amount",
-        type: "uint256",
-      },
-    ];
-
-    let params = [spender, amount];
-    let bytes = abi.encode(inputs, params).substr(2);
-
-    // construct approval data from function hash and parameters
-    let inputData = `${funcHash}${bytes}`;
-
-    // let nonce = await infuraProvider.getTransactionCount(ethersWallet.address);
-    let nonce = await web3.eth.getTransactionCount(account.address);
-
-    // You will want to get the real gas price from https://ethgasstation.info/json/ethgasAPI.json
-    let gasPrice = web3.utils.toWei(await this._getGasPrice(), "gwei");
-
-    let transaction = {
-      to: token,
-      nonce: nonce,
-      gasLimit: 500000, // You will want to use estimateGas instead for real apps
-      gasPrice: gasPrice,
-      data: inputData,
-      from: account.address,
-    };
-
-    // let tx = await ethersWallet.sendTransaction(transaction);
-    let tx = await web3.eth.sendTransaction(transaction);
-    console.log(tx);
-  };
-
-  _getAssetUSDPrices = async (web3, asset, account, usdPrices, callback) => {
-    try {
-      const usdPrice = usdPrices[asset.price_id];
-
-      const returnObj = {
-        usdPrice: usdPrice.usd,
-      };
-
-      callback(null, returnObj);
-    } catch (ex) {
-      callback(null, {});
-    }
-  };
-
-  _getStrategy = async (web3, asset, account, callback) => {
-    if (["LINK"].includes(asset.id)) {
-      return callback(null, {
-        strategy: "",
-        name: "",
-        holdings: 0,
-      });
-    }
-
-    try {
-      const vaultContract = new web3.eth.Contract(
-        asset.vaultContractABI,
-        asset.vaultContractAddress
-      );
-      const controllerAddress = await vaultContract.methods
-        .controller()
-        .call({ from: account.address });
-      const controllerContract = new web3.eth.Contract(
-        config.vaultControllerABI,
-        controllerAddress
-      );
-
-      let strategyAddress = "";
-      if (["LINK", "aLINK"].includes(asset.id)) {
-        strategyAddress = await controllerContract.methods
-          .strategies(asset.vaultContractAddress)
-          .call({ from: account.address });
-      } else {
-        if (asset.erc20address === "Ethereum") {
-          asset.erc20address = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
-        }
-        strategyAddress = await controllerContract.methods
-          .strategies(asset.erc20address)
-          .call({ from: account.address });
-      }
-
-      const strategyContract = new web3.eth.Contract(
-        config.vaultStrategyABI,
-        strategyAddress
-      );
-      const holdings = await strategyContract.methods
-        .balanceOf()
-        .call({ from: account.address });
-      let strategyName = "DForceUSDC";
-
-      if (!["USDC"].includes(asset.id)) {
-        strategyName = await strategyContract.methods
-          .getName()
-          .call({ from: account.address });
-        strategyName = strategyName.replace(/^Strategy/, "");
-      }
-
-      callback(null, {
-        strategy: strategyAddress,
-        name: strategyName,
-        holdings: holdings / 10 ** (asset.id === "aLINK" ? 6 : asset.decimals),
-      });
-    } catch (ex) {
-      console.log(ex);
-      callback(null, {
-        strategy: "",
-        name: "",
-        holdings: 0,
-      });
-    }
-  };
-
-  _getStatsAPY = (vaultStatistics, asset, callback) => {
-    try {
-      if (asset.erc20address === "Ethereum") {
-        asset.erc20address = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
-      }
-
-      let vault = [];
-
-      if (asset.strategyType === "compound") {
-        vault = vaultStatistics.filter((stats) => {
-          return (
-            stats.address.toLowerCase() ===
-            asset.vaultContractAddress.toLowerCase()
-          );
-        });
-      } else if (asset.strategyType === "yearn") {
-        vault = vaultStatistics.filter((stats) => {
-          if (typeof stats.tokenAddress == "string") {
-            return (
-              stats.tokenAddress.toLowerCase() ===
-                asset.erc20address.toLowerCase() &&
-              stats.address.toLowerCase() === asset.vaultAddress.toLowerCase()
-            );
-          } else if (Array.isArray(stats.tokenAddress)) {
-            return stats.tokenAddress.find(
-              (t) =>
-                t.toLowerCase() === asset.erc20address.toLowerCase() &&
-                stats.address.toLowerCase() === asset.vaultAddress.toLowerCase()
-            );
-          }
-        });
-      } else if (this.isUsdVault(asset)) {
-        vault = vaultStatistics.filter((stats) => {
-          return (
-            stats.address.toLowerCase() ===
-            asset.vaultContractAddress.toLowerCase()
-          );
-        });
-      }
-
-      if (vault.length === 0) {
-        return callback(null, {});
-      }
-
-      callback(null, vault[0]);
-    } catch (ex) {
-      callback(null, {});
-    }
-  };
-
-  _getAddressStats = (addressStatistics, asset, callback) => {
-    try {
-      if (asset.erc20address === "Ethereum") {
-        asset.erc20address = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
-      }
-
-      const vault = addressStatistics.filter((stats) => {
-        return (
-          stats.contractAddress.toLowerCase() ===
-          asset.vaultContractAddress.toLowerCase()
-        );
-      });
-
-      if (vault.length === 0 || (vault.length > 0 && vault[0].message)) {
-        return callback(null, null);
-      }
-
-      callback(null, vault[0]);
-
-    } catch (ex) {
-      callback(null, {});
-    }
-  };
-
-  _getAddressTransactions = (addressTXHitory, asset, callback) => {
-    try {
-      if (asset.erc20address === "Ethereum") {
-        asset.erc20address = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
-      }
-
-      const vault = addressTXHitory.filter((stats) => {
-        return (
-          stats.contractAddress.toLowerCase() ===
-          asset.vaultContractAddress.toLowerCase()
-        );
-      });
-
-      if (vault.length === 0) {
-        return callback(null, {});
-      }
-
-      callback(null, vault[0]);
-    } catch (ex) {
-      callback(null, {});
-    }
-  };
-
-  _getVaultHoldings = async (web3, asset, account, callback) => {
-    // let vaultContract = new web3.eth.Contract(asset.vaultContractABI, asset.vaultContractAddress)
-    // var balance = await vaultContract.methods.balance().call({ from: account.address });
-    // balance = parseFloat(balance)/10**asset.decimals
-    // callback(null, parseFloat(balance))
-    let vaultContract = new web3.eth.Contract(
-      asset.vaultContractABI,
-      asset.vaultContractAddress
-    );
-    let strategyAddress = await vaultContract.methods
-      .strategy()
-      .call({ from: account.address });
-    let strategyContract = new web3.eth.Contract(
-      asset.strategyContractABI,
-      strategyAddress
-    );
-    let balance = "";
-
-    let pool = await strategyContract.methods
-      .pool()
-      .call({ from: account.address });
-    let decimals = await strategyContract.methods
-      .decimals()
-      .call({ from: account.address });
-    balance = parseFloat(pool) / 10 ** parseInt(decimals);
-    // }
-    callback(null, parseFloat(balance));
-  };
-
-  _getStrategyHoldings = async (web3, asset, account, callback) => {
-    try {
-      let vaultContract = new web3.eth.Contract(
-        asset.vaultContractABI,
-        asset.vaultContractAddress
-      );
-      let balance = await vaultContract.methods
-        .balance()
-        .call({ from: account.address });
-
-      let available = 0;
-      if (asset.id === "aLINK") {
-        available = await vaultContract.methods
-          .credit()
-          .call({ from: account.address });
-      } else {
-        available = await vaultContract.methods
-          .available()
-          .call({ from: account.address });
-      }
-      balance = parseFloat(balance - available) / 10 ** asset.decimals;
-      callback(null, parseFloat(balance));
-    } catch (ex) {
-      console.log(ex);
-    }
-  };
-
-  _getVaultBalance = async (web3, asset, account, callback) => {
-    if (asset.vaultContractAddress === null) {
-      return callback(null, 0);
-    }
-
-    let vaultContract = new web3.eth.Contract(
-      asset.vaultContractABI,
-      asset.vaultContractAddress
-    );
-    var balance = await vaultContract.methods
-      .balanceOf(account.address)
-      .call({ from: account.address });
-    balance = parseFloat(balance) / 10 ** asset.decimals;
-    callback(null, parseFloat(balance));
   };
 
   _getBalances = async (web3, asset, account, callback) => {
@@ -1977,26 +1139,6 @@ class Store {
     }
   };
 
-  _getVaultPricePerShare = async (web3, asset, account, callback) => {
-    if (asset.vaultContractAddress === null) {
-      return callback(null, 0);
-    }
-
-    try {
-      let vaultContract = new web3.eth.Contract(
-        asset.vaultContractABI,
-        asset.vaultContractAddress
-      );
-      var price = await vaultContract.methods
-        .getPricePerFullShare()
-        .call({ from: account.address });
-      price = parseFloat(price) / 10 ** 18;
-      callback(null, parseFloat(price));
-    } catch (ex) {
-      console.log(ex);
-      callback(null, 0);
-    }
-  };
 
   /******** DEPOSIT APPROVAL START ********************/
 
@@ -2382,271 +1524,6 @@ class Store {
   };
 
   /******** DEPOSIT APPROVAL END ********************/
- 
-
-  _getVaultAPY = async (web3, asset, account, callback) => {
-    try {
-      if (asset.vaultContractAddress === null) {
-        return callback(null, {
-          earnPricePerFullShare: 0,
-          vaultPricePerFullShare: 0,
-          compoundExchangeRate: 0,
-          apy: 0,
-        });
-      }
-
-      if (asset.strategyType === "yearn") {
-        const block = await web3.eth.getBlockNumber();
-        const contract = new web3.eth.Contract(
-          asset.vaultContractABI,
-          asset.vaultContractAddress
-        );
-        const strategyAddress = await contract.methods
-          .strategy()
-          .call({ from: account.address });
-        const strategyContract = new web3.eth.Contract(
-          asset.strategyContractABI,
-          strategyAddress
-        );
-        const earnAddress = await strategyContract.methods
-          .earn()
-          .call({ from: account.address });
-        const vaultAddress = await strategyContract.methods
-          .vault()
-          .call({ from: account.address });
-        const earnContract = new web3.eth.Contract(
-          config.IEarnErc20ABIv2,
-          earnAddress
-        );
-        const vaultContract = new web3.eth.Contract(
-          asset.vaultABI,
-          vaultAddress
-        );
-
-        // Calculate price per full share
-        const earnPricePerFullShare = await earnContract.methods
-          .getPricePerFullShare()
-          .call({ from: account.address });
-        const vaultPricePerFullShare = await vaultContract.methods
-          .getPricePerFullShare()
-          .call({ from: account.address });
-        let balance = vaultPricePerFullShare - asset.measurement;
-        balance = balance / 1e18;
-        let diff = block - asset.lastMeasurement;
-
-        balance = balance / diff;
-        balance = balance * 242584600;
-
-        const returnObj = {
-          earnPricePerFullShare: parseFloat(earnPricePerFullShare) / 10 ** 18,
-          vaultPricePerFullShare: parseFloat(vaultPricePerFullShare) / 10 ** 18,
-          compoundExchangeRate: 0,
-          apy: parseFloat(balance),
-        };
-
-        return callback(null, returnObj);
-      } else if (asset.strategyType === "compound") {
-        const cTokenDecimals = 8; // all cTokens have 8 decimal places
-        const compoundContract = new web3.eth.Contract(
-          asset.cAbi,
-          asset.cTokenAddress
-        );
-
-        // Exchange Rate
-        const exchangeRateCurrent = await compoundContract.methods
-          .exchangeRateCurrent()
-          .call();
-        const mantissa = 18 + asset.decimals - cTokenDecimals;
-
-        // APY Calculation
-        const ethMantissa = 1e18;
-        const blocksPerDay = 6570; // 13.15 seconds per block
-        const daysPerYear = 365;
-        const supplyRatePerBlock = parseFloat(
-          await compoundContract.methods.supplyRatePerBlock().call()
-        );
-        const supplyApy =
-          (Math.pow(
-            (supplyRatePerBlock / ethMantissa) * blocksPerDay + 1,
-            daysPerYear
-          ) -
-            1) *
-          100;
-
-        const returnObj = {
-          earnPricePerFullShare: 0,
-          vaultPricePerFullShare: 0,
-          compoundExchangeRate:
-            parseFloat(exchangeRateCurrent) / Math.pow(10, mantissa),
-          apy: parseFloat(supplyApy),
-        };
-        return callback(null, returnObj);
-      } else if (asset.strategyType === "citadel") {
-        const citadelContract = new web3.eth.Contract(
-          asset.vaultContractABI,
-          asset.vaultContractAddress
-        );
-        const network = store.getStore("network");
-
-        // USDT to ETH price feed contract
-        const address =  (network === NETWORK.ETHEREUM)
-          ? config.USDTETHPriceFeedContract
-          : config.USDTETHPriceFeedKovanContract;
-      
-        const usdtEthPriceFeedContract = new web3.eth.Contract(
-          config.eacAggregatoorProxyContract,
-          address
-        );
-        // USDT / ETH conversion result
-        const ethPrice = await usdtEthPriceFeedContract.methods
-          .latestAnswer()
-          .call();
-        const pool = await citadelContract.methods
-          .getAllPoolInETH(ethPrice)
-          .call();
-
-        const totalSupply = await citadelContract.methods.totalSupply().call();
-
-        const pricePerFullShare = pool / totalSupply;
-
-        const returnObj = {
-          earnPricePerFullShare: 0,
-          vaultPricePerFullShare: 0,
-          compoundExchangeRate: 0,
-          citadelPricePerFullShare: pricePerFullShare,
-          elonPricePerFullShare: 0,
-          cubanPricePerFullShare: 0,
-        };
-        return callback(null, returnObj);
-      } else if (asset.strategyType === "elon") {
-        const elonContract = new web3.eth.Contract(
-          asset.vaultContractABI,
-          asset.vaultContractAddress
-        );
-
-        const pool = await elonContract.methods.getAllPoolInUSD().call(); // All pool in USD (6 decimals)
-        const totalSupply = await elonContract.methods.totalSupply().call();
-        const pricePerFullShare = totalSupply
-          ? new BigNumber(pool).shiftedBy(12).dividedBy(totalSupply).toNumber()
-          : 0;
-
-        const returnObj = {
-          earnPricePerFullShare: 0,
-          vaultPricePerFullShare: 0,
-          compoundExchangeRate: 0,
-          citadelPricePerFullShare: 0,
-          elonPricePerFullShare: pricePerFullShare,
-          cubanPricePerFullShare: 0,
-        };
-        return callback(null, returnObj);
-      } else if (asset.strategyType === "cuban") {
-        const cubanContract = new web3.eth.Contract(
-          asset.vaultContractABI,
-          asset.vaultContractAddress
-        );
-
-        const pool = await cubanContract.methods.getAllPoolInUSD().call(); // All pool in USD (6 decimals)
-        const totalSupply = await cubanContract.methods.totalSupply().call();
-        const pricePerFullShare = totalSupply
-          ? new BigNumber(pool).shiftedBy(12).dividedBy(totalSupply).toNumber()
-          : 0;
-
-        const returnObj = {
-          earnPricePerFullShare: 0,
-          vaultPricePerFullShare: 0,
-          compoundExchangeRate: 0,
-          citadelPricePerFullShare: 0,
-          elonPricePerFullShare: 0,
-          cubanPricePerFullShare: pricePerFullShare,
-        };
-        return callback(null, returnObj);
-      } else if (asset.strategyType === "daoFaang") {
-        const daoFaangContract = new web3.eth.Contract(
-          asset.vaultContractABI,
-          asset.vaultContractAddress
-        );
-
-        const pool = await daoFaangContract.methods
-          .getTotalValueInPool()
-          .call();
-
-        const totalSupply = await daoFaangContract.methods.totalSupply().call();
-
-        const pricePerFullShare = pool / totalSupply;
-
-        const returnObj = {
-          earnPricePerFullShare: 0,
-          vaultPricePerFullShare: 0,
-          compoundExchangeRate: 0,
-          faangPricePerFullShare: pricePerFullShare,
-        };
-        return callback(null, returnObj);
-      } else if (asset.strategyType === "moneyPrinter") {
-        const moneyPrinterContract = new web3.eth.Contract(
-          asset.vaultContractABI,
-          asset.vaultContractAddress
-        );
-        const pool = await moneyPrinterContract.methods.getValueInPool().call();
-        const totalSupply = await moneyPrinterContract.methods
-          .totalSupply()
-          .call();
-        const pricePerFullShare = totalSupply
-          ? new BigNumber(pool).dividedBy(totalSupply).toNumber()
-          : 0;
-        const returnObj = {
-          earnPricePerFullShare: 0,
-          vaultPricePerFullShare: 0,
-          compoundExchangeRate: 0,
-          moneyPrinterPricePerFullShare: pricePerFullShare,
-        };
-        return callback(null, returnObj);
-      }
-    } catch (e) {
-      console.log(`Asset ${asset.id}: `, e);
-      callback(null, {
-        earnPricePerFullShare: 0,
-        vaultPricePerFullShare: 0,
-        compoundExchangeRate: 0,
-        apy: 0,
-      });
-    }
-  };
-
-  _getCompoundMarketRate = async (web3,
-                                  asset) => {
-    try {
-
-      if(asset.strategyType === "compound") {
-        return {
-          success: true,
-          exchangeRateCurrent: 0
-        };
-      }
-      const cTokenDecimals = 8; // all cTokens have 8 decimal places
-      const compoundContract = new web3.eth.Contract(
-          asset.cAbi,
-          asset.cTokenAddress
-      );
-
-      // Exchange Rate
-      const exchangeRateCurrent = await compoundContract.methods
-          .exchangeRateCurrent()
-          .call();
-
-      const mantissa = 18 + asset.decimals - cTokenDecimals;
-
-      return {
-        success: true,
-        exchangeRateCurrent: parseFloat(exchangeRateCurrent) / Math.pow(10, mantissa)
-      };
-    } catch (Err) {
-      return {
-        success: false,
-        exchangeRateCurrent: 0
-      }
-    }
-
-  }
 
   getUSDPrices = async () => {
     try {
@@ -2673,128 +1550,6 @@ class Store {
     }
   };
 
-  _getHistoricalPrice = async (price_id, interval, callback) => {
-    try {
-      const url = `${config.statsProvider}vaults/price/${price_id}/${interval}`;
-      const resultString = await rp(url);
-      const result = JSON.parse(resultString);
-      callback(null, result.body);
-    } catch (e) {
-      console.log(e);
-      callback(null, []);
-    }
-  };
-
-  _getHistoricalPerformance = async (performanceId, interval, callback) => {
-    const performanceIds = store.getStore("performanceIds");
-    if (performanceId && performanceIds.includes(performanceId)) {
-      try {
-        const url = `${config.statsProvider}vaults/performance/${performanceId}/${interval}`;
-        const resultString = await rp(url);
-        const result = JSON.parse(resultString);
-        callback(null, result.body);
-      } catch (e) {
-        console.log(e);
-        callback(null, []);
-      }
-    } else {
-      callback(null, []);
-    }
-  };
-
-  _getPNL = async (performanceId, callback) => {
-    if (!performanceId) {
-      callback(null, []);
-      return;
-    }
-
-    let output = {};
-    let url;
-    let resultString;
-    let result;
-    const intervals = ["30d", "7d"];
-    const performanceIds = store.getStore("performanceIds");
-    if (performanceId && performanceIds.includes(performanceId)) {
-      for (const interval of intervals) {
-        try {
-          let url = `${config.statsProvider}vaults/pnl/${performanceId}/${interval}`;
-          resultString = await rp(url);
-          result = JSON.parse(resultString);
-          output[interval] = result.body;
-        } catch (e) {
-          console.log(e);
-          callback(null, []);
-        }
-      }
-      try {
-        url = `${config.statsProvider}vaults/pnl/${performanceId}`;
-        resultString = await rp(url);
-        result = JSON.parse(resultString);
-        output["inception"] = result.body;
-      } catch (e) {
-        console.log(e);
-        callback(null, []);
-      }
-      callback(null, output);
-    } else {
-      callback(null, []);
-    }
-  };
-
-  _getTvl = async (tvl_id, callback) => {
-    try {
-      const url = `${config.statsProvider}vaults/tvl/${tvl_id}`;
-      const resultString = await rp(url);
-      const result = JSON.parse(resultString);
-
-      callback(null, result.body);
-    } catch (e) {
-      console.log(e);
-      callback(null, []);
-    }
-  };
-
-  _getHistoricalAPY = async (web3, asset, account, interval, callback) => {
-    try {
-      let vaultAddress = "";
-      if (asset.strategyType === "yearn") {
-        let vaultContract = new web3.eth.Contract(
-          asset.vaultContractABI,
-          asset.vaultContractAddress
-        );
-        let strategyAddress = await vaultContract.methods
-          .strategy()
-          .call({ from: account.address });
-        let strategyContract = new web3.eth.Contract(
-          asset.strategyContractABI,
-          strategyAddress
-        );
-        vaultAddress = await strategyContract.methods
-          .vault()
-          .call({ from: account.address });
-      } else if (asset.strategyType === "compound") {
-        vaultAddress = asset.vaultContractAddress;
-      } else if (asset.strategyType === "citadel") {
-        vaultAddress = asset.vaultContractAddress;
-      } else if (asset.strategyType === "elon") {
-        vaultAddress = asset.vaultContractAddress;
-      } else if (asset.strategyType === "cuban") {
-        vaultAddress = asset.vaultContractAddress;
-      } else if (asset.strategyType === "daoFaang") {
-        vaultAddress = asset.vaultContractAddress;
-      } else if (asset.strategyType === "moneyPrinter") {
-        vaultAddress = asset.vaultContractAddress;
-      }
-      const url = `${config.statsProvider}vaults/historical-apy/${vaultAddress}/${interval}`;
-      const resultString = await rp(url);
-      const result = JSON.parse(resultString);
-      callback(null, result.body);
-    } catch (e) {
-      console.log(e);
-      callback(null, []);
-    }
-  };
-
   getHistoricDataOfVault = async (strategy, interval) => {
     try {
       const url = `${config.statsProvider}vaults/performance-apy/${strategy}/${interval}`;
@@ -2810,25 +1565,6 @@ class Store {
         success: false,
       };
     }
-  }
-
-  getUserDistributionByWalletId = async (farmerId) => {
-    try {
-      const url = `${config.statsProvider}vaults/${farmerId}/distribution`;
-      const resultString = await rp(url);
-      const result = JSON.parse(resultString);
-      return {
-        success: true,
-        data: result.body
-      };
-    } catch (Err) {
-      console.log(Err);
-      return {
-        success: false,
-        message: 'No Account Found'
-      }
-    }
-
   }
 
   getAllAssetInformation = async (network) => {
@@ -2882,58 +1618,20 @@ class Store {
     } else {
       _result = { happyHour: result.body.happyHour };
     }
-    // For testing
-    // _result = {
-    //   happyHour: true,
-    //   happyHourStartTime: Date.now(),
-    //   happyHourEndTime: Date.now() + 6000000,
-    //   happyHourThreshold: 5,
-    // };
     store.setStore(_result);
     emitter.emit(HAPPY_HOUR_RETURN, _result);
   };
 
-  _getAddressStatistics = async (address) => {
-    try {
-      const url =
-        config.statsProvider + "user/" + address + "/vaults/statistics";
-      const statisticsString = await rp(url);
-      const statistics = JSON.parse(statisticsString);
-
-      return statistics.body;
-    } catch (e) {
-      console.log(e);
-      return store.getStore("universalGasPrice");
-    }
-  };
-
-  _getAddressTxHistory = async (address) => {
-    try {
-      const url =
-        config.statsProvider + "user/" + address + "/vaults/transactions";
-      const statisticsString = await rp(url);
-      const statistics = JSON.parse(statisticsString);
-
-      return statistics.body;
-    } catch (e) {
-      console.log(e);
-      return store.getStore("universalGasPrice");
-    }
-  };
-  //获取策略总额
-  _getTotalValue(totalValue, vaultApiInfo, callback) {
-    // callback();
-  }
-
-  _getTotalValueStatistic = async () => {
+  // Total TVL
+  _getTotalTVL = async () => {
     try {
       const url = config.statsProvider + "vaults/tvl/total";
       const statisticsString = await rp(url);
       const statistics = JSON.parse(statisticsString);
-      return statistics.body;
+      return {success: true, tvl: statistics.body[0].tvl};
     } catch (e) {
-      console.log(e);
-      // return store.getStore('universalGasPrice')
+      console.error(`Error in _getTotalTVL(): `, e);
+      return {success: false, tvl: 0};
     }
   };
 
@@ -3180,183 +1878,6 @@ class Store {
     } else {
       return callback(null, { daomineApy: pool.apr });
     }
-  };
-
-  getStrategyBalancesFull = async (payload) => {
-    const network = store.getStore("network");
-    const account = store.getStore("account");
-    // const assets = store.getStore('vaultAssets')
-    const assets = this._getDefaultValues(network).vaultAssets;
-    store.setStore({ vaultAssets: assets });
-    emitter.emit(STRATEGY_BALANCES_FULL_RETURNED, assets);
-
-    const { interval } = payload.content;
-    if (!account || !account.address) {
-      return false;
-    }
-    const web3 = await this._getWeb3Provider();
-    if (!web3) {
-      return null;
-    }
-
-    store.setStore({executeStrategyBalanceFunction: true});
-
-    const vaultStatistics = await this._getStatistics();
-    const addressStatistics = await this._getAddressStatistics(account.address);
-    const daoMinePools = await this._findDAOminePool();
-    const pools = daoMinePools.pools;
-
-    const usdPrices = await this._getUSDPrices();
-    await this.getUSDPrices();
-
-    async.map(
-      assets,
-      (asset, callback) => {
-        async.parallel(
-          [
-            (callbackInner) => {
-              // 0
-              this._getERC20Balance(web3, asset, account, callbackInner);
-            },
-            (callbackInner) => {
-              // 1
-              this._getBalances(web3, asset, account, callbackInner);
-            },
-            (callbackInner) => {
-              // 2
-              this._getStatsAPY(vaultStatistics, asset, callbackInner);
-            },
-            (callbackInner) => {
-              // 3
-              this._getAssetUSDPrices(
-                web3,
-                asset,
-                account,
-                usdPrices,
-                callbackInner
-              );
-            },
-            (callbackInner) => {
-              // 4
-              this._getVaultAPY(web3, asset, account, callbackInner);
-            },
-            (callbackInner) => {
-              // 5
-              this._getAddressStats(addressStatistics, asset, callbackInner);
-            },
-            (callbackInner) => {
-              // 6
-              this._getMaxAPR(web3, asset, account, callbackInner);
-            },
-            (callbackInner) => {
-              // 7
-              this._getHistoricalAPY(
-                web3,
-                asset,
-                account,
-                interval,
-                callbackInner
-              );
-            },
-            (callbackInner) => {
-              // 8
-              this._getTvl(asset.tvlKey, callbackInner);
-            },
-            (callbackInner) => {
-              // 9
-              this._getERC20Balances(web3, asset, account, callbackInner);
-            },
-            (callbackInner) => {
-              // 10
-              this._getVaultDAOmineAPY(asset, pools, callbackInner);
-            },
-            (callbackInner) => {
-              // 11
-              this._getHistoricalPerformance(
-                asset.id,
-                "7d", // TODO: Remove hardcode and refactor, default interval is 1d
-                callbackInner
-              );
-            },
-            (callbackInner) => {
-              // 12
-              this._getPNL(asset.performanceId, callbackInner);
-            },
-
-            // (callbackInner) => { this._getVaultHoldings(web3, asset, account, callbackInner) },
-            // (callbackInner) => { this._getAddressTransactions(addressTXHitory, asset, callbackInner) },
-          ],
-          (err, data) => {
-            if (err) {
-              console.log(err);
-              return callback(err);
-            }
-            asset.balance = data[0];
-            asset.strategyBalance = data[1].strategyBalance;
-            asset.vaultBalance = data[1].vaultBalance;
-            asset.earnBalance = data[1].earnBalance;
-            asset.depositedSharesInUSD = data[1].depositedSharesInUSD
-              ? data[1].depositedSharesInUSD
-              : null;
-            asset.stats = data[2];
-            asset.usdPrice = data[3].usdPrice;
-
-            // Price per full share
-            asset.earnPricePerFullShare = data[4].earnPricePerFullShare;
-            asset.vaultPricePerFullShare = data[4].vaultPricePerFullShare;
-            asset.compoundExchangeRate = data[4].compoundExchangeRate;
-            asset.citadelPricePerFullShare = data[4].citadelPricePerFullShare
-              ? data[4].citadelPricePerFullShare
-              : null;
-            asset.faangPricePerFullShare = data[4].faangPricePerFullShare
-              ? data[4].faangPricePerFullShare
-              : null;
-            asset.elonPricePerFullShare = data[4].elonPricePerFullShare
-              ? data[4].elonPricePerFullShare
-              : null;
-            asset.cubanPricePerFullShare = data[4].cubanPricePerFullShare
-              ? data[4].cubanPricePerFullShare
-              : null;
-            asset.apy = data[4].apy; // Vault APY
-            asset.addressStatistics = data[5];
-            asset.earnApr = data[6];
-            asset.historicalAPY = data[7];
-            asset.tvl = data[8][0].tvl;
-            asset.balances =
-              data[9] && data[9].balances ? data[9].balances : null;
-            asset.priceInUSD =
-              data[9] && data[9].priceInUSD ? data[9].priceInUSD : null;
-            asset.sumBalances = data[9].sumBalances;
-            asset.daomineApy = data[10] ? data[10].daomineApy : 0;
-            asset.historicalPerformance = data[11];
-            asset.stats.pnl = data[12];
-
-            // asset.addressTransactions = data[7]
-            // asset.vaultHoldings = data[3]
-
-            if (asset.strategyType === "moneyPrinter") {
-              console.log("Money Printer:", asset);
-            }
-
-            callback(null, asset);
-          }
-        );
-      },
-      (err, assets) => {
-        if (err) {
-          console.log(err);
-          store.setStore({executeStrategyBalanceFunction: false});
-          return emitter.emit(ERROR, err);
-        }
-
-        store.setStore({ vaultAssets: assets, executeStrategyBalanceFunction: false});
-        console.log(
-          "🚀 | getStrategyBalancesFull= | STRATEGY_BALANCES_FULL_RETURNED",
-          STRATEGY_BALANCES_FULL_RETURNED
-        );
-        return emitter.emit(STRATEGY_BALANCES_FULL_RETURNED, assets);
-      }
-    );
   };
 
   getFeeInfo = async (asset, amount) => {
