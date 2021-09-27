@@ -1737,17 +1737,6 @@ class Vault extends Component {
     };
 
     _getPnl = (asset) => {
-        // if ( asset.pnl && (
-        //     asset.strategyType === "citadel" ||
-        //     asset.strategyType === "daoFaang" ||
-        //     asset.strategyType === "elon" ||
-        //     asset.strategyType === "cuban" ||
-        //     asset.strategyType === "moneyPrinter")
-        // ) {
-
-        //     return (asset.pnl).toFixed(2) + "%";
-        // }
-        // return '0.00 %';
         return `${(asset && asset.pnl) ? (asset.pnl).toFixed(2) : 0.00 } %`;
     }
 
