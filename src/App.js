@@ -241,12 +241,12 @@ class App extends Component {
                 <Stake />
               </Route> */}
 
-              <Route path="/swap">
+              {/* <Route path="/swap">
                 <Header />
                 <SideDrawer keyName="swap"/>
                 <MainContainer />
                 <Swap />
-              </Route>
+              </Route> */}
 
               <Route path="/">
                 {/* <Home /> */}
