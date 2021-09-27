@@ -11,7 +11,7 @@ import {
     Collapse,
 } from "@material-ui/core";
 
-import Store from "../../stores";
+import Store from "../../stores/storev2";
 import {
     DRAWER_RETURNED,
     TOGGLE_DRAWER,

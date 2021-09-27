@@ -43,7 +43,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
-import Store from "../../stores";
+import Store from "../../stores/storev2";
 import {getTheme} from "../../theme";
 import {withRouter} from "react-router-dom";
 import {withStyles} from "@material-ui/core/styles";

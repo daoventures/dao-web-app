@@ -43,7 +43,7 @@ import RiskLevelLabel from "../common/riskLevelLabel/riskLevelLabel";
 import RiskLevelTab from "../common/riskLevelTab/riskLevelTab";
 import SearchIcon from "@material-ui/icons/Search";
 import Snackbar from "../snackbar";
-import Store from "../../stores";
+import Store from "../../stores/storev2";
 import { colors } from "../../theme";
 import queryString from "query-string";
 import { withNamespaces } from "react-i18next";
