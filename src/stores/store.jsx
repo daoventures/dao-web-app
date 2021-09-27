@@ -386,16 +386,16 @@ class Store {
             // this.idai(payload);
             break;
           case SWAP:
-            this.swap(payload);
+            // this.swap(payload);
             break;
           case TRADE:
-            this.trade(payload);
+            // this.trade(payload);
             break;
           case GET_CURV_BALANCE:
             // this.getCurveBalances(payload);
             break;
           case GET_BEST_PRICE:
-            this.getBestPrice(payload);
+            // this.getBestPrice(payload);
             break;
           case GET_VAULT_BALANCES:
             this.getVaultBalances(payload);
@@ -1955,196 +1955,7 @@ class Store {
     );
     return balance;
   };
-
-  swap = (payload) => {
-    const account = store.getStore("account");
-    const { sendAsset, amount } = payload.content;
-
-    let yCurveZapSwapContract = config.yCurveZapSwapAddress;
-    if (sendAsset.id === "crvV3") {
-      yCurveZapSwapContract = config.yCurveZapSwapV4Address;
-    }
-
-    this._checkApproval(
-      sendAsset,
-      account,
-      amount,
-      yCurveZapSwapContract,
-      (err) => {
-        if (err) {
-          return emitter.emit(ERROR, err);
-        }
-
-        this._callSwap(sendAsset, account, amount, (err, swapResult) => {
-          if (err) {
-            return emitter.emit(ERROR, err);
-          }
-
-          return emitter.emit(SWAP_RETURNED, swapResult);
-        });
-      }
-    );
-  };
-
-  _callSwap = async (sendAsset, account, amount, callback) => {
-    const web3 = new Web3(store.getStore("web3context").library.provider);
-
-    var amountToSend = web3.utils.toWei(amount, "ether");
-    if (sendAsset.decimals !== 18) {
-      amountToSend = amount * 10 ** sendAsset.decimals;
-    }
-
-    let call = "";
-
-    switch (sendAsset.id) {
-      case "crvV1":
-        call = "swapv1tov3";
-        break;
-      case "crvV2":
-        call = "swapv2tov3";
-        break;
-      case "crvV3":
-        call = "swapv3tov4";
-        break;
-      default:
-    }
-
-    let yCurveZapSwapContract = new web3.eth.Contract(
-      config.yCurveZapSwapABI,
-      config.yCurveZapSwapAddress
-    );
-    if (sendAsset.id === "crvV3") {
-      yCurveZapSwapContract = new web3.eth.Contract(
-        config.yCurveZapSwapV4ABI,
-        config.yCurveZapSwapV4Address
-      );
-    }
-    yCurveZapSwapContract.methods[call](amountToSend)
-      .send({
-        from: account.address,
-        gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-      })
-      .on("transactionHash", function (hash) {
-        console.log(hash);
-        callback(null, hash);
-      })
-      .on("confirmation", function (confirmationNumber, receipt) {
-        console.log(confirmationNumber, receipt);
-      })
-      .on("receipt", function (receipt) {
-        console.log(receipt);
-      })
-      .on("error", function (error) {
-        if (!error.toString().includes("-32601")) {
-          if (error.message) {
-            return callback(error.message);
-          }
-          callback(error);
-        }
-      })
-      .catch((error) => {
-        if (!error.toString().includes("-32601")) {
-          if (error.message) {
-            return callback(error.message);
-          }
-          callback(error);
-        }
-      });
-  };
-
-  getBestPrice = (payload) => {
-    const account = store.getStore("account");
-    const { sendAsset, receiveAsset, amount } = payload.content;
-
-    this._getBestPrice(
-      sendAsset,
-      receiveAsset,
-      account,
-      amount,
-      (err, price) => {
-        if (err) {
-          return emitter.emit(ERROR, err);
-        }
-
-        return emitter.emit(GET_BEST_PRICE_RETURNED, price);
-      }
-    );
-  };
-
-  _getBestPrice = async (
-    sendAsset,
-    receiveAsset,
-    account,
-    amount,
-    callback
-  ) => {
-    try {
-      const url =
-        "https://api-v2.dex.ag/price?from=" +
-        sendAsset.symbol.toLowerCase() +
-        "&to=" +
-        receiveAsset.symbol.toLowerCase() +
-        "&fromAmount=" +
-        amount +
-        "&dex=ag&tradable=true";
-      let price = await rp(url);
-      callback(null, JSON.parse(price));
-    } catch (e) {
-      callback(null, {});
-    }
-  };
-
-  trade = (payload) => {
-    const account = store.getStore("account");
-    const { sendAsset, receiveAsset, amount } = payload.content;
-
-    this._callTrade(
-      sendAsset,
-      receiveAsset,
-      account,
-      amount,
-      (err, tradeResult) => {
-        if (err) {
-          return emitter.emit(ERROR, err);
-        }
-
-        return emitter.emit(TRADE_RETURNED, tradeResult);
-      }
-    );
-  };
-
-  _callTrade = async (sendAsset, receiveAsset, account, amount, callback) => {
-    const web3 = new Web3(store.getStore("web3context").library.provider);
-
-    let trade = await this._getDexAgTrade(
-      sendAsset,
-      receiveAsset,
-      account,
-      amount
-    );
-    // await this._approveToken(trade.metadata.input.address, trade.metadata.input.spender, trade.metadata.input.amount, account, web3);
-
-    try {
-      const tx = await this._sendTrade(trade, account, web3);
-      return callback(null, tx.transactionHash);
-    } catch (ex) {
-      return callback(ex.message);
-    }
-  };
-
-  _getDexAgTrade = async (sendAsset, receiveAsset, account, amount) => {
-    const url =
-      "https://api-v2.dex.ag/trade?from=" +
-      sendAsset.symbol.toLowerCase() +
-      "&to=" +
-      receiveAsset.symbol.toLowerCase() +
-      "&fromAmount=" +
-      amount +
-      "&dex=ag";
-    let trade = await rp(url);
-    return JSON.parse(trade);
-  };
-
+ 
   _approveToken = async (token, spender, amount, account, web3) => {
     // First 4 bytes of the hash of "fee()" for the sighash selector
     let funcHash = ethers.utils.hexDataSlice(
@@ -2191,24 +2002,6 @@ class Store {
     console.log(tx);
   };
 
-  _sendTrade = async (trade, account, web3) => {
-    // let nonce = await infuraProvider.getTransactionCount(ethersWallet.address);
-    let nonce = await web3.eth.getTransactionCount(account.address);
-
-    // You will want to get the real gas price from https://ethgasstation.info/json/ethgasAPI.json
-    let gasPrice = web3.utils.toWei(await this._getGasPrice(), "gwei");
-
-    let transaction = trade.trade;
-    transaction.nonce = nonce;
-    transaction.gasPrice = Number(gasPrice);
-    transaction.gasLimit = 500000; // You will want to use estimateGas instead for real apps
-    transaction.value = Number(transaction.value);
-    transaction.from = account.address;
-    // let tx = await ethersWallet.sendTransaction(transaction);
-    let tx = await web3.eth.sendTransaction(transaction);
-    return tx;
-  };
-  
 
   getVaultBalancesFull = async (interval) => {
     const network = store.getStore("network");
