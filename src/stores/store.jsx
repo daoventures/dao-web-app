@@ -3739,25 +3739,34 @@ class Store {
         asset.vaultContractAddress
       );
 
-      const pool = await vaultContract.methods.getAllPoolInUSD().call();
+      // Strategies with pool in 6 decimals
+      const strategies = [
+        "citadel",
+        "elon",
+        "cuban"
+      ];
+
+      const includeInStrategies = strategies.includes(asset.strategyType);
+
+      let pool = 0;
+      pool = await vaultContract.methods.getAllPoolInUSD().call();
+      if(includeInStrategies) {
+        pool = pool * 10 ** 12;
+      }
       const totalSupply = await vaultContract.methods.totalSupply().call();
+      const pricePerFullShareInUSD = pool / totalSupply;
+
       const depositedShares = await vaultContract.methods
         .balanceOf(account.address)
-        .call({ from: account.address });
-
+        .call();
+      const depositedSharesInUSD = (depositedShares / 10 ** asset.decimals) * pricePerFullShareInUSD;
+     
       let pendingBalance = 0;
-      if(asset.strategyType === "metaverse" || asset.strategyType === "citadelv2") {
+      if(!includeInStrategies) {
         pendingBalance = await vaultContract.methods.depositAmt(account.address).call({from: account.address});
         pendingBalance = pendingBalance / 10 ** 18;
       }
      
-      const decimals = (asset.strategyType === "metaverse" || asset.strategyType === "citadelv2") 
-        ? 18
-        : 6;
-
-      const depositedSharesInUSD =
-        (depositedShares * pool) / totalSupply / 10 ** decimals;
-
       callback(null, {
         earnBalance: 0,
         vaultBalance: 0,
