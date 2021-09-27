@@ -613,30 +613,6 @@ class Store {
   };
 
   _getERC20Balances = async (web3, asset, account, callback, coinsInUSDPrice) => {
-    // Strategy which required to get balances for multiple token
-    const strategyTypes = [
-      "citadel",
-      "daoFaang",
-      "elon",
-      "cuban",
-      "moneyPrinter",
-      "metaverse",
-      "citadelv2",
-      "daoStonks"
-    ];
-    if (!strategyTypes.includes(asset.strategyType)) {
-      callback(null, {
-        balances: [0, 0, 0],
-        sumBalances: 0,
-      });
-      return {
-        success: false,
-        data: {
-          balances: [0, 0, 0],
-          sumBalances: 0,
-        }
-      }
-    }
     if(!coinsInUSDPrice) {
       coinsInUSDPrice = await this._getUSDPrices();
     }
@@ -730,141 +706,8 @@ class Store {
         data: 0
       }
     }
-    if (asset.strategyType === "yearn") {
-      let vaultContract = new web3.eth.Contract(
-        asset.vaultContractABI,
-        asset.vaultContractAddress
-      );
-      let sharesBalance = await vaultContract.methods
-        .balanceOf(account.address)
-        .call({ from: account.address });
-      sharesBalance = parseFloat(sharesBalance);
-
-      let strategyAddress = await vaultContract.methods
-        .strategy()
-        .call({ from: account.address });
-      let strategyContract = new web3.eth.Contract(
-        asset.strategyContractABI,
-        strategyAddress
-      );
-
-      let earnBalance = await strategyContract.methods
-        .getEarnDepositBalance(account.address)
-        .call({ from: account.address });
-      earnBalance = parseFloat(earnBalance);
-
-      let vaultBalance = await strategyContract.methods
-        .getVaultDepositBalance(account.address)
-        .call({ from: account.address });
-      vaultBalance = parseFloat(vaultBalance);
-
-      const sharePerDepositAmt = sharesBalance / (earnBalance + vaultBalance);
-      earnBalance = (sharePerDepositAmt * earnBalance) / 10 ** asset.decimals;
-      vaultBalance = (sharePerDepositAmt * vaultBalance) / 10 ** asset.decimals;
-
-      callback(null, {
-        earnBalance: isNaN(parseFloat(earnBalance))
-          ? 0
-          : parseFloat(earnBalance),
-        vaultBalance: isNaN(parseFloat(vaultBalance))
-          ? 0
-          : parseFloat(vaultBalance),
-        strategyBalance: 0,
-      });
-
-      return {
-        success: true,
-        data: {
-          earnBalance: isNaN(parseFloat(earnBalance))
-              ? 0
-              : parseFloat(earnBalance),
-          vaultBalance: isNaN(parseFloat(vaultBalance))
-              ? 0
-              : parseFloat(vaultBalance),
-          strategyBalance: 0,
-        }
-      }
-    } else if (asset.strategyType === "compound") {
-      let compoundContract = new web3.eth.Contract(
-        asset.vaultContractABI,
-        asset.vaultContractAddress
-      );
-      let strategyAddress = await compoundContract.methods
-        .strategy()
-        .call({ from: account.address });
-      let strategyContract = new web3.eth.Contract(
-        asset.strategyContractABI,
-        strategyAddress
-      );
-
-      let balance = await strategyContract.methods
-        .getCurrentBalance(account.address)
-        .call({ from: account.address });
-      balance = parseFloat(balance) / 10 ** asset.decimals;
-
-      callback(null, {
-        earnBalance: 0,
-        vaultBalance: 0,
-        strategyBalance: balance,
-      });
-
-      return {
-        success: true,
-        data: {
-          earnBalance: 0,
-          vaultBalance: 0,
-          strategyBalance: balance,
-        }
-      }
-    } else if (
-      asset.strategyType === "citadel" ||
-      asset.strategyType === "elon" ||
-      asset.strategyType === "cuban" ||
-      asset.strategyType === "metaverse" ||
-      asset.strategyType === "citadelv2" || 
-      asset.strategyType === "daoStonks"
-    ) {
-      const vaultContract = new web3.eth.Contract(
-        asset.vaultContractABI,
-        asset.vaultContractAddress
-      );
-
-      const pool = await vaultContract.methods.getAllPoolInUSD().call();
-      const totalSupply = await vaultContract.methods.totalSupply().call();
-      const depositedShares = await vaultContract.methods
-        .balanceOf(account.address)
-        .call({ from: account.address });
-
-      let pendingBalance = 0;
-      if(asset.strategyType === "metaverse" || asset.strategyType === "citadelv2" || asset.strategyType === "daoStonks") {
-        pendingBalance = await vaultContract.methods.depositAmt(account.address).call({from: account.address});
-        pendingBalance = pendingBalance / 10 ** 18;
-      }
-     
-      const decimals = (asset.strategyType === "metaverse" || asset.strategyType === "citadelv2" || asset.strategyType === "daoStonks") 
-        ? 18
-        : 6;
-
-      const depositedSharesInUSD =
-        (depositedShares * pool) / totalSupply / 10 ** decimals;
-
-      callback(null, {
-        earnBalance: 0,
-        vaultBalance: 0,
-        strategyBalance: depositedShares,
-        depositedSharesInUSD: depositedSharesInUSD,
-      });
-      return {
-        success: true,
-        data: {
-          earnBalance: 0,
-          vaultBalance: 0,
-          strategyBalance: depositedShares,
-          depositedSharesInUSD: depositedSharesInUSD,
-          pendingBalance: pendingBalance
-        }
-      }
-    } else if (asset.strategyType === "daoFaang") {
+   
+    if (asset.strategyType === "daoFaang") {
       const network = store.getStore("network");
       const vaultContract = new web3.eth.Contract(
         asset.vaultContractABI,
@@ -955,6 +798,47 @@ class Store {
         }
       }
 
+    } else {
+      const vaultContract = new web3.eth.Contract(
+        asset.vaultContractABI,
+        asset.vaultContractAddress
+      );
+
+      const pool = await vaultContract.methods.getAllPoolInUSD().call();
+      const totalSupply = await vaultContract.methods.totalSupply().call();
+      const depositedShares = await vaultContract.methods
+        .balanceOf(account.address)
+        .call({ from: account.address });
+
+      let pendingBalance = 0;
+      if(asset.strategyType === "metaverse" || asset.strategyType === "citadelv2" || asset.strategyType === "daoStonks") {
+        pendingBalance = await vaultContract.methods.depositAmt(account.address).call({from: account.address});
+        pendingBalance = pendingBalance / 10 ** 18;
+      }
+     
+      const decimals = (asset.strategyType === "metaverse" || asset.strategyType === "citadelv2" || asset.strategyType === "daoStonks") 
+        ? 18
+        : 6;
+
+      const depositedSharesInUSD =
+        (depositedShares * pool) / totalSupply / 10 ** decimals;
+
+      callback(null, {
+        earnBalance: 0,
+        vaultBalance: 0,
+        strategyBalance: depositedShares,
+        depositedSharesInUSD: depositedSharesInUSD,
+      });
+      return {
+        success: true,
+        data: {
+          earnBalance: 0,
+          vaultBalance: 0,
+          strategyBalance: depositedShares,
+          depositedSharesInUSD: depositedSharesInUSD,
+          pendingBalance: pendingBalance
+        }
+      }
     }
   };
 
