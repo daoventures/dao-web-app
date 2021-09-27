@@ -186,12 +186,12 @@ class App extends Component {
                 <MainContainer />
                 <InvestSimple />
               </Route> */}
-              <Route path="/portfolio">
+              {/* <Route path="/portfolio">
                 <Header />
                 <SideDrawer keyName="portfolio"/>
                 <MainContainer />
                 <Dashboard />
-              </Route>
+              </Route> */}
             
               <Route path="/invest">
                 <Header />
