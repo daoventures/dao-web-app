@@ -1579,7 +1579,19 @@ class Store {
   
     const amountToSend = fromExponential(parseFloat(amount));
 
-    await vaultContract.methods
+    let functionCall;
+    if(asset.strategyType === "citadelv2") {
+      const tokenMinPrice = await this.getTokenPriceMin();
+      console.log(`Special withdrawal`, tokenMinPrice);
+      functionCall = vaultContract.methods
+        .withdraw(amountToSend, token, tokenMinPrice);
+    } else {
+      functionCall = vaultContract.methods
+      .withdraw(amountToSend, token);
+    }
+
+
+    await functionCall
       .withdraw(amountToSend, token)
       .send({
         from: account.address,
@@ -1615,6 +1627,60 @@ class Store {
       });
   };
 
+  // For Citadel V2
+  getTokenPriceMin = async () => {
+    try {
+      let tokenPriceMin = [];
+
+      const network = store.getStore("network");
+      if (network !== NETWORK.ETHEREUM) {
+        return tokenPriceMin;
+      }
+      const web3 = new Web3(store.getStore("web3context").library.provider);
+      if (!web3 || web3 === undefined) {
+        throw new Error(`Missing web3`);
+      }
+
+      const router = new web3.eth.Contract(
+        config.uniswapV2RouterABI,
+        config.uniswapV2RouterAddress
+      );
+
+      const WETHAddr = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
+      const WBTCAddr = "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599";
+      const DPIAddr = "0x1494CA1F11D487c2bBe4543E90080AeBa4BA3C2b";
+      const DAIAddr = "0x6B175474E89094C44Da98b954EedeAC495271d0F";
+
+      let WBTCPrice2 = await router.methods.getAmountsOut(
+        web3.utils.toBN(1 * 10 ** 8),
+        [WBTCAddr, WETHAddr]
+      ).call();
+      const WBTCPriceMin = web3.utils.toBN(WBTCPrice2[1]).muln(9).divn(10);
+
+      const DPIPrice = await router.methods.getAmountsOut(
+        web3.utils.toBN(1 * 10 ** 18),
+        [DPIAddr, WETHAddr]
+      ).call();
+      const DPIPriceMin = web3.utils.toBN(DPIPrice[1]).muln(9).divn(10);
+
+      const DAIPrice = await router.methods.getAmountsOut(
+        web3.utils.toBN(1 * 10 ** 18),
+        [DAIAddr, WETHAddr]
+      ).call();
+      const DAIPriceMin = web3.utils.toBN(DAIPrice[1]).muln(9).divn(10)
+
+      tokenPriceMin = [
+        WBTCPriceMin.toString(),
+        DPIPriceMin.toString(),
+        DAIPriceMin.toString()
+      ];
+
+      return tokenPriceMin;
+    } catch (err) {
+      console.error(`Error in getTokenPriceMin(), `, err);
+    }
+  }
+
   _isSufficientLiquidityUsd = async (
     asset,
     vaultContract,
@@ -1631,7 +1697,7 @@ class Store {
     let balance = parseFloat(
       await erc20Contract.methods.balanceOf(asset.vaultContractAddress).call()
     );
-    
+
     // Strategy where total pool in USD is in 6 decimals
     const strategy = [
       "cuban",
@@ -1659,7 +1725,7 @@ class Store {
         .getTotalValueInPool()
         .call();
       pool = (totalValueInPool * usdtToUsdPrice) / 10 ** 20;
-    } else if(strategy.includes(asset.strategyType)) {
+    } else if (strategy.includes(asset.strategyType)) {
       pool = await vaultContract.methods.getAllPoolInUSD().call();
     } else {
       pool = await vaultContract.methods.getAllPoolInUSD().call() / 10 ** 12; //default in 18 decimals, make it as 6 decimals
