@@ -1,20 +1,14 @@
 import {
-  ADVANCE,
   APPROVE_COMPLETED,
   APPROVE_TRANSACTING,
   APPROVAL_DVG_RETURNED,
   APPROVAL_DVG_RETURNED_COMPLETED,
-  BALANCES_LIGHT_RETURNED,
-  BALANCES_RETURNED,
   BICONOMY_CONNECTED,
   CURRENT_THEME_RETURNED,
   DAOMINE_POOL_RETURNED,
   DAOMINE_POOL_RETURNED_COMPLETED,
-  DEGEN,
   APPROVE_DEPOSIT_CONTRACT,
   CONFIRM_DEPOSIT_CONTRACT,
-  DEPOSIT_ALL_CONTRACT,
-  DEPOSIT_CONTRACT,
   DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED,
   DEPOSIT_CONTRACT_RETURNED,
   DEPOSIT_CONTRACT_RETURNED_COMPLETED,
@@ -25,84 +19,45 @@ import {
   DEPOSIT_DVG_RETURNED_COMPLETED,
   DEPOSIT_XDVG,
   DISABLE_ACTION_BUTTONS_RETURNED,
-  DONATE,
-  DONATE_RETURNED,
   DRAWER_RETURNED,
   EMERGENCY_WITHDRAW_DAOMINE,
   EMERGENCY_WITHDRAW_DAOMINE_RETURNED,
   EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,
   ERROR,
   FIND_DAOMINE_POOL,
-  GET_AGGREGATED_YIELD,
-  GET_AGGREGATED_YIELD_RETURNED,
-  GET_BALANCES,
-  GET_BALANCES_LIGHT,
-  GET_BEST_PRICE,
-  GET_BEST_PRICE_RETURNED,
-  GET_CONTRACT_EVENTS,
-  GET_CONTRACT_EVENTS_RETURNED,
-  GET_CURV_BALANCE,
-  GET_CURV_BALANCE_RETURNED,
-  GET_DASHBOARD_SNAPSHOT,
   GET_DVG_APR,
   GET_DVG_BALANCE_SUCCESS,
   GET_DVG_INFO,
   GET_HAPPY_HOUR_STATUS,
-  GET_STATISTICS,
   GET_STRATEGY_BALANCES_FULL,
   GET_UPGRADE_TOKEN,
   GET_UPGRADE_TOKEN_RETURN,
-  GET_VAULT_BALANCES,
-  GET_VAULT_BALANCES_FULL,
-  GET_VAULT_INFO,
   GET_XDVG_APR_SUCCESS,
   HAPPY_HOUR_RETURN,
   HAPPY_HOUR_VERIFY,
-  IDAI,
-  IDAI_RETURNED,
-  INVEST,
-  INVEST_RETURNED,
   LATEST_POOLS,
   LEGACY_POOLS,
   UPDATE_SELECTED_POOL_TYPE,
   NETWORK,
-  REBALANCE,
-  REBALANCE_RETURNED,
-  REDEEM,
-  REDEEM_RETURNED,
-  STATISTICS_RETURNED,
   STRATEGY_BALANCES_FULL_RETURNED,
   STRATEGIES_USE_TOKEN_INDEX,
-  SWAP,
-  SWAP_RETURNED,
   TOGGLE_DRAWER,
   TOGGLE_THEME,
-  TRADE,
-  TRADE_RETURNED,
   UPGRADE_STAKE_TOKEN,
   UPGRADE_TOKEN,
   UPGRADE_TOKEN_RETURN,
   UPGRADE_TOKEN_SUCCESS,
   USD_PRICE_RETURNED,
-  VAULT_BALANCES_FULL_RETURNED,
-  VAULT_BALANCES_RETURNED,
   WIDTHDRAW_XDVG,
   WITHDRAW_BOTH,
-  WITHDRAW_BOTH_VAULT,
-  WITHDRAW_BOTH_VAULT_RETURNED,
-  WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
-  DASHBOARD_SNAPSHOT_RETURNED,
-  ZAP,
   WITHDRAW_BOTH_VAULT_FAIL_RETURNED,
   WITHDRAW_DAOMINE,
   WITHDRAW_DAOMINE_RETURNED,
   WITHDRAW_DAOMINE_RETURNED_COMPLETED,
   WITHDRAW_DVG_RETURNED,
-  WITHDRAW_VAULT,
   WITHDRAW_VAULT_RETURNED,
   WITHDRAW_DVG_RETURNED_COMPLETED,
   WITHDRAW_VAULT_RETURNED_COMPLETED,
-  ZAP_RETURNED,
   YIELD_DAOMINE,
   YIELD_DAOMINE_RETURNED,
   YIELD_DAOMINE_RETURNED_COMPLETED,
@@ -111,7 +66,6 @@ import {
   ERROR_DEPOSIT_WALLET
 } from "../constants";
 
-import BigNumber from "bignumber.js";
 import Ethereum from "./config/ethereum";
 import Kovan from "./config/kovan";
 import Matic from "./config/matic";
@@ -121,13 +75,11 @@ import async from "async";
 import citadelABI from "./citadelABI.json";
 import config from "../config";
 import fromExponential from "from-exponential";
-import { getERC20AbiByNetwork } from "./helper/contractHelper";
 import { injected } from "./connectors";
 
 import contractHelper from './helper/contractHelper';
 
 const rp = require("request-promise");
-const ethers = require("ethers");
 
 const Dispatcher = require("flux").Dispatcher;
 const Emitter = require("events").EventEmitter;
@@ -548,43 +500,6 @@ class Store {
     };
   };
 
-  // checkIsApproved = async (asset, account, amount, contract) => {
-  //   const web3 = new Web3(store.getStore("web3context").library.provider);
-
-  //   if (asset.erc20address === "Ethereum") {
-  //     return {
-  //       success: false,
-  //       message: "erc20address not ethereum"
-  //     }
-  //   }
-
-  //   let erc20Contract = new web3.eth.Contract(
-  //       config.erc20ABI,
-  //       asset.erc20address
-  //   );
-
-  //   try {
-  //     const allowance = await erc20Contract.methods
-  //         .allowance(account.address, contract)
-  //         .call({from: account.address});
-
-  //     const ethAllowance = web3.utils.fromWei(allowance, "ether");
-  //     return {
-  //       success: true,
-  //       needApproval: parseFloat(ethAllowance) < parseFloat(amount)
-  //     }
-
-  //   } catch (error) {
-  //     if (error.message) {
-  //       console.log(error.message);
-  //     }
-  //     return {
-  //       success: false,
-  //       message: error
-  //     }
-  //   }
-  // }
-
   _checkApprovalCitadel = async (
     asset,
     account,
@@ -696,137 +611,6 @@ class Store {
       callback(error);
     }
   };
-
- 
-
-  // checkIsCompoundApproved = async (asset,
-  //                                  account,
-  //                                  amount,
-  //                                  contract) => {
-
-  //   const web3 = new Web3(store.getStore("web3context").library.provider);
-
-  //   if (asset.erc20address === "Ethereum") {
-  //     return {
-  //       success: false,
-  //       message: "erc20address not ethereum"
-  //     }
-  //   }
-
-  //   let erc20Contract = new web3.eth.Contract(
-  //       config.erc20ABI,
-  //       asset.erc20address
-  //   );
-
-  //   try {
-  //     const allowance = await erc20Contract.methods
-  //         .allowance(account.address, contract)
-  //         .call({from: account.address});
-
-  //     const ethAllowance = web3.utils.fromWei(allowance, "ether");
-  //     return {
-  //       success: true,
-  //       needApproval: parseFloat(ethAllowance) < parseFloat(amount)
-  //     }
-  //   } catch (error) {
-  //     if (error.message) {
-  //       console.log(error.message);
-  //     }
-  //     return {
-  //       success: false,
-  //       message: error
-  //     }
-  //   }
-  // }
-
-  // _checkApprovalWaitForConfirmation = async (
-  //   asset,
-  //   account,
-  //   amount,
-  //   contract,
-  //   callback
-  // ) => {
-  //   const web3 = new Web3(store.getStore("web3context").library.provider);
-  //   let erc20Contract = new web3.eth.Contract(
-  //     config.erc20ABI,
-  //     asset.erc20address
-  //   );
-  //   const allowance = await erc20Contract.methods
-  //     .allowance(account.address, contract)
-  //     .call({ from: account.address });
-
-  //   const ethAllowance = web3.utils.fromWei(allowance, "ether");
-
-  //   if (parseFloat(ethAllowance) < parseFloat(amount)) {
-  //     if (
-  //       [
-  //         "crvV1",
-  //         "crvV2",
-  //         "crvV3",
-  //         "crvV4",
-  //         "USDTv1",
-  //         "USDTv2",
-  //         "USDTv3",
-  //         "sCRV",
-  //       ].includes(asset.id) &&
-  //       ethAllowance > 0
-  //     ) {
-  //       erc20Contract.methods
-  //         .approve(contract, web3.utils.toWei("0", "ether"))
-  //         .send({
-  //           from: account.address,
-  //           gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-  //         })
-  //         .on("transactionHash", async function (hash) {
-  //           erc20Contract.methods
-  //             .approve(contract, web3.utils.toWei(amount, "ether"))
-  //             .send({
-  //               from: account.address,
-  //               gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-  //             })
-  //             .on("transactionHash", function (hash) {
-  //               callback();
-  //             })
-  //             .on("error", function (error) {
-  //               if (!error.toString().includes("-32601")) {
-  //                 if (error.message) {
-  //                   return callback(error.message);
-  //                 }
-  //                 callback(error);
-  //               }
-  //             });
-  //         })
-  //         .on("error", function (error) {
-  //           if (!error.toString().includes("-32601")) {
-  //             if (error.message) {
-  //               return callback(error.message);
-  //             }
-  //             callback(error);
-  //           }
-  //         });
-  //     } else {
-  //       erc20Contract.methods
-  //         .approve(contract, web3.utils.toWei(amount, "ether"))
-  //         .send({
-  //           from: account.address,
-  //           gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
-  //         })
-  //         .on("transactionHash", function (hash) {
-  //           callback();
-  //         })
-  //         .on("error", function (error) {
-  //           if (!error.toString().includes("-32601")) {
-  //             if (error.message) {
-  //               return callback(error.message);
-  //             }
-  //             callback(error);
-  //           }
-  //         });
-  //     }
-  //   } else {
-  //     callback();
-  //   }
-  // };
 
   _getERC20Balances = async (web3, asset, account, callback, coinsInUSDPrice) => {
     // Strategy which required to get balances for multiple token
@@ -1138,7 +922,6 @@ class Store {
 
     }
   };
-
 
   /******** DEPOSIT APPROVAL START ********************/
 
