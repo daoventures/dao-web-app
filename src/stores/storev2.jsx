@@ -1475,7 +1475,6 @@ class Store {
     let functionCall;
     if(asset.strategyType === "citadelv2") {
       const tokenMinPrice = await this.getTokenPriceMin();
-      console.log(`Special withdrawal`, tokenMinPrice);
       functionCall = vaultContract.methods
         .withdraw(amountToSend, token, tokenMinPrice);
     } else {
@@ -1483,9 +1482,7 @@ class Store {
       .withdraw(amountToSend, token);
     }
 
-
     await functionCall
-      .withdraw(amountToSend, token)
       .send({
         from: account.address,
         gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
