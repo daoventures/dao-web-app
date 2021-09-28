@@ -7,21 +7,11 @@ import IpfsRouter from "ipfs-react-router";
 import { BrowserView, MobileView } from "react-device-detect";
 
 import "./i18n";
-import interestTheme from "./theme";
 import { getTheme } from "./theme";
 
-import APR from "./components/apr";
-import InvestSimple from "./components/investSimple";
-import Manage from "./components/manage";
-// import Performance from './components/performance';
-import Zap from "./components/zap";
-import IDai from "./components/idai";
-// import Footer from './components/footer';
-// import Home from './components/home';
+
 import Header from "./components/header";
-import Vaults from "./components/vault";
 import VaultsInfo from "./components/vaultInfo";
-import Dashboard from "./components/dashboard";
 import SideDrawer from "./components/sideDrawer";
 import MainContainer from "./components/mainContainer";
 
@@ -29,7 +19,6 @@ import StakeDvdVip from './components/stake/stakeDvdVip';
 import StakeDvgVip from './components/stake/stakeDvgVip';
 import Stake from './components/stake';
 
-import Swap from './components/swap';
 import UpgradeToken from './components/upgradeToken/upgradeToken';
 
 import {
@@ -51,55 +40,6 @@ class App extends Component {
 
   componentWillMount() {
     dispatcher.dispatch({ type: GET_VAULT_INFO });
-
-    // console.log('没到这里吗####');
-    // const onboard = initOnboard({
-    //   address: (address) => {
-    //     console.log('onboard#####address####', address);
-    //     store.setStore({account: {address: address}});
-    //   },
-    //   network: (network) => {
-    //     console.log('onboard###network#####', network);
-    //   },
-    //   balance: (balance) => {
-    //     console.log('onboard#####balance#####', balance);
-    //   },
-    //   wallet: (wallet) => {
-    //     console.log('onboard#####wallet#####', wallet);
-    //     window.localStorage.setItem('selectedWallet', wallet.name);
-    //   },
-    // });
-
-    // const previouslySelectedWallet = window.localStorage.getItem(
-    //   'selectedWallet'
-    // );
-
-    // if (previouslySelectedWallet && onboard) {
-    //   onboard.walletSelect(previouslySelectedWallet);
-    // }
-
-    // 暂时注释
-    // injected.isAuthorized().then((isAuthorized) => {
-    //   if (isAuthorized) {
-    //     injected
-    //       .activate()
-    //       .then((a) => {
-    //         console.log('a@@@@######', a);
-    //         store.setStore({
-    //           account: {address: a.account},
-    //           web3context: {library: {provider: a.provider}},
-    //         });
-
-    //         console.log('a######', a);
-    //         console.log('a.account####', a.account);
-    //         emitter.emit(CONNECTION_CONNECTED);
-    //       })
-    //       .catch((e) => {
-    //         console.log(e);
-    //       });
-    //   } else {
-    //   }
-    // });
 
     if (window.ethereum) {
       window.ethereum.on("accountsChanged", function (accounts) {
@@ -157,42 +97,6 @@ class App extends Component {
               background: this.state.interestTheme.themeColors.back,
             }}>
             <Switch>
-              {/* <Route path="/stats">
-                <Header />
-                <APR />
-              </Route>
-              <Route path="/zap">
-                <Header />
-                <Zap />
-              </Route>
-              <Route path="/idai">
-                <IDai />
-              </Route> */}
-              {/* <Route path="/performance">
-                <Header />
-                <Performance />
-              </Route> */}
-              {/* <Route path="/manage">
-                <Header />
-                <Manage />
-              </Route> */}
-              {/* <Route path="/vaults">
-                <Header />
-                <Vaults />
-              </Route> */}
-                {/* <Route path="/earn">
-                <Header />
-                <SideDrawer />
-                <MainContainer />
-                <InvestSimple />
-              </Route> */}
-              {/* <Route path="/portfolio">
-                <Header />
-                <SideDrawer keyName="portfolio"/>
-                <MainContainer />
-                <Dashboard />
-              </Route> */}
-            
               <Route path="/invest">
                 <Header />
                 <SideDrawer keyName="invest"/>
@@ -232,20 +136,6 @@ class App extends Component {
                 <SideDrawer keyName="upgrade"/>
                 <MainContainer />
                 <UpgradeToken />
-              </Route>
-
-              {/* <Route path="/stake">
-                <Header />
-                <SideDrawer />
-                <MainContainer />
-                <Stake />
-              </Route> */}
-
-              <Route path="/swap">
-                <Header />
-                <SideDrawer keyName="swap"/>
-                <MainContainer />
-                <Swap />
               </Route>
 
               <Route path="/">
