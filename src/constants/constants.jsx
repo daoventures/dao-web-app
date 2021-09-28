@@ -208,6 +208,8 @@ export const DISABLE_ACTION_BUTTONS_RETURNED = "DISABLE_ACTION_BUTTONS_RETURNED"
 // Pending Rewards section
 export const EARLY_HARVEST_PENALTY = "50";
 
+export const DVD_AIRDROP = "DVD_AIRDROP";
+
 export const NETWORK = {
   ETHEREUM: 1,
   KOVAN: 42,

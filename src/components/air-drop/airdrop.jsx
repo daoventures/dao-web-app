@@ -3,7 +3,7 @@ import { withNamespaces } from "react-i18next";
 import { withRouter } from "react-router";
 import { withStyles } from "@material-ui/core/styles";
 import Store from "../../stores"; // Update this
-import { Typography, Button, Dialog, DialogContent, IconButton } from "@material-ui/core";
+import { Typography, Button, Dialog, DialogContent, IconButton, CircularProgress } from "@material-ui/core";
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import CloseIcon from "@material-ui/icons/Close";
 import Celebrate from '../../assets/img_new/vaults/celebrate.svg';
@@ -29,6 +29,9 @@ const styles = (theme) => ({
     },
     padding30: {
         padding: "30px",
+    },
+    width40: {
+        width: "40%"
     },
     airDropContainer: {
         width: "100%",
@@ -99,7 +102,6 @@ const styles = (theme) => ({
     claimDVDContainer: {
         background: theme.themeColors.itemBack,
         padding: "20px 50px 20px 50px",
-        color: theme.themeColors.textGray
     },
     claimDVDLinkContainer: {
         margin: "10px 0px"
@@ -108,6 +110,24 @@ const styles = (theme) => ({
         color: theme.themeColors.textT,
         marginTop: "3px",
         marginBottom: "3px"
+    },
+    claimInProgressContainer: {
+        height: "350px"
+    },
+    progressIconContainer: {
+        margin: "30px 0px"
+    },
+    claimInProgressTitle: {
+        marginTop: "10px"
+    },
+    claimInProgressSubtitle: {
+        marginTop: "40px"
+    },
+    grayText: {
+        color: theme.themeColors.textGray
+    },
+    purpleText: {
+        color: theme.themeColors.textP
     }
 })
 
@@ -126,6 +146,44 @@ class AirDrop extends Component {
         this.setState({ openModal });
     }
 
+    claimDVD = () => {
+        this.setState({
+            isClaimDVD: true,
+            isClaimInProgress: true
+        })
+    }
+
+    claimDVDInProgress = () => {
+        const { classes } = this.props;
+        const claimContent = <div className={`${classes.flexCenter} ${classes.flexColumn}`}>
+            <div className={`${classes.flexCenter} ${classes.flexColumn} ${classes.claimInProgressContainer}`}>
+                <div className={`${classes.progressIconContainer}`}>
+                    <CircularProgress color="#FFFFFF" size="60px" />
+                </div>
+
+                <div className={`${classes.claimInProgressTitle}`}>
+                    <Typography variant={"h3"}>
+                        Claiming
+                    </Typography>
+                </div>
+
+                <div className={`${classes.claimInProgressTitle}`}>
+                    <Typography variant={"h2"} className={`${classes.purpleText}`}>
+                        400 DVD
+                    </Typography>
+                </div>
+
+                <div className={`${classes.textGray} ${classes.claimInProgressSubtitle}`}>
+                    <Typography variant={"h5"}>
+                        Confirm this transaction in your wallet.
+                    </Typography>
+                </div>
+            </div>
+        </div>
+
+        return claimContent;
+    }
+
     claimDVDContent = () => {
         const { classes } = this.props;
         const claimContent = <div className={`${classes.flexCenter} ${classes.flexColumn}`}>
@@ -134,7 +192,7 @@ class AirDrop extends Component {
                     400 DVD
                 </Typography>
             </div>
-            <div className={`${classes.h50} ${classes.claimDVDContainer}`}>
+            <div className={`${classes.h50} ${classes.claimDVDContainer} ${classes.textGray}`}>
                 <Typography variant={"h5"}>
                     As a member of DAOventures community you may claim DVD to be used for Voting and Governance.
                 </Typography>
@@ -144,8 +202,8 @@ class AirDrop extends Component {
                 </div>
 
                 <div className={classes.flexCenter}>
-                    <Button className={classes.claimButton}
-                        onClick={()=> this.claimDVD}>
+                    <Button className={`${classes.width40} ${classes.claimButton}`}
+                        onClick={()=> this.claimDVD()}>
                         <span className={classes.claimButtonText}>
                             Claim DVD
                         </span>
@@ -197,6 +255,7 @@ class AirDrop extends Component {
                 <DialogContent dividers className={classes.dialogContent}>
                     <div>
                         { !isClaimDVD && this.claimDVDContent() }
+                        { isClaimDVD && isClaimInProgress && this.claimDVDInProgress() }
                     </div>
                 </DialogContent>
             </Dialog>
@@ -224,7 +283,7 @@ class AirDrop extends Component {
                 </Typography>
             </div>
             <div>
-                <Button className={classes.claimButton}
+                <Button className={`${classes.claimButton}`}
                     onClick={()=> this.setOpenModal(true)}>
                     <span className={classes.claimButtonText}>
                         Claim your DVD Token

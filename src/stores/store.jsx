@@ -28,6 +28,7 @@ import {
   DONATE,
   DONATE_RETURNED,
   DRAWER_RETURNED,
+  DVD_AIRDROP,
   EMERGENCY_WITHDRAW_DAOMINE,
   EMERGENCY_WITHDRAW_DAOMINE_RETURNED,
   EMERGENCY_WITHDRAW_DAOMINE_RETURNED_COMPLETED,
@@ -486,6 +487,9 @@ class Store {
             break;  
           case YIELD_DAOMINE:
             this.yieldDAOmine(payload);
+            break;
+          case DVD_AIRDROP: 
+            this.dvdAirDrop(payload);
             break;
           default: {
           }
@@ -9081,6 +9085,57 @@ class Store {
       );
     }
   };
+
+  /*** Air Drop START */
+  dvdAirDrop = async(payload) => {
+    const network = store.getStore("network");
+    if(!network || network === undefined) {
+      console.error(`Network is undefined.`);
+      return;
+    }
+
+    const web3 = store.getStore("web3");
+    if(!web3 || web3 === undefined) {
+      console.error(`Network is undefined.`);
+      return;
+    }
+  }
+
+  checkIfAirdropClaimedByUser = async(payload) => {
+    const network = store.getStore("network");
+    if(!network || network === undefined) {
+      console.error(`Network is undefined.`);
+      return;
+    }
+
+    const web3 = store.getStore("web3");
+    if(!web3 || web3 === undefined) {
+      console.error(`Network is undefined.`);
+      return;
+    }
+
+    const isClaimed = false;
+
+    return isClaimed;
+  }
+
+  checkIfAirdropFullyClaimed = async(payload) => {
+    const network = store.getStore("network");
+    if(!network || network === undefined) {
+      console.error(`Network is undefined.`);
+      return;
+    }
+
+    const web3 = store.getStore("web3");
+    if(!web3 || web3 === undefined) {
+      console.error(`Network is undefined.`);
+      return;
+    }
+
+    const isFullyClaimed = false;
+
+    return isFullyClaimed;
+  }
 }
 
 var store = new Store();
