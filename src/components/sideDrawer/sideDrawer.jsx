@@ -42,6 +42,8 @@ import Snackbar from "../snackbar";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 
+import Airdrop from "../air-drop/airdrop";
+
 const emitter = Store.emitter;
 const dispatcher = Store.dispatcher;
 const store = Store.store;
@@ -675,7 +677,12 @@ class SideDrawer extends Component {
                                 : null}
                         </List>
                     </div>
-
+                    
+                    {/** Airdrop */}
+                    <div className={classes.accountInfoBlock}>
+                        <Airdrop/>
+                    </div>
+                   
                     {/** Footer */}
                     {this.renderFooterMenu(false)}
                     {snackbarMessage && this.renderSnackbar()}
@@ -818,6 +825,9 @@ class SideDrawer extends Component {
                             })
                             : null}
                     </List>
+
+                    {/** Airdrop */}
+                    <Airdrop/>
 
                     {/* *Footer */}
                     {this.renderFooterMenu(true)}
