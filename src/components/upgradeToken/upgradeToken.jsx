@@ -23,7 +23,7 @@ import {
     APPROVAL_DVG_RETURNED,
     APPROVAL_DVG_RETURNED_COMPLETED
 } from '../../constants'
-import Store from "../../stores";
+import Store from "../../stores/storev2";
 import ConnectWallet from "../common/connectWallet/connectWallet";
 import Snackbar from "../snackbar/snackbar";
 import InfoModal from "../common/infoModal/infoModal";

@@ -7,7 +7,7 @@ import {
     TOGGLE_THEME
 } from '../../constants'
 
-import Store from "../../stores"
+import Store from "../../stores/storev2"
 const emitter = Store.emitter
 const dispatcher = Store.dispatcher
 const store = Store.store

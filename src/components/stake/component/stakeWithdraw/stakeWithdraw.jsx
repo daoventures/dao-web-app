@@ -3,7 +3,7 @@ import { withNamespaces } from "react-i18next";
 import { withRouter } from "react-router";
 import { withStyles } from "@material-ui/core/styles";
 import { Typography, TextField, Button } from "@material-ui/core";
-import Store from "../../../../stores/store";
+import Store from "../../../../stores/storev2";
 import {
     WITHDRAW_DAOMINE,
     WITHDRAW_DAOMINE_RETURNED_COMPLETED,

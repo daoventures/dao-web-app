@@ -38,7 +38,7 @@ import {
   GET_VAULT_INFO,
 } from "./constants";
 
-import Store from "./stores";
+import Store from "./stores/storev2";
 const emitter = Store.emitter;
 const store = Store.store;
 const dispatcher = Store.dispatcher;
@@ -186,12 +186,12 @@ class App extends Component {
                 <MainContainer />
                 <InvestSimple />
               </Route> */}
-              <Route path="/portfolio">
+              {/* <Route path="/portfolio">
                 <Header />
                 <SideDrawer keyName="portfolio"/>
                 <MainContainer />
                 <Dashboard />
-              </Route>
+              </Route> */}
             
               <Route path="/invest">
                 <Header />
