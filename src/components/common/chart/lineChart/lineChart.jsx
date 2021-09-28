@@ -8,7 +8,7 @@ import HighchartsReact from "highcharts-react-official";
 
 import { HIDE_NAV_INNERWIDTH } from "../../../../constants/constants";
 
-import Store from "../../../../stores/store";
+import Store from "../../../../stores/storev2";
 const emitter = Store.emitter;
 const store = Store.store;
 
