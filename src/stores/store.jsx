@@ -7360,7 +7360,7 @@ class Store {
 
       let functionCall;
       if(asset.strategyType === "citadelv2") {
-        const tokenMinPrice = await this.getTokenPriceMin(erc20Address);
+        const tokenMinPrice = await this.getTokenPriceMin(token);
         console.log(`Special withdrawal`, tokenMinPrice);
         functionCall = vaultContract.methods
           .withdraw(amountToSend, token, tokenMinPrice);
