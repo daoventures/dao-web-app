@@ -3523,13 +3523,15 @@ class Asset extends Component {
     onChange = (event) => {
         let val = [];
         let asset = this.props.asset;
-        const balance = asset.strategyBalance;
         const decimals = asset.decimals;
-        const priceInUsd = asset.depositedSharesInUSD;
+        const balance = asset.strategyBalance / 10 ** decimals;
+        
+        let inputAmount = event.target.value;
+        val[event.target.id] = inputAmount;
 
-        val[event.target.id] = event.target.value;
+        const pricePerFullShareInUSD = asset.depositedSharesInUSD / balance;
 
-        let assetTokenAmount = event.target.value * ((balance / 10 ** decimals) / priceInUsd);
+        let assetTokenAmount = (inputAmount * asset.priceInUSD[this.state.tokenIndex]) / pricePerFullShareInUSD;
         assetTokenAmount = (
             Math.floor(assetTokenAmount * 10 ** 8) /
             10 ** 8
