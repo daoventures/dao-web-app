@@ -6,7 +6,6 @@ const minPercentage = 95;
 const getAmountsOut = async(contract, amount, pairs) => {
     let result = [];
     try {
-        console.log(`Amount ${amount}, pairs`, pairs);
         result = await contract.methods.getAmountsOut(amount, pairs).call();
     } catch (err) {
         console.error(`Error in getAmountsOut(): `, err);
