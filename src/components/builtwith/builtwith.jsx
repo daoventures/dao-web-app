@@ -7,7 +7,7 @@ import {
 } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 
-import Store from "../../stores";
+import Store from "../../stores/storev2";
 const store = Store.store
 
 const styles = theme => ({

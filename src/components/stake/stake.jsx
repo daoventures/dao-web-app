@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
 import { withStyles } from "@material-ui/core/styles";
 import { withNamespaces } from "react-i18next";
-import Store from "../../stores";
+import Store from "../../stores/storev2";
 import {
   Typography,
   Grid,

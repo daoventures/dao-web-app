@@ -11,7 +11,7 @@ import {
     Collapse,
 } from "@material-ui/core";
 
-import Store from "../../stores";
+import Store from "../../stores/storev2";
 import {
     DRAWER_RETURNED,
     TOGGLE_DRAWER,
@@ -321,7 +321,7 @@ class SideDrawer extends Component {
                 (store.getStore("account") && store.getStore("account").balance) || "",
             totalValue: "",
             listItem: [
-                {key: PORTFOLIO, name: "portfolio", path: PORTFOLIO_PATH, icon: "#iconmenu_porftfolio_nor_day"},
+                // {key: PORTFOLIO, name: "portfolio", path: PORTFOLIO_PATH, icon: "#iconmenu_porftfolio_nor_day"},
                 {
                     key: INVEST,
                     name: "invest",
@@ -340,12 +340,12 @@ class SideDrawer extends Component {
                         {key: "DAOvip (DVD)", name: "stake-dvd", path: STAKE_PATH_DVD},
                     ],
                 },
-                {
-                    key: SWAP,
-                    name: "swap",
-                    path: SWAP_PATH,
-                    icon: "#iconmenu_features_nor_night",
-                },
+                // {
+                //     key: SWAP,
+                //     name: "swap",
+                //     path: SWAP_PATH,
+                //     icon: "#iconmenu_features_nor_night",
+                // },
                 {
                     key: UPGPRADE,
                     name: "upgrade",
@@ -361,6 +361,7 @@ class SideDrawer extends Component {
         window.addEventListener("resize", this.resize.bind(this));
         emitter.on(DRAWER_RETURNED, this.toggleDrawer);
         this.resize();
+        this.getTotalTVL();
     }
 
     componentWillMount() {
@@ -376,6 +377,13 @@ class SideDrawer extends Component {
         emitter.removeListener(CURRENT_THEME_RETURNED, this.currentThemeChanged);
         emitter.removeListener(CHANGE_NETWORK, this.networkChanged);
         emitter.removeListener(CONNECTION_CONNECTED, this.connectionConnected);
+    }
+
+    getTotalTVL = async () => {
+        const tvlResult = await store._getTotalTVL();
+        this.setState({
+            totalValue: (tvlResult.success) ? parseFloat(tvlResult.tvl).toFixed(2) : `0`
+        });
     }
 
     resize() {
@@ -607,7 +615,7 @@ class SideDrawer extends Component {
                             Total Value Locked
                         </div>
                         <div className={classes.totalValueRightNum}>
-                            $ {this.state.totalValue.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")}
+                            $ {(this.state.totalValue && this.state.totalValue !== undefined) && this.state.totalValue.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")}
                         </div>
                     </div>
                 </div>

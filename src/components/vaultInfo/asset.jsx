@@ -13,34 +13,26 @@ import {
     ListItem,
     ListItemAvatar,
     ListItemText,
-    Slider,
     TextField,
-    Tooltip,
     Typography,
     Table,
     TableBody,
     TableCell,
-    TableContainer,
     TableHead,
     TableRow,
 } from "@material-ui/core";
 import {
-    APPROVE_COMPLETED,
     APPROVE_DEPOSIT_CONTRACT,
     APPROVE_DEPOSIT_SUCCESS,
     CONFIRM_DEPOSIT_CONTRACT,
-    DEPOSIT_ALL_CONTRACT,
     DEPOSIT_ALL_CONTRACT_RETURNED,
     DEPOSIT_ALL_CONTRACT_RETURNED_COMPLETED,
-    DEPOSIT_CONTRACT,
     DEPOSIT_CONTRACT_RETURNED_COMPLETED,
     ERROR,
     HAPPY_HOUR_VERIFY,
     WITHDRAW_BOTH,
-    WITHDRAW_BOTH_VAULT,
     WITHDRAW_BOTH_VAULT_FAIL_RETURNED,
     WITHDRAW_BOTH_VAULT_RETURNED_COMPLETED,
-    WITHDRAW_VAULT_RETURNED,
     WITHDRAW_VAULT_RETURNED_COMPLETED,
     ERROR_WALLET_APPROVAL, ERROR_DEPOSIT_WALLET, DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED
 } from "../../constants";
@@ -50,14 +42,14 @@ import ArrowDropDownCircleIcon from "@material-ui/icons/ArrowDropDownCircle";
 import CloseIcon from "@material-ui/icons/Close";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
-import InfoIcon from "@material-ui/icons/Info";
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
-import Store from "../../stores";
+import Store from "../../stores/storev2";
 import {getTheme} from "../../theme";
-import SimpleTabs from "./Tabs";
 import {withRouter} from "react-router-dom";
 import {withStyles} from "@material-ui/core/styles";
 import PieChart from '../common/pieChart';
+import LineChart from '../common/chart/lineChart/lineChart';
+
 import {
     getAssetData,
     getMappedData,
@@ -66,7 +58,8 @@ import {
 import BasicModal from '../common/basicModal';
 import DoneMark from '../../assets/done.png';
 
-import fromExponential from "from-exponential";
+import InputValidation from "../../utils/inputValidation";
+
 import InfoModal from "../common/infoModal/infoModal";
 
 const emitter = Store.emitter;
@@ -763,17 +756,7 @@ const styles = (theme) => ({
     }
 });
 
-const HtmlTooltip = withStyles((theme) => ({
-    tooltip: {
-        backgroundColor: "#f5f5f9",
-        color: "rgba(0, 0, 0, 0.87)",
-        maxWidth: 220,
-        fontSize: theme.typography.pxToRem(12),
-        border: "1px solid #dadde9",
-    },
-}))(Tooltip);
-
-const StyledTableCell = withStyles((theme) => ({
+const StyledTableCell = withStyles(() => ({
     head: {
         color: "#FFFFFF",
         borderBottom: "none",
@@ -789,7 +772,7 @@ const StyledTableCell = withStyles((theme) => ({
     },
 }))(TableCell);
 
-const StyledTableCellDepositHead = withStyles((theme) => ({
+const StyledTableCellDepositHead = withStyles(() => ({
     head: {
         color: "#FFFFFF",
     },
@@ -800,7 +783,7 @@ const StyledTableCellDepositHead = withStyles((theme) => ({
     },
 }))(TableCell);
 
-const StyledTableCellDeposit = withStyles((theme) => ({
+const StyledTableCellDeposit = withStyles(() => ({
     head: {
         color: "#FFFFFF",
         borderBottom: "none"
@@ -813,7 +796,7 @@ const StyledTableCellDeposit = withStyles((theme) => ({
     },
 }))(TableCell);
 
-const StyledTableRow = withStyles((theme) => ({
+const StyledTableRow = withStyles(() => ({
     root: {
         // '&:nth-of-type(odd)': {
         //     backgroundColor: theme.palette.action.hover,
@@ -964,8 +947,7 @@ class Asset extends Component {
         let apyResponseData = await store.getHistoricDataOfVault(asset.id, value);
 
         if (apyResponseData.success) {
-            let mappedHistoricalData = getMappedData(apyResponseData.data.chartData || [], asset.id);
-            this.setState({vaultAssetHistoricalData: {...mappedHistoricalData, pnl: apyResponseData.data.performanceHistory}});
+            this.setState({vaultAssetHistoricalData: {chartData: apyResponseData.data.chartData , pnl: apyResponseData.data.performanceHistory}});
         }
     }
 
@@ -978,9 +960,9 @@ class Asset extends Component {
             amountError,
             errorMessage,
         } = this.state;
-        const {asset, startLoading} = this.props;
+        const {asset} = this.props;
 
-        if (this.validateAmount(amount)) {
+        if (InputValidation.validateAmountNotExist(amount)) {
             this.setState({
                 amountError: true,
                 errorMessage: "Invalid amount",
@@ -1143,24 +1125,11 @@ class Asset extends Component {
         }
     };
 
-    isUsdVault = (asset) => {
-        return asset.strategyType === "citadel" ||
-            asset.strategyType === "elon" ||
-            asset.strategyType === "cuban" ||
-            asset.strategyType === "daoFaang" ||
-            asset.strategyType === "moneyPrinter" ||
-            asset.strategyType === "metaverse" || 
-            asset.strategyType === "citadelv2";
-    };
-
-    // Handle input validation message
     renderErrorMessage = (classes) => {
         const {
             errorMessage,
             happyHourMessage,
-            happyHourThreshold,
             happyHourWarning,
-            amountAboveThreshold,
         } = this.state;
         if (errorMessage !== "") {
             return (
@@ -1244,7 +1213,6 @@ class Asset extends Component {
             amountError,
             scales,
             loading,
-            redeemAmount,
             redeemAmountInUsd,
             redeemAmountError,
             percent,
@@ -1268,41 +1236,36 @@ class Asset extends Component {
                         disabled={loading || (!(isDeposit ? asset.isDepositEnabled : asset.isWithdrawEnabled))}
                         placeholder="0.00"
                         variant="outlined"
-                        onKeyDown={isDeposit ? this.inputKeyDown : this.inputRedeemKeyDown}
                     />
                     <div className={classes.depositScaleContainer}>
-                        {this.isUsdVault(asset) && (
-                            <React.Fragment>
-                                <div className={classes.accountInfoBlock}>
-                                    <div
-                                        className={classes.accountInfo}
-                                        onClick={() => {
-                                            this.handleModalDisplay(true);
-                                        }}
-                                    >
-                                        <img
-                                            alt=""
-                                            src={require("../../assets/" +
-                                                this.state.selectedCurrency +
-                                                "-logo.png")}
-                                            className={classes.assetIconImg}
-                                            style={
-                                                asset.disabled
-                                                    ? {filter: "grayscale(100%)"}
-                                                    : {}
-                                            }
-                                        />
-                                        <span className={classes.addressSpan}>
-                            {this.state.selectedCurrency}
-                          </span>
-                                        <ArrowDropDownCircleIcon
-                                            className={classes.arrowDropdownIcon}
-                                        />
-                                    </div>
-                                </div>
-                                {this.renderCurrencyModal(asset.symbols)}
-                            </React.Fragment>
-                        )}
+                        <div className={classes.accountInfoBlock}>
+                            <div
+                                className={classes.accountInfo}
+                                onClick={() => {
+                                    this.handleModalDisplay(true);
+                                }}
+                            >
+                                <img
+                                    alt=""
+                                    src={require("../../assets/" +
+                                        this.state.selectedCurrency +
+                                        "-logo.png")}
+                                    className={classes.assetIconImg}
+                                    style={
+                                        asset.disabled
+                                            ? { filter: "grayscale(100%)" }
+                                            : {}
+                                    }
+                                />
+                                <span className={classes.addressSpan}>
+                                    {this.state.selectedCurrency}
+                                </span>
+                                <ArrowDropDownCircleIcon
+                                    className={classes.arrowDropdownIcon}
+                                />
+                            </div>
+                        </div>
+                        {this.renderCurrencyModal(asset.symbols)}
                     </div>
                     <div className={classes.floatRightItems}>
                         {scales.length > 0 &&
@@ -1364,194 +1327,6 @@ class Asset extends Component {
             </React.Fragment>
         );
     };
-
-    renderYearnRatio = (isYEarn) => {
-        const {classes, asset} = this.props;
-        const {openEarnInfo, openVaultInfo, earnRatio, vaultRatio} = this.state;
-
-        return (
-            <React.Fragment>
-                <Typography
-                    variant="h4"
-                    style={{
-                        color: isYEarn ? "#7B25D2" : "#027AFF",
-                        display: "flex",
-                        alignItems: "center",
-                    }}
-                >
-                    <HtmlTooltip
-                        placement={"top"}
-                        title={
-                            <React.Fragment>
-                                <Typography>
-                                    See{" "}
-                                    <a
-                                        href="https://daoventures.gitbook.io/daoventures/"
-                                        target="_blank"
-                                    >
-                                        FAQ: Product
-                                    </a>{" "}
-                                    for more information
-                                </Typography>
-                            </React.Fragment>
-                        }
-                        open={isYEarn ? openEarnInfo : openVaultInfo}
-                        onClose={
-                            isYEarn
-                                ? this.handleTooltipEarnClose
-                                : this.handleTooltipVaultClose
-                        }
-                        PopperProps={{
-                            disablePortal: true,
-                            style: {
-                                pointerEvents: "auto",
-                            },
-                        }}
-                        disableFocusListener
-                        disableHoverListener
-                        disableTouchListener
-                    >
-                        <InfoIcon
-                            style={{
-                                verticalAlign: "text-top",
-                                cursor: "pointer",
-                                width: "16px",
-                                height: "16px",
-                            }}
-                            onClick={() =>
-                                isYEarn
-                                    ? this.handleTooltipEarnClose()
-                                    : this.handleTooltipVaultClose()
-                            }
-                        />
-                    </HtmlTooltip>
-                    &nbsp;
-                    {isYEarn ? "yEarn: " + earnRatio : "yVault: " + vaultRatio}
-                    {" %"}
-                </Typography>
-            </React.Fragment>
-        );
-    };
-
-    renderStrategy() {
-        const {classes, asset} = this.props;
-        const {
-            redeemEarnAmount,
-            redeemEarnAmountError,
-            redeemAmount,
-            redeemAmountError,
-            loading,
-            ratio,
-            earnPercent,
-            vaultPercent,
-            scales,
-        } = this.state;
-        if (asset.strategyType === "citadel" || asset.strategyType === "daoFaang") {
-            return (
-                <div>
-                    <Typography variant={"h4"} className={classes.subtitle} noWrap>
-                        STRATEGY
-                    </Typography>
-                    <Grid container style={{marginTop: "1rem"}}>
-                        <Grid item sm={3} xs={6}>
-                            <Typography variant={"h5"} className={classes.grey}>
-                                Currently Active:
-                            </Typography>
-                            <div className={classes.flexy}>
-                                <Typography variant={"h4"} styles={{wordWrap: "break-word"}}>
-                                    {asset.strategy}
-                                </Typography>
-                            </div>
-                        </Grid>
-                        <Grid item sm={3} xs={6}>
-                            <Typography variant={"h5"} className={classes.grey}>
-                                Inception PnL:
-                            </Typography>
-                            <div className={classes.flexy}>
-                                <Typography variant={"h4"} noWrap>
-                                    {(this._getPNL(asset)["inception"] * 100).toFixed(2)}%{" "}
-                                </Typography>
-                            </div>
-                        </Grid>
-                        <Grid item sm={3} xs={6}>
-                            <Typography variant={"h5"} className={classes.grey}>
-                                Monthly PnL:
-                            </Typography>
-                            <div className={classes.flexy}>
-                                <Typography variant={"h4"} noWrap>
-                                    {(this._getPNL(asset)["30d"] * 100).toFixed(2)}%{" "}
-                                </Typography>
-                            </div>
-                        </Grid>
-                        <Grid item sm={3} xs={6}>
-                            <Typography variant={"h5"} className={classes.grey}>
-                                Weekly PnL:
-                            </Typography>
-                            <div className={classes.flexy}>
-                                <Typography variant={"h4"} noWrap>
-                                    {(this._getPNL(asset)["7d"] * 100).toFixed(2)}%{" "}
-                                </Typography>
-                            </div>
-                        </Grid>
-                    </Grid>
-
-                    <div className={classes.fullWidth}></div>
-                </div>
-            );
-        } else {
-            return (
-                <div>
-                    <Typography variant={"h4"} className={classes.subtitle} noWrap>
-                        STRATEGY
-                    </Typography>
-                    <Grid container style={{marginTop: "1rem"}}>
-                        <Grid item sm={3} xs={6}>
-                            <Typography variant={"h5"} className={classes.grey}>
-                                Currently Active:
-                            </Typography>
-                            <div className={classes.flexy}>
-                                <Typography variant={"h4"} styles={{wordWrap: "break-word"}}>
-                                    {asset.strategy}
-                                </Typography>
-                            </div>
-                        </Grid>
-                        <Grid item sm={3} xs={6}>
-                            <Typography variant={"h5"} className={classes.grey}>
-                                Yearly Growth:
-                            </Typography>
-                            <div className={classes.flexy}>
-                                <Typography variant={"h4"} noWrap>
-                                    {(this._getAPY(asset) / 1).toFixed(2)}%{" "}
-                                </Typography>
-                            </div>
-                        </Grid>
-                        <Grid item sm={3} xs={6}>
-                            <Typography variant={"h5"} className={classes.grey}>
-                                Monthly Growth:
-                            </Typography>
-                            <div className={classes.flexy}>
-                                <Typography variant={"h4"} noWrap>
-                                    {(this._getAPY(asset) / 12).toFixed(2)}%{" "}
-                                </Typography>
-                            </div>
-                        </Grid>
-                        <Grid item sm={3} xs={6}>
-                            <Typography variant={"h5"} className={classes.grey}>
-                                Weekly Growth:
-                            </Typography>
-                            <div className={classes.flexy}>
-                                <Typography variant={"h4"} noWrap>
-                                    {(this._getAPY(asset) / 52).toFixed(2)}%{" "}
-                                </Typography>
-                            </div>
-                        </Grid>
-                    </Grid>
-
-                    <div className={classes.fullWidth}></div>
-                </div>
-            );
-        }
-    }
 
     calculateFeeAmount = async () => {
         this.setState({
@@ -1788,6 +1563,7 @@ class Asset extends Component {
         </div>
     }
 
+    // Dispatch ERC20 Approval Action
     getDepositApproval = () => {
         const {
             amount,
@@ -1800,7 +1576,7 @@ class Asset extends Component {
         const {asset, startLoading} = this.props;
 
 
-        if (this.validateAmount(amount)) {
+        if (InputValidation.validateAmountNotExist(amount)) {
             this.setState({
                 amountError: true,
                 errorMessage: "Invalid amount",
@@ -1815,53 +1591,30 @@ class Asset extends Component {
             });
             startLoading();
 
-            if (asset.strategyType === "yearn") {
-                dispatcher.dispatch({
-                    type: APPROVE_DEPOSIT_CONTRACT,
-                    content: {
-                        earnAmount: ((amount * earnRatio) / 100).toString(),
-                        vaultAmount: ((amount * vaultRatio) / 100).toString(),
-                        amount: "0",
-                        asset,
-                    },
-                });
-            } else if (asset.strategyType === "compound") {
-                dispatcher.dispatch({
-                    type: APPROVE_DEPOSIT_CONTRACT,
-                    content: {
-                        earnAmount: 0,
-                        vaultAmount: 0,
-                        amount: amount.toString(),
-                        asset,
-                    },
-                });
-            } else if (this.isUsdVault(asset)) {
-                dispatcher.dispatch({
-                    type: APPROVE_DEPOSIT_CONTRACT,
-                    content: {
-                        earnAmount: 0,
-                        vaultAmount: 0,
-                        amount: amount.toString(),
-                        tokenIndex: tokenIndex, // TODO: Change to state variable
-                        asset,
-                    },
-                });
-            }
+            dispatcher.dispatch({
+                type: APPROVE_DEPOSIT_CONTRACT,
+                content: {
+                    earnAmount: 0,
+                    vaultAmount: 0,
+                    amount: amount.toString(),
+                    tokenIndex: tokenIndex, // TODO: Change to state variable
+                    asset,
+                },
+            });
         }
     }
 
+    // Dispatch Deposit action
     depositTokenToContract = () => {
         const {
             amount,
-            earnRatio,
-            vaultRatio,
             tokenIndex,
             amountError,
             errorMessage,
         } = this.state;
         const {asset, startLoading} = this.props;
 
-        if (this.validateAmount(amount)) {
+        if (InputValidation.validateAmountNotExist(amount)) {
             this.setState({
                 amountError: true,
                 errorMessage: "Invalid amount",
@@ -1873,41 +1626,54 @@ class Asset extends Component {
             this.setState({loading: true, isDepositLoading: true});
             startLoading();
 
-            if (asset.strategyType === "yearn") {
-                dispatcher.dispatch({
-                    type: CONFIRM_DEPOSIT_CONTRACT,
-                    content: {
-                        earnAmount: ((amount * earnRatio) / 100).toString(),
-                        vaultAmount: ((amount * vaultRatio) / 100).toString(),
-                        amount: "0",
-                        asset,
-                    },
-                });
-            } else if (asset.strategyType === "compound") {
-                dispatcher.dispatch({
-                    type: CONFIRM_DEPOSIT_CONTRACT,
-                    content: {
-                        earnAmount: 0,
-                        vaultAmount: 0,
-                        amount: amount.toString(),
-                        asset,
-                    },
-                });
-            } else if (this.isUsdVault(asset)) {
-                dispatcher.dispatch({
-                    type: CONFIRM_DEPOSIT_CONTRACT,
-                    content: {
-                        earnAmount: 0,
-                        vaultAmount: 0,
-                        amount: amount.toString(),
-                        tokenIndex: tokenIndex, // TODO: Change to state variable
-                        asset,
-                    },
-                });
-            }
+            dispatcher.dispatch({
+                type: CONFIRM_DEPOSIT_CONTRACT,
+                content: {
+                    earnAmount: 0,
+                    vaultAmount: 0,
+                    amount: amount.toString(),
+                    tokenIndex: tokenIndex, // TODO: Change to state variable
+                    asset,
+                },
+            });
         }
     }
 
+    // Dispatch withdraw action
+    onWithdraw = () => {
+        let {redeemEarnAmount, redeemAmount, tokenIndex} = this.state;
+
+        const {asset, startLoading} = this.props;
+
+        if (InputValidation.validateAmountNotExist(redeemAmount)) {
+            this.setState({
+                redeemAmountError: true,
+                withdrawErrorMessage: "Invalid amount",
+            });
+            return;
+        }
+
+        if (!this.state.redeemAmountError && this.withdrawErrorMessage !== "") {
+            redeemAmount = (Math.floor(redeemAmount * 10000) / 10000).toFixed(4);
+            let shares = (redeemAmount * 10 ** asset.decimals).toString();
+
+            this.setState({loading: true, isWithdrawing: true});
+            startLoading();
+
+            dispatcher.dispatch({
+                type: WITHDRAW_BOTH,
+                content: {
+                    earnAmount: "0",
+                    vaultAmount: "0",
+                    amount: shares,
+                    asset: asset,
+                    tokenIndex: tokenIndex,
+                },
+            });
+        }
+    };
+
+    // Pending balance info modal renderring
     renderPendingInfo = () => {
         const { classes } = this.props;
         const modalContent = (
@@ -1921,18 +1687,8 @@ class Asset extends Component {
     }
 
     render() {
-        const {classes, asset} = this.props;
-        const {
-            redeemEarnAmount,
-            redeemEarnAmountError,
-            redeemAmount,
-            redeemAmountError,
-            loading,
-            ratio,
-            earnPercent,
-            vaultPercent,
-            scales
-        } = this.state;
+        const { classes, asset } = this.props;
+        const { loading } = this.state;
 
         const AssetInfo = getAssetData(asset.asset_distribution ? asset.asset_distribution : []);
 
@@ -1958,99 +1714,39 @@ class Asset extends Component {
                     <Grid item xs={12}>
                         <div className={classes.sepperator}></div>
                     </Grid>
-                    <Grid item sm={6} xs={12} className={classes.tradeBox}>
-                        {/* 滑动条部分  */}
-                        {asset.strategyType === "yearn" && (
-                            <Grid container className={classes.slider}>
-                                <Grid item xs={12}>
-                                    <div className={classes.ratioContainer}>
-                                        <div className={classes.leftLabelContainer}>
-                                            {this.renderYearnRatio(true)}
-                                        </div>
-                                        <div>
-                                            <Typography
-                                                className={classes.apyText}
-                                                variant="h4"
-                                                noWrap
-                                            >
-                                                {"APY " + this._getEstimatedAPY(asset) + "%"}
-                                            </Typography>
-                                        </div>
-                                        <div className={classes.rightLabelContainer}>
-                                            {this.renderYearnRatio(false)}
-                                        </div>
-                                    </div>
-                                    <Slider
-                                        value={ratio}
-                                        step={10}
-                                        classes={{
-                                            rail: classes.rail,
-                                            track: classes.track,
-                                            thumb: classes.thumb,
-                                        }}
-                                        onChange={this.handleSliderChange}
-                                        getAriaValueText={this.sliderValueText}
-                                        // marks={marks}
-                                        aria-labelledby="continuous-slider"
-                                    />
-                                </Grid>
-                            </Grid>
-                        )}
 
+                     {/** DEPOSIT */}
+                    <Grid item sm={6} xs={12} className={classes.tradeBox}>
                         <div className={classes.actionsContainer}>
-                            {/* 充值部分 */}
                             <div className={classes.tradeContainer}>
                                 <div className={classes.operationLabel}>
                                     Deposit
                                 </div>
                                 <div className={classes.balances}>
-                                    {/** Wallet Balance */}
                                     <Typography
                                         variant="body1"
                                         className={classes.labelMessage}
                                         noWrap
-                                        // onClick={() => {
-                                        //     this.setAmount(100);
-                                        // }}
                                     >
                                         Deposit funds into this strategy.
                                     </Typography>
 
                                     <Typography
                                         variant="body2"
-                                        // onClick={() => {
-                                        //     this.setAmount(100);
-                                        // }}
                                         className={classes.labelMessage}
                                         noWrap
                                     >
-                                        {/** Wallet Balance */}
-                                        {this.isUsdVault(asset) && (
-                                            <React.Fragment>
-                                                AVAILABLE {asset.balances
-                                                    ? (
-                                                        Math.floor(
-                                                            asset.balances[this.state.tokenIndex] * 10000
-                                                        ) / 10000
-                                                    ).toFixed(4)
-                                                    : "0.0000"}{" "}
-                                                {asset.symbols
-                                                    ? asset.symbols[this.state.tokenIndex]
-                                                    : ""}
-                                            </React.Fragment>
-                                        )}
-                                        {!this.isUsdVault(asset) && (
-                                            <span>
-                                                {asset.balance
-                                                    ? (Math.floor(asset.balance * 10000) / 10000).toFixed(
-                                                        4
-                                                    )
-                                                    : "0.0000"}{" "}
-                                                {asset.tokenSymbol ? asset.tokenSymbol : asset.symbol}
-                                            </span>
-                                        )}
+                                        AVAILABLE {asset.balances
+                                            ? (
+                                                Math.floor(
+                                                    asset.balances[this.state.tokenIndex] * 10000
+                                                ) / 10000
+                                            ).toFixed(4)
+                                            : "0.0000"}{" "}
+                                        {asset.symbols
+                                            ? asset.symbols[this.state.tokenIndex]
+                                            : ""}
                                     </Typography>
-
                                 </div>
 
                                 {/** Deposit Input */}
@@ -2083,20 +1779,6 @@ class Asset extends Component {
                                             <span className={classes.actionButtonText}>Deposit</span>
                                         </Button>
                                     )}
-                                    {/** DAO-157: Remove "Deposit All" button from Invest  */}
-                                    {/* {asset.depositAll === true && (
-                    <Button
-                      className={classes.depositActionButton}
-                      disabled={
-                        loading ||
-                        asset.balance <= 0 ||
-                        asset.depositDisabled === true
-                      }
-                      onClick={this.onDepositAll}
-                    >
-                      <span>Deposit All</span>
-                    </Button>
-                  )} */}
                                 </div>
                                 {asset.depositDisabled === true && (
                                     <div className={classes.disabledContainer}>
@@ -2108,297 +1790,68 @@ class Asset extends Component {
                             </div>
                         </div>
                     </Grid>
+
+                    {/** WITHDRAWAL */}
                     <Grid item sm={6} xs={12} className={classes.tradeBox}>
                         <div className={classes.actionsContainer}>
-
-                            {/* 提现部分 Withdrawal */}
                             <div className={classes.tradeContainer}>
-                                {/** Yearn Strategy */}
-                                {asset.strategyType === "yearn" && (
-                                    <div className={classes.yearnEarnAndVaultBlock}>
-                                        <div className={classes.yearnEarnAndVaultItem}>
-                                            {/** Earn Balance*/}
-                                            <Typography
-                                                variant="h5"
-                                                style={{color: "#7B25D2"}}
-                                                className={classes.withdrawalText}
-                                            >
-                                                Earn
-                                            </Typography>
-                                            <Typography
-                                                variant="h4"
-                                                onClick={() => {
-                                                    this.setRedeemEarnAmount(100);
-                                                }}
-                                                className={classes.earnAndVaultValue}
-                                                noWrap
-                                            >
-                                                {asset.earnBalance
-                                                    ? (
-                                                        Math.floor(
-                                                            asset.earnBalance *
-                                                            asset.earnPricePerFullShare *
-                                                            10000
-                                                        ) / 10000
-                                                    ).toFixed(4)
-                                                    : "0.0000"}{" "}
-                                                {asset.symbol} (
-                                                {asset.earnBalance
-                                                    ? (
-                                                        Math.floor(asset.earnBalance * 10000) / 10000
-                                                    ).toFixed(4)
-                                                    : "0.0000"}{" "}
-                                                {asset.vaultSymbol}){" "}
-                                            </Typography>
+                                <div className={classes.withdrawContainer}>
+                                    <div className={classes.tradeContainer}>
+                                        <div className={classes.operationLabel}>
+                                            Withdrawal
+                                            {
+                                                (Number(asset.pendingBalance) > 0) &&
+                                                <div className={classes.pendingContainer}>
 
-                                            {/** Earn Amount Input */}
-                                            <TextField
-                                                className={`${classes.actionInput} ${classes.earnAndVaultInput}`}
-                                                id="redeemEarnAmount"
-                                                value={redeemEarnAmount}
-                                                error={redeemEarnAmountError}
-                                                onChange={this.onChange}
-                                                disabled={loading}
-                                                placeholder="0.00"
-                                                variant="outlined"
-                                                onKeyDown={this.inputRedeemKeyDown}
-                                            />
-                                            <div className={classes.scaleContainer}>
-                                                {scales.length > 0 &&
-                                                scales.map((percentage) => {
-                                                    return (
-                                                        <Button
-                                                            className={
-                                                                earnPercent === percentage
-                                                                    ? classes.depositScaleActive
-                                                                    : classes.depositScale
-                                                            }
-                                                            variant="text"
-                                                            disabled={loading}
-                                                            color="primary"
-                                                            onClick={() => {
-                                                                this.setRedeemEarnAmount(percentage);
-                                                            }}
-                                                        >
-                                                            <Typography variant={"h5"}>
-                                                                {percentage === 100
-                                                                    ? "Max"
-                                                                    : percentage + "%"}
-                                                            </Typography>
-                                                        </Button>
-                                                    );
-                                                })}
-                                            </div>
-                                            {this.state.redeemEarnAmountError &&
-                                            this.state.withdrawEarnErrorMessage !== "" && (
-                                                <Typography
-                                                    variant={"h5"}
-                                                    className={classes.errorMessage}
-                                                >
-                                                    {this.state.withdrawEarnErrorMessage}
-                                                </Typography>
-                                            )}
-                                        </div>
-
-                                        <div className={classes.yearnEarnAndVaultItem}>
-                                            {/** Vault Balance */}
-                                            <Typography
-                                                variant="h5"
-                                                style={{color: "#027AFF"}}
-                                                className={classes.withdrawalText}
-                                            >
-                                                Vault
-                                            </Typography>
-                                            <Typography
-                                                variant="h4"
-                                                onClick={() => {
-                                                    this.setRedeemVaultAmount(100);
-                                                }}
-                                                className={classes.earnAndVaultValue}
-                                                noWrap
-                                            >
-                                                {asset.vaultBalance
-                                                    ? (
-                                                        Math.floor(
-                                                            asset.vaultBalance *
-                                                            asset.vaultPricePerFullShare *
-                                                            10000
-                                                        ) / 10000
-                                                    ).toFixed(4)
-                                                    : "0.0000"}{" "}
-                                                {asset.symbol} (
-                                                {asset.vaultBalance
-                                                    ? (
-                                                        Math.floor(asset.vaultBalance * 10000) / 10000
-                                                    ).toFixed(4)
-                                                    : "0.0000"}{" "}
-                                                {asset.vaultSymbol}){" "}
-                                            </Typography>
-
-                                            {/** Vault Amount Input */}
-                                            <TextField
-                                                fullWidth
-                                                className={`${classes.actionInput} ${classes.earnAndVaultInput}`}
-                                                id="redeemVaultAmount"
-                                                value={redeemAmount}
-                                                error={redeemAmountError}
-                                                onChange={this.onChange}
-                                                disabled={loading}
-                                                placeholder="0.00"
-                                                variant="outlined"
-                                                onKeyDown={this.inputRedeemKeyDown}
-                                            />
-                                            <div className={classes.scaleContainer}>
-                                                {scales.length > 0 &&
-                                                scales.map((percentage) => {
-                                                    return (
-                                                        <Button
-                                                            className={
-                                                                vaultPercent === percentage
-                                                                    ? classes.depositScaleActive
-                                                                    : classes.depositScale
-                                                            }
-                                                            variant="text"
-                                                            disabled={loading}
-                                                            color="primary"
-                                                            onClick={() => {
-                                                                this.setRedeemVaultAmount(percentage);
-                                                            }}
-                                                        >
-                                                            <Typography variant={"h5"}>
-                                                                {percentage === 100
-                                                                    ? "Max"
-                                                                    : percentage + "%"}
-                                                            </Typography>
-                                                        </Button>
-                                                    );
-                                                })}
-                                            </div>
-                                            {this.state.redeemAmountError &&
-                                            this.state.withdrawErrorMessage !== "" && (
-                                                <Typography
-                                                    variant={"h5"}
-                                                    className={classes.errorMessage}
-                                                >
-                                                    {this.state.withdrawErrorMessage}
-                                                </Typography>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-                                {/** Compound Strategy */}
-                                {asset.strategyType === "compound" && (
-                                    <div className={classes.withdrawContainer}>
-                                        <div className={classes.tradeContainer}>
-                                            <div className={classes.operationLabel}>
-                                                Withdrawal
-                                            </div>
-                                            <div className={classes.balances}>
-                                                <Typography
-                                                    variant="body1"
-                                                    onClick={() => {
-                                                        this.setRedeemAmount(100);
-                                                    }}
-                                                    className={classes.value}
-                                                    noWrap
-                                                >
-                                                    {asset.strategyBalance
-                                                        ? (
-                                                            Math.floor(
-                                                                asset.strategyBalance *
-                                                                asset.compoundExchangeRate *
-                                                                10000
-                                                            ) / 10000
-                                                        ).toFixed(4)
-                                                        : "0.0000"}{" "}
-                                                    {asset.symbol} (
-                                                    {asset.strategyBalance
-                                                        ? (
-                                                            Math.floor(asset.strategyBalance * 10000) /
-                                                            10000
-                                                        ).toFixed(4)
-                                                        : "0.0000"}{" "}
-                                                    {asset.vaultSymbol}){" "}
-                                                </Typography>
-                                            </div>
-                                            {this.renderDepositWithdrawInput(false, asset)}
-                                        </div>
-                                    </div>
-                                )}
-                                {/** Citadel, Elon, Cuban, DAO Faang, Money Printer, Metaverse Strategy*/}
-                                {(asset.strategyType === "citadel" ||
-                                    asset.strategyType === "elon" ||
-                                    asset.strategyType === "cuban" ||
-                                    asset.strategyType === "daoFaang" ||
-                                    asset.strategyType === "moneyPrinter" ||
-                                    asset.strategyType === "metaverse" || 
-                                    asset.strategyType === "citadelv2") && (
-                                    <div className={classes.withdrawContainer}>
-                                        <div className={classes.tradeContainer}>
-                                            <div className={classes.operationLabel}>
-                                                Withdrawal
-                                                {
-                                                    (Number(asset.pendingBalance) > 0) &&
-                                                    <div className={classes.pendingContainer}>
-
-                                                        <Typography
-                                                            variant="body2"
-                                                            className={classes.labelMessage}
-                                                            noWrap
-                                                        >
-                                                            <span className={classes.padding4Span}>{this.renderPendingInfo()}</span>
-                                                            PROCESSING:&nbsp;
-                                                            {asset.pendingBalance.toFixed(4)} USD
-                                                        </Typography>
-                                                    </div>
-                                                }
-                                            </div>
-                                            <div className={`${classes.balances} ${classes.alignCenter}`}>
-                                                <Typography
-                                                    variant="body1"
-                                                    // onClick={() => {
-                                                    //     this.setRedeemAmount(100);
-                                                    // }}
-                                                    className={classes.labelMessage}
-                                                    noWrap
-                                                >
-                                                    Withdraw funds from this strategy.
-                                                    {/*{(asset.strategyBalance*/}
-                                                </Typography>
-
-                                                <div>
-                                                    {/** Pending Balance */}
-
-                                                    {/** Available for deposit */}
                                                     <Typography
                                                         variant="body2"
-                                                        // onClick={() => {
-                                                        //     this.setAmount(100);
-                                                        // }}
                                                         className={classes.labelMessage}
                                                         noWrap
                                                     >
-                                                        AVAILABLE:&nbsp;
-                                                        {asset.strategyBalance && (
-                                                            <span>
-
-                                                                {asset.depositedSharesInUSD
-                                                                    ? (
-                                                                        asset.depositedSharesInUSD /
-                                                                        asset.priceInUSD[this.state.tokenIndex]
-                                                                    ).toFixed(4)
-                                                                    : "0.0000"}{" "}
-                                                                {asset.symbols[this.state.tokenIndex]}
-                                                            </span>
-                                                        )}
+                                                        <span className={classes.padding4Span}>{this.renderPendingInfo()}</span>
+                                                        PROCESSING:&nbsp;
+                                                        {asset.pendingBalance.toFixed(4)} USD
                                                     </Typography>
                                                 </div>
-                                            </div>
-                                            {this.renderDepositWithdrawInput(false, asset)}
+                                            }
                                         </div>
-                                    </div>
-                                )}
+                                        <div className={`${classes.balances} ${classes.alignCenter}`}>
+                                            <Typography
+                                                variant="body1"
+                                                className={classes.labelMessage}
+                                                noWrap
+                                            >
+                                                Withdraw funds from this strategy.
+                                            </Typography>
 
+                                            <div>
+                                                {/** Available balance for withdraw */}
+                                                <Typography
+                                                    variant="body2"
+                                                    className={classes.labelMessage}
+                                                    noWrap
+                                                >
+                                                    AVAILABLE:&nbsp;
+                                                    {asset.strategyBalance && (
+                                                        <span>
+
+                                                            {asset.depositedSharesInUSD
+                                                                ? (
+                                                                    asset.depositedSharesInUSD /
+                                                                    asset.priceInUSD[this.state.tokenIndex]
+                                                                ).toFixed(4)
+                                                                : "0.0000"}{" "}
+                                                            {asset.symbols[this.state.tokenIndex]}
+                                                        </span>
+                                                    )}
+                                                </Typography>
+                                            </div>
+                                        </div>
+                                        {/** Withdrawal Input */}
+                                        {this.renderDepositWithdrawInput(false, asset)}
+                                    </div>
+                                </div>
+                                {/** Withdraw Buttons */}
                                 <div className={classes.withdrawButtonBox}>
                                     {asset.withdraw === true && (
                                         <Button
@@ -2408,7 +1861,7 @@ class Asset extends Component {
                                                 (asset.vaultBalance <= 0 &&
                                                     asset.earnBalance <= 0 ** asset.strategyBalance <= 0) ||
                                                 this.state.redeemAmountError ||
-                                                    !this.state.redeemAmount
+                                                !this.state.redeemAmount
 
                                             }
                                             onClick={() => this.setOpenWithdrawModal(true)}
@@ -2417,25 +1870,12 @@ class Asset extends Component {
                                             <span className={classes.actionButtonText}>Withdraw</span>
                                         </Button>
                                     )}
-                                    {/** DAO-157 */}
-                                    {/* {asset.withdrawAll === true && (
-                    <Button
-                      className={classes.withdrawButton}
-                      disabled={
-                        loading ||
-                        (asset.vaultBalance <= 0 &&
-                          asset.earnBalance <= 0 ** asset.strategyBalance <= 0)
-                      }
-                      onClick={this.onWithdrawAll}
-                      fullWidth
-                    >
-                      <span>Withdraw All</span>
-                    </Button>
-                  )} */}
                                 </div>
                             </div>
                         </div>
                     </Grid>
+
+                    {/** PNL CHART */}                        
                     <Grid item xs={12}>
                         <div className={classes.sepperator}></div>
                     </Grid>
@@ -2445,6 +1885,8 @@ class Asset extends Component {
                     <Grid item xs={12}>
                         <div className={classes.sepperator}></div>
                     </Grid>
+
+                    {/** ASSET DISTRIBUTION */}
                     <Grid item xs={12}>
                         <div>
                             <p className={classes.chartTitle}>Asset Strategy</p>
@@ -2481,819 +1923,15 @@ class Asset extends Component {
                             </TableBody>
                         </Table>
                     </Grid>
-
-                    {/*  <Grid item sm={12} xs={12} className={classes.assetDetails}>*/}
-                    {/*    /!* STRATEGY *!/*/}
-                    {/*    {this.renderStrategy()}*/}
-
-                    {/** STATISTICS */}
-                    {/*<Typography variant={"h4"} className={classes.subtitle} noWrap>*/}
-                    {/*  STATISTICS*/}
-                    {/*</Typography>*/}
-                    {/*<Grid container style={{ marginTop: "1rem" }}>*/}
-                    {/*  /!** Total Earnings *!/*/}
-                    {/*  <Grid item sm={3} xs={6}>*/}
-                    {/*    <Typography variant={"h5"} className={classes.grey}>*/}
-                    {/*      Total Earnings:*/}
-                    {/*    </Typography>*/}
-                    {/*    <div className={classes.flexy}>*/}
-                    {/*      <Typography variant={"h4"} noWrap>*/}
-                    {/*        {asset.addressStatistics*/}
-                    {/*          ? (this.isUsdVault(asset)*/}
-                    {/*              ? Number(asset.addressStatistics.earnings)*/}
-                    {/*              : asset.addressStatistics.earnings / asset.decimals*/}
-                    {/*            ).toFixed(2)*/}
-                    {/*          : "0.00"}{" "}*/}
-                    {/*        {this.isUsdVault(asset) ? "USD" : asset.symbol}*/}
-                    {/*      </Typography>*/}
-                    {/*    </div>*/}
-                    {/*  </Grid>*/}
-                    {/*</Grid>*/}
-
-                    {/*      /!** Deposit *!/*/}
-                    {/*      <Grid item sm={3} xs={6}>*/}
-                    {/*        <Typography variant={"h5"} className={classes.grey}>*/}
-                    {/*          Deposits:*/}
-                    {/*        </Typography>*/}
-                    {/*        <div className={classes.flexy}>*/}
-                    {/*          <Typography variant={"h4"} noWrap>*/}
-                    {/*            {asset.addressStatistics*/}
-                    {/*              ? (this.isUsdVault(asset)*/}
-                    {/*                  ? Number(asset.addressStatistics.totalDepositsInUSD)*/}
-                    {/*                  : asset.addressStatistics.totalDeposits /*/}
-                    {/*                    10 ** asset.decimals*/}
-                    {/*                ).toFixed(2)*/}
-                    {/*              : "0.00"}{" "}*/}
-                    {/*            {this.isUsdVault(asset) ? "USD" : asset.symbol}*/}
-                    {/*          </Typography>*/}
-                    {/*        </div>*/}
-                    {/*      </Grid>*/}
-
-                    {/*      /!** Withdrawals *!/*/}
-                    {/*      <Grid item sm={3} xs={6}>*/}
-                    {/*        <Typography variant={"h5"} className={classes.grey}>*/}
-                    {/*          Withdrawals:*/}
-                    {/*        </Typography>*/}
-                    {/*        <div className={classes.flexy}>*/}
-                    {/*          <Typography variant={"h4"} noWrap>*/}
-                    {/*            {asset.addressStatistics*/}
-                    {/*              ? (this.isUsdVault(asset)*/}
-                    {/*                  ? Number(*/}
-                    {/*                      asset.addressStatistics.totalWithdrawalsInUSD*/}
-                    {/*                    )*/}
-                    {/*                  : asset.addressStatistics.totalWithdrawals /*/}
-                    {/*                    10 ** asset.decimals*/}
-                    {/*                ).toFixed(2)*/}
-                    {/*              : "0.00"}{" "}*/}
-                    {/*            {this.isUsdVault(asset) ? "USD" : asset.symbol}*/}
-                    {/*          </Typography>*/}
-                    {/*        </div>*/}
-                    {/*      </Grid>*/}
-
-                    {/*      /!** Transferred In *!/*/}
-                    {/*      <Grid item sm={3} xs={6}>*/}
-                    {/*        <Typography variant={"h5"} className={classes.grey}>*/}
-                    {/*          Transferred In:*/}
-                    {/*        </Typography>*/}
-                    {/*        <div className={classes.flexy}>*/}
-                    {/*          <Typography variant={"h4"} noWrap>*/}
-                    {/*            {asset.addressStatistics*/}
-                    {/*              ? (this.isUsdVault(asset)*/}
-                    {/*                  ? Number(*/}
-                    {/*                      asset.addressStatistics.totalTransferredInUSD*/}
-                    {/*                    )*/}
-                    {/*                  : asset.addressStatistics.totalTransferredIn /*/}
-                    {/*                    10 ** asset.decimals*/}
-                    {/*                ).toFixed(2)*/}
-                    {/*              : "0.00"}{" "}*/}
-                    {/*            {this.isUsdVault(asset) ? "USD" : asset.symbol}*/}
-                    {/*          </Typography>*/}
-                    {/*        </div>*/}
-                    {/*      </Grid>*/}
-
-                    {/*      /!** Transferred Out *!/*/}
-                    {/*      <Grid item sm={3} xs={6}>*/}
-                    {/*        <Typography variant={"h5"} className={classes.grey}>*/}
-                    {/*          Transferred Out:*/}
-                    {/*        </Typography>*/}
-                    {/*        <div className={classes.flexy}>*/}
-                    {/*          <Typography variant={"h4"} noWrap>*/}
-                    {/*            {asset.addressStatistics*/}
-                    {/*              ? (this.isUsdVault(asset)*/}
-                    {/*                  ? Number(*/}
-                    {/*                      asset.addressStatistics.totalTransferredOutInUSD*/}
-                    {/*                    )*/}
-                    {/*                  : asset.addressStatistics.totalTransferredOut /*/}
-                    {/*                    10 ** asset.decimals*/}
-                    {/*                ).toFixed(2)*/}
-                    {/*              : "0.00"}{" "}*/}
-                    {/*            {this.isUsdVault(asset) ? "USD" : asset.symbol}*/}
-                    {/*          </Typography>*/}
-                    {/*        </div>*/}
-                    {/*      </Grid>*/}
-                    {/*    </Grid>*/}
-                    {/*  </Grid>*/}
                 </Grid>
             </div>
         );
     }
 
     renderChart = (asset) => {
-        var earnAPY = [];
-        var vaultAPY = [];
-        var compoundAPY = [];
-        var citadelAPY = [];
-        let ethAPY = [];
-        let btcAPY = [];
-        var elonAPY = [];
-        var cubanAPY = [];
-        var faangAPY = [];
-        var moneyPrinterAPY = [];
-        var metaverseAPY = [];
-        var citadelv2APY = [];
-        var labels = [];
-
-        const {hideNav} = this.state;
-
-        const sortByTimestamp = (a, b) => {
-            if (a.timestamp > b.timestamp) return 1;
-            if (a.timestamp < b.timestamp) return -1;
-            return 0;
-        };
-
-        let labelColorData = {};
-
-        if (asset.historicalAPY || asset.historicalPerformance) {
-            // this gives an object with dates as keys
-            let groups;
-            if (
-                asset.strategyType === "citadel" ||
-                asset.strategyType === "daoFaang"  ||
-                asset.strategyType === "cuban"  ||
-                asset.strategyType === "elon"  ||
-                asset.strategyType === "moneyPrinter" ||
-                asset.strategyType === "metaverse" || 
-                asset.strategyType === "citadelv2" 
-            ) {
-
-                let data = this.state.vaultAssetHistoricalData && this.state.vaultAssetHistoricalData.data && this.state.vaultAssetHistoricalData.data.length ? this.state.vaultAssetHistoricalData.data : asset.historicalPerformance || [];
-                labelColorData = this.state.vaultAssetHistoricalData && this.state.vaultAssetHistoricalData.data.length ? this.state.vaultAssetHistoricalData.colorInfo: {};
-                groups = data
-                    .sort(sortByTimestamp)
-                    .reduce((groups, apy) => {
-                        const date = moment.unix(apy["time_stamp"]).format("DD-MM-YYYY");
-                        if (!groups[date]) {
-                            groups[date] = [];
-                        }
-                        groups[date].push(apy);
-                        return groups;
-                    }, {});
-            } else {
-                let data = this.state.vaultAssetHistoricalData  && this.state.vaultAssetHistoricalData.data  && this.state.vaultAssetHistoricalData.data.length ? this.state.vaultAssetHistoricalData.data : asset.historicalAPY || [];
-                labelColorData = this.state.vaultAssetHistoricalData && this.state.vaultAssetHistoricalData.data.length ? this.state.vaultAssetHistoricalData.colorInfo: {};
-                groups = data
-                    .sort(sortByTimestamp)
-                    .reduce((groups, apy) => {
-                        const date = moment.unix(apy.timestamp / 1000).format("DD-MM-YYYY");
-                        if (!groups[date]) {
-                            groups[date] = [];
-                        }
-                        groups[date].push(apy);
-                        return groups;
-                    }, {});
-            }
-
-            try {
-                Object.keys(groups).forEach((date) => {
-                    // first attempt
-                    labels.push(date);
-                    if (asset.strategyType === "yearn") {
-                        earnAPY.push([
-                            date,
-                            parseFloat((parseFloat(groups[date][0].aprs) * 100).toFixed(4)),
-                        ]);
-                        vaultAPY.push([
-                            date,
-                            parseFloat(groups[date][0].apyInceptionSample.toFixed(4)),
-                        ]);
-                    } else if (asset.strategyType === "compound") {
-                        compoundAPY.push([
-                            date,
-                            parseFloat(groups[date][0].compoundApy.toFixed(4)),
-                        ]);
-                    } else if (asset.strategyType === "citadel") {
-                        citadelAPY.push([
-                            date,
-                            parseFloat((groups[date][0]["lp_performance"]).toFixed(4)),
-                        ]);
-                        btcAPY.push([
-                            date,
-                            parseFloat((groups[date][0]["btc_performance"]).toFixed(4)),
-                        ]);
-                        ethAPY.push([
-                            date,
-                            parseFloat((groups[date][0]["eth_performance"]).toFixed(4)),
-                        ]);
-                    } else if (asset.strategyType === "citadelv2") {
-                        citadelv2APY.push([
-                            date,
-                            parseFloat((groups[date][0]["lp_performance"]).toFixed(4)),
-                        ]);
-                        btcAPY.push([
-                            date,
-                            parseFloat((groups[date][0]["btc_performance"]).toFixed(4)),
-                        ]);
-                        ethAPY.push([
-                            date,
-                            parseFloat((groups[date][0]["eth_performance"]).toFixed(4)),
-                        ]);
-                    } else if (asset.strategyType === "elon") {
-                        elonAPY.push([
-                            date,
-                            parseFloat(groups[date][0]['lp_performance'].toFixed(4)),
-                        ]);
-                        btcAPY.push([
-                            date,
-                            parseFloat((groups[date][0]["btc_performance"]).toFixed(4)),
-                        ]);
-                        ethAPY.push([
-                            date,
-                            parseFloat((groups[date][0]["eth_performance"]).toFixed(4)),
-                        ]);
-                    } else if (asset.strategyType === "cuban") {
-                        cubanAPY.push([
-                            date,
-                            parseFloat(groups[date][0]['lp_performance'].toFixed(4)),
-                        ]);
-                        btcAPY.push([
-                            date,
-                            parseFloat((groups[date][0]["btc_performance"]).toFixed(4)),
-                        ]);
-                        ethAPY.push([
-                            date,
-                            parseFloat((groups[date][0]["eth_performance"]).toFixed(4)),
-                        ]);
-                    } else if (asset.strategyType === "metaverse") {
-                        metaverseAPY.push([
-                            date,
-                            parseFloat(groups[date][0]['lp_performance'].toFixed(4)),
-                        ]);
-                        btcAPY.push([
-                            date,
-                            parseFloat((groups[date][0]["btc_performance"]).toFixed(4)),
-                        ]);
-                        ethAPY.push([
-                            date,
-                            parseFloat((groups[date][0]["eth_performance"]).toFixed(4)),
-                        ]);
-                    } else if (asset.strategyType === "daoFaang") {
-                        faangAPY.push([
-                            date,
-                            parseFloat((groups[date][0]["lp_performance"]).toFixed(4)),
-                        ]);
-                    } else if (asset.strategyType === "moneyPrinter") {
-                        moneyPrinterAPY.push([
-                            date,
-                            parseFloat(groups[date][0]['lp_performance'].toFixed(4)),
-                        ]);
-                        btcAPY.push([
-                            date,
-                            parseFloat((groups[date][0]["btc_performance"]).toFixed(4)),
-                        ]);
-                        ethAPY.push([
-                            date,
-                            parseFloat((groups[date][0]["eth_performance"]).toFixed(4)),
-                        ]);
-                    }
-                    
-                    // second attempt
-                    var halfCount = Math.round(Number(groups[date].length / 2));
-                    if (halfCount !== 1) {
-                        labels.push(date);
-
-                        if (asset.strategyType === "yearn") {
-                            earnAPY.push([
-                                date,
-                                parseFloat(
-                                    (parseFloat(groups[date][halfCount].aprs) * 100).toFixed(4)
-                                ),
-                            ]);
-                            vaultAPY.push([
-                                date,
-                                parseFloat(
-                                    groups[date][halfCount].apyInceptionSample.toFixed(4)
-                                ),
-                            ]);
-                        } else if (asset.strategyType === "compound") {
-                            compoundAPY.push([
-                                date,
-                                parseFloat(groups[date][halfCount].compoundApy.toFixed(4)),
-                            ]);
-                        } else if (asset.strategyType === "citadel") {
-                            citadelAPY.push([
-                                date,
-                                parseFloat(groups[date][halfCount].citadelApy.toFixed(4)),
-                            ]);
-                        } else if (asset.strategyType === "elon") {
-                            elonAPY.push([
-                                date,
-                                parseFloat(groups[date][halfCount].elonApy.toFixed(4)),
-                            ]);
-                        } else if (asset.strategyType === "cuban") {
-                            cubanAPY.push([
-                                date,
-                                parseFloat(groups[date][halfCount].cubanApy.toFixed(4)),
-                            ]);
-                        } else if (asset.strategyType === "daoFaang") {
-                            faangAPY.push([
-                                date,
-                                parseFloat(groups[date][halfCount].faangApy.toFixed(4)),
-                            ]);
-                        } else if (asset.strategyType === "moneyPrinter") {
-                            moneyPrinterAPY.push([
-                                date,
-                                parseFloat(groups[date][halfCount].moneyPrinterApy.toFixed(4)),
-                            ]);
-                        }
-                    }
-                });
-            } catch (ex) {
-            }
-        }
-
-        let options = {};
-
-        if (asset.strategyType === "yearn") {
-            options = {
-                chart: {
-                    width: hideNav ? 300 : 420,
-                },
-                title: {
-                    text: "Historical Earn & Vault Performance",
-                },
-                xAxis: {
-                    categories: labels,
-                },
-                series: [
-                    {
-                        name: "Earn",
-                        data: earnAPY,
-                        color: "#7F25D9",
-                    },
-                    {
-                        name: "Vault",
-                        data: vaultAPY,
-                        color: "#027AFF",
-                    },
-                ],
-                responsive: {
-                    rules: [
-                        {
-                            condition: {
-                                maxWidth: 450,
-                                chartOptions: {
-                                    chart: {
-                                        width: 300,
-                                    },
-                                },
-                            },
-                        },
-                    ],
-                },
-                credits: {
-                    enabled: false,
-                },
-            };
-        } else if (asset.strategyType === "compound") {
-            options = {
-                chart: {
-                    width: hideNav ? 300 : 420,
-                },
-                title: {
-                    text: "Vault Performance History",
-                },
-                xAxis: {
-                    categories: labels,
-                },
-                series: [
-                    {
-                        name: "Compound",
-                        data: compoundAPY,
-                    },
-                ],
-                responsive: {
-                    rules: [
-                        {
-                            condition: {
-                                maxWidth: 450,
-                                chartOptions: {
-                                    chart: {
-                                        width: 300,
-                                    },
-                                },
-                            },
-                        },
-                    ],
-                },
-                credits: {
-                    enabled: false,
-                },
-            };
-        } else if (asset.strategyType === "citadel") {
-            options = {
-                chart: {
-                    width: hideNav ? 300 : 420,
-                },
-                title: {
-                    text: "Vault Performance History",
-                },
-                xAxis: {
-                    categories: labels,
-                },
-                series: [
-                    {
-                        name: "Citadel",
-                        data: citadelAPY,
-                        color: labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.Citadel]: "#FFFFF"
-                    },
-                    {
-                        name: "BTC",
-                        data: btcAPY,
-                        color:  labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.BTC]: "#f7931b",
-                    },
-                    {
-                        name: "ETH",
-                        data: ethAPY,
-                        color: labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.ETH]:"#464a75",
-                    },
-                ],
-                responsive: {
-                    rules: [
-                        {
-                            condition: {
-                                maxWidth: 300,
-                                chartOptions: {
-                                    chart: {
-                                        width: 150,
-                                    },
-                                },
-                            },
-                        },
-                    ],
-                },
-                credits: {
-                    enabled: false,
-                },
-            };
-        } else if (asset.strategyType === "elon") {
-            options = {
-                chart: {
-                    width: hideNav ? 300 : 420,
-                },
-                title: {
-                    text: "Vault Performance History",
-                },
-                xAxis: {
-                    categories: labels,
-                },
-                series: [
-                    {
-                        name: "Elon",
-                        data: elonAPY,
-                        color: labelColorData[strategyMap.Elon]? labelColorData[strategyMap.Elon]: "#FFFFF"
-                    },
-                    {
-                        name: "BTC",
-                        data: btcAPY,
-                        color:  labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.BTC]: "#f7931b",
-                    },
-                    {
-                        name: "ETH",
-                        data: ethAPY,
-                        color: labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.ETH]:"#464a75",
-                    }
-                ],
-                responsive: {
-                    rules: [
-                        {
-                            condition: {
-                                maxWidth: 300,
-                                chartOptions: {
-                                    chart: {
-                                        width: 150,
-                                    },
-                                },
-                            },
-                        },
-                    ],
-                },
-                credits: {
-                    enabled: false,
-                },
-            };
-        } else if (asset.strategyType === "cuban") {
-            options = {
-                chart: {
-                    width: hideNav ? 300 : 420,
-                },
-                title: {
-                    text: "Vault Performance History",
-                },
-                xAxis: {
-                    categories: labels,
-                },
-                series: [
-                    {
-                        name: "Cuban",
-                        data: cubanAPY,
-                        color: labelColorData[strategyMap.Cuban]? labelColorData[strategyMap.Cuban]: "#FFFFF"
-                    },
-                    {
-                        name: "BTC",
-                        data: btcAPY,
-                        color:  labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.BTC]: "#f7931b",
-                    },
-                    {
-                        name: "ETH",
-                        data: ethAPY,
-                        color: labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.ETH]:"#464a75",
-                    }
-                ],
-                responsive: {
-                    rules: [
-                        {
-                            condition: {
-                                maxWidth: 300,
-                                chartOptions: {
-                                    chart: {
-                                        width: 150,
-                                    },
-                                },
-                            },
-                        },
-                    ],
-                },
-                credits: {
-                    enabled: false,
-                },
-            };
-        } else if (asset.strategyType === "daoFaang") {
-            options = {
-                chart: {
-                    width: hideNav ? 300 : 420,
-                },
-                title: {
-                    text: "Vault Performance History",
-                },
-                xAxis: {
-                    categories: labels,
-                },
-                series: [
-                    {
-                        name: "FAANG Stonk",
-                        data: faangAPY,
-                        color:  labelColorData[strategyMap['FAANG Stonk']]? labelColorData[strategyMap['FAANG Stonk']]: "#FFFFFF",
-                    }
-                ],
-                responsive: {
-                    rules: [
-                        {
-                            condition: {
-                                maxWidth: 300,
-                                chartOptions: {
-                                    chart: {
-                                        width: 150,
-                                    },
-                                },
-                            },
-                        },
-                    ],
-                },
-                credits: {
-                    enabled: false,
-                },
-            };
-        } else if (asset.strategyType === "moneyPrinter") {
-            options = {
-                chart: {
-                    width: hideNav ? 300 : 420,
-                },
-                title: {
-                    text: "Vault Performance History",
-                },
-                xAxis: {
-                    categories: labels,
-                },
-                series: [
-                    {
-                        name: "Money Printer",
-                        data: moneyPrinterAPY,
-                    },
-                    {
-                        name: "BTC",
-                        data: btcAPY,
-                        color:  labelColorData[strategyMap["Money Printer"]]? labelColorData[strategyMap.BTC]: "#f7931b",
-                    },
-                    {
-                        name: "ETH",
-                        data: ethAPY,
-                        color: labelColorData[strategyMap["Money Printer"]]? labelColorData[strategyMap.ETH]:"#464a75",
-                    },
-                ],
-                responsive: {
-                    rules: [
-                        {
-                            condition: {
-                                maxWidth: 450,
-                                chartOptions: {
-                                    chart: {
-                                        width: 300,
-                                    },
-                                },
-                            },
-                        },
-                    ],
-                },
-                credits: {
-                    enabled: false,
-                },
-            };
-        } else if (asset.strategyType === "metaverse") {
-            options = {
-                chart: {
-                    width: hideNav ? 300 : 420,
-                },
-                title: {
-                    text: "Vault Performance History",
-                },
-                xAxis: {
-                    categories: labels,
-                },
-                series: [
-                    {
-                        name: "Metaverse",
-                        data: metaverseAPY,
-                        color: labelColorData[strategyMap.Metaverse]? labelColorData[strategyMap.Metaverse]: "#FFFFF"
-                    },
-                    {
-                        name: "BTC",
-                        data: btcAPY,
-                        color:  labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.BTC]: "#f7931b",
-                    },
-                    {
-                        name: "ETH",
-                        data: ethAPY,
-                        color: labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.ETH]:"#464a75",
-                    }
-                ],
-                responsive: {
-                    rules: [
-                        {
-                            condition: {
-                                maxWidth: 450,
-                                chartOptions: {
-                                    chart: {
-                                        width: 300,
-                                    },
-                                },
-                            },
-                        },
-                    ],
-                },
-                credits: {
-                    enabled: false,
-                },
-            };
-        } else if (asset.strategyType === "citadelv2") {
-            options = {
-                chart: {
-                    width: hideNav ? 300 : 420,
-                },
-                title: {
-                    text: "Vault Performance History",
-                },
-                xAxis: {
-                    categories: labels,
-                },
-                series: [
-                    {
-                        name: "Citadel V2",
-                        data: citadelv2APY,
-                        color: labelColorData[strategyMap["Citadel V2"]] ? labelColorData[strategyMap["Citadel V2"]]: "#FFFFF",
-                    }, 
-                    {
-                        name: "BTC",
-                        data: btcAPY,
-                        color:  labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.BTC]: "#f7931b",
-                    },
-                    {
-                        name: "ETH",
-                        data: ethAPY,
-                        color: labelColorData[strategyMap.Citadel]? labelColorData[strategyMap.ETH]:"#464a75",
-                    }
-                ],
-                responsive: {
-                    rules: [
-                        {
-                            condition: {
-                                maxWidth: 450,
-                                chartOptions: {
-                                    chart: {
-                                        width: 300,
-                                    },
-                                },
-                            },
-                        },
-                    ],
-                },
-                credits: {
-                    enabled: false,
-                },
-            };
-        }
-
-        const chartTitle = {
-            yearn: "Historical Earn & Vault Performance",
-            compound: "Vault Performance History",
-            citadel: "Vault Performance History",
-            elon: "Vault Performance History",
-            cuban: "Vault Performance History",
-            daoFaang: "Vault Performance History",
-            moneyPrinter: "Vault Performance History",
-            metaverse: "Vault Performance History",
-            citadelv2: "Vault Performance History"
-        };
-
-        // 调整折线图展示
-        options["legend"] = {
-            align: "right",
-            verticalAlign: "bottom",
-            padding: 3,
-            itemMarginTop: 10,
-            itemMarginBottom: 20,
-            itemStyle: {
-                lineHeight: "14px",
-                color: this.state.interestTheme.themeColors.textP,
-            },
-        };
-
-        options["title"] = {
-            text: chartTitle[asset.strategyType],
-            align: "left",
-            floating: true,
-            y: -50,
-            style: {
-                fontSize: "14px",
-                color: this.state.interestTheme.themeColors.textT
-            },
-        };
-
-        options["chart"] = {
-            width: hideNav ? 300 : null,
-            backgroundColor: "#292750",
-            spacingLeft: 25,
-            spacingTop: 70
-        };
-
-        options["yAxis"] = {
-            gridLineColor: this.state.interestTheme.themeColors.lineT,
-            title: {
-                text: "",
-            },
-            labels: {
-                style: {
-                    color: this.state.interestTheme.themeColors.textP,
-                    fontSize: "12px",
-                },
-                format: "{value}%",
-            },
-        };
-
-        options["xAxis"] = {
-            categories: labels,
-            tickColor: this.state.interestTheme.themeColors.lineT,
-            lineColor: this.state.interestTheme.themeColors.lineT,
-            labels: {
-                style: {
-                    color: this.state.interestTheme.themeColors.textP,
-                    fontSize: "12px",
-                },
-            },
-        };
-
-        options["tooltip"] = {
-            backgroundColor: this.state.interestTheme.themeColors.tooltipBack,
-            style: {
-                color: this.state.interestTheme.themeColors.textT,
-            },
-            formatter: function () {
-                var label =
-                    "<b>" + this.x + "</b><br/>" + this.series.name + ": " + this.y + "%";
-                return label;
-            },
-        };
-
         const {classes} = this.props;
+        const chartTitle =  "Vault Performance History";
+
         let pnl = this.state.vaultAssetHistoricalData  && this.state.vaultAssetHistoricalData.pnl ? this.state.vaultAssetHistoricalData.pnl.toFixed(2) : '0.00';
         const pnlTextColor = parseFloat(pnl) <0?'red':'#15C73E';
         if(parseFloat(pnl) > 0) {
@@ -3306,7 +1944,7 @@ class Asset extends Component {
                     justifyContent="space-between"
                 >
                     <Grid item xs={6} className={classes.pnlDivPosition}>
-                        {options.title.text}
+                        {chartTitle}
                         <span className={classes.pnlVault}
                               style={{color: pnlTextColor}}>{pnl}%</span>
                     </Grid>
@@ -3322,140 +1960,12 @@ class Asset extends Component {
                         })}
                     </Grid>
                 </Grid>
-                <HighchartsReact
-                    highcharts={Highcharts}
-                    options={{...options, title: {text: ''}}}
-                    style={{margin: "auto"}}
-                    containerProps={{className: 'asset-chart'}}
-                />
+                <LineChart data={this.state.vaultAssetHistoricalData.chartData} title={""}/>
             </>
         );
     };
 
-    _getAPY = (asset) => {
-        const {basedOn} = this.props;
-        // To calculate APY (Vault + Earn divide by 2 : Estimated)
-        // Compound APY is using compoundApy
-        if (asset && asset.stats) {
-            if (asset.strategyType === "compound") {
-                if (asset.stats.compoundApy) {
-                    return asset.stats.compoundApy;
-                }
-            } else if (asset.strategyType === "yearn") {
-                switch (basedOn) {
-                    case 1:
-                        return (
-                            (asset.stats.apyOneWeekSample + parseFloat(asset.earnApr) * 100) /
-                            2
-                        );
-                    case 2:
-                        return (
-                            (asset.stats.apyOneMonthSample +
-                                parseFloat(asset.earnApr) * 100) /
-                            2
-                        );
-                    case 3:
-                        return (
-                            (asset.stats.apyInceptionSample +
-                                parseFloat(asset.earnApr) * 100) /
-                            2
-                        );
-                    default:
-                        return (asset.apy + parseFloat(asset.earnApr) * 100) / 2;
-                }
-            } else if (asset.strategyType === "citadel") {
-                return asset.stats.citadelApy;
-            } else if (asset.strategyType === "elon") {
-                if (asset.stats.elonApy) {
-                    return asset.stats.elonApy;
-                }
-            } else if (asset.strategyType === "cuban") {
-                if (asset.stats.cubanApy) {
-                    return asset.stats.cubanApy;
-                }
-            } else if (asset.strategyType === "daoFaang") {
-                return asset.stats.faangApy;
-            } else if (asset.strategyType === "moneyPrinter") {
-                return asset.stats.moneyPrinterApy;
-            }
-        }
-        return 0;
-    };
-
-    _getPNL = (asset) => {
-        const {basedOn} = this.props;
-        // To calculate APY (Vault + Earn divide by 2 : Estimated)
-        // Compound APY is using compoundApy
-        if (asset && asset.stats) {
-            // if (asset.strategyType === "compound") {
-            //   if (asset.stats.compoundApy) {
-            //     return asset.stats.compoundApy;
-            //   }
-            // } else if (asset.strategyType === "yearn") {
-            //   switch (basedOn) {
-            //     case 1:
-            //       return (
-            //         (asset.stats.apyOneWeekSample + parseFloat(asset.earnApr) * 100) /
-            //         2
-            //       );
-            //     case 2:
-            //       return (
-            //         (asset.stats.apyOneMonthSample +
-            //           parseFloat(asset.earnApr) * 100) /
-            //         2
-            //       );
-            //     case 3:
-            //       return (
-            //         (asset.stats.apyInceptionSample +
-            //           parseFloat(asset.earnApr) * 100) /
-            //         2
-            //       );
-            //     default:
-            //       return (asset.apy + parseFloat(asset.earnApr) * 100) / 2;
-            //   }
-            // } else if (asset.strategyType === "citadel") {
-            if (
-                asset.strategyType === "citadel" ||
-                asset.strategyType === "daoFaang"
-            ) {
-                // console.log("🚀 | Asset | asset.stats.pnl", asset.stats.pnl);
-
-                return asset.stats.pnl;
-            }
-            // else if (asset.strategyType === "elon") {
-            //   if (asset.stats.elonApy) {
-            //     return asset.stats.elonApy;
-            //   }
-            // } else if (asset.strategyType === "cuban") {
-            //   if (asset.stats.cubanApy) {
-            //     return asset.stats.cubanApy;
-            //   }
-            // } else if (asset.strategyType === "daoFaang") {
-            //   return asset.stats.faangApy;
-            // }
-        }
-        return 0;
-    };
-
-    _getEstimatedAPY = (asset) => {
-        const {earnRatio, vaultRatio} = this.state;
-
-        const earnAPY = asset.earnApr ? parseFloat(asset.earnApr) * 100 : 0;
-        const vaultAPY = asset && asset.stats ? asset.stats.apyInceptionSample : 0;
-        return (
-            (earnAPY * earnRatio) / 100 +
-            (vaultAPY * vaultRatio) / 100
-        ).toFixed(2);
-    };
-
-    handleSliderChange = (event, newValue) => {
-        this.setState({
-            ratio: newValue,
-            earnRatio: 100 - newValue,
-            vaultRatio: newValue,
-        });
-    };
-
+    // Withdraw Input On Change
     onChange = (event) => {
         let val = [];
         let asset = this.props.asset;
@@ -3473,20 +1983,17 @@ class Asset extends Component {
             10 ** 8
         ).toFixed(8)
 
-        this.verifyWithdrawInput(assetTokenAmount, event.target.id);
+        this.verifyWithdrawInput(assetTokenAmount, event.target.value);
 
-        if (event.target.id === "redeemEarnAmount") {
-            this.setState({redeemEarnAmount: val[event.target.id], earnPercent: 0});
-        } else {
-            this.setState({
-                redeemAmountInUsd: val[event.target.id],
-                vaultPercent: 0,
-                redeemAmountPercent: 0,
-                redeemAmount: assetTokenAmount,
-            });
-        }
+        this.setState({
+            redeemAmountInUsd: val[event.target.id],
+            vaultPercent: 0,
+            redeemAmountPercent: 0,
+            redeemAmount: assetTokenAmount,
+        });
     };
 
+    // Deposit Input On Change
     onChangeDeposit = (event) => {
         let val = [];
         val[event.target.id] = event.target.value;
@@ -3497,224 +2004,65 @@ class Asset extends Component {
         }
     };
 
-    verifyInput = (amount) => {
-        // const { amount } = this.state;
-        const {asset, startLoading, happyHour, happyHourThreshold} = this.props;
+    // Verify amount on Withdraw Input
+    verifyWithdrawInput = (shareAmount, inputAmount) => {
+        const {asset} = this.props;
 
-        let assetBalance = !this.isUsdVault(asset)
-            ? asset.balance
-            : asset.balances[this.state.tokenIndex];
+        const depositedShares = (
+            Math.floor((asset.strategyBalance / 10 ** asset.decimals) * 10 ** 8) / 
+            10 ** 8
+        ).toFixed(8);
 
-        assetBalance = (Math.floor(assetBalance * 10000) / 10000).toFixed(4);
+        const displayBalance = (asset.depositedSharesInUSD)
+            ? (asset.depositedSharesInUSD / asset.priceInUSD[this.state.tokenIndex]).toFixed(4)
+            : 0;
 
-        const digitRegex = /^[0-9]\d*(\.\d+)?$/;
-
-        if (!digitRegex.test(amount)) {
-            this.setState({amountError: true, errorMessage: "Invalid amount"});
-            return;
+        if( !InputValidation.validateDigit(shareAmount) || 
+            InputValidation.validateAmountNotExist(shareAmount) ||
+            parseFloat(depositedShares) <= 0
+        ) {
+          this.setState({
+            redeemAmountError: true,
+            withdrawErrorMessage: `Invalid amount`,
+          });
+          return;
         }
-
-        if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
-            this.setState({amountError: true, errorMessage: "Invalid amount"});
-            return;
-        }
-
-        if (parseFloat(amount) > assetBalance) {
+  
+        if (
+            InputValidation.validateInputMoreThanBalance(inputAmount, displayBalance) ||  
+            InputValidation.validateInputMoreThanBalance(shareAmount, depositedShares)
+        ) {
             this.setState({
-                amountError: true,
-                errorMessage: "Exceed available balance",
+                redeemAmountError: true,
+                withdrawErrorMessage: `Exceed available balance`,
             });
             return;
         }
 
-        if (
-            parseFloat(amount) <= parseFloat("0.0") ||
-            parseFloat(amount) > assetBalance
-        ) {
-            this.setState({amountError: true});
-            // return false;
-        } else {
-            this.setState({amountError: false, errorMessage: ""});
-        }
-
-        if (asset.happyHourEnabled === true && happyHour === true) {
-            if (parseFloat(amount) < parseFloat(happyHourThreshold)) {
-                this.setState({
-                    // amountError: true,
-                    happyHourWarning: `Below required deposit ${happyHourThreshold} USD for Happy Hour. Gas fee will be required.`,
-                    happyHourMessage: "",
-                });
-            } else {
-                this.setState({
-                    // amountError: true,
-                    happyHourWarning: "",
-                    happyHourMessage: "Gas fee is on us!",
-                });
-            }
-        }
+        this.setState({redeemAmountError: false, withdrawErrorMessage: ""});
     };
 
-    inputKeyDown = (event) => {
-        if (event.which === 13) {
-            this.onInvest();
-        }
-    };
-
-    validateDigit = (amount) => {
-        let finalAmount = fromExponential(amount);
-        const digitRegex = /^[0-9]\d*(\.\d+)?$/;
-        return digitRegex.test(finalAmount);
-    };
-
-    validateAmount = (amount) => {
-        return !amount || isNaN(amount) || parseFloat(amount) <= 0;
-    };
-
-    validateInputValMoreThanBalance = (amount, balance) => {
-        return parseFloat(amount) > parseFloat(balance);
-    };
-
-    calculateDepositShare = (asset, type) => {
-        if (asset.strategyType === "compound") {
-            return (
-                Math.floor(asset.strategyBalance * asset.compoundExchangeRate * 10000) /
-                10000
-            ).toFixed(4);
-        } else if (this.isUsdVault(asset)) {
-            return (
-                Math.floor((asset.strategyBalance / 10 ** asset.decimals) * 10000) /
-                10000
-            ).toFixed(4);
-        } else if (asset.strategyType === "yearn") {
-            if (type === "earn") {
-                return (
-                    Math.floor(asset.earnBalance * asset.earnPricePerFullShare * 10000) /
-                    10000
-                ).toFixed(4);
-            } else {
-                return (
-                    Math.floor(
-                        asset.vaultBalance * asset.vaultPricePerFullShare * 10000
-                    ) / 10000
-                ).toFixed(4);
-            }
-        } else {
-            return 0;
-        }
-    };
-
-    setRedeemAmountError = (message) => {
-        this.setState({redeemAmountError: true, withdrawErrorMessage: message});
-    };
-
-    verifyWithdrawInput = (amount, divId) => {
-        const {asset} = this.props;
-
-        if (asset.strategyType === "yearn") {
-            if (!this.validateDigit(amount)) {
-                const errorMessage = "Invalid amount";
-                divId === "redeemEarnAmount"
-                    ? this.setState({
-                        redeemEarnAmountError: true,
-                        withdrawEarnErrorMessage: errorMessage,
-                    })
-                    : this.setState({
-                        redeemAmountError: true,
-                        withdrawErrorMessage: errorMessage,
-                    });
-                return;
-            }
-
-            // No need to validate 0 input, as either one of them can be 0
-            if (!amount || isNaN(amount) || parseFloat(amount) < 0) {
-                const errorMessage = "Invalid amount";
-                divId === "redeemEarnAmount"
-                    ? this.setState({
-                        redeemEarnAmountError: true,
-                        withdrawEarnErrorMessage: errorMessage,
-                    })
-                    : this.setState({
-                        redeemAmountError: true,
-                        withdrawErrorMessage: errorMessage,
-                    });
-                return;
-            }
-
-            const depositedShares = this.calculateDepositShare(
-                asset,
-                divId === "redeemEarnAmount" ? "earn" : "vault"
-            );
-
-            if (this.validateInputValMoreThanBalance(amount, depositedShares)) {
-                const errorMessage = "Exceed Available Balance";
-                divId === "redeemEarnAmount"
-                    ? this.setState({
-                        redeemEarnAmountError: true,
-                        withdrawEarnErrorMessage: errorMessage,
-                    })
-                    : this.setState({
-                        redeemAmountError: true,
-                        withdrawErrorMessage: errorMessage,
-                    });
-                return;
-            }
-
-            divId === "redeemEarnAmount"
-                ? this.setState({
-                    redeemEarnAmountError: false,
-                    withdrawEarnErrorMessage: "",
-                })
-                : this.setState({redeemAmountError: false, withdrawErrorMessage: ""});
-        } else {
-            if (!this.validateDigit(amount)) {
-                this.setRedeemAmountError("Invalid amount");
-                return;
-            }
-
-            if (this.validateAmount(amount)) {
-                this.setRedeemAmountError("Invalid amount");
-                return;
-            }
-
-            const depositedShares = this.calculateDepositShare(asset, null);
-
-            if(depositedShares <= 0 ) {
-                this.setRedeemAmountError("Invalid amount");
-                return;
-            }
-
-            if (this.validateInputValMoreThanBalance(amount, depositedShares)) {
-                this.setRedeemAmountError("Exceed available balance");
-                return;
-            }
-
-            this.setState({redeemAmountError: false, withdrawErrorMessage: ""});
-        }
-    };
-
+    // Verify amount on Deposit Input
     verifyInput = (amount) => {
         const {asset, happyHour, happyHourThreshold} = this.props;
 
-        let assetBalance = !this.isUsdVault(asset)
-            ? asset.balance
-            : asset.balances[this.state.tokenIndex];
-
+        let assetBalance = asset.balances[this.state.tokenIndex];
         assetBalance = (Math.floor(assetBalance * 10000) / 10000).toFixed(4);
 
-        if (!this.validateDigit(amount)) {
-            this.setState({amountError: true, errorMessage: "Invalid amount"});
-            return;
+        if( !InputValidation.validateDigit(amount) || 
+            InputValidation.validateAmountNotExist(amount)
+        ) {
+          this.setState({
+            redeemAmountError: true,
+            withdrawErrorMessage: `Invalid amount`,
+          });
+          return;
         }
 
-        if (this.validateAmount(amount)) {
-            this.setState({amountError: true, errorMessage: "Invalid amount"});
-            return;
-        }
-
-        if (this.validateInputValMoreThanBalance(amount, assetBalance)) {
+        if ( InputValidation.validateInputMoreThanBalance(amount, assetBalance)) {
             this.setState({
-                amountError: true,
-                errorMessage: "Exceed available balance",
+                redeemAmountError: true,
+                withdrawErrorMessage: `Exceed available balance`,
             });
             return;
         }
@@ -3738,238 +2086,7 @@ class Asset extends Component {
         }
     };
 
-    inputKeyDown = (event) => {
-        if (event.which === 13) {
-            this.onInvest();
-        }
-    };
-
-    sliderValueText = (value) => {
-        return value;
-    };
-
-    onDeposit = () => {
-        const {
-            amount,
-            earnRatio,
-            vaultRatio,
-            tokenIndex,
-            amountError,
-            errorMessage,
-        } = this.state;
-        const {asset, startLoading} = this.props;
-
-        if (this.validateAmount(amount)) {
-            this.setState({
-                amountError: true,
-                errorMessage: "Invalid amount",
-            });
-            return;
-        }
-
-        if (!amountError && errorMessage === "") {
-            this.setState({loading: true});
-            startLoading();
-
-            if (asset.strategyType === "yearn") {
-                dispatcher.dispatch({
-                    type: DEPOSIT_CONTRACT,
-                    content: {
-                        earnAmount: ((amount * earnRatio) / 100).toString(),
-                        vaultAmount: ((amount * vaultRatio) / 100).toString(),
-                        amount: "0",
-                        asset,
-                    },
-                });
-            } else if (asset.strategyType === "compound") {
-                dispatcher.dispatch({
-                    type: DEPOSIT_CONTRACT,
-                    content: {
-                        earnAmount: 0,
-                        vaultAmount: 0,
-                        amount: amount.toString(),
-                        asset,
-                    },
-                });
-            } else if (this.isUsdVault(asset)) {
-                dispatcher.dispatch({
-                    type: DEPOSIT_CONTRACT,
-                    content: {
-                        earnAmount: 0,
-                        vaultAmount: 0,
-                        amount: amount.toString(),
-                        tokenIndex: tokenIndex, // TODO: Change to state variable
-                        asset,
-                    },
-                });
-            }
-        }
-    };
-
-    onDepositAll = () => {
-        const {asset, startLoading} = this.props;
-        const {earnRatio, vaultRatio, tokenIndex} = this.state;
-        this.setState({loading: true});
-        startLoading();
-        let amount;
-
-        if (this.isUsdVault(asset)) {
-            amount = (asset.balances[this.state.tokenIndex] * 100) / 100;
-        } else {
-            const balance = asset.balance;
-            amount = (balance * 100) / 100;
-            amount = Math.floor(amount * 10000) / 10000;
-        }
-
-        amount = amount.toFixed(4);
-
-        if (asset.strategyType === "yearn") {
-            dispatcher.dispatch({
-                type: DEPOSIT_ALL_CONTRACT,
-                content: {
-                    asset,
-                    earnAmount: ((asset.balance * earnRatio) / 100).toString(),
-                    vaultAmount: ((asset.balance * vaultRatio) / 100).toString(),
-                },
-            });
-        } else if (asset.strategyType === "compound") {
-            dispatcher.dispatch({
-                type: DEPOSIT_ALL_CONTRACT,
-                content: {
-                    earnAmount: 0,
-                    vaultAmount: 0,
-                    amount: amount,
-                    asset,
-                },
-            });
-        } else if (this.isUsdVault(asset)) {
-            dispatcher.dispatch({
-                type: DEPOSIT_ALL_CONTRACT,
-                content: {
-                    earnAmount: 0,
-                    vaultAmount: 0,
-                    amount: amount,
-                    tokenIndex: tokenIndex,
-                    asset,
-                },
-            });
-        }
-    };
-
-    onWithdraw = () => {
-        let {redeemEarnAmount, redeemAmount, tokenIndex} = this.state;
-
-        const {asset, startLoading} = this.props;
-
-        if (asset.strategyType === "yearn") {
-            // Both input field are blank
-            if (
-                (!redeemAmount || isNaN(redeemAmount)) &&
-                (!redeemEarnAmount || isNaN(redeemEarnAmount))
-            ) {
-                this.setState({
-                    redeemAmountError: true,
-                    redeemEarnAmountError: true,
-                    withdrawErrorMessage: "Invalid amount",
-                    withdrawEarnErrorMessage: "Invalid amount",
-                });
-                return;
-            }
-
-            if (
-                !this.state.redeemAmountError &&
-                this.state.withdrawErrorMessage === "" &&
-                !this.state.redeemEarnAmountError &&
-                this.state.withdrawEarnErrorMessage === ""
-            ) {
-                redeemAmount = redeemAmount
-                    ? (Math.floor(redeemAmount * 10000) / 10000).toFixed(4)
-                    : 0;
-                redeemEarnAmount = redeemEarnAmount
-                    ? (Math.floor(redeemEarnAmount * 10000) / 10000).toFixed(4)
-                    : 0;
-
-                this.setState({loading: true, isWithdrawing: true});
-                startLoading();
-
-                dispatcher.dispatch({
-                    type: WITHDRAW_BOTH,
-                    content: {
-                        earnAmount: redeemEarnAmount.toString(),
-                        vaultAmount: redeemAmount.toString(),
-                        amount: "0",
-                        asset: asset,
-                        tokenIndex
-                    },
-                });
-            }
-        } else if (asset.strategyType === "compound") {
-            if (this.validateAmount(redeemAmount)) {
-                this.setState({
-                    redeemAmountError: true,
-                    withdrawErrorMessage: "Invalid amount",
-                });
-                return;
-            }
-
-            if (!this.state.redeemAmountError && this.withdrawErrorMessage !== "") {
-                this.setState({loading: true, isWithdrawing: true});
-                startLoading();
-
-                redeemAmount = (Math.floor(redeemAmount * 10000) / 10000).toFixed(4);
-
-                dispatcher.dispatch({
-                    type: WITHDRAW_BOTH,
-                    content: {
-                        earnAmount: "0",
-                        vaultAmount: "0",
-                        amount: redeemAmount.toString(),
-                        asset: asset,
-                    },
-                });
-            }
-        } else if (this.isUsdVault(asset)) {
-            if (this.validateAmount(redeemAmount)) {
-                this.setState({
-                    redeemAmountError: true,
-                    withdrawErrorMessage: "Invalid amount",
-                });
-                return;
-            }
-
-            if (!this.state.redeemAmountError && this.withdrawErrorMessage !== "") {
-                redeemAmount = (Math.floor(redeemAmount * 10000) / 10000).toFixed(4);
-                let shares = (redeemAmount * 10 ** asset.decimals).toString();
-
-                this.setState({loading: true, isWithdrawing: true});
-                startLoading();
-
-                dispatcher.dispatch({
-                    type: WITHDRAW_BOTH,
-                    content: {
-                        earnAmount: "0",
-                        vaultAmount: "0",
-                        amount: shares,
-                        asset: asset,
-                        tokenIndex: tokenIndex,
-                    },
-                });
-            }
-        }
-    };
-
-    onWithdrawAll = () => {
-        const {asset, startLoading} = this.props;
-        const {tokenIndex} = this.state;
-
-        this.setState({loading: true});
-        startLoading();
-        dispatcher.dispatch({
-            type: WITHDRAW_BOTH_VAULT,
-            content: {asset: asset, tokenIndex: tokenIndex},
-        });
-    };
-
+    // Auto Deposit amount calculation when click on percentage on input
     setAmount = (percent) => {
         if (this.state.loading) {
             return;
@@ -3979,12 +2096,7 @@ class Asset extends Component {
 
         let amount = 0.0;
 
-        if (this.isUsdVault(asset)) {
-            amount = (asset.balances[this.state.tokenIndex] * percent) / 100;
-        } else {
-            const balance = asset.balance;
-            amount = (balance * percent) / 100;
-        }
+        amount = (asset.balances[this.state.tokenIndex] * percent) / 100;
 
         amount = (Math.floor(amount * 10000) / 10000).toFixed(4);
         this.verifyInput(amount);
@@ -3992,6 +2104,32 @@ class Asset extends Component {
         this.setState({amount, percent, amountError: false, errorMessage: ""});
     };
 
+    // Auto withdraw amount calculation when click on percentage on input
+    setRedeemAmount = (percent) => {
+        if (this.state.loading) {
+            return;
+        }
+        const asset = this.props.asset;
+        const balance = asset.strategyBalance;
+        const decimals = asset.decimals;
+        const priceInUsd = asset.depositedSharesInUSD;
+
+        let amount;
+
+        amount = (balance * percent) / 100;
+        amount = Math.floor((amount / 10 ** decimals) * 10000) / 10000;
+
+        this.setState({
+            redeemAmount: amount.toFixed(4),
+            // redeemCoins: ,
+            redeemAmountPercent: percent,
+            redeemAmountInUsd: (priceInUsd * percent / 100).toFixed(4),
+            redeemAmountError: false,
+            withdrawErrorMessage: "",
+        });
+    };
+
+    // Handle selected currency
     setCurrency = (tokenIndex) => {
         if (this.state.loading) {
             return;
@@ -4006,82 +2144,6 @@ class Asset extends Component {
         this.setState({tokenIndex: tokenIndex});
     };
 
-    setRedeemAmount = (percent) => {
-        if (this.state.loading) {
-            return;
-        }
-        const asset = this.props.asset;
-        const balance = asset.strategyBalance;
-        const decimals = asset.decimals;
-        const priceInUsd = asset.depositedSharesInUSD;
-
-
-        let amount;
-
-        if (this.isUsdVault(asset)) {
-            amount = (balance * percent) / 100;
-            amount = Math.floor((amount / 10 ** decimals) * 10000) / 10000;
-        } else {
-            amount = (balance * percent) / 100;
-            amount = Math.floor(amount * 10000) / 10000;
-        }
-
-        this.setState({
-            redeemAmount: amount.toFixed(4),
-            // redeemCoins: ,
-            redeemAmountPercent: percent,
-            redeemAmountInUsd: (priceInUsd * percent / 100).toFixed(4),
-            redeemAmountError: false,
-            withdrawErrorMessage: "",
-        });
-    };
-
-    setRedeemVaultAmount = (percent) => {
-        if (this.state.loading) {
-            return;
-        }
-
-        const balance = this.props.asset.vaultBalance;
-
-        let amount = (balance * percent) / 100;
-        amount = Math.floor(amount * 10000) / 10000;
-
-        this.setState({
-            redeemAmount: amount.toFixed(4),
-            redeemAmountError: false,
-            withdrawErrorMessage: "",
-            vaultPercent: percent,
-        });
-    };
-
-    setRedeemEarnAmount = (percent) => {
-        if (this.state.loading) {
-            return;
-        }
-
-        const balance = this.props.asset.earnBalance;
-        let amount = (balance * percent) / 100;
-        amount = Math.floor(amount * 10000) / 10000;
-
-        this.setState({
-            redeemEarnAmountError: false,
-            withdrawEarnErrorMessage: "",
-            redeemEarnAmount: amount.toFixed(4),
-            earnPercent: percent,
-        });
-    };
-
-    handleTooltipEarnClose = () => {
-        this.setState({
-            openEarnInfo: !this.state.openEarnInfo,
-        });
-    };
-
-    handleTooltipVaultClose = () => {
-        this.setState({
-            openVaultInfo: !this.state.openVaultInfo,
-        });
-    };
 }
 
 export default withRouter(withStyles(styles, {withTheme: true})(Asset));

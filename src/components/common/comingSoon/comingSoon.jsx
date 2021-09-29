@@ -3,7 +3,7 @@ import { withRouter } from "react-router-dom";
 import { withStyles } from "@material-ui/core/styles";
 import { withNamespaces } from "react-i18next";
 import { CURRENT_THEME_RETURNED } from "../../../constants";
-import Store from "../../../stores";
+import Store from "../../../stores/storev2";
 const emitter = Store.emitter;
 const store = Store.store;
 
