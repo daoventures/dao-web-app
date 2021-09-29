@@ -1531,12 +1531,6 @@ class Store {
         throw new Error(`Missing web3`);
       }
 
-      const stableCoinContract = new web3.eth.Contract(
-        config.erc20ABI,
-        erc20Address
-      );
-      const stableCoinDecimal = await stableCoinContract.methods.decimals().call();
-
       const router = new web3.eth.Contract(
         config.uniswapV2RouterABI,
         config.uniswapV2RouterAddress
@@ -1547,11 +1541,11 @@ class Store {
       const DPIAddr = "0x1494CA1F11D487c2bBe4543E90080AeBa4BA3C2b";
       const DAIAddr = "0x6B175474E89094C44Da98b954EedeAC495271d0F";
 
-      let stableCoinPrice = await router.methods.getAmountsOut(
-        web3.utils.toBN(1 * 10 ** stableCoinDecimal),
+      let ETHPriceInStablecoinUnit = await router.methods.getAmountsOut(
+        web3.utils.toBN(1 * 10 ** 18), // A unit of ETH
         [WETHAddr, erc20Address]
       ).call();
-      const stableCoinPriceMin = web3.utils.toBN(stableCoinPrice[1]).muln(95).divn(100)
+      const stableCoinPriceMin = web3.utils.toBN(ETHPriceInStablecoinUnit[1]).muln(95).divn(100)
 
       let WBTCPrice = await router.methods.getAmountsOut(
         web3.utils.toBN(1 * 10 ** 8),

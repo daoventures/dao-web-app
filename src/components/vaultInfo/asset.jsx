@@ -1,4 +1,3 @@
-import * as moment from "moment";
 
 import {
     Avatar,
@@ -40,8 +39,6 @@ import React, {Component} from "react";
 
 import ArrowDropDownCircleIcon from "@material-ui/icons/ArrowDropDownCircle";
 import CloseIcon from "@material-ui/icons/Close";
-import Highcharts from "highcharts";
-import HighchartsReact from "highcharts-react-official";
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import Store from "../../stores/storev2";
 import {getTheme} from "../../theme";
@@ -51,10 +48,7 @@ import PieChart from '../common/pieChart';
 import LineChart from '../common/chart/lineChart/lineChart';
 
 import {
-    getAssetData,
-    getMappedData,
-    strategyMap
-} from './vaultUtils';
+    getAssetData} from './vaultUtils';
 import BasicModal from '../common/basicModal';
 import DoneMark from '../../assets/done.png';
 

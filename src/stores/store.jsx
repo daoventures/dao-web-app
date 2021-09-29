@@ -7456,12 +7456,6 @@ class Store {
         throw new Error(`Missing web3`);
       }
 
-      const stableCoinContract = new web3.eth.Contract(
-        config.erc20ABI,
-        erc20Address
-      );
-      const stableCoinDecimal = await stableCoinContract.methods.decimals().call();
-
       const router = new web3.eth.Contract(
         config.uniswapV2RouterABI,
         config.uniswapV2RouterAddress
