@@ -78,6 +78,7 @@ import fromExponential from "from-exponential";
 import { injected } from "./connectors";
 
 import contractHelper from './helper/contractHelper';
+import tokenPriceMinHelper from './helper/tokenPriceMinHelper';
 
 const rp = require("request-promise");
 
@@ -1473,8 +1474,8 @@ class Store {
     const amountToSend = fromExponential(parseFloat(amount));
 
     let functionCall;
-    if(asset.strategyType === "citadelv2") {
-      const tokenMinPrice = await this.getTokenPriceMin(token);
+    if(asset.strategyType === "citadelv2" || asset.strategyType === "daoStonks") {
+      const tokenMinPrice = await this.getTokenPriceMin(token, asset.strategyType);
       functionCall = vaultContract.methods
         .withdraw(amountToSend, token, tokenMinPrice);
     } else {
@@ -1517,8 +1518,8 @@ class Store {
       });
   };
 
-  // For Citadel V2
-  getTokenPriceMin = async(erc20Address) => {
+  // For Citadel V2, DAO Stonks
+  getTokenPriceMin = async(erc20Address, contractType) => {
     try {
       let tokenPriceMin = [];
 
@@ -1531,54 +1532,7 @@ class Store {
         throw new Error(`Missing web3`);
       }
 
-      const stableCoinContract = new web3.eth.Contract(
-        config.erc20ABI,
-        erc20Address
-      );
-      const stableCoinDecimal = await stableCoinContract.methods.decimals().call();
-
-      const router = new web3.eth.Contract(
-        config.uniswapV2RouterABI,
-        config.uniswapV2RouterAddress
-      );
-
-      const WETHAddr = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
-      const WBTCAddr = "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599";
-      const DPIAddr = "0x1494CA1F11D487c2bBe4543E90080AeBa4BA3C2b";
-      const DAIAddr = "0x6B175474E89094C44Da98b954EedeAC495271d0F";
-
-      let stableCoinPrice = await router.methods.getAmountsOut(
-        web3.utils.toBN(1 * 10 ** stableCoinDecimal),
-        [WETHAddr, erc20Address]
-      ).call();
-      const stableCoinPriceMin = web3.utils.toBN(stableCoinPrice[1]).muln(95).divn(100)
-
-      let WBTCPrice = await router.methods.getAmountsOut(
-        web3.utils.toBN(1 * 10 ** 8),
-        [WBTCAddr, WETHAddr]
-      ).call();
-      const WBTCPriceMin = web3.utils.toBN(WBTCPrice[1]).muln(95).divn(100);
-  
-      const DPIPrice = await router.methods.getAmountsOut(
-        web3.utils.toBN(1 * 10 ** 18),
-        [DPIAddr, WETHAddr]
-      ).call();
-      const DPIPriceMin = web3.utils.toBN(DPIPrice[1]).muln(95).divn(100);
-
-      const DAIPrice  = await router.methods.getAmountsOut(
-        web3.utils.toBN(1 * 10 ** 18),
-        [DAIAddr, WETHAddr]
-      ).call();
-      const DAIPriceMin = web3.utils.toBN(DAIPrice[1]).muln(95).divn(100)
-
-      tokenPriceMin = [
-        stableCoinPriceMin.toString(),
-        WBTCPriceMin.toString(),
-        DPIPriceMin.toString(),
-        DAIPriceMin.toString()
-      ];
-
-      return tokenPriceMin;
+      return await tokenPriceMinHelper.getTokenPriceMin(web3, network, contractType, erc20Address);
     } catch (err) {
       console.error(`Error in getTokenPriceMin(), `, err);
     }
