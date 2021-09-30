@@ -3053,8 +3053,40 @@ class Store {
     }
   } 
 
+  checkIsAllDVDBeingClaimed = async() => {
+    let isAllDVDBeingClaimed = true;
+
+    try {
+      const network = store.getStore("network");
+      if(!network || network === undefined) {
+        throw new Error(`Missing network`);
+      }
+
+      const web3 = await this._getWeb3Provider();
+      if(!web3 || web3 === undefined) {
+        throw new Error(`Missing web 3`);
+      } 
+     
+      const dvdContractInfo = this._getDefaultValues(network).dvg[1];
+      const airdropContractInfo = this._getDefaultValues(network).airdrop;
+
+      const dvdContract = contractHelper.getContract(dvdContractInfo.abi, dvdContractInfo.erc20address);
+      
+      const dvdBalanceOfAirdropContract = await dvdContract.methods.balanceOf(airdropContractInfo.address).call();
+
+      // If there's remaining amount of DVD
+      if(parseFloat(dvdBalanceOfAirdropContract) > 0) {
+        isAllDVDBeingClaimed = false;
+      }
+    } catch (err) {
+      console.error(`Error in checkIsAllDVDBeingClaimed(): `, err);
+    } finally {
+      return isAllDVDBeingClaimed;
+    }
+  }
+
   processedAirdrops = async() => {
-    let result = { success: false , isClaimed: false };
+    let isClaimed = false;
 
     try {
       const web3 = await this._getWeb3Provider();
@@ -3080,14 +3112,11 @@ class Store {
       const { address , abi } = this._getDefaultValues(network).airdrop;
       const contract = await contractHelper.getContract(web3, address, abi);
 
-      const isClaimed = await contract.methods.processedAirdrops(account.address).call();
-
-      result.sucesss = true;
-      result.isClaimed = isClaimed;
+      isClaimed = await contract.methods.processedAirdrops(account.address).call();
     } catch (err) {
       console.error(`Error in processedAirdrops(): `, err);
     } finally {
-      return result;
+      return isClaimed;
     }
   }
 

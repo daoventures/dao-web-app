@@ -396,7 +396,8 @@ class SideDrawer extends Component {
         }
 
         const airdropInfoResponse = await store._getAirdropInfo(address);
-        if(airdropInfoResponse.success) {
+
+        if(airdropInfoResponse && airdropInfoResponse.success) {
             const airdropInfo = airdropInfoResponse.result.info;
             const ongoingEvent = airdropInfoResponse.result.active;
         

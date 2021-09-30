@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { withNamespaces } from "react-i18next";
 import { withRouter } from "react-router";
 import { withStyles } from "@material-ui/core/styles";
-import Store from "../../stores"; // Update this
+import Store from "../../stores/storev2"; // Update this
 import { Typography, Button, Dialog, DialogContent, IconButton, CircularProgress } from "@material-ui/core";
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import CloseIcon from "@material-ui/icons/Close";
@@ -118,7 +118,8 @@ const styles = (theme) => ({
         margin: "30px 0px"
     },
     claimInProgressTitle: {
-        marginTop: "10px"
+        marginTop: "10px",
+        textAlign: "center"
     },
     claimInProgressSubtitle: {
         marginTop: "40px"
@@ -135,12 +136,30 @@ class AirDrop extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            logoPath: "../../assets/DAO-logo.png",
             openModal: false,
             isClaimDVD: false,
             isClaimInProgress: false,
             isClaimSuccess: false,
+            isAllDVDBeingClaimed: false,
+            isUserClaimedDVDBefore: false,
             airdropInfo: this.props.info
         }
+    }
+
+    componentDidMount() {
+        this.airdropConditionChecking();
+    }
+
+    closeModal = () => {
+        this.setState({
+            openModal: false,
+            isClaimDVD: false,
+            isClaimInProgress: false,
+            isClaimSuccess: false,
+            isAllDVDBeingClaimed: false,
+            isUserClaimedDVDBefore: false,
+        });
     }
 
     setOpenModal = (openModal = false) => {
@@ -148,37 +167,119 @@ class AirDrop extends Component {
     }
 
     claimDVD = () => {
-        this.setState({
-            isClaimDVD: true,
-            isClaimInProgress: true
-        })
+        const { isAllDVDBeingClaimed, isUserClaimedDVDBefore} = this.state;
+        this.setState({isClaimDVD: true});
+
+        console.log(`all being claim ${isAllDVDBeingClaimed}, claim before ${isUserClaimedDVDBefore}`);
+        if(isAllDVDBeingClaimed || isUserClaimedDVDBefore) {
+            return;
+        } else {
+            this.setState({ isClaimInProgress: true })
+        }
+    }
+
+    getAirdropAmount = () => {
+        const {airdropInfo} = this.state;
+        const amount = (airdropInfo !== undefined && airdropInfo.amount)
+            ? airdropInfo.amount / 10 ** 18
+            : 0 
+        return `${amount} DVD`
+    }
+
+    airdropConditionChecking = async() => {
+        const isAllDVDBeingClaimed = await store.checkIsAllDVDBeingClaimed();
+        this.setState({ isAllDVDBeingClaimed });
+
+        // const isAllDVDBeingClaimed = false;
+        // this.setState({ isAllDVDBeingClaimed });
+    
+        if(!isAllDVDBeingClaimed) {
+            const isUserClaimedDVDBefore = await store.processedAirdrops();
+            this.setState({ isUserClaimedDVDBefore });
+
+            // const isUserClaimedDVDBefore = false;
+            // this.setState({ isUserClaimedDVDBefore });
+        }
     }
 
     claimDVDInProgress = () => {
         const { classes } = this.props;
-        const { airdropInfo } = this.state;
+        const {
+            isAllDVDBeingClaimed,
+            isUserClaimedDVDBefore,
+            isClaimInProgress,
+            isClaimSuccess
+        } = this.state;
+
         const claimContent = <div className={`${classes.flexCenter} ${classes.flexColumn}`}>
             <div className={`${classes.flexCenter} ${classes.flexColumn} ${classes.claimInProgressContainer}`}>
                 <div className={`${classes.progressIconContainer}`}>
-                    <CircularProgress color="#FFFFFF" size="60px" />
+                    { (isAllDVDBeingClaimed || isUserClaimedDVDBefore) &&
+                        <img className={classes.logo} src={require('../../assets/DAO-logo.png')} style={{width: "65px", height: "75px"}} alt="" /> 
+                    }
+                    { isClaimInProgress && <CircularProgress color="#FFFFFF" size="60px" />}
                 </div>
 
                 <div className={`${classes.claimInProgressTitle}`}>
-                    <Typography variant={"h3"}>
-                        Claiming
-                    </Typography>
+                    {/** Claimed Previously */}
+                    { isUserClaimedDVDBefore && 
+                        <Typography variant={"h3"}>
+                            Oops! Looks like you have already claimed your ${this.getAirdropAmount()}
+                        </Typography>
+                    }
+                    {/** All DVD being claimed */}
+                    { isAllDVDBeingClaimed && 
+                        <Typography variant={"h3"}>
+                            Oops! Looks like all the Airdrop amount has been claimed
+                        </Typography>
+                    }
+                    {/**  Successfully Claimed */}
+                    { (!isClaimInProgress && isClaimSuccess) &&
+                        <Typography variant={"h3"} className={classes.purpleText}>
+                            {this.getAirdropAmount()}
+                        </Typography> 
+                    }
+                    {/** Claim In Progress */}
+                    { isClaimInProgress && <Typography variant={"h3"}>Claiming</Typography>}
                 </div>
 
                 <div className={`${classes.claimInProgressTitle}`}>
-                    <Typography variant={"h2"} className={`${classes.purpleText}`}>
-                        {airdropInfo && airdropInfo.amount} DVD
-                    </Typography>
+                    {/** Claim In Progress */}
+                    {
+                        isClaimInProgress && 
+                        <Typography variant={"h2"} className={`${classes.purpleText}`}>
+                            {this.getAirdropAmount()}
+                        </Typography>
+                    }
+
+                    {/**  Successfully Claimed */}
+                    { (!isClaimInProgress && isClaimSuccess) &&
+                        <Typography variant={"h3"}>Claimed</Typography> 
+                    }
                 </div>
 
                 <div className={`${classes.textGray} ${classes.claimInProgressSubtitle}`}>
-                    <Typography variant={"h5"}>
-                        Confirm this transaction in your wallet.
-                    </Typography>
+                    {/** Claim In Progress */} 
+                    {isClaimInProgress &&  <Typography variant={"h5"}>Confirm this transaction in your wallet.</Typography>}
+
+                    {/** Successfully Claimed and Claimed Previously */}
+                    {
+                        ((!isClaimInProgress && isClaimSuccess) || isUserClaimedDVDBefore) && 
+                        <div className={`${classes.flexCenter} ${classes.flexRow}`}>
+                            <img className={classes.celebrateSVG} src={Celebrate} alt=""/>
+                            <Typography variant={"h4"}>Welcome to DAOventures</Typography>
+                            <img className={classes.celebrateSVG} src={Celebrate} alt=""/>
+                        </div>
+                    }
+                  
+                    {/**  All DVD being Claimed */}
+                    { isAllDVDBeingClaimed &&
+                        <div className={`${classes.flexCenter} ${classes.flexRow}`}>
+                            <img className={classes.celebrateSVG} src={Celebrate} alt=""/>
+                            <Typography variant={"h4"}>Come back later for more rewards :)</Typography>
+                            <img className={classes.celebrateSVG} src={Celebrate} alt=""/>
+                        </div> 
+                    }
                 </div>
             </div>
         </div>
@@ -188,11 +289,11 @@ class AirDrop extends Component {
 
     claimDVDContent = () => {
         const { classes } = this.props;
-        const { airdropInfo } = this.state;
+
         const claimContent = <div className={`${classes.flexCenter} ${classes.flexColumn}`}>
             <div className={`${classes.h50} ${classes.padding30}`}>
                 <Typography variant={"h2"} className={`${classes.padding30}`}>
-                {airdropInfo && airdropInfo.amount}DVD
+                    {this.getAirdropAmount()}
                 </Typography>
             </div>
             <div className={`${classes.h50} ${classes.claimDVDContainer} ${classes.textGray}`}>
@@ -223,8 +324,6 @@ class AirDrop extends Component {
         const { 
             openModal,
             isClaimDVD,
-            isClaimInProgress,
-            isClaimSuccess
         } = this.state;
 
         // When user first entry, haven't start to claim DVD yet
@@ -249,7 +348,7 @@ class AirDrop extends Component {
                     <IconButton
                         aria-label="close"
                         className={classes.closeButton}
-                        onClick={() => this.setOpenModal(false)}
+                        onClick={() => this.closeModal()}
                     >
                         <CloseIcon />
                     </IconButton>
@@ -258,7 +357,7 @@ class AirDrop extends Component {
                 <DialogContent dividers className={classes.dialogContent}>
                     <div>
                         { !isClaimDVD && this.claimDVDContent() }
-                        { isClaimDVD && isClaimInProgress && this.claimDVDInProgress() }
+                        { isClaimDVD  && this.claimDVDInProgress() }
                     </div>
                 </DialogContent>
             </Dialog>
@@ -267,7 +366,7 @@ class AirDrop extends Component {
 
     render() {
         const { classes } = this.props;
-        const { openModal, airdropInfo } = this.state;
+        const { openModal } = this.state;
        
         return <div className={`${classes.flexCenter} ${classes.flexColumn} ${classes.airDropContainer}`}>
             <div>
@@ -276,10 +375,7 @@ class AirDrop extends Component {
             <div className={`${classes.flexCenter} ${classes.flexRow}`}>
                 <img className={classes.celebrateSVG} src={Celebrate} alt=""/>
                 <Typography variant={"h4"}>
-                    { (airdropInfo !== undefined && airdropInfo.amount)
-                        ? airdropInfo.amount / 10 ** 18
-                        : 0
-                    } DVD
+                   {this.getAirdropAmount()}
                 </Typography>
                 <img className={classes.celebrateSVG} src={Celebrate} alt=""/>
             </div>
