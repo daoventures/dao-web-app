@@ -313,7 +313,7 @@ class AirDrop extends Component {
                     {this.getAirdropAmount()}
                 </Typography>
             </div>
-            <div className={`${classes.h50} ${classes.claimDVDContainer} ${classes.textGray}`}>
+            <div className={` ${classes.claimDVDContainer} ${classes.textGray}`}>
                 <Typography variant={"h5"}>
                     As a member of DAOventures community you may claim DVD to be used for Voting and Governance.
                 </Typography>
