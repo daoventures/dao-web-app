@@ -19,7 +19,10 @@ import {
     CHANGE_NETWORK,
     CONNECTION_CONNECTED,
     GET_VAULT_INFO,
-    NETWORK
+    NETWORK,
+    CLAIM_DVD_HASH,
+    CLAIM_DVD_SUCCESS,
+    CLAIM_DVD_ERROR
 } from "../../constants/constants";
 import {
     INVEST_PATH,
@@ -363,6 +366,9 @@ class SideDrawer extends Component {
         emitter.on(DRAWER_RETURNED, this.toggleDrawer);
         this.resize();
         this.getTotalTVL();
+        emitter.on(CLAIM_DVD_HASH, this.handleClaim);
+        emitter.on(CLAIM_DVD_SUCCESS, this.handleSuccessClaim);
+        emitter.on(CLAIM_DVD_ERROR, this.handleErrorClaim);
     }
 
     componentWillMount() {
@@ -378,6 +384,40 @@ class SideDrawer extends Component {
         emitter.removeListener(CURRENT_THEME_RETURNED, this.currentThemeChanged);
         emitter.removeListener(CHANGE_NETWORK, this.networkChanged);
         emitter.removeListener(CONNECTION_CONNECTED, this.connectionConnected);
+        emitter.removeListener(CLAIM_DVD_HASH, this.handleClaim);
+        emitter.removeListener(CLAIM_DVD_SUCCESS, this.handleSuccessClaim);
+        emitter.removeListener(CLAIM_DVD_ERROR, this.handleErrorClaim);
+    }
+
+    handleClaim = (txnHash) => {
+        const snackbarObj = { snackbarMessage: null, snackbarType: null };
+        this.setState(snackbarObj);
+        const that = this;
+        setTimeout(() => {
+            const snackbarObj = { snackbarMessage: txnHash, snackbarType: "Hash" };
+            that.setState(snackbarObj);
+        });
+    }
+
+    handleSuccessClaim = (txnHash) => {
+        const snackbarObj = { snackbarMessage: null, snackbarType: null };
+        this.setState(snackbarObj);
+        const that = this;
+        setTimeout(() => {
+            const snackbarObj = { snackbarMessage: txnHash, snackbarType: "Transaction Success",};
+            that.setState(snackbarObj);
+        });
+    }
+
+    handleErrorClaim = (error) => {
+        const snackbarObj = { snackbarMessage: null, snackbarType: null };
+        this.setState(snackbarObj);
+        const errorMessage = typeof error === "string" ? error : error.message;
+        const that = this;
+        setTimeout(() => {
+            const snackbarObj = { snackbarMessage: errorMessage, snackbarType: "Error",};
+            that.setState(snackbarObj);
+        });
     }
 
     getTotalTVL = async () => {

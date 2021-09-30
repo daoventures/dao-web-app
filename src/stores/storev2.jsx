@@ -9,6 +9,9 @@ import {
   DAOMINE_POOL_RETURNED_COMPLETED,
   APPROVE_DEPOSIT_CONTRACT,
   CONFIRM_DEPOSIT_CONTRACT,
+  CONFIRM_CLAIM_DVD,
+  CLAIM_DVD_HASH,
+  CLAIM_DVD_SUCCESS,
   DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED,
   DEPOSIT_CONTRACT_RETURNED,
   DEPOSIT_CONTRACT_RETURNED_COMPLETED,
@@ -373,6 +376,9 @@ class Store {
           case YIELD_DAOMINE:
             this.yieldDAOmine(payload);
             break;
+          case CONFIRM_CLAIM_DVD:
+            this.claimTokens();
+            break;
           default: {
           }
         }
@@ -454,7 +460,7 @@ class Store {
     if(supportedNetwork.includes(network)) {
       airdrop = {
         address: upgradeToken.airdropAddress,
-        abi: upgradeToken.abi
+        abi: upgradeToken.airdropABI
       };
     }
    
@@ -3046,7 +3052,8 @@ class Store {
       const airdropAddress = airdropContractInfo.address;
    
       const result = await apiHelper.getAirDropInfo(address, airdropAddress);
-      this.setStore({ airdropInfo: result.result });
+      this.setStore({ airdropInfo: result.result.info });
+      console.log(`get airdrop info: `, this.getStore("airdropInfo"));
       return result;
     } catch(err) {
       console.error(`Error in _getAirdropInfo(): `, err);
@@ -3133,39 +3140,30 @@ class Store {
       return null;
     }
     
-    const airdropInfo = await this._getAirdropInfo(
-      account.address
+    const airdropInfo = store.getStore("airdropInfo");
+    const { amount, signature, address } = airdropInfo;
+
+    const contract = new web3.eth.Contract(
+      airdropContractInfo.abi,
+      airdropContractInfo.address
     );
-    
-    if(airdropInfo === null) {
-      return emitter.emit(
-        ERROR,
-        "Your account is not eligible for airdrop. Please contact us via Telegram/Discord."
-      );
-    } else {
-      const { amount, signature, address } = airdropInfo;
 
-      const contract = new web3.eth.Contract(
-        airdropContractInfo.abi,
-        airdropContractInfo.address
-      );
-
-      await contract.methods
-        .claimTokens(address, amount, signature)
-        .send({
-          from: account.address,
-          gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei")
-        })
-        .on("transactionHash", function(txnHash) {
-
-        })
-        .on("receipt", function(receipt) {
-        
-        })
-        .on("error", function(error) {
-
-        })
-    }
+    await contract.methods.claimTokens(address, amount, signature)
+      .send({
+        from: account.address,
+        gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei")
+      })
+      .on("transactionHash", function(transactionHash) {
+        console.log(`Transaction hash produced`);
+        return emitter.emit(CLAIM_DVD_HASH, transactionHash);
+      })
+      .on("receipt", function(receipt) {
+        console.log(`Receipt for claim DVD Token`, receipt);
+        return emitter.emit(CLAIM_DVD_SUCCESS, receipt.transactionHash);
+      })
+      .on("error", function(error) {
+        return emitter.emit(ERROR, error.message);
+      })
   }
 }
 

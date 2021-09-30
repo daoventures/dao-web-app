@@ -7,11 +7,10 @@ import { Typography, Button, Dialog, DialogContent, IconButton, CircularProgress
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import CloseIcon from "@material-ui/icons/Close";
 import Celebrate from '../../assets/img_new/vaults/celebrate.svg';
-
+import { CONFIRM_CLAIM_DVD, CLAIM_DVD_SUCCESS, CLAIM_DVD_ERROR } from "../../constants/constants";
 
 const emitter = Store.emitter;
 const dispatcher = Store.dispatcher;
-const store = Store.store;
 
 const styles = (theme) => ({
     flexCenter: {
@@ -149,6 +148,13 @@ class AirDrop extends Component {
 
     componentDidMount() {
         this.airdropConditionChecking();
+        emitter.on(CLAIM_DVD_SUCCESS, this.handleSuccessfulDVDClaim);
+        emitter.on(CLAIM_DVD_ERROR, this.handleErrorClaim);
+    }
+
+    componentWillUnmount() {
+        emitter.removeListener(CLAIM_DVD_SUCCESS, this.handleSuccessfulDVDClaim);
+        emitter.on(CLAIM_DVD_ERROR, this.handleErrorClaim)
     }
 
     closeModal = () => {
@@ -157,8 +163,6 @@ class AirDrop extends Component {
             isClaimDVD: false,
             isClaimInProgress: false,
             isClaimSuccess: false,
-            isAllDVDBeingClaimed: false,
-            isUserClaimedDVDBefore: false,
         });
     }
 
@@ -175,7 +179,20 @@ class AirDrop extends Component {
             return;
         } else {
             this.setState({ isClaimInProgress: true })
+            dispatcher.dispatch({ type: CONFIRM_CLAIM_DVD });
+            // this.setState({isClaimInProgress: false, isClaimSuccess: true})
         }
+    }
+
+    handleSuccessfulDVDClaim = (transactionHash) => {
+        this.setState({
+            isClaimInProgress: false,
+            isClaimSuccess: true
+        });
+    }
+
+    handleErrorClaim = (error) => {
+        // Do something
     }
 
     getAirdropAmount = () => {
@@ -187,18 +204,18 @@ class AirDrop extends Component {
     }
 
     airdropConditionChecking = async() => {
-        const isAllDVDBeingClaimed = await store.checkIsAllDVDBeingClaimed();
-        this.setState({ isAllDVDBeingClaimed });
-
-        // const isAllDVDBeingClaimed = false;
+        // const isAllDVDBeingClaimed = await store.checkIsAllDVDBeingClaimed();
         // this.setState({ isAllDVDBeingClaimed });
+
+        const isAllDVDBeingClaimed = false;
+        this.setState({ isAllDVDBeingClaimed });
     
         if(!isAllDVDBeingClaimed) {
-            const isUserClaimedDVDBefore = await store.processedAirdrops();
-            this.setState({ isUserClaimedDVDBefore });
-
-            // const isUserClaimedDVDBefore = false;
+            // const isUserClaimedDVDBefore = await store.processedAirdrops();
             // this.setState({ isUserClaimedDVDBefore });
+
+            const isUserClaimedDVDBefore = false;
+            this.setState({ isUserClaimedDVDBefore });
         }
     }
 
@@ -214,7 +231,7 @@ class AirDrop extends Component {
         const claimContent = <div className={`${classes.flexCenter} ${classes.flexColumn}`}>
             <div className={`${classes.flexCenter} ${classes.flexColumn} ${classes.claimInProgressContainer}`}>
                 <div className={`${classes.progressIconContainer}`}>
-                    { (isAllDVDBeingClaimed || isUserClaimedDVDBefore) &&
+                    { (isAllDVDBeingClaimed || isUserClaimedDVDBefore || !isClaimInProgress) &&
                         <img className={classes.logo} src={require('../../assets/DAO-logo.png')} style={{width: "65px", height: "75px"}} alt="" /> 
                     }
                     { isClaimInProgress && <CircularProgress color="#FFFFFF" size="60px" />}

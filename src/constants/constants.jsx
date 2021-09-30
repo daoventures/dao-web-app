@@ -222,3 +222,9 @@ export const STRATEGIES_USE_TOKEN_INDEX = [
   "elon",
   "cuban"
 ];
+
+// Airdrop
+export const CONFIRM_CLAIM_DVD = "Confirm Claim DVD";
+export const CLAIM_DVD_HASH = "Claim DVD Success";
+export const CLAIM_DVD_SUCCESS = "Claim DVD Success Returned";
+export const CLAIM_DVD_ERROR = "Claim DVD Error";
