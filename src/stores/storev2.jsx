@@ -79,6 +79,7 @@ import { injected } from "./connectors";
 
 import contractHelper from './helper/contractHelper';
 import tokenPriceMinHelper from './helper/tokenPriceMinHelper';
+import apiHelper from "./helper/apiHelper";
 
 const rp = require("request-promise");
 
@@ -417,6 +418,8 @@ class Store {
         },
         swapAddress: "0x61FfA596ABBbA47fE6014bDa91F894B2Dae6dE05",
         swapContractAbi: config.upgradeContractAbi,
+        airdropAddress: "",
+        airdropABI: config.airdropABI
       },
       42: {
         dvg: {
@@ -431,6 +434,8 @@ class Store {
         },
         swapAddress: "0xC314f6527DAC85AcdfE222Cb410133aB6fc09009",
         swapContractAbi: config.upgradeContractAbi,
+        airdropAddress: "0xBcf5ceF54bCa1b0591eE487bac567E7182bf8c7d",
+        airdropABI: config.airdropABI
       },
     };
 
@@ -443,6 +448,16 @@ class Store {
     const upgradeToken = network
       ? upgradeTokenObj[network]
       : upgradeTokenObj[1];
+
+    let airdrop = null;
+    const supportedNetwork = [NETWORK.ETHEREUM, NETWORK.KOVAN];
+    if(supportedNetwork.includes(network)) {
+      airdrop = {
+        address: upgradeToken.airdropAddress,
+        abi: upgradeToken.abi
+      };
+    }
+   
 
     let dvgObj = { xDVG: "", xDVD: "", dvg: "", dvd: "" };
     if (network === 1) {
@@ -498,6 +513,7 @@ class Store {
         },
       ],
       upgradeToken,
+      airdrop
     };
   };
 
@@ -1356,7 +1372,7 @@ class Store {
     const citadelv2Asset = assets.filter((el) => el.id === "daoCDV2");
     const FAANGAsset = assets.filter((el) => el.id === "daoSTO");
     const metaverseAsset = assets.filter((el) => el.id === "daoMVF");
-    const daoStonksAsset = assets.filter((el) => el.id === "daoStonks");
+    const daoStonksAsset = assets.filter((el) => el.id === "daoSTO2");
     
     if (happyHourWeb3) {
       // Initialize Contract
@@ -3022,6 +3038,106 @@ class Store {
       );
     }
   };
+
+  _getAirdropInfo = async(address) => {
+    try {
+      const network = store.getStore("network");
+      const airdropContractInfo = this._getDefaultValues(network).airdrop;
+      const airdropAddress = airdropContractInfo.address;
+   
+      const result = await apiHelper.getAirDropInfo(address, airdropAddress);
+      this.setStore({ airdropInfo: result.result });
+      return result;
+    } catch(err) {
+      console.error(`Error in _getAirdropInfo(): `, err);
+    }
+  } 
+
+  processedAirdrops = async() => {
+    let result = { success: false , isClaimed: false };
+
+    try {
+      const web3 = await this._getWeb3Provider();
+      if(!web3 || web3 === undefined) {
+        throw new Error(`Missing web 3`);
+      }
+  
+      const account = store.getStore("account");
+      if(!account || account === undefined) {
+        throw new Error(`Missing account`);
+      }
+
+      const network = store.getStore("network");
+      const supportedNetwork = [ NETWORK.ETHEREUM, NETWORK.KOVAN ];
+
+      if(!network || network === undefined) {
+        throw new Error(`Missing network`);
+      }
+      if(!supportedNetwork.includes(network)) {
+        throw new Error(`Network not supported`);
+      }
+
+      const { address , abi } = this._getDefaultValues(network).airdrop;
+      const contract = await contractHelper.getContract(web3, address, abi);
+
+      const isClaimed = await contract.methods.processedAirdrops(account.address).call();
+
+      result.sucesss = true;
+      result.isClaimed = isClaimed;
+    } catch (err) {
+      console.error(`Error in processedAirdrops(): `, err);
+    } finally {
+      return result;
+    }
+  }
+
+  claimTokens = async() => {
+    const network = store.getStore("network");
+    const account = store.getStore("account");
+
+    const airdropContractInfo = this._getDefaultValues(network).airdrop;
+    if(!account || !account.address) {
+      return false;
+    }
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      return null;
+    }
+    
+    const airdropInfo = await this._getAirdropInfo(
+      account.address
+    );
+    
+    if(airdropInfo === null) {
+      return emitter.emit(
+        ERROR,
+        "Your account is not eligible for airdrop. Please contact us via Telegram/Discord."
+      );
+    } else {
+      const { amount, signature, address } = airdropInfo;
+
+      const contract = new web3.eth.Contract(
+        airdropContractInfo.abi,
+        airdropContractInfo.address
+      );
+
+      await contract.methods
+        .claimTokens(address, amount, signature)
+        .send({
+          from: account.address,
+          gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei")
+        })
+        .on("transactionHash", function(txnHash) {
+
+        })
+        .on("receipt", function(receipt) {
+        
+        })
+        .on("error", function(error) {
+
+        })
+    }
+  }
 }
 
 var store = new Store();

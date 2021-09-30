@@ -19,22 +19,18 @@ import {
     CHANGE_NETWORK,
     CONNECTION_CONNECTED,
     GET_VAULT_INFO,
+    NETWORK
 } from "../../constants/constants";
 import {
     INVEST_PATH,
     STAKE_PATH_DVD,
     STAKE_PATH_DVG,
     INVEST,
-    SWAP_PATH,
-    SWAP,
     DAOMINE_PATH,
-    PORTFOLIO,
-    PORTFOLIO_PATH,
     UPGPRADE,
     UPGPRADE_PATH,
 } from "../../constants/page-constant";
 import {drawerWidth} from "../../theme/theme";
-import ToggleTheme from "../toggleTheme";
 
 import copy from "copy-to-clipboard";
 import Snackbar from "../snackbar";
@@ -356,6 +352,9 @@ class SideDrawer extends Component {
                 },
             ],
             open: false,
+            showAirDrop: false,
+            airdropInfo: null,
+            airdropSupportedNetwork: [NETWORK.ETHEREUM, NETWORK.KOVAN]
         };
     }
 
@@ -388,6 +387,32 @@ class SideDrawer extends Component {
         });
     }
 
+    getAirdropInfo = async(address) => {
+        const network = store.getStore("network");
+       
+        if(!this.state.airdropSupportedNetwork.includes(network)) {
+            this.setState({showAirDrop: false});
+            return;
+        }
+
+        const airdropInfoResponse = await store._getAirdropInfo(address);
+        if(airdropInfoResponse.success) {
+            const airdropInfo = airdropInfoResponse.result.info;
+            const ongoingEvent = airdropInfoResponse.result.active;
+        
+            // No ongoing airdrop event, or user address not found
+            if(!ongoingEvent || (ongoingEvent && airdropInfo === null)) {
+                this.setState({showAirDrop: false});
+                return;
+            }
+
+            this.setState({
+                showAirDrop: true,
+                airdropInfo
+            });
+        }
+    }
+
     resize() {
         let currentHideNav = window.innerWidth <= 760;
         if (currentHideNav !== this.state.hideNav) {
@@ -396,8 +421,10 @@ class SideDrawer extends Component {
     }
 
     networkChanged = (obj) => {
+        const showAirDrop = this.state.airdropSupportedNetwork.includes(obj.network);
         this.setState({
             currentNetwork: obj.network,
+            showAirDrop: showAirDrop
         });
     };
 
@@ -416,6 +443,7 @@ class SideDrawer extends Component {
         this.setState({
             currentAddress: account.address,
         });
+        this.getAirdropInfo(this.state.currentAddress);
     };
 
     render() {
@@ -626,7 +654,7 @@ class SideDrawer extends Component {
     };
 
     renderDrawer = () => {
-        const {snackbarMessage, listItem} = this.state;
+        const {snackbarMessage, listItem, airdropInfo} = this.state;
         const {classes, match: {path}} = this.props;
 
         const {hideNav} = this.state;
@@ -687,9 +715,12 @@ class SideDrawer extends Component {
                     </div>
                     
                     {/** Airdrop */}
-                    <div className={classes.accountInfoBlock}>
-                        <Airdrop/>
-                    </div>
+                    {
+                        (this.state.showAirDrop && this.state.airdropInfo) &&
+                        <div className={classes.accountInfoBlock}>
+                            <Airdrop info={airdropInfo}/>
+                        </div>
+                    }
                    
                     {/** Footer */}
                     {this.renderFooterMenu(false)}

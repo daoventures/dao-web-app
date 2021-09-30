@@ -133,12 +133,13 @@ const styles = (theme) => ({
 
 class AirDrop extends Component {
     constructor(props) {
-        super();
+        super(props);
         this.state = {
             openModal: false,
             isClaimDVD: false,
             isClaimInProgress: false,
-            isClaimSuccess: false
+            isClaimSuccess: false,
+            airdropInfo: this.props.info
         }
     }
 
@@ -155,6 +156,7 @@ class AirDrop extends Component {
 
     claimDVDInProgress = () => {
         const { classes } = this.props;
+        const { airdropInfo } = this.state;
         const claimContent = <div className={`${classes.flexCenter} ${classes.flexColumn}`}>
             <div className={`${classes.flexCenter} ${classes.flexColumn} ${classes.claimInProgressContainer}`}>
                 <div className={`${classes.progressIconContainer}`}>
@@ -169,7 +171,7 @@ class AirDrop extends Component {
 
                 <div className={`${classes.claimInProgressTitle}`}>
                     <Typography variant={"h2"} className={`${classes.purpleText}`}>
-                        400 DVD
+                        {airdropInfo && airdropInfo.amount} DVD
                     </Typography>
                 </div>
 
@@ -186,10 +188,11 @@ class AirDrop extends Component {
 
     claimDVDContent = () => {
         const { classes } = this.props;
+        const { airdropInfo } = this.state;
         const claimContent = <div className={`${classes.flexCenter} ${classes.flexColumn}`}>
             <div className={`${classes.h50} ${classes.padding30}`}>
                 <Typography variant={"h2"} className={`${classes.padding30}`}>
-                    400 DVD
+                {airdropInfo && airdropInfo.amount}DVD
                 </Typography>
             </div>
             <div className={`${classes.h50} ${classes.claimDVDContainer} ${classes.textGray}`}>
@@ -264,8 +267,8 @@ class AirDrop extends Component {
 
     render() {
         const { classes } = this.props;
-        const { openModal } = this.state;
-
+        const { openModal, airdropInfo } = this.state;
+       
         return <div className={`${classes.flexCenter} ${classes.flexColumn} ${classes.airDropContainer}`}>
             <div>
                 <img className={classes.logo} src={require('../../assets/DAO-logo.png')} alt="" />
@@ -273,7 +276,10 @@ class AirDrop extends Component {
             <div className={`${classes.flexCenter} ${classes.flexRow}`}>
                 <img className={classes.celebrateSVG} src={Celebrate} alt=""/>
                 <Typography variant={"h4"}>
-                    400 DVD
+                    { (airdropInfo !== undefined && airdropInfo.amount)
+                        ? airdropInfo.amount / 10 ** 18
+                        : 0
+                    } DVD
                 </Typography>
                 <img className={classes.celebrateSVG} src={Celebrate} alt=""/>
             </div>
