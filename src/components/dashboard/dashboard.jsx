@@ -26,7 +26,7 @@ import {
 import * as moment from 'moment';
 import _ from 'lodash';
 
-import Store from "../../stores";
+import Store from "../../stores/storev2";
 import UnlockModal from "../unlock/unlockModal";
 import Highcharts from 'highcharts';
 import HighchartsReact from "highcharts-react-official";

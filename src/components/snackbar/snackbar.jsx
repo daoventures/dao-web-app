@@ -12,7 +12,7 @@ import { BLOCK_EXPLORERS } from "../../constants";
 import { colors } from "../../theme";
 import { withNamespaces } from "react-i18next";
 
-import Store from "../../stores";
+import Store from "../../stores/storev2";
 
 const store = Store.store;
 

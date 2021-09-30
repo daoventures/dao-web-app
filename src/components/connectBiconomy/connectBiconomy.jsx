@@ -20,7 +20,7 @@ import { colors, drawerWidth } from "../../theme/theme";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import Loader from "../loader/loader";
-import Store from "../../stores/store";
+import Store from "../../stores/storev2";
 import UnlockModal from "../unlock/unlockModal";
 import Web3 from "web3";
 import _ from "lodash";

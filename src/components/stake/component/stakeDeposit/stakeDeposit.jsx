@@ -17,7 +17,7 @@ import {
   ACTION_WITHDRAW,
   DISABLE_ACTION_BUTTONS_RETURNED
 } from "../../../../constants/constants";
-import Store from "../../../../stores/store";
+import Store from "../../../../stores/storev2";
 import StakeActions from "../stakeActions/stakeActions";
 import { validateDigit, validateInputMoreThanBalance, validateAmountNotExist } from "../../helper/validation";
 

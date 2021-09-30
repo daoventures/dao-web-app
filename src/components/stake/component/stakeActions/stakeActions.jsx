@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import Store from "../../../../stores/store";
+import Store from "../../../../stores/storev2";
 import { withNamespaces } from "react-i18next";
 import { withRouter } from "react-router";
 import { withStyles } from "@material-ui/core/styles";

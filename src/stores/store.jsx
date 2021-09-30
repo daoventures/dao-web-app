@@ -3745,25 +3745,34 @@ class Store {
         asset.vaultContractAddress
       );
 
-      const pool = await vaultContract.methods.getAllPoolInUSD().call();
+      // Strategies with pool in 6 decimals
+      const strategies = [
+        "citadel",
+        "elon",
+        "cuban"
+      ];
+
+      const includeInStrategies = strategies.includes(asset.strategyType);
+
+      let pool = 0;
+      pool = await vaultContract.methods.getAllPoolInUSD().call();
+      if(includeInStrategies) {
+        pool = pool * 10 ** 12;
+      }
       const totalSupply = await vaultContract.methods.totalSupply().call();
+      const pricePerFullShareInUSD = pool / totalSupply;
+
       const depositedShares = await vaultContract.methods
         .balanceOf(account.address)
-        .call({ from: account.address });
-
+        .call();
+      const depositedSharesInUSD = (depositedShares / 10 ** asset.decimals) * pricePerFullShareInUSD;
+     
       let pendingBalance = 0;
-      if(asset.strategyType === "metaverse" || asset.strategyType === "citadelv2" || asset.strategyType === "daoStonks") {
+      if(!includeInStrategies) {
         pendingBalance = await vaultContract.methods.depositAmt(account.address).call({from: account.address});
         pendingBalance = pendingBalance / 10 ** 18;
       }
      
-      const decimals = (asset.strategyType === "metaverse" || asset.strategyType === "citadelv2" || asset.strategyType === "daoStonks") 
-        ? 18
-        : 6;
-
-      const depositedSharesInUSD =
-        (depositedShares * pool) / totalSupply / 10 ** decimals;
-
       callback(null, {
         earnBalance: 0,
         vaultBalance: 0,
@@ -7381,7 +7390,7 @@ class Store {
 
       let functionCall;
       if(asset.strategyType === "citadelv2") {
-        const tokenMinPrice = await this.getTokenPriceMin();
+        const tokenMinPrice = await this.getTokenPriceMin(token);
         console.log(`Special withdrawal`, tokenMinPrice);
         functionCall = vaultContract.methods
           .withdraw(amountToSend, token, tokenMinPrice);
@@ -7438,7 +7447,7 @@ class Store {
   };
 
   // For Citadel V2
-  getTokenPriceMin = async() => {
+  getTokenPriceMin = async(erc20Address) => {
     try {
       let tokenPriceMin = [];
 
@@ -7461,25 +7470,32 @@ class Store {
       const DPIAddr = "0x1494CA1F11D487c2bBe4543E90080AeBa4BA3C2b";
       const DAIAddr = "0x6B175474E89094C44Da98b954EedeAC495271d0F";
 
-      let WBTCPrice2 = await router.methods.getAmountsOut(
+      let ETHPriceInStablecoinUnit = await router.methods.getAmountsOut(
+        web3.utils.toBN(1 * 10 ** 18), // A unit of ETH
+        [WETHAddr, erc20Address]
+      ).call();
+      const stableCoinPriceMin = web3.utils.toBN(ETHPriceInStablecoinUnit[1]).muln(95).divn(100)
+
+      let WBTCPrice = await router.methods.getAmountsOut(
         web3.utils.toBN(1 * 10 ** 8),
         [WBTCAddr, WETHAddr]
       ).call();
-      const WBTCPriceMin = web3.utils.toBN(WBTCPrice2[1]).muln(9).divn(10);
+      const WBTCPriceMin = web3.utils.toBN(WBTCPrice[1]).muln(95).divn(100);
   
       const DPIPrice = await router.methods.getAmountsOut(
         web3.utils.toBN(1 * 10 ** 18),
         [DPIAddr, WETHAddr]
       ).call();
-      const DPIPriceMin = web3.utils.toBN(DPIPrice[1]).muln(9).divn(10);
+      const DPIPriceMin = web3.utils.toBN(DPIPrice[1]).muln(95).divn(100);
 
       const DAIPrice  = await router.methods.getAmountsOut(
         web3.utils.toBN(1 * 10 ** 18),
         [DAIAddr, WETHAddr]
       ).call();
-      const DAIPriceMin = web3.utils.toBN(DAIPrice[1]).muln(9).divn(10)
+      const DAIPriceMin = web3.utils.toBN(DAIPrice[1]).muln(95).divn(100)
 
       tokenPriceMin = [
+        stableCoinPriceMin.toString(),
         WBTCPriceMin.toString(),
         DPIPriceMin.toString(),
         DAIPriceMin.toString()
