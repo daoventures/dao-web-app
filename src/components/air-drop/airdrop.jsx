@@ -13,7 +13,8 @@ import { Typography,
 import { CONFIRM_CLAIM_DVD, 
     CLAIM_DVD_SUCCESS, 
     CLAIM_DVD_ERROR, 
-    APPROVE_CLAIM_DVD_ERROR
+    CLAIM_DVD_HASH,
+    BLOCK_EXPLORERS
 } from "../../constants/constants";
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import CloseIcon from "@material-ui/icons/Close";
@@ -141,6 +142,9 @@ const styles = (theme) => ({
     },
     purpleText: {
         color: theme.themeColors.textP
+    },
+    whiteText: {
+        color: theme.themeColors.textT
     }
 })
 
@@ -148,6 +152,7 @@ class AirDrop extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            network: store.getStore("network"),
             logoPath: "../../assets/DAO-logo.png",
             openModal: false,
             isClaimDVD: false,
@@ -158,11 +163,14 @@ class AirDrop extends Component {
             isUserClaimedDVDBefore: false,
             airdropInfo: this.props.info,
             disableButton: false,
+            isHashGenerated: false,
+            hashLink: ""
         }
     }
 
     componentDidMount() {
         emitter.on(CLAIM_DVD_SUCCESS, this.handleSuccessfulDVDClaim);
+        emitter.on(CLAIM_DVD_HASH, this.handleTransactionHashGenerated);
         emitter.on(CLAIM_DVD_ERROR, this.handleErrorClaim);
     }
 
@@ -179,6 +187,7 @@ class AirDrop extends Component {
 
     componentWillUnmount() {
         emitter.removeListener(CLAIM_DVD_SUCCESS, this.handleSuccessfulDVDClaim);
+        emitter.removeListener(CLAIM_DVD_HASH, this.handleTransactionHashGenerated);
         emitter.removeListener(CLAIM_DVD_ERROR, this.handleErrorClaim);
     }
 
@@ -189,7 +198,9 @@ class AirDrop extends Component {
             isClaimInProgress: false,
             isClaimSuccess: false,
             isClaimError: false,
-            disableButton: false
+            disableButton: false,
+            isHashGenerated: false,
+            hashLink: ""
         });
     }
 
@@ -206,9 +217,8 @@ class AirDrop extends Component {
         if(isAllDVDBeingClaimed || isUserClaimedDVDBefore) {
             return;
         } else {
-            this.setState({ isClaimInProgress: true })
+            this.setState({ isClaimInProgress: true });
             dispatcher.dispatch({ type: CONFIRM_CLAIM_DVD });
-            // this.setState({isClaimInProgress: false, isClaimSuccess: true}) For testing success scenario, remove this later
         }
     }
 
@@ -247,6 +257,15 @@ class AirDrop extends Component {
         })
     }
 
+    handleTransactionHashGenerated = (transactionHash) => {
+        const blockExplorer = BLOCK_EXPLORERS[this.state.network];
+        const hashLink = blockExplorer + transactionHash;
+        this.setState({
+            isHashGenerated: true,
+            hashLink
+        })
+    }
+
     getAirdropAmount = () => {
         const {airdropInfo} = this.state;
         const amount = (airdropInfo !== undefined && airdropInfo.amount)
@@ -262,7 +281,9 @@ class AirDrop extends Component {
             isUserClaimedDVDBefore,
             isClaimInProgress,
             isClaimSuccess,
-            isClaimError
+            isClaimError,
+            isHashGenerated,
+            hashLink
         } = this.state;
 
         const claimContent = <div className={`${classes.flexCenter} ${classes.flexColumn}`}>
@@ -320,7 +341,16 @@ class AirDrop extends Component {
 
                 <div className={`${classes.textGray} ${classes.claimInProgressSubtitle}`}>
                     {/** Claim In Progress */} 
-                    {isClaimInProgress &&  <Typography variant={"h5"}>Confirm this transaction in your wallet.</Typography>}
+                    { (isClaimInProgress && !isHashGenerated) &&  <Typography variant={"h5"}>Confirm this transaction in your wallet.</Typography>}
+                    { (isClaimInProgress && isHashGenerated) &&  
+                        <div className={`${classes.flexCenter} ${classes.flexRow}`}>
+                            <Typography variant={"h5"}>
+                                View your transaction hash 
+                                <a href={hashLink} rel="noopener noreferrer" target="_blank" className={classes.whiteText} style={{marginLeft: "5px"}}>here</a>
+                            </Typography>
+
+                        </div>
+                    }
 
                     {/** Successfully Claimed and Claimed Previously */}
                     {
