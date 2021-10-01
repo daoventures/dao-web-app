@@ -3,6 +3,9 @@ import {
   APPROVE_TRANSACTING,
   APPROVAL_DVG_RETURNED,
   APPROVAL_DVG_RETURNED_COMPLETED,
+  APPROVE_CLAIM_DVD_HASH,
+  APPROVE_CLAIM_DVD_ERROR,
+  APPROVE_CLAIM_DVD_SUCCESS,
   BICONOMY_CONNECTED,
   CURRENT_THEME_RETURNED,
   DAOMINE_POOL_RETURNED,
@@ -3133,6 +3136,8 @@ class Store {
     const account = store.getStore("account");
 
     const airdropContractInfo = this._getDefaultValues(network).airdrop;
+    const dvdContractInfo = this._getDefaultValues(network).dvg[1];
+
     if(!account || !account.address) {
       return false;
     }
@@ -3140,16 +3145,47 @@ class Store {
     if (!web3) {
       return null;
     }
-    
-    const airdropInfo = store.getStore("airdropInfo");
-    const { amount, signature, address } = airdropInfo;
+
+    const dvdContract = new web3.eth.Contract(
+      dvdContractInfo.abi,
+      dvdContractInfo.erc20address
+    );
 
     const contract = new web3.eth.Contract(
       airdropContractInfo.abi,
       airdropContractInfo.address
     );
+    
+    const airdropInfo = store.getStore("airdropInfo");
+    const { amount, signature, address } = airdropInfo;
 
-    await contract.methods.claimTokens(address, amount, signature)
+    // Check allowance 
+    // const allowance = await dvdContract.methods.allowance(account.address, airdropContractInfo.address).call();
+    // console.log(`Allowance ${allowance}, amount ${amount}, ${parseFloat(amount) > parseFloat(allowance)}`);
+
+    let approvalErr = false;
+    // if(parseFloat(amount) > parseFloat(allowance)) {
+    //   await dvdContract.methods.approve(airdropContractInfo.address, web3.utils.toWei("999999999999", "ether"))
+    //     .send({
+    //       from: account.address,
+    //       gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei")
+    //     })
+    //     .on("transactionHash", function(transactionHash) {
+    //       console.log(`Transaction hash for DVD approval produced`);
+    //       return emitter.emit(APPROVE_CLAIM_DVD_HASH, transactionHash);
+    //     })
+    //     .on("receipt", function(receipt) {
+    //       console.log(`Receipt for claim DVD Token`, receipt);
+    //       return emitter.emit(APPROVE_CLAIM_DVD_SUCCESS, receipt.transactionHash);
+    //     })
+    //     .on("error", function(error) {
+    //       return emitter.emit(APPROVE_CLAIM_DVD_ERROR, error.message);
+    //     })
+    // }
+    console.log(`info`, airdropInfo);
+
+    if(!approvalErr) {
+      await contract.methods.claimTokens(address, amount, signature)
       .send({
         from: account.address,
         gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei")
@@ -3165,6 +3201,7 @@ class Store {
       .on("error", function(error) {
         return emitter.emit(CLAIM_DVD_ERROR, error.message);
       })
+    }
   }
 }
 

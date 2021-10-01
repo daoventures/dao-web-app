@@ -13,6 +13,9 @@ import {
 
 import Store from "../../stores/storev2";
 import {
+    APPROVE_CLAIM_DVD_HASH,
+    APPROVE_CLAIM_DVD_SUCCESS,
+    APPROVE_CLAIM_DVD_ERROR,
     DRAWER_RETURNED,
     TOGGLE_DRAWER,
     CURRENT_THEME_RETURNED,
@@ -368,7 +371,10 @@ class SideDrawer extends Component {
         this.getTotalTVL();
         emitter.on(CLAIM_DVD_HASH, this.handleClaim);
         emitter.on(CLAIM_DVD_SUCCESS, this.handleSuccessClaim);
+        emitter.on(APPROVE_CLAIM_DVD_HASH, this.handleClaim);
+        emitter.on(APPROVE_CLAIM_DVD_SUCCESS, this.handleSuccessClaim);
         emitter.on(CLAIM_DVD_ERROR, this.handleErrorClaim);
+        emitter.on(APPROVE_CLAIM_DVD_ERROR, this.handleErrorClaim);
     }
 
     componentWillMount() {

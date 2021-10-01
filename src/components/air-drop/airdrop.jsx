@@ -12,7 +12,8 @@ import { Typography,
 } from "@material-ui/core";
 import { CONFIRM_CLAIM_DVD, 
     CLAIM_DVD_SUCCESS, 
-    CLAIM_DVD_ERROR 
+    CLAIM_DVD_ERROR, 
+    APPROVE_CLAIM_DVD_ERROR
 } from "../../constants/constants";
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import CloseIcon from "@material-ui/icons/Close";
@@ -161,11 +162,13 @@ class AirDrop extends Component {
         this.airdropConditionChecking();
         emitter.on(CLAIM_DVD_SUCCESS, this.handleSuccessfulDVDClaim);
         emitter.on(CLAIM_DVD_ERROR, this.handleErrorClaim);
+        emitter.on(APPROVE_CLAIM_DVD_ERROR, this.handleErrorClaim);
     }
 
     componentWillUnmount() {
         emitter.removeListener(CLAIM_DVD_SUCCESS, this.handleSuccessfulDVDClaim);
-        emitter.on(CLAIM_DVD_ERROR, this.handleErrorClaim)
+        emitter.removeListener(CLAIM_DVD_ERROR, this.handleErrorClaim);
+        emitter.removeListener(APPROVE_CLAIM_DVD_ERROR, this.handleErrorClaim);
     }
 
     closeModal = () => {
@@ -196,11 +199,9 @@ class AirDrop extends Component {
     }
 
     airdropConditionChecking = async() => {
-        const isAllDVDBeingClaimed = await store.checkIsAllDVDBeingClaimed();
-        this.setState({ isAllDVDBeingClaimed });
-
-        // const isAllDVDBeingClaimed = false; // For testing purpose
+        // const isAllDVDBeingClaimed = await store.checkIsAllDVDBeingClaimed();
         // this.setState({ isAllDVDBeingClaimed });
+        const { isAllDVDBeingClaimed } = this.state;
     
         if(!isAllDVDBeingClaimed) {
             const isUserClaimedDVDBefore = await store.processedAirdrops();

@@ -228,3 +228,7 @@ export const CONFIRM_CLAIM_DVD = "Confirm Claim DVD";
 export const CLAIM_DVD_HASH = "Claim DVD Success";
 export const CLAIM_DVD_SUCCESS = "Claim DVD Success Returned";
 export const CLAIM_DVD_ERROR = "Claim DVD Error";
+
+export const APPROVE_CLAIM_DVD_HASH = "Approve Claim DVD Hash";
+export const APPROVE_CLAIM_DVD_SUCCESS = "Approve Claim DVD Success";
+export const APPROVE_CLAIM_DVD_ERROR = "Approve Claim DVD Error";
