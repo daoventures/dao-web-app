@@ -162,13 +162,21 @@ class AirDrop extends Component {
         this.airdropConditionChecking();
         emitter.on(CLAIM_DVD_SUCCESS, this.handleSuccessfulDVDClaim);
         emitter.on(CLAIM_DVD_ERROR, this.handleErrorClaim);
-        emitter.on(APPROVE_CLAIM_DVD_ERROR, this.handleErrorClaim);
+    }
+
+    componentDidUpdate(prevProps) {
+        if(prevProps.info) {
+            const info = prevProps.info;
+            if(info.address !== this.state.airdropInfo.address) {
+                this.setState({airdropInfo: info});
+                this.airdropConditionChecking();
+            }
+        }
     }
 
     componentWillUnmount() {
         emitter.removeListener(CLAIM_DVD_SUCCESS, this.handleSuccessfulDVDClaim);
         emitter.removeListener(CLAIM_DVD_ERROR, this.handleErrorClaim);
-        emitter.removeListener(APPROVE_CLAIM_DVD_ERROR, this.handleErrorClaim);
     }
 
     closeModal = () => {
@@ -199,10 +207,9 @@ class AirDrop extends Component {
     }
 
     airdropConditionChecking = async() => {
-        // const isAllDVDBeingClaimed = await store.checkIsAllDVDBeingClaimed();
-        // this.setState({ isAllDVDBeingClaimed });
-        const { isAllDVDBeingClaimed } = this.state;
-    
+        const isAllDVDBeingClaimed = await store.checkIsAllDVDBeingClaimed();
+        this.setState({ isAllDVDBeingClaimed });
+        
         if(!isAllDVDBeingClaimed) {
             const isUserClaimedDVDBefore = await store.processedAirdrops();
             this.setState({ isUserClaimedDVDBefore });
@@ -215,7 +222,8 @@ class AirDrop extends Component {
     handleSuccessfulDVDClaim = (transactionHash) => {
         this.setState({
             isClaimInProgress: false,
-            isClaimSuccess: true
+            isClaimSuccess: true,
+            isUserClaimedDVDBefore: true
         });
     }
 
