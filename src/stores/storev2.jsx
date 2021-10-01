@@ -3081,10 +3081,10 @@ class Store {
       const dvdContractInfo = this._getDefaultValues(network).dvg[1];
       const airdropContractInfo = this._getDefaultValues(network).airdrop;
 
-      const dvdContract = contractHelper.getContract(dvdContractInfo.abi, dvdContractInfo.erc20address);
+      const dvdContract = contractHelper.getContract(web3, dvdContractInfo.abi, dvdContractInfo.erc20address);
       
       const dvdBalanceOfAirdropContract = await dvdContract.methods.balanceOf(airdropContractInfo.address).call();
-
+     
       // If there's remaining amount of DVD
       if(parseFloat(dvdBalanceOfAirdropContract) > 0) {
         isAllDVDBeingClaimed = false;
@@ -3121,7 +3121,7 @@ class Store {
       }
 
       const { address , abi } = this._getDefaultValues(network).airdrop;
-      const contract = await contractHelper.getContract(web3, address, abi);
+      const contract = await contractHelper.getContract(web3, abi, address);
 
       isClaimed = await contract.methods.processedAirdrops(account.address).call();
     } catch (err) {
@@ -3136,7 +3136,6 @@ class Store {
     const account = store.getStore("account");
 
     const airdropContractInfo = this._getDefaultValues(network).airdrop;
-    const dvdContractInfo = this._getDefaultValues(network).dvg[1];
 
     if(!account || !account.address) {
       return false;
@@ -3146,11 +3145,6 @@ class Store {
       return null;
     }
 
-    const dvdContract = new web3.eth.Contract(
-      dvdContractInfo.abi,
-      dvdContractInfo.erc20address
-    );
-
     const contract = new web3.eth.Contract(
       airdropContractInfo.abi,
       airdropContractInfo.address
@@ -3159,49 +3153,22 @@ class Store {
     const airdropInfo = store.getStore("airdropInfo");
     const { amount, signature, address } = airdropInfo;
 
-    // Check allowance 
-    // const allowance = await dvdContract.methods.allowance(account.address, airdropContractInfo.address).call();
-    // console.log(`Allowance ${allowance}, amount ${amount}, ${parseFloat(amount) > parseFloat(allowance)}`);
-
-    let approvalErr = false;
-    // if(parseFloat(amount) > parseFloat(allowance)) {
-    //   await dvdContract.methods.approve(airdropContractInfo.address, web3.utils.toWei("999999999999", "ether"))
-    //     .send({
-    //       from: account.address,
-    //       gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei")
-    //     })
-    //     .on("transactionHash", function(transactionHash) {
-    //       console.log(`Transaction hash for DVD approval produced`);
-    //       return emitter.emit(APPROVE_CLAIM_DVD_HASH, transactionHash);
-    //     })
-    //     .on("receipt", function(receipt) {
-    //       console.log(`Receipt for claim DVD Token`, receipt);
-    //       return emitter.emit(APPROVE_CLAIM_DVD_SUCCESS, receipt.transactionHash);
-    //     })
-    //     .on("error", function(error) {
-    //       return emitter.emit(APPROVE_CLAIM_DVD_ERROR, error.message);
-    //     })
-    // }
-    console.log(`info`, airdropInfo);
-
-    if(!approvalErr) {
-      await contract.methods.claimTokens(address, amount, signature)
-      .send({
-        from: account.address,
-        gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei")
-      })
-      .on("transactionHash", function(transactionHash) {
-        console.log(`Transaction hash produced`);
-        return emitter.emit(CLAIM_DVD_HASH, transactionHash);
-      })
-      .on("receipt", function(receipt) {
-        console.log(`Receipt for claim DVD Token`, receipt);
-        return emitter.emit(CLAIM_DVD_SUCCESS, receipt.transactionHash);
-      })
-      .on("error", function(error) {
-        return emitter.emit(CLAIM_DVD_ERROR, error.message);
-      })
-    }
+    await contract.methods.claimTokens(address, amount, signature)
+    .send({
+      from: account.address,
+      gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei")
+    })
+    .on("transactionHash", function(transactionHash) {
+      console.log(`Transaction hash produced`);
+      return emitter.emit(CLAIM_DVD_HASH, transactionHash);
+    })
+    .on("receipt", function(receipt) {
+      console.log(`Receipt for claim DVD Token`, receipt);
+      return emitter.emit(CLAIM_DVD_SUCCESS, receipt.transactionHash);
+    })
+    .on("error", function(error) {
+      return emitter.emit(CLAIM_DVD_ERROR, error.message);
+    })
   }
 }
 
