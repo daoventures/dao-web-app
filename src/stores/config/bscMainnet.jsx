@@ -11,11 +11,11 @@ const bscMainnet = [
         description: "Stablecoins",
         vaultSymbol: "daoSAFU",
         erc20addresses: [
-            "0x337610d27c682e347c9cd60bd4b3b107c9d34ddd", // Update this to mainnet
-            "0x64544969ed7ebf5f083679233325356ebe738930",
-            "0xec5dcb5dbf4b114c9d0f65bccab49ec54f6a0867",
+            "0x55d398326f99059fF775485246999027B3197955", 
+            "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+            "0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3",
         ],
-        erc20address: "0x337610d27c682e347c9cd60bd4b3b107c9d34ddd", // Update this
+        erc20address: "0x55d398326f99059fF775485246999027B3197955", 
         vaultContractAddress: "0x81390703430015a751f967694d5ccb8745fda254", // Update this
         vaultContractABI: config.vaultDAOSAFUContractABI,
         balance: 0, // Stores balance of selectedERC20Address
