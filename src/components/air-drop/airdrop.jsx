@@ -129,7 +129,9 @@ const styles = (theme) => ({
     },
     claimInProgressTitle: {
         marginTop: "10px",
-        textAlign: "center"
+        textAlign: "center",
+        marginLeft: "35px",
+        marginRight: "35px"
     },
     claimInProgressSubtitle: {
         marginTop: "40px"
@@ -154,17 +156,18 @@ class AirDrop extends Component {
             isClaimError: false,
             isAllDVDBeingClaimed: false,
             isUserClaimedDVDBefore: false,
-            airdropInfo: this.props.info
+            airdropInfo: this.props.info,
+            disableButton: false,
         }
     }
 
     componentDidMount() {
-        this.airdropConditionChecking();
         emitter.on(CLAIM_DVD_SUCCESS, this.handleSuccessfulDVDClaim);
         emitter.on(CLAIM_DVD_ERROR, this.handleErrorClaim);
     }
 
     componentDidUpdate(prevProps) {
+        // Update airdrop info to the latest info from props, if wallet address is changing.
         if(prevProps.info) {
             const info = prevProps.info;
             if(info.address !== this.state.airdropInfo.address) {
@@ -185,18 +188,21 @@ class AirDrop extends Component {
             isClaimDVD: false,
             isClaimInProgress: false,
             isClaimSuccess: false,
-            isClaimError: false
+            isClaimError: false,
+            disableButton: false
         });
     }
 
     setOpenModal = (openModal = false) => {
         this.setState({ openModal });
+        this.airdropConditionChecking();
     }
 
     claimDVD = () => {
         const { isAllDVDBeingClaimed, isUserClaimedDVDBefore} = this.state;
         this.setState({isClaimDVD: true});
 
+        console.log(`claim dvd all being claim ${isAllDVDBeingClaimed},claim before ${isUserClaimedDVDBefore}`);
         if(isAllDVDBeingClaimed || isUserClaimedDVDBefore) {
             return;
         } else {
@@ -207,23 +213,29 @@ class AirDrop extends Component {
     }
 
     airdropConditionChecking = async() => {
+        this.setState({ disableButton: true });
+
         const isAllDVDBeingClaimed = await store.checkIsAllDVDBeingClaimed();
         this.setState({ isAllDVDBeingClaimed });
+        console.log(`is all dvd being claimed ${isAllDVDBeingClaimed}`);
         
         if(!isAllDVDBeingClaimed) {
             const isUserClaimedDVDBefore = await store.processedAirdrops();
             this.setState({ isUserClaimedDVDBefore });
-
+            console.log(`is user claimed before ${isUserClaimedDVDBefore}`);
+           
             // const isUserClaimedDVDBefore = false; // For testing purpose
             // this.setState({ isUserClaimedDVDBefore });
+            // console.log(`is user claimed before ${isUserClaimedDVDBefore}`);
         }
+
+        this.setState({ disableButton: false });
     }
 
     handleSuccessfulDVDClaim = (transactionHash) => {
         this.setState({
             isClaimInProgress: false,
             isClaimSuccess: true,
-            isUserClaimedDVDBefore: true
         });
     }
 
@@ -264,7 +276,7 @@ class AirDrop extends Component {
 
                 <div className={`${classes.claimInProgressTitle}`}>
                     {/** Claimed Previously */}
-                    { isUserClaimedDVDBefore && 
+                    {  isUserClaimedDVDBefore && 
                         <Typography variant={"h3"}>
                             Oops! Looks like you have already claimed your ${this.getAirdropAmount()}
                         </Typography>
@@ -337,6 +349,7 @@ class AirDrop extends Component {
 
     claimDVDContent = () => {
         const { classes } = this.props;
+        const { disableButton } = this.state;
 
         const claimContent = <div className={`${classes.flexCenter} ${classes.flexColumn}`}>
             <div className={`${classes.h50} ${classes.padding30}`}>
@@ -355,6 +368,7 @@ class AirDrop extends Component {
 
                 <div className={classes.flexCenter}>
                     <Button className={`${classes.width40} ${classes.claimButton}`}
+                        disabled={disableButton}
                         onClick={()=> this.claimDVD()}>
                         <span className={classes.claimButtonText}>
                             Claim DVD
