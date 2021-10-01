@@ -1362,7 +1362,7 @@ class Store {
     const citadelv2Asset = assets.filter((el) => el.id === "daoCDV2");
     const FAANGAsset = assets.filter((el) => el.id === "daoSTO");
     const metaverseAsset = assets.filter((el) => el.id === "daoMVF");
-    const daoStonksAsset = assets.filter((el) => el.id === "daoStonks");
+    const daoStonksAsset = assets.filter((el) => el.id === "daoSTO2");
     
     if (happyHourWeb3) {
       // Initialize Contract
@@ -1480,7 +1480,7 @@ class Store {
     const amountToSend = fromExponential(parseFloat(amount));
 
     let functionCall;
-    if(asset.strategyType === "citadelv2" || asset.strategyType === "daoStonks") {
+    if(asset.strategyType === "citadelv2" || asset.strategyType === "daoStonks" || asset.strategyType === "daoSafu") {
       const tokenMinPrice = await this.getTokenPriceMin(token, asset.strategyType);
       functionCall = vaultContract.methods
         .withdraw(amountToSend, token, tokenMinPrice);
@@ -1524,13 +1524,17 @@ class Store {
       });
   };
 
-  // For Citadel V2, DAO Stonks
+  // For Citadel V2, DAO Stonks, DAO Safu
   getTokenPriceMin = async(erc20Address, contractType) => {
     try {
       let tokenPriceMin = [];
 
       const network = store.getStore("network");
-      if(network !== NETWORK.ETHEREUM) {
+      const supportedNetwork = [
+        NETWORK.BSCMAINNET,
+        NETWORK.ETHEREUM
+      ];
+      if(!supportedNetwork.includes(network)) {
         return tokenPriceMin;
       }
       const web3 = new Web3(store.getStore("web3context").library.provider);
@@ -1711,6 +1715,7 @@ class Store {
       _promises.push(this._getBalances(web3, asset, account, () => {}));
 
       let assetApiData = assetApiInfo.data[asset.id] ? assetApiInfo.data[asset.id]: {};
+      console.log(assetApiInfo);
 
       let data = await Promise.all(_promises);
 
@@ -1740,6 +1745,7 @@ class Store {
         ...newAssetKeys
       }
       assets[i] = asset;
+      console.log(`asset ${asset.symbol}`, asset);
       store.setStore({ vaultAssets: assets });
 
       emitter.emit(STRATEGY_BALANCES_FULL_RETURNED, assets);
