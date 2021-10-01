@@ -66,7 +66,8 @@ import {
   YIELD_DAOMINE_RETURNED_COMPLETED,
   APPROVE_DEPOSIT_SUCCESS,
   ERROR_WALLET_APPROVAL,
-  ERROR_DEPOSIT_WALLET
+  ERROR_DEPOSIT_WALLET,
+  CLAIM_DVD_ERROR
 } from "../constants/constants";
 
 import Ethereum from "./config/ethereum";
@@ -3162,7 +3163,7 @@ class Store {
         return emitter.emit(CLAIM_DVD_SUCCESS, receipt.transactionHash);
       })
       .on("error", function(error) {
-        return emitter.emit(ERROR, error.message);
+        return emitter.emit(CLAIM_DVD_ERROR, error.message);
       })
   }
 }

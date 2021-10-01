@@ -3,14 +3,24 @@ import { withNamespaces } from "react-i18next";
 import { withRouter } from "react-router";
 import { withStyles } from "@material-ui/core/styles";
 import Store from "../../stores/storev2"; // Update this
-import { Typography, Button, Dialog, DialogContent, IconButton, CircularProgress } from "@material-ui/core";
+import { Typography, 
+    Button, 
+    Dialog, 
+    DialogContent, 
+    IconButton,
+    CircularProgress 
+} from "@material-ui/core";
+import { CONFIRM_CLAIM_DVD, 
+    CLAIM_DVD_SUCCESS, 
+    CLAIM_DVD_ERROR 
+} from "../../constants/constants";
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import CloseIcon from "@material-ui/icons/Close";
 import Celebrate from '../../assets/img_new/vaults/celebrate.svg';
-import { CONFIRM_CLAIM_DVD, CLAIM_DVD_SUCCESS, CLAIM_DVD_ERROR } from "../../constants/constants";
 
 const emitter = Store.emitter;
 const dispatcher = Store.dispatcher;
+const store = Store.store;
 
 const styles = (theme) => ({
     flexCenter: {
@@ -140,6 +150,7 @@ class AirDrop extends Component {
             isClaimDVD: false,
             isClaimInProgress: false,
             isClaimSuccess: false,
+            isClaimError: false,
             isAllDVDBeingClaimed: false,
             isUserClaimedDVDBefore: false,
             airdropInfo: this.props.info
@@ -163,6 +174,7 @@ class AirDrop extends Component {
             isClaimDVD: false,
             isClaimInProgress: false,
             isClaimSuccess: false,
+            isClaimError: false
         });
     }
 
@@ -174,13 +186,28 @@ class AirDrop extends Component {
         const { isAllDVDBeingClaimed, isUserClaimedDVDBefore} = this.state;
         this.setState({isClaimDVD: true});
 
-        console.log(`all being claim ${isAllDVDBeingClaimed}, claim before ${isUserClaimedDVDBefore}`);
         if(isAllDVDBeingClaimed || isUserClaimedDVDBefore) {
             return;
         } else {
             this.setState({ isClaimInProgress: true })
             dispatcher.dispatch({ type: CONFIRM_CLAIM_DVD });
-            // this.setState({isClaimInProgress: false, isClaimSuccess: true})
+            // this.setState({isClaimInProgress: false, isClaimSuccess: true}) For testing success scenario, remove this later
+        }
+    }
+
+    airdropConditionChecking = async() => {
+        const isAllDVDBeingClaimed = await store.checkIsAllDVDBeingClaimed();
+        this.setState({ isAllDVDBeingClaimed });
+
+        // const isAllDVDBeingClaimed = false; // For testing purpose
+        // this.setState({ isAllDVDBeingClaimed });
+    
+        if(!isAllDVDBeingClaimed) {
+            const isUserClaimedDVDBefore = await store.processedAirdrops();
+            this.setState({ isUserClaimedDVDBefore });
+
+            // const isUserClaimedDVDBefore = false; // For testing purpose
+            // this.setState({ isUserClaimedDVDBefore });
         }
     }
 
@@ -192,7 +219,11 @@ class AirDrop extends Component {
     }
 
     handleErrorClaim = (error) => {
-        // Do something
+        this.setState({
+            isClaimInProgress: false,
+            isClaimSuccess: false,
+            isClaimError: true
+        })
     }
 
     getAirdropAmount = () => {
@@ -203,29 +234,14 @@ class AirDrop extends Component {
         return `${amount} DVD`
     }
 
-    airdropConditionChecking = async() => {
-        // const isAllDVDBeingClaimed = await store.checkIsAllDVDBeingClaimed();
-        // this.setState({ isAllDVDBeingClaimed });
-
-        const isAllDVDBeingClaimed = false;
-        this.setState({ isAllDVDBeingClaimed });
-    
-        if(!isAllDVDBeingClaimed) {
-            // const isUserClaimedDVDBefore = await store.processedAirdrops();
-            // this.setState({ isUserClaimedDVDBefore });
-
-            const isUserClaimedDVDBefore = false;
-            this.setState({ isUserClaimedDVDBefore });
-        }
-    }
-
     claimDVDInProgress = () => {
         const { classes } = this.props;
         const {
             isAllDVDBeingClaimed,
             isUserClaimedDVDBefore,
             isClaimInProgress,
-            isClaimSuccess
+            isClaimSuccess,
+            isClaimError
         } = this.state;
 
         const claimContent = <div className={`${classes.flexCenter} ${classes.flexColumn}`}>
@@ -254,6 +270,12 @@ class AirDrop extends Component {
                     { (!isClaimInProgress && isClaimSuccess) &&
                         <Typography variant={"h3"} className={classes.purpleText}>
                             {this.getAirdropAmount()}
+                        </Typography> 
+                    }
+                    {/** Claim Error */}
+                    { (!isClaimInProgress && !isClaimSuccess && isClaimError) && 
+                        <Typography variant={"h3"}>
+                            Oops ! Something went wrong, please try again.
                         </Typography> 
                     }
                     {/** Claim In Progress */}
@@ -313,7 +335,7 @@ class AirDrop extends Component {
                     {this.getAirdropAmount()}
                 </Typography>
             </div>
-            <div className={` ${classes.claimDVDContainer} ${classes.textGray}`}>
+            <div className={`${classes.claimDVDContainer} ${classes.textGray}`}>
                 <Typography variant={"h5"}>
                     As a member of DAOventures community you may claim DVD to be used for Voting and Governance.
                 </Typography>
