@@ -70,6 +70,9 @@ import Ethereum from "./config/ethereum";
 import Kovan from "./config/kovan";
 import Matic from "./config/matic";
 import Mumbai from "./config/mumbai";
+import BscTestnet from "./config/bscTestnet";
+import BscMainnet from  "./config/bscMainnet";
+
 import Web3 from "web3";
 import async from "async";
 import citadelABI from "./citadelABI.json";
@@ -91,10 +94,11 @@ const emitter = new Emitter();
 const networkObj = {
   1: "ethereum",
   4: "ethereum",
-  56: "Binance",
+  56: "bsc",
+  97: "bsc",
   42: "ethereum",
   80001: "polygon",
-  137: "polygon"
+  137: "polygon",
 }
 
 class Store {
@@ -401,6 +405,8 @@ class Store {
       42: Kovan,
       80001: Mumbai,
       137: Matic,
+      56: BscMainnet,
+      97: BscTestnet
     };
 
     const upgradeTokenObj = {

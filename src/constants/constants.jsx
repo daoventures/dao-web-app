@@ -213,6 +213,8 @@ export const NETWORK = {
   KOVAN: 42,
   MATIC: 137,
   MUMBAI: 80001,
+  BSCTEST: 97,
+  BSCMAINNET: 56
 }
 
 export const STRATEGIES_USE_TOKEN_INDEX = [
