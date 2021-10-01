@@ -1356,7 +1356,7 @@ class Store {
     const citadelv2Asset = assets.filter((el) => el.id === "daoCDV2");
     const FAANGAsset = assets.filter((el) => el.id === "daoSTO");
     const metaverseAsset = assets.filter((el) => el.id === "daoMVF");
-    const daoStonksAsset = assets.filter((el) => el.id === "daoStonks");
+    const daoStonksAsset = assets.filter((el) => el.id === "daoSTO2");
     
     if (happyHourWeb3) {
       // Initialize Contract
