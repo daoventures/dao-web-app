@@ -19,6 +19,8 @@ import { CONFIRM_CLAIM_DVD,
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import CloseIcon from "@material-ui/icons/Close";
 import Celebrate from '../../assets/img_new/vaults/celebrate.svg';
+import DAOventures from '../../assets/img_new/airdrop/DAOventures.svg';
+import WrappedGift from "../../assets/img_new/airdrop/wrapped-gift.svg";
 
 const emitter = Store.emitter;
 const dispatcher = Store.dispatcher;
@@ -290,7 +292,7 @@ class AirDrop extends Component {
             <div className={`${classes.flexCenter} ${classes.flexColumn} ${classes.claimInProgressContainer}`}>
                 <div className={`${classes.progressIconContainer}`}>
                     { (isAllDVDBeingClaimed || isUserClaimedDVDBefore || !isClaimInProgress) &&
-                        <img className={classes.logo} src={require('../../assets/DAO-logo.png')} style={{width: "65px", height: "75px"}} alt="" /> 
+                        <img className={classes.logo} src={DAOventures} style={{width: "65px", height: "75px"}} alt="" /> 
                     }
                     { isClaimInProgress && <CircularProgress color="#FFFFFF" size="60px" />}
                 </div>
@@ -365,9 +367,9 @@ class AirDrop extends Component {
                     {/**  All DVD being Claimed */}
                     { isAllDVDBeingClaimed &&
                         <div className={`${classes.flexCenter} ${classes.flexRow}`}>
-                            <img className={classes.celebrateSVG} src={Celebrate} alt=""/>
+                            <img className={classes.celebrateSVG} src={WrappedGift} alt=""/>
                             <Typography variant={"h4"}>Come back later for more rewards :)</Typography>
-                            <img className={classes.celebrateSVG} src={Celebrate} alt=""/>
+                            <img className={classes.celebrateSVG} src={WrappedGift} alt=""/>
                         </div> 
                     }
                 </div>
@@ -462,7 +464,7 @@ class AirDrop extends Component {
        
         return <div className={`${classes.flexCenter} ${classes.flexColumn} ${classes.airDropContainer}`}>
             <div>
-                <img className={classes.logo} src={require('../../assets/DAO-logo.png')} alt="" />
+                <img className={classes.logo} src={DAOventures} alt="" />
             </div>
             <div className={`${classes.flexCenter} ${classes.flexRow}`}>
                 <img className={classes.celebrateSVG} src={Celebrate} alt=""/>
