@@ -1715,8 +1715,7 @@ class Store {
       _promises.push(this._getBalances(web3, asset, account, () => {}));
 
       let assetApiData = assetApiInfo.data[asset.id] ? assetApiInfo.data[asset.id]: {};
-      console.log(assetApiInfo);
-
+    
       let data = await Promise.all(_promises);
 
       let newAssetKeys = {
@@ -1745,7 +1744,6 @@ class Store {
         ...newAssetKeys
       }
       assets[i] = asset;
-      console.log(`asset ${asset.symbol}`, asset);
       store.setStore({ vaultAssets: assets });
 
       emitter.emit(STRATEGY_BALANCES_FULL_RETURNED, assets);
