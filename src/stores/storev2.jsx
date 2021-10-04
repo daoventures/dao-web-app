@@ -9,6 +9,9 @@ import {
   DAOMINE_POOL_RETURNED_COMPLETED,
   APPROVE_DEPOSIT_CONTRACT,
   CONFIRM_DEPOSIT_CONTRACT,
+  CONFIRM_CLAIM_DVD,
+  CLAIM_DVD_HASH,
+  CLAIM_DVD_SUCCESS,
   DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED,
   DEPOSIT_CONTRACT_RETURNED,
   DEPOSIT_CONTRACT_RETURNED_COMPLETED,
@@ -63,7 +66,8 @@ import {
   YIELD_DAOMINE_RETURNED_COMPLETED,
   APPROVE_DEPOSIT_SUCCESS,
   ERROR_WALLET_APPROVAL,
-  ERROR_DEPOSIT_WALLET
+  ERROR_DEPOSIT_WALLET,
+  CLAIM_DVD_ERROR
 } from "../constants/constants";
 
 import Ethereum from "./config/ethereum";
@@ -79,6 +83,7 @@ import { injected } from "./connectors";
 
 import contractHelper from './helper/contractHelper';
 import tokenPriceMinHelper from './helper/tokenPriceMinHelper';
+import apiHelper from "./helper/apiHelper";
 
 const rp = require("request-promise");
 
@@ -372,6 +377,9 @@ class Store {
           case YIELD_DAOMINE:
             this.yieldDAOmine(payload);
             break;
+          case CONFIRM_CLAIM_DVD:
+            this.claimTokens();
+            break;
           default: {
           }
         }
@@ -417,6 +425,8 @@ class Store {
         },
         swapAddress: "0x61FfA596ABBbA47fE6014bDa91F894B2Dae6dE05",
         swapContractAbi: config.upgradeContractAbi,
+        airdropAddress: "",
+        airdropABI: config.airdropABI
       },
       42: {
         dvg: {
@@ -431,6 +441,8 @@ class Store {
         },
         swapAddress: "0xC314f6527DAC85AcdfE222Cb410133aB6fc09009",
         swapContractAbi: config.upgradeContractAbi,
+        airdropAddress: "0xBcf5ceF54bCa1b0591eE487bac567E7182bf8c7d",
+        airdropABI: config.airdropABI
       },
     };
 
@@ -443,6 +455,16 @@ class Store {
     const upgradeToken = network
       ? upgradeTokenObj[network]
       : upgradeTokenObj[1];
+
+    let airdrop = null;
+    const supportedNetwork = [NETWORK.ETHEREUM, NETWORK.KOVAN];
+    if(supportedNetwork.includes(network)) {
+      airdrop = {
+        address: upgradeToken.airdropAddress,
+        abi: upgradeToken.airdropABI
+      };
+    }
+   
 
     let dvgObj = { xDVG: "", xDVD: "", dvg: "", dvd: "" };
     if (network === 1) {
@@ -498,6 +520,7 @@ class Store {
         },
       ],
       upgradeToken,
+      airdrop
     };
   };
 
@@ -3022,6 +3045,128 @@ class Store {
       );
     }
   };
+
+  _getAirdropInfo = async(address) => {
+    try {
+      const network = store.getStore("network");
+      const airdropContractInfo = this._getDefaultValues(network).airdrop;
+      const airdropAddress = airdropContractInfo.address;
+   
+      const result = await apiHelper.getAirDropInfo(address, airdropAddress);
+      this.setStore({ airdropInfo: result.result.info });
+      console.log(`get airdrop info: `, this.getStore("airdropInfo"));
+      return result;
+    } catch(err) {
+      console.error(`Error in _getAirdropInfo(): `, err);
+    }
+  } 
+
+  checkIsAllDVDBeingClaimed = async() => {
+    let isAllDVDBeingClaimed = true;
+
+    try {
+      const network = store.getStore("network");
+      if(!network || network === undefined) {
+        throw new Error(`Missing network`);
+      }
+
+      const web3 = await this._getWeb3Provider();
+      if(!web3 || web3 === undefined) {
+        throw new Error(`Missing web 3`);
+      } 
+     
+      const dvdContractInfo = this._getDefaultValues(network).dvg[1];
+      const airdropContractInfo = this._getDefaultValues(network).airdrop;
+
+      const dvdContract = contractHelper.getContract(web3, dvdContractInfo.abi, dvdContractInfo.erc20address);
+      
+      const dvdBalanceOfAirdropContract = await dvdContract.methods.balanceOf(airdropContractInfo.address).call();
+     
+      // If there's remaining amount of DVD
+      if(parseFloat(dvdBalanceOfAirdropContract) > 0) {
+        isAllDVDBeingClaimed = false;
+      }
+    } catch (err) {
+      console.error(`Error in checkIsAllDVDBeingClaimed(): `, err);
+    } finally {
+      return isAllDVDBeingClaimed;
+    }
+  }
+
+  processedAirdrops = async() => {
+    let isClaimed = false;
+
+    try {
+      const web3 = await this._getWeb3Provider();
+      if(!web3 || web3 === undefined) {
+        throw new Error(`Missing web 3`);
+      }
+  
+      const account = store.getStore("account");
+      if(!account || account === undefined) {
+        throw new Error(`Missing account`);
+      }
+
+      const network = store.getStore("network");
+      const supportedNetwork = [ NETWORK.ETHEREUM, NETWORK.KOVAN ];
+
+      if(!network || network === undefined) {
+        throw new Error(`Missing network`);
+      }
+      if(!supportedNetwork.includes(network)) {
+        throw new Error(`Network not supported`);
+      }
+
+      const { address , abi } = this._getDefaultValues(network).airdrop;
+      const contract = await contractHelper.getContract(web3, abi, address);
+
+      isClaimed = await contract.methods.processedAirdrops(account.address).call();
+    } catch (err) {
+      console.error(`Error in processedAirdrops(): `, err);
+    } finally {
+      return isClaimed;
+    }
+  }
+
+  claimTokens = async() => {
+    const network = store.getStore("network");
+    const account = store.getStore("account");
+
+    const airdropContractInfo = this._getDefaultValues(network).airdrop;
+
+    if(!account || !account.address) {
+      return false;
+    }
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      return null;
+    }
+
+    const contract = new web3.eth.Contract(
+      airdropContractInfo.abi,
+      airdropContractInfo.address
+    );
+    
+    const airdropInfo = store.getStore("airdropInfo");
+    const { amount, signature, address } = airdropInfo;
+
+    await contract.methods.claimTokens(address, amount, signature)
+    .send({
+      from: account.address,
+      gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei")
+    })
+    .on("transactionHash", function(transactionHash) {
+      console.log(`Transaction hash produced`);
+      return emitter.emit(CLAIM_DVD_HASH, transactionHash);
+    })
+    .on("receipt", function(receipt) {
+      console.log(`Receipt for claim DVD Token`, receipt);
+      return emitter.emit(CLAIM_DVD_SUCCESS, receipt.transactionHash);
+    })
+    .on("error", function(error) {
+      return emitter.emit(CLAIM_DVD_ERROR, error.message);
+    })
+  }
 }
 
 var store = new Store();

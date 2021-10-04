@@ -208,6 +208,8 @@ export const DISABLE_ACTION_BUTTONS_RETURNED = "DISABLE_ACTION_BUTTONS_RETURNED"
 // Pending Rewards section
 export const EARLY_HARVEST_PENALTY = "50";
 
+export const DVD_AIRDROP = "DVD_AIRDROP";
+
 export const NETWORK = {
   ETHEREUM: 1,
   KOVAN: 42,
@@ -220,3 +222,9 @@ export const STRATEGIES_USE_TOKEN_INDEX = [
   "elon",
   "cuban"
 ];
+
+// Airdrop
+export const CONFIRM_CLAIM_DVD = "Confirm Claim DVD";
+export const CLAIM_DVD_HASH = "Claim DVD Success";
+export const CLAIM_DVD_SUCCESS = "Claim DVD Success Returned";
+export const CLAIM_DVD_ERROR = "Claim DVD Error";

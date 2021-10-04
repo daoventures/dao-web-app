@@ -19,28 +19,29 @@ import {
     CHANGE_NETWORK,
     CONNECTION_CONNECTED,
     GET_VAULT_INFO,
+    NETWORK,
+    CLAIM_DVD_HASH,
+    CLAIM_DVD_SUCCESS,
+    CLAIM_DVD_ERROR
 } from "../../constants/constants";
 import {
     INVEST_PATH,
     STAKE_PATH_DVD,
     STAKE_PATH_DVG,
     INVEST,
-    SWAP_PATH,
-    SWAP,
     DAOMINE_PATH,
-    PORTFOLIO,
-    PORTFOLIO_PATH,
     UPGPRADE,
     UPGPRADE_PATH,
 } from "../../constants/page-constant";
 import {drawerWidth} from "../../theme/theme";
-import ToggleTheme from "../toggleTheme";
 
 import copy from "copy-to-clipboard";
 import Snackbar from "../snackbar";
 
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
+
+import Airdrop from "../air-drop/airdrop";
 
 const emitter = Store.emitter;
 const dispatcher = Store.dispatcher;
@@ -354,6 +355,9 @@ class SideDrawer extends Component {
                 },
             ],
             open: false,
+            showAirDrop: false,
+            airdropInfo: null,
+            airdropSupportedNetwork: [NETWORK.ETHEREUM, NETWORK.KOVAN]
         };
     }
 
@@ -362,6 +366,9 @@ class SideDrawer extends Component {
         emitter.on(DRAWER_RETURNED, this.toggleDrawer);
         this.resize();
         this.getTotalTVL();
+        emitter.on(CLAIM_DVD_HASH, this.handleClaim);
+        emitter.on(CLAIM_DVD_SUCCESS, this.handleSuccessClaim);
+        emitter.on(CLAIM_DVD_ERROR, this.handleErrorClaim);
     }
 
     componentWillMount() {
@@ -377,6 +384,40 @@ class SideDrawer extends Component {
         emitter.removeListener(CURRENT_THEME_RETURNED, this.currentThemeChanged);
         emitter.removeListener(CHANGE_NETWORK, this.networkChanged);
         emitter.removeListener(CONNECTION_CONNECTED, this.connectionConnected);
+        emitter.removeListener(CLAIM_DVD_HASH, this.handleClaim);
+        emitter.removeListener(CLAIM_DVD_SUCCESS, this.handleSuccessClaim);
+        emitter.removeListener(CLAIM_DVD_ERROR, this.handleErrorClaim);
+    }
+
+    handleClaim = (txnHash) => {
+        const snackbarObj = { snackbarMessage: null, snackbarType: null };
+        this.setState(snackbarObj);
+        const that = this;
+        setTimeout(() => {
+            const snackbarObj = { snackbarMessage: txnHash, snackbarType: "Hash" };
+            that.setState(snackbarObj);
+        });
+    }
+
+    handleSuccessClaim = (txnHash) => {
+        const snackbarObj = { snackbarMessage: null, snackbarType: null };
+        this.setState(snackbarObj);
+        const that = this;
+        setTimeout(() => {
+            const snackbarObj = { snackbarMessage: txnHash, snackbarType: "Transaction Success",};
+            that.setState(snackbarObj);
+        });
+    }
+
+    handleErrorClaim = (error) => {
+        const snackbarObj = { snackbarMessage: null, snackbarType: null };
+        this.setState(snackbarObj);
+        const errorMessage = typeof error === "string" ? error : error.message;
+        const that = this;
+        setTimeout(() => {
+            const snackbarObj = { snackbarMessage: errorMessage, snackbarType: "Error",};
+            that.setState(snackbarObj);
+        });
     }
 
     getTotalTVL = async () => {
@@ -384,6 +425,38 @@ class SideDrawer extends Component {
         this.setState({
             totalValue: (tvlResult.success) ? parseFloat(tvlResult.tvl).toFixed(2) : `0`
         });
+    }
+
+    getAirdropInfo = async(address) => {
+        const network = store.getStore("network");
+       
+        if(!this.state.airdropSupportedNetwork.includes(network)) {
+            this.setState({showAirDrop: false});
+            return;
+        }
+
+        const airdropInfoResponse = await store._getAirdropInfo(address);
+     
+        if(airdropInfoResponse && airdropInfoResponse.success) {
+            const airdropInfo = airdropInfoResponse.result.info;
+            const ongoingEvent = airdropInfoResponse.result.active;
+        
+            // No ongoing airdrop event, or user address not found
+            if(!ongoingEvent || (ongoingEvent && airdropInfo === null)) {
+                this.setState({showAirDrop: false});
+                return;
+            }
+
+            this.setState({
+                showAirDrop: true,
+                airdropInfo
+            });
+        } else {
+            this.setState({
+                showAirDrop: false,
+                airdropInfo: null
+            });
+        }
     }
 
     resize() {
@@ -394,8 +467,10 @@ class SideDrawer extends Component {
     }
 
     networkChanged = (obj) => {
+        const showAirDrop = this.state.airdropSupportedNetwork.includes(obj.network);
         this.setState({
             currentNetwork: obj.network,
+            showAirDrop: showAirDrop
         });
     };
 
@@ -414,6 +489,7 @@ class SideDrawer extends Component {
         this.setState({
             currentAddress: account.address,
         });
+        this.getAirdropInfo(this.state.currentAddress);
     };
 
     render() {
@@ -624,7 +700,7 @@ class SideDrawer extends Component {
     };
 
     renderDrawer = () => {
-        const {snackbarMessage, listItem} = this.state;
+        const {snackbarMessage, listItem, airdropInfo} = this.state;
         const {classes, match: {path}} = this.props;
 
         const {hideNav} = this.state;
@@ -683,7 +759,15 @@ class SideDrawer extends Component {
                                 : null}
                         </List>
                     </div>
-
+                    
+                    {/** Airdrop */}
+                    {
+                        (this.state.showAirDrop && this.state.airdropInfo) &&
+                        <div className={classes.accountInfoBlock}>
+                            <Airdrop info={airdropInfo}/>
+                        </div>
+                    }
+                   
                     {/** Footer */}
                     {this.renderFooterMenu(false)}
                     {snackbarMessage && this.renderSnackbar()}
@@ -826,6 +910,9 @@ class SideDrawer extends Component {
                             })
                             : null}
                     </List>
+
+                    {/** Airdrop */}
+                    <Airdrop/>
 
                     {/* *Footer */}
                     {this.renderFooterMenu(true)}
