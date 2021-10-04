@@ -44,7 +44,7 @@ class TokenPriceMinHelper {
                 const tokenPair = tokensPairs[i];
                 let { amount, decimal, pairs } = tokenPair;
                 
-                if(i === 0 && contractType === "citadelv2") {
+                if(i === 0 && (contractType === "citadelv2" || contractType === "daoTA")) {
                     pairs.push(erc20Address);
                 }
 

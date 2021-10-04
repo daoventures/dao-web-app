@@ -17,6 +17,9 @@ const  mAMZNAddr = "0x0cae9e4d663793c2a2A0b211c1Cf4bBca2B9cAa7";
 const  mAAPLAddr = "0xd36932143F6eBDEDD872D5Fb0651f4B72Fd15a84";
 const  mNFLXAddr = "0xC8d674114bac90148d11D3C1d33C61835a0F9DCD";
 
+// DAO TA
+const USDCAddr = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
+
 const tokensMinInfo = {
     citadelv2: {
         routerAddress: "0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F",
@@ -39,6 +42,15 @@ const tokensMinInfo = {
             { amount: 1, decimal: 18, pairs:[mAMZNAddr, USTAddr]},
             { amount: 1, decimal: 18, pairs:[mAAPLAddr, USTAddr]},
             { amount: 1, decimal: 18, pairs:[mNFLXAddr, USTAddr]},
+        ]
+    },
+    daoTA: {
+        routerAddress: "0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F",
+        abi: config.uniswapV2RouterABI,
+        tokens: [
+            { amount: 1, decimal: 18, pairs:[WETHAddr]}, // ETH <-> Stablecoins for withdraw
+            { amount: 1, decimal: 8, pairs:[WBTCAddr, WETHAddr]},
+            { amount: 1, decimal: 6, pairs:[USDCAddr, WETHAddr]},
         ]
     }
 };
