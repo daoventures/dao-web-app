@@ -208,7 +208,7 @@ const kovan = [
       "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
     ],
     erc20address: "0x07de306ff27a2b630b1141956844eb1552b956b5",
-    vaultContractAddress: "0x7739933d775bf2ed5eaec76bc61c581a82e25b0c",
+    vaultContractAddress: "0xb8e43526D2FEE347F88E690ee86d047895472D04",
     vaultContractABI: config.vaultDAOSTO2ContractABI,
     balance: 0,
     balances: [0, 0, 0],
