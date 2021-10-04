@@ -214,3 +214,9 @@ export const NETWORK = {
   MATIC: 137,
   MUMBAI: 80001,
 }
+
+export const STRATEGIES_USE_TOKEN_INDEX = [
+  "citadel",
+  "elon",
+  "cuban"
+];

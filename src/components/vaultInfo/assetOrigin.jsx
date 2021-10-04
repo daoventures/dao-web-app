@@ -23,7 +23,7 @@ import {
 import { colors } from '../../theme'
 import { getTheme } from '../../theme';
 import * as moment from 'moment';
-import Store from "../../stores";
+import Store from "../../stores/storev2";
 import HighchartsReact from "highcharts-react-official";
 import Highcharts from 'highcharts';
 import InfoIcon from '@material-ui/icons/Info';

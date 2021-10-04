@@ -37,7 +37,7 @@ const matic = [
         strategyInfo: "A stablecoin farming strategy to compound more stablecoins.",
         strategyDescription: "A strategy to compound dollars, to ensure minimal portfolio volatility but a decent yield for uncertain times.",
         historicalPriceId: "daoMPT_price",
-        logoFormat: "svg",
+        logoFormat: "png",
         risk: ADVANCE,
         strategyType: "moneyPrinter",
         cTokenAddress: "",

@@ -15,7 +15,7 @@ import _ from 'lodash';
 // blocknative测试
 import {initOnboard} from '../../../walletsServices.js';
 
-import Store from "../../../stores";
+import Store from "../../../stores/storev2";
 import UnlockModal from "../../unlock/unlockModal";
 const emitter = Store.emitter
 const dispatcher = Store.dispatcher

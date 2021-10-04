@@ -22,7 +22,7 @@ import React, { Component } from "react";
 
 import ENS from "ethjs-ens";
 import HappyHourTimer from "../happyHourTimer";
-import Store from "../../stores";
+import Store from "../../stores/storev2";
 import ToggleTheme from "../toggleTheme";
 import UnlockModal from "../unlock/unlockModal.jsx";
 import { colors } from "../../theme";
