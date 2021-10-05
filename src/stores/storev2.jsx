@@ -1506,7 +1506,7 @@ class Store {
     const amountToSend = fromExponential(parseFloat(amount));
 
     let functionCall;
-    if(asset.strategyType === "citadelv2" || asset.strategyType === "daoStonks") {
+    if(asset.strategyType === "citadelv2" || asset.strategyType === "daoStonks" || asset.strategyType === "daoDegen") {
       const tokenMinPrice = await this.getTokenPriceMin(token, asset.strategyType);
       functionCall = vaultContract.methods
         .withdraw(amountToSend, token, tokenMinPrice);
@@ -1556,7 +1556,11 @@ class Store {
       let tokenPriceMin = [];
 
       const network = store.getStore("network");
-      if(network !== NETWORK.ETHEREUM) {
+      const supportedNetwork = [
+        NETWORK.BSCMAINNET,
+        NETWORK.ETHEREUM
+      ];
+      if(!supportedNetwork.includes(network)) {
         return tokenPriceMin;
       }
       const web3 = new Web3(store.getStore("web3context").library.provider);
