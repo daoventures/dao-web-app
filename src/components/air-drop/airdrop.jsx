@@ -395,7 +395,7 @@ class AirDrop extends Component {
                 </Typography>
 
                 <div className={classes.claimDVDLinkContainer}>
-                    <a className={classes.claimDVDLink} href="https://daoventures.gitbook.io/daoventures/daoventures-governance" target="_blank" rel="noopener noreferrer">Read more about DVD</a>
+                    <a className={classes.claimDVDLink} href="https://daoventures.gitbook.io/daoventures/daoventures-governance/daovip" target="_blank" rel="noopener noreferrer">Read more about DVD</a>
                 </div>
 
                 <div className={classes.flexCenter}>
