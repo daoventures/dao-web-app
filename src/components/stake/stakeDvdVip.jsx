@@ -1006,7 +1006,7 @@ class StakeDvdVip extends Component {
             </Button>
         );
 
-        return <React.Fragment>{stakeButton}{stakeWithAutoCompoundButton}</React.Fragment>
+        return <React.Fragment>{stakeButton}</React.Fragment>
     }
 
     render() {

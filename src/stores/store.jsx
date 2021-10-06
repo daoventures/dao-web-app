@@ -5308,6 +5308,7 @@ class Store {
         ? asset.erc20addresses[tokenIndex]
         : tokenIndex;
 
+    console.log(vaultContract);
     let tx = vaultContract.methods.deposit(amountToSend, tokenToSent).send({
       from: account.address,
       signatureType: "EIP712_SIGN",
@@ -8622,7 +8623,7 @@ class Store {
     }
 
     await vipTokenContract.methods
-      .deposit(amount, autoCompound)
+      .deposit(amount)
       .send({
         from: account.address,
       })

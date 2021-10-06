@@ -107,11 +107,12 @@ class ConnectBiconomy extends Component {
 
     // This web3 instance is used to read normally and write to contract via meta transactions.
     const happyHourWeb3 = new Web3(happyHourbiconomy);
-
     // const erc20PaymentWeb3 = new Web3(erc20Paymentbiconomy);
 
     happyHourbiconomy
       .onEvent(happyHourbiconomy.READY, () => {
+        console.log('ready');
+
         // Initialize your dapp here like getting user accounts etc
         dispatcher.dispatch({
           type: BICONOMY_CONNECTED,
@@ -120,8 +121,9 @@ class ConnectBiconomy extends Component {
           },
         });
       })
-      .onEvent(happyHourbiconomy.ERROR, () => {
+      .onEvent(happyHourbiconomy.ERROR, (ex) => {
         // Handle error while initializing mexa
+        console.log('error', ex);
       });
 
     // erc20Paymentbiconomy
