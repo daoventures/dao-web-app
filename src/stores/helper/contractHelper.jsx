@@ -13,6 +13,8 @@ class ContractHelper {
       return config.erc20ABI;
     } else if (network === NETWORK.MATIC || network === NETWORK.MUMBAI) {
       return config.polygonERC20Abi;
+    } else if (network === NETWORK.BSCTEST || network === NETWORK.BSCMAINNET) {
+      return config.bscERC20Abi;
     }
   }
 
