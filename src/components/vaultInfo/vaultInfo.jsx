@@ -1190,7 +1190,7 @@ class Vault extends Component {
                                         {Number(asset.daomineApy)
                                             .toFixed(2)
                                             .toString()
-                                            .replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")}
+                                            .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                                         {"%"}
                                     </Typography>
                                 </div>

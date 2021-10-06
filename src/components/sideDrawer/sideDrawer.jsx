@@ -607,7 +607,7 @@ class SideDrawer extends Component {
                             Total Value Locked
                         </div>
                         <div className={classes.totalValueRightNum}>
-                            $ {this.state.totalValue.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")}
+                            $ {this.state.totalValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                         </div>
                     </div>
                 </div>
