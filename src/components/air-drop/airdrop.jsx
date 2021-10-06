@@ -46,15 +46,22 @@ const styles = (theme) => ({
     width40: {
         width: "40%"
     },
+    marginLeft10: {
+        marginLeft: "5px"
+    },
     airDropContainer: {
         width: "100%",
         color: "#ffffff",
-        background: "linear-gradient(141.11deg, #1D0D48 6.13%, rgba(111, 79, 199, 0.503561) 47.59%, rgba(144, 126, 194, 0) 89.65%)" 
+        background: "linear-gradient(144.77deg, #1D0D48 2.91%, #51369A 50.04%, #1A0456 97.84%)" 
     },
     logo: {
         width: '43px',
         height: '49px',
         margin: '15px'
+    },
+    logoTitle: {
+        width: '20px',
+        height: '20px'
     },
     celebrateSVG: {
         height: "17px",
@@ -89,7 +96,7 @@ const styles = (theme) => ({
     },
     dialogRoot: {
         border: "1px solid " + theme.themeColors.border,
-        background: "linear-gradient(144.77deg, #1D0D48 3.91%, rgba(111, 79, 199 , 0.9) 50.04%, rgba(144, 126, 194, 0) 150.84%)",
+        background: "linear-gradient(144.77deg, #1D0D48 2.91%, #51369A 50.04%, #1A0456 97.84%)",
         color: "#ffffff",
     },
     dialogTitle: {
@@ -140,13 +147,16 @@ const styles = (theme) => ({
         marginTop: "40px"
     },
     grayText: {
-        color: theme.themeColors.textGray
+        color: "rgba(255,255,255,0.75)"
     },
     purpleText: {
         color: theme.themeColors.textP
     },
     whiteText: {
         color: theme.themeColors.textT
+    },
+    modalTitle: {
+        fontSize: "18px",
     }
 })
 
@@ -389,8 +399,8 @@ class AirDrop extends Component {
                     {this.getAirdropAmount()}
                 </Typography>
             </div>
-            <div className={`${classes.claimDVDContainer} ${classes.textGray}`}>
-                <Typography variant={"h5"}>
+            <div className={`${classes.claimDVDContainer} ${classes.grayText}`}>
+                <Typography variant={"body2"}>
                     As a member of DAOventures community you may claim DVD to be used for Voting and Governance.
                 </Typography>
 
@@ -403,7 +413,7 @@ class AirDrop extends Component {
                         disabled={disableButton}
                         onClick={()=> this.claimDVD()}>
                         <span className={classes.claimButtonText}>
-                            Claim DVD
+                            CLAIM DVD
                         </span>
                     </Button>
                 </div>
@@ -423,9 +433,14 @@ class AirDrop extends Component {
         // When user first entry, haven't start to claim DVD yet
         let titleTemplate; 
         if(!isClaimDVD) {
-            titleTemplate = <div>
-               Claim DVD
-            </div>
+            titleTemplate = (
+                <div className={`${classes.flexRow} ${classes.flexCenter}`}>
+                    <img className={classes.logoTitle} src={DAOventures} alt="" />
+                    <div className={`${classes.modalTitle} ${classes.marginLeft10}`}>
+                        CLAIM DVD 
+                    </div>
+                </div>
+            );
         }
         
         return (
