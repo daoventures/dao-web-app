@@ -681,15 +681,9 @@ class SideDrawer extends Component {
                 <Drawer
                     className={classes.drawer}
                     variant="permanent"
-                    classes={{
-                        paper: classes.drawerPaper,
-                        // paperAnchorLeft: classes.drawerLeft,
-                    }}
+                    classes={{paper: classes.drawerPaper}}
                     key={path}
-                    style={{
-                        WebkitScrollbarTrack:
-                            "'background-color': 'red','-webkit-border-radius': '2em','-moz-border-radius': '2em','border-radius': '2em'",
-                    }}
+                    style={{WebkitScrollbarTrack:"'background-color': 'red','-webkit-border-radius': '2em','-moz-border-radius': '2em','border-radius': '2em'",}}
                 >
                     {/**  DAOventures Logo */}
                     <div className={classes.logo} key={path}>
