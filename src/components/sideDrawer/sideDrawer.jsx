@@ -25,13 +25,9 @@ import {
     CLAIM_DVD_ERROR
 } from "../../constants/constants";
 import {
-    INVEST_PATH,
-    STAKE_PATH_DVD,
-    STAKE_PATH_DVG,
-    INVEST,
-    DAOMINE_PATH,
-    UPGPRADE,
-    UPGPRADE_PATH,
+    SIDE_MENU,
+    SOCIAL_MEDIAS,
+    SUB_MENU
 } from "../../constants/page-constant";
 import {drawerWidth} from "../../theme/theme";
 
@@ -146,7 +142,7 @@ const styles = (theme) => ({
         padding: "60px 20px 0px 20px",
     },
     paddingGitter: {
-        paddingLeft: "16px",
+        paddingLeft: "26px",
         paddingRight: "16px",
     },
     footerMenu: {
@@ -321,39 +317,9 @@ class SideDrawer extends Component {
             balance:
                 (store.getStore("account") && store.getStore("account").balance) || "",
             totalValue: "",
-            listItem: [
-                // {key: PORTFOLIO, name: "portfolio", path: PORTFOLIO_PATH, icon: "#iconmenu_porftfolio_nor_day"},
-                {
-                    key: INVEST,
-                    name: "invest",
-                    path: INVEST_PATH,
-                    icon: "#iconmenu_porftfolio_normal_nightbeifen1",
-                },
-                {
-                    key: "GROW",
-                    name: "stake",
-                    path: "",
-                    icon: "#iconmenu_stake_normal_night",
-                    open: false,
-                    childrens: [
-                        {key: "DAOmine", name: "daomine", path: DAOMINE_PATH},
-                        {key: "DAOvip (DVG)", name: "stake-dvg", path: STAKE_PATH_DVG},
-                        {key: "DAOvip (DVD)", name: "stake-dvd", path: STAKE_PATH_DVD},
-                    ],
-                },
-                // {
-                //     key: SWAP,
-                //     name: "swap",
-                //     path: SWAP_PATH,
-                //     icon: "#iconmenu_features_nor_night",
-                // },
-                {
-                    key: UPGPRADE,
-                    name: "upgrade",
-                    path: UPGPRADE_PATH,
-                    icon: "#iconmenu_revert",
-                },
-            ],
+            listItem: SIDE_MENU,
+            subMenus: SUB_MENU,
+            socialMedias: SOCIAL_MEDIAS,
             open: false,
             showAirDrop: false,
             airdropInfo: null,
@@ -505,6 +471,7 @@ class SideDrawer extends Component {
     };
 
     nav = (url) => {
+        console.log(`in this.nav ${url}`);
         window.open(url, "_blank");
     };
 
@@ -725,8 +692,7 @@ class SideDrawer extends Component {
                     }}
                 >
                     {/**  DAOventures Logo */}
-                    <div className={classes.logo} key={path}
-                    >
+                    <div className={classes.logo} key={path}>
                         <img
                             alt=""
                             src={
@@ -751,14 +717,13 @@ class SideDrawer extends Component {
                     <div className={classes.menuList}>
                         <List>
                             {listItem && listItem.length > 0
-                                ? listItem.map((item) => {
-                                    return item.childrens
-                                        ? this.renderChildrenListItem(item)
-                                        : this.renderNormalListItem(item);
-                                })
+                                ? listItem.map((item) => this.renderMenuListItem(item))
                                 : null}
                         </List>
                     </div>
+                    
+                    {/** SubMenu */}
+                    {this.renderSubmenu()}
                     
                     {/** Airdrop */}
                     {
@@ -776,113 +741,10 @@ class SideDrawer extends Component {
         );
     };
 
-    handleOpenMenu = (item) => {
-        const {listItem} = this.state;
-        listItem.forEach((i) => {
-            if (i.name === item.name) {
-                i.open = !item.open;
-            }
-        });
-        this.setState({listItem});
-    };
-
-    renderChildrenListItem = (item) => {
-        const {classes} = this.props;
-        return (
-            <React.Fragment    key={item.key}>
-                <ListItem
-                    button
-                    key={item.key}
-                    className={
-                        this.linkSelected(item.path) ? classes.selected : classes.menuItem
-                    }
-                    onClick={() => this.handleOpenMenu(item)}
-                >
-                    <ListItemIcon>
-                        <svg
-                            className={
-                                this.linkSelected(item.path)
-                                    ? classes.selectedSvg
-                                    : classes.menuSvg
-                            }
-                            aria-hidden="true"
-                        >
-                            <use xlinkHref={item.icon}></use>
-                        </svg>
-                    </ListItemIcon>
-                    <ListItemText primary={item.key}/>
-
-                    {item.open ? <ExpandLess/> : <ExpandMore/>}
-                </ListItem>
-
-                <Collapse in={item.open} timeout="auto" unmountOnExit>
-                    <List component="div" disablePadding>
-                        {item.childrens.map((c) => {
-                            return (
-                                <ListItem
-                                    button
-                                    key={c.key}
-                                    className={
-                                        window.location.pathname === item.path
-                                            ? classes.selected
-                                            : classes.menuItem
-                                    }
-                                    onClick={() => {
-                                        this.navInApp(c.name);
-                                    }}
-                                >
-                                    <ListItemText primary={c.key}/>
-                                </ListItem>
-                            );
-                        })}
-                    </List>
-                </Collapse>
-            </React.Fragment>
-        );
-    };
-
-    renderNormalListItem = (item) => {
-        const {classes} = this.props;
-        return (
-            <ListItem
-                button
-                key={item.key}
-                className={
-                    this.linkSelected(item.path) ? classes.selected : classes.menuItem
-                }
-                onClick={() => {
-                    this.navInApp(item.name);
-                }}
-            >
-                <ListItemIcon>
-                    <svg
-                        className={
-                            this.linkSelected(item.path)
-                                ? classes.selectedSvg
-                                : classes.menuSvg
-                        }
-                        aria-hidden="true"
-                    >
-                        <use xlinkHref={item.icon}></use>
-                    </svg>
-                </ListItemIcon>
-                <ListItemText primary={item.key}/>
-                {item && item.childrens ? (
-                    item.open ? (
-                        <ExpandLess/>
-                    ) : (
-                        <ExpandMore/>
-                    )
-                ) : null}
-            </ListItem>
-        );
-    };
-
     renderSideDrawer = () => {
         const {classes, match: {path}} = this.props;
-
-        const {listItem} = this.state;
-
+        const {listItem, airdropInfo} = this.state;
+    
         return (
             <Fragment key={path}>
                 <Drawer
@@ -896,24 +758,24 @@ class SideDrawer extends Component {
                 >
                     {/** Wallet information */}
                     {this.renderWalletInfo()}
-
+    
                     {/** Total Value Locked */}
                     {this.renderTotalValueLocked()}
-
+    
                     {/** Side Navigation Bar */}
                     <List>
                         {listItem && listItem.length > 0
-                            ? listItem.map((item) => {
-                                return item.childrens
-                                    ? this.renderChildrenListItem(item)
-                                    : this.renderNormalListItem(item);
-                            })
+                            ? listItem.map((item) => this.renderMenuListItem(item))
                             : null}
                     </List>
-
+    
+                    {this.renderSubmenu()}
+    
                     {/** Airdrop */}
-                    <Airdrop/>
-
+                    {(this.state.showAirDrop && this.state.airdropInfo) &&
+                        <Airdrop info={airdropInfo}/>
+                    }
+    
                     {/* *Footer */}
                     {this.renderFooterMenu(true)}
                 </Drawer>
@@ -921,85 +783,111 @@ class SideDrawer extends Component {
         );
     };
 
+    handleOpenMenu = (item) => {
+        const {listItem} = this.state;
+        listItem.forEach((i) => {
+            if (i.name === item.name) {
+                i.open = !item.open;
+            }
+        });
+        this.setState({listItem});
+    };
+
+    renderMenuListItem = (item) => {
+        const {classes} = this.props;
+        return (
+            <React.Fragment key={item.key}>
+                <ListItem
+                    button
+                    key={item.key}
+                    className={
+                        this.linkSelected(item.path) ? classes.selected : classes.menuItem
+                    }
+                    onClick={() => item.childrens 
+                        ? this.handleOpenMenu(item) 
+                        : (item.isExternalPath === true) 
+                            ? this.nav(item.path) 
+                            : this.navInApp(item.name)}
+                >
+                    <ListItemIcon style={{minWidth:"40px"}}>
+                        <svg
+                            className={
+                                this.linkSelected(item.path)
+                                    ? classes.selectedSvg
+                                    : classes.menuSvg
+                            }
+                            aria-hidden="true"
+                        >
+                            <use xlinkHref={item.icon}></use>
+                        </svg>
+                    </ListItemIcon>
+                    <ListItemText primary={item.key} />
+
+                    {(item.childrens) ? item.open ? <ExpandLess /> : <ExpandMore /> : null}
+                </ListItem>
+
+                {item.childrens && <Collapse in={item.open} timeout="auto" unmountOnExit>
+                    <List component="div" disablePadding>
+                        {item.childrens.map((c) => {
+                            return (
+                                <ListItem
+                                    button
+                                    key={c.key}
+                                    className={
+                                        window.location.pathname === item.path
+                                            ? classes.selected
+                                            : classes.menuItem
+                                    }
+                                    onClick={() => {
+                                        (c.isExternalPath === true) ? this.nav(c.path) : this.navInApp(c.name);
+                                    }}
+                                >
+                                    <ListItemText primary={c.key} />
+                                </ListItem>
+                            );
+                        })}
+                    </List>
+                </Collapse>}
+            </React.Fragment>
+        );
+    };
+
+    renderSubmenu = () => {
+        const {classes} = this.props;
+        const {subMenus} = this.state;
+
+        return  <List className={classes.bottomLinkBox}>
+            {subMenus && subMenus.length > 0
+                ? subMenus.map((menu) => {
+                    return (
+                        <ListItem
+                            button
+                            key={menu.title}
+                            className={`${
+                                this.linkSelected(menu.link)
+                                    ? classes.selected
+                                    : classes.menuItem2
+                            } ${classes.bottomLink}`}
+                            onClick={() => {
+                                this.nav(menu.link);
+                            }}
+                        >
+                            <ListItemText primary={menu.title}/>
+                        </ListItem>
+                    );
+                })
+                : null}
+        </List>
+    }
+
     renderFooterMenu = (isMobile) => {
         const {classes} = this.props;
         const {hideNav} = this.state;
 
-        const subMenus = [
-            {
-                title: "Your Feedback",
-                path: "/user-feedback",
-                link: "http://feedback.daoventures.co/beta-product-v1",
-            },
-            {
-                title: "FAQ",
-                path: "/faq",
-                link: "https://daoventures.gitbook.io/daoventures/frequently-asked-question",
-            },
-            {
-                title: "About Us",
-                path: "/about-us",
-                link: "https://daoventures.co/about",
-            },
-        ];
-
-        const socialMedias = [
-            [
-                // {
-                //     icon: "#iconfacebook",
-                //     link: "https://www.facebook.com/DAOventuresCo/",
-                // },
-                {icon: "#icontwitter", link: "https://twitter.com/VenturesDao"},
-                // {
-                //     icon: "#iconlinked",
-                //     link: "https://www.linkedin.com/company/daoventuresco/",
-                // },
-                {icon: "#icondiscord", link: "https://discord.com/invite/UJaCPMkb6q"},
-                {icon: "#icontelegram", link: "https://t.me/DAOventures"},
-                // {icon: "#iconmedium", link: "https://daoventuresco.medium.com/"},
-            ],
-            [
-                // {icon: "#iconweixin1", link: ""},
-                // {icon: "#iconcoinMarketCap", link: "https://coinmarketcap.com/currencies/daoventures/"},
-                // {icon: "#iconcoingecko", link: "https://www.coingecko.com/en/coins/daoventures"},
-            ],
-            [
-                // {icon: "#iconreddit", link: "https://www.reddit.com/r/DAOVentures/"},
-
-                // {icon: "#iconemail", link: "mailto:support@daoventures.co"},
-                // {
-                //     icon: "#iconslack",
-                //     link: "https://join.slack.com/t/daoventures/shared_invite/zt-k4hmm44g-p5ME~5I~fm0pkfY2U8AUIw",
-                // },
-                // {icon: "#iconweibo", link: ""},
-            ],
-        ];
+        const socialMedias = SOCIAL_MEDIAS;
 
         return (
             <div className={isMobile ? classes.footerMenuH5 : classes.footerMenu}>
-                <List className={classes.bottomLinkBox}>
-                    {subMenus && subMenus.length > 0
-                        ? subMenus.map((menu) => {
-                            return (
-                                <ListItem
-                                    button
-                                    key={menu.title}
-                                    className={`${
-                                        this.linkSelected(menu.link)
-                                            ? classes.selected
-                                            : classes.menuItem2
-                                    } ${classes.bottomLink}`}
-                                    onClick={() => {
-                                        this.nav(menu.link);
-                                    }}
-                                >
-                                    <ListItemText primary={menu.title}/>
-                                </ListItem>
-                            );
-                        })
-                        : null}
-                </List>
-
                 {hideNav && (
                     <div style={{marginLeft: "20px", paddingBottom: "40px"}}>
                         {/*<ToggleTheme></ToggleTheme>*/}
