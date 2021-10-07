@@ -124,3 +124,14 @@ export const SOCIAL_MEDIAS = [
         // {icon: "#iconweibo", link: ""},
     ],
 ];
+
+export const AUDITORS = [
+    [
+        { name: "hacken", format: "svg"},
+        { name: "certik", format: "svg"},
+    ],
+    [
+        { name: "immunefi", format: "svg"},
+        { name: "zokyo", format: "svg"},
+    ]
+]

@@ -9,6 +9,7 @@ import {
     ListItemIcon,
     ListItemText,
     Collapse,
+    Typography,
 } from "@material-ui/core";
 
 import Store from "../../stores/storev2";
@@ -27,7 +28,8 @@ import {
 import {
     SIDE_MENU,
     SOCIAL_MEDIAS,
-    SUB_MENU
+    SUB_MENU,
+    AUDITORS
 } from "../../constants/page-constant";
 import {drawerWidth} from "../../theme/theme";
 
@@ -299,6 +301,21 @@ const styles = (theme) => ({
         justifyContent: "space-between",
         flexDirection: "column",
     },
+    flexCenter: {
+        display: "flex",
+        alignItems: "center"
+    },
+    purpleText: {
+        color: theme.themeColors.textP
+    },
+    justifyCenter: {
+        justifyContent:"center"
+    },
+    auditors: {
+        display: "flex",
+        justifyContent: "space-between",
+        margin: "5px 0px"
+    }
 });
 
 class SideDrawer extends Component {
@@ -874,6 +891,33 @@ class SideDrawer extends Component {
         </List>
     }
 
+    renderAuditor = () => {
+        const {classes} = this.props;
+
+        const auditors = AUDITORS;
+
+        return <div className={classes.accountInfoBlock}>
+            <div className={`${classes.flexCenter} ${classes.purpleText} ${classes.justifyCenter}`}>
+                <Typography variant={"h5"}>Audited By</Typography>
+            </div>
+            { auditors.map(row => {
+                return <div className={classes.auditors}>
+                    {
+                        row.map(r => {
+                            const imgLink = require(`../../assets/img_new/sidebar/auditor-${r.name}.${r.format}`);
+                            return  <img
+                                alt={r.name}
+                                src={imgLink}
+                                style={{width: "84px", height: "18px", margin: "10px" }}
+                            />
+                        })
+                    }
+                </div>
+             })
+            }
+        </div>
+    }
+
     renderFooterMenu = (isMobile) => {
         const {classes} = this.props;
         const {hideNav} = this.state;
@@ -887,6 +931,8 @@ class SideDrawer extends Component {
                         {/*<ToggleTheme></ToggleTheme>*/}
                     </div>
                 )}
+
+                {<div style={{marginBottom: "10px"}}>{this.renderAuditor()}</div>}
 
                 {/** Social Medias */}
                 {socialMedias &&
