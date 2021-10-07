@@ -1506,7 +1506,7 @@ class Store {
     const amountToSend = fromExponential(parseFloat(amount));
 
     let functionCall;
-    if(asset.strategyType === "citadelv2" || asset.strategyType === "daoStonks" || asset.strategyType === "daoDegen") {
+    if(asset.strategyType === "citadelv2" || asset.strategyType === "daoStonks" || asset.strategyType === "daoDegen" || asset.strategyType === "daoSafu") {
       const tokenMinPrice = await this.getTokenPriceMin(token, asset.strategyType);
       functionCall = vaultContract.methods
         .withdraw(amountToSend, token, tokenMinPrice);
@@ -1550,7 +1550,7 @@ class Store {
       });
   };
 
-  // For Citadel V2, DAO Stonks
+  // For Citadel V2, DAO Stonks, DAO Safu
   getTokenPriceMin = async(erc20Address, contractType) => {
     try {
       let tokenPriceMin = [];
@@ -1687,7 +1687,7 @@ class Store {
       if(strategies.includes(asset.strategyType)) {
         let amountRange3 = await vaultContract.methods.customNetworkFeeTier().call();
         let percentageRange4 = await vaultContract.methods.customNetworkFeePerc().call();
-        
+      
         if(amount < amountRange1) {
           return {
             feePercent: percentageRange1/100
@@ -1750,7 +1750,7 @@ class Store {
       _promises.push(this._getBalances(web3, asset, account, () => {}));
 
       let assetApiData = assetApiInfo.data[asset.id] ? assetApiInfo.data[asset.id]: {};
-
+    
       let data = await Promise.all(_promises);
 
       let newAssetKeys = {

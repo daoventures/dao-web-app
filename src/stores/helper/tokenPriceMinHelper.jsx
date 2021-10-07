@@ -19,11 +19,11 @@ class TokenPriceMinHelper {
         let tokenPriceMin = [];
         try {
             const supportedNetwork = [
-                NETWORK.BSCMAINNET,
-                NETWORK.ETHEREUM
-              ];
+                NETWORK.ETHEREUM,
+                NETWORK.BSCMAINNET
+            ]
             if(!supportedNetwork.includes(network)) {
-                return tokenPriceMin;
+                throw new Error(`Not in mainnet network`);
             }
             if(!web3 || web3 === undefined) {
                 throw new Error(`Missing web3`);
@@ -44,11 +44,17 @@ class TokenPriceMinHelper {
 
             const tokensPairs = tokensInfo.tokens;
 
+            const contractTypes = [
+                "citadelv2",
+                "daoSafu",
+                "daoDegen"
+            ];
+
             for(let i = 0; i < tokensPairs.length; i ++) {
                 const tokenPair = tokensPairs[i];
                 let { amount, decimal, pairs } = tokenPair;
                 
-                if(i === 0 && (contractType === "citadelv2" || contractType === "daoDegen")) {
+                if(i === 0 && contractTypes.includes(contractType)) {
                     pairs.push(erc20Address);
                 }
 
@@ -60,6 +66,7 @@ class TokenPriceMinHelper {
                 );
                 //console.log(`${magnifiedAmount}, price ${price[1]}, pairs`, pairs);
                
+
                 let priceMin = web3.utils.toBN(price[1]).muln(minPercentage).divn(100); 
                 if(priceMin === undefined) {
                     console.error(`Price Min is undefined for`, tokenPair.pairs);
@@ -71,7 +78,7 @@ class TokenPriceMinHelper {
         
           } catch (err) {
             console.error(`Error in getTokenPriceMin(), `, err);
-          } finally {
+          } finally{
             return tokenPriceMin;
           }
     }

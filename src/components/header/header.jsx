@@ -37,6 +37,7 @@ const networkObj = {
   1: "Ethereum",
   4: "Rinkeby",
   56: "Binance",
+  97: "Binance",
   42: "Kovan",
   80001: "Matic Testnet",
   137: "Polygon(Matic)"
@@ -462,6 +463,8 @@ class Header extends Component {
             {this.state.currentNetwork === 1 ||
             this.state.currentNetwork === 56 ||
             this.state.currentNetwork === 42 ||
+            this.state.currentNetwork === NETWORK.BSCTEST ||
+            this.state.currentNetwork === NETWORK.BSCMAINNET || 
             this.state.currentNetwork  === NETWORK.MUMBAI || 
             this.state.currentNetwork  === NETWORK.MATIC ? (
               <div className={classes.netWork}>
@@ -471,7 +474,7 @@ class Header extends Component {
                     <use xlinkHref="#iconETH"></use>
                   </svg>
                 ) : null}
-                {this.state.currentNetwork === 56 ? (
+                {this.state.currentNetwork === NETWORK.BSCMAINNET || this.state.currentNetwork === NETWORK.BSCTEST? (
                   <img
                     alt="bnb-icon"
                     src={require("../../assets/img_new/bnb-icon.png")}
