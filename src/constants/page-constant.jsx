@@ -71,7 +71,7 @@ export const SIDE_MENU = [
         name: "prediction_game",
         path: PREDICTION_GAME_PATH,
         isExternalPath: true,
-        icon: "#iconmenu_revert"
+        icon: "#iconmenu_game"
     }
 ];
 
