@@ -10,6 +10,14 @@ const APP_NAME = "DAOVentures"
 
 const wallets = [
   { walletName: "metamask" },
+  {
+    walletName: "walletConnect",
+    infuraKey: INFURA_KEY
+  },
+  {
+    walletName: 'ledger',
+    rpcUrl: RPC_URL
+  },
   { walletName: "coinbase"},
   { walletName: "trust", rpcUrl: RPC_URL},
   {
@@ -29,10 +37,6 @@ const wallets = [
     rpcUrl: RPC_URL
   },
   {
-    walletName: 'ledger',
-    rpcUrl: RPC_URL
-  },
-  {
     walletName: 'lattice',
     rpcUrl: RPC_URL,
     appName: APP_NAME
@@ -41,10 +45,6 @@ const wallets = [
     walletName: 'cobovault',
     rpcUrl: RPC_URL,
     appName: APP_NAME,
-  },
-  {
-    walletName: "walletConnect",
-    infuraKey: INFURA_KEY
   },
   { walletName: "opera" },
   { walletName: "operaTouch" },
