@@ -395,7 +395,7 @@ class AirDrop extends Component {
 
         const claimContent = <div className={`${classes.flexCenter} ${classes.flexColumn}`}>
             <div className={`${classes.h50} ${classes.padding30}`}>
-                <Typography variant={"h2"} className={`${classes.padding30}`}>
+                <Typography variant={"h1"} className={`${classes.padding30}`}>
                     {this.getAirdropAmount()}
                 </Typography>
             </div>
@@ -412,9 +412,7 @@ class AirDrop extends Component {
                     <Button className={`${classes.width40} ${classes.claimButton}`}
                         disabled={disableButton}
                         onClick={()=> this.claimDVD()}>
-                        <span className={classes.claimButtonText}>
-                            CLAIM DVD
-                        </span>
+                        <Typography variant={"body2"}>CLAIM DVD</Typography>
                     </Button>
                 </div>
             </div>
