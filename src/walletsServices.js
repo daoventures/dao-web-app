@@ -9,9 +9,18 @@ const RPC_URL = "https://main.infura.io/v3/83833d00ec5c4c6a858c199e83a5b411"
 const APP_NAME = "DAOVentures"
 
 const wallets = [
-  { walletName: "coinbase", preferred: true },
-  { walletName: "trust", preferred: true, rpcUrl: RPC_URL },
-  { walletName: "metamask", preferred: true },
+  { walletName: "metamask" },
+  { walletName: "coinbase"},
+  { walletName: "trust", rpcUrl: RPC_URL},
+  {
+    walletName: "fortmatic",
+    apiKey: FORTMATIC_KEY,
+  },
+  {
+    walletName: "portis",
+    apiKey: PORTIS_KEY,
+    label: 'Login with Email'
+  },
   { walletName: "authereum" },
   {
     walletName: 'trezor',
@@ -32,17 +41,6 @@ const wallets = [
     walletName: 'cobovault',
     rpcUrl: RPC_URL,
     appName: APP_NAME,
-  },
-  {
-    walletName: "fortmatic",
-    apiKey: FORTMATIC_KEY,
-    preferred: true
-  },
-  {
-    walletName: "portis",
-    apiKey: PORTIS_KEY,
-    preferred: true,
-    label: 'Login with Email'
   },
   {
     walletName: "walletConnect",
