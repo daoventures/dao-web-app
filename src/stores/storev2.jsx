@@ -1649,10 +1649,19 @@ class Store {
       let amountRange1 = await vaultContract.methods.networkFeeTier2(0).call();
       let amountRange2 = await vaultContract.methods.networkFeeTier2(1).call();
 
-      if(asset.strategyType === "metaverse" || asset.strategyType === "citadelv2" || asset.strategyType === "daoStonks") {
+      const strategies = [
+        "metaverse",
+        "citadelv2",
+        "daoStonks",
+        "daoSafu",
+        "daoTA",
+        "daoDegen"
+      ];
+
+      if(strategies.includes(asset.strategyType)) {
         let amountRange3 = await vaultContract.methods.customNetworkFeeTier().call();
         let percentageRange4 = await vaultContract.methods.customNetworkFeePerc().call();
-        
+      
         if(amount < amountRange1) {
           return {
             feePercent: percentageRange1/100
