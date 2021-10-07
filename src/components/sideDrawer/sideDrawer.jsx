@@ -881,7 +881,7 @@ class SideDrawer extends Component {
     renderSideDrawer = () => {
         const {classes, match: {path}} = this.props;
 
-        const {listItem} = this.state;
+        const {listItem, airdropInfo} = this.state;
 
         return (
             <Fragment key={path}>
@@ -912,8 +912,11 @@ class SideDrawer extends Component {
                     </List>
 
                     {/** Airdrop */}
-                    <Airdrop/>
-
+                    {
+                        (this.state.showAirDrop && this.state.airdropInfo) &&
+                        <Airdrop info={airdropInfo}/>
+                    }
+                    
                     {/* *Footer */}
                     {this.renderFooterMenu(true)}
                 </Drawer>
