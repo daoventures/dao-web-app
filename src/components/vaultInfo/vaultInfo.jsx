@@ -1125,7 +1125,7 @@ class Vault extends Component {
 
         return <React.Fragment>
             <Typography variant={"h5"} className={classes.assetLabel2}>
-                P30D PNL
+                RETURNS SINCE INCEPTION
             </Typography>
 
             <Typography variant={"h5"} className={classes.assetLabel1}>
