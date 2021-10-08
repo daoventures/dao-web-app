@@ -43,6 +43,9 @@ const styles = (theme) => ({
     padding30: {
         padding: "30px",
     },
+    marginTop30: {
+        marginTop: "30px"
+    },
     width40: {
         width: "40%"
     },
@@ -463,12 +466,9 @@ class AirDrop extends Component {
         const { openModal } = this.state;
        
         return <div className={`${classes.flexCenter} ${classes.flexColumn} ${classes.airDropContainer}`}>
-            <div>
-                <img className={classes.logo} src={DAOventures} alt="" />
-            </div>
-            <div className={`${classes.flexCenter} ${classes.flexRow}`}>
+            <div className={`${classes.flexCenter} ${classes.flexRow} ${classes.marginTop30}`}>
                 <img className={classes.celebrateSVG} src={Celebrate} alt=""/>
-                <Typography variant={"h4"}>
+                <Typography variant={"h3"}>
                    {this.getAirdropAmount()}
                 </Typography>
                 <img className={classes.celebrateSVG} src={Celebrate} alt=""/>
