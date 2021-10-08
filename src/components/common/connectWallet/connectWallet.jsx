@@ -266,8 +266,7 @@ class ConnectWallet extends Component {
           <div className={classes.connectWalletContainer}>
             <div>
               <Typography variant={'h2'} className={classes.welcomeText}>Welcome to DAOventures</Typography>
-              <Typography className={classes.titleDesc} variant={'body1'}>Connect an Ethereum wallet to manage and invest your DeFi portfolio</Typography>
-              <Typography variant='body1' className={classes.alertDesc}>Alert: The deposit into any of investment strategies will incur high gas fees due to Ethereum network</Typography>
+              <Typography className={classes.titleDesc} variant={'body1'}>Connect a wallet to invest and manage your DeFi portfolio</Typography>
               <div className={classes.buttonContainer}>
                 <Grid container className={classes.buttonGroup} onClick={this.addressClicked}>
                   {/* <Grid item sm={3} xs={3} className={classes.buttonIconContainer}>

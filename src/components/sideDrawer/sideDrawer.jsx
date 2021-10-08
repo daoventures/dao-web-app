@@ -315,6 +315,9 @@ const styles = (theme) => ({
         display: "flex",
         justifyContent: "space-between",
         margin: "5px 0px"
+    },
+    submenuLinks: {
+        fontSize: "12px"
     }
 });
 
@@ -733,9 +736,6 @@ class SideDrawer extends Component {
                         </List>
                     </div>
                     
-                    {/** SubMenu */}
-                    {this.renderSubmenu()}
-                    
                     {/** Airdrop */}
                     {
                         (this.state.showAirDrop && this.state.airdropInfo) &&
@@ -743,6 +743,9 @@ class SideDrawer extends Component {
                             <Airdrop info={airdropInfo}/>
                         </div>
                     }
+
+                    {/** SubMenu */}
+                    {this.renderSubmenu()}
                    
                     {/** Footer */}
                     {this.renderFooterMenu(false)}
@@ -780,12 +783,13 @@ class SideDrawer extends Component {
                             : null}
                     </List>
     
-                    {this.renderSubmenu()}
     
                     {/** Airdrop */}
                     {(this.state.showAirDrop && this.state.airdropInfo) &&
                         <Airdrop info={airdropInfo}/>
                     }
+
+                    {this.renderSubmenu()}
     
                     {/* *Footer */}
                     {this.renderFooterMenu(true)}
@@ -878,12 +882,12 @@ class SideDrawer extends Component {
                                 this.linkSelected(menu.link)
                                     ? classes.selected
                                     : classes.menuItem2
-                            } ${classes.bottomLink}`}
+                            } ${classes.bottomLink} ${classes.submenuLinks}`}
                             onClick={() => {
                                 this.nav(menu.link);
                             }}
                         >
-                            <ListItemText primary={menu.title}/>
+                            <ListItemText primary={<Typography type={"h2"} style={{fontSize: "12px"}}>{menu.title}</Typography>}/>
                         </ListItem>
                     );
                 })
