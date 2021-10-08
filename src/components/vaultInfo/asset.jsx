@@ -747,6 +747,10 @@ const styles = (theme) => ({
     },
     padding4Span: {
         padding: "4px"
+    },
+    infoLink: {
+        textDecoration: "none",
+        color: theme.themeColors.textT
     }
 });
 
@@ -1907,7 +1911,9 @@ class Asset extends Component {
                                         <StyledTableCell component="th" scope="row">
                                             <span className={classes.tokenColorKey}
                                                   style={{"backgroundColor": row.color}}>&nbsp;</span>
-                                            <span className={classes.strategyCellData}>{row.label}</span>
+                                            <a href={row.infoLink} target="_blank" rel="noopener noreferrer" className={classes.infoLink}>
+                                                <span className={classes.strategyCellData}>{row.label}</span>
+                                            </a>
                                         </StyledTableCell>
                                         <StyledTableCell align="left" className={classes.strategyCellData}>{row.percent.toFixed(2)} %</StyledTableCell>
                                         <StyledTableCell align="right"
