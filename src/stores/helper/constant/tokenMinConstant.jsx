@@ -31,6 +31,8 @@ const btcbBscAddress = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c"
 const wethBscAddress = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8"
 const bUSDBscAddress = "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56"
 const cakeBscAddress = "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82"
+// DAO TA
+const USDCAddr = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
 
 const tokensMinInfo = {
     citadelv2: {
@@ -78,6 +80,15 @@ const tokensMinInfo = {
             { amount: 1, decimal: 18, pairs:[wethBscAddress, wBNBBscAddr]},
             { amount: 1, decimal: 18, pairs:[bUSDBscAddress, wBNBBscAddr]},
             { amount: 1, decimal: 18, pairs:[cakeBscAddress, wBNBBscAddr]},
+        ]
+    },
+    daoTA: {
+        routerAddress: "0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F",
+        abi: config.uniswapV2RouterABI,
+        tokens: [
+            { amount: 1, decimal: 18, pairs:[WETHAddr]}, // ETH <-> Stablecoins for withdraw
+            { amount: 1, decimal: 8, pairs:[WBTCAddr, WETHAddr]},
+            { amount: 1, decimal: 6, pairs:[USDCAddr, WETHAddr]},
         ]
     }
 };

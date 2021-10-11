@@ -1037,7 +1037,8 @@ class Store {
         "citadelv2",
         "daoFaang",
         "daoStonks",
-        "metaverse"
+        "metaverse",
+        "daoTA"
       ];
 
       if(happyHourStrategy.includes(asset.strategyType)) {
@@ -1208,7 +1209,9 @@ class Store {
     } else if (asset.strategyType === "citadelv2") {
       vaultContract = store.getStore(" happyHourContractCitadelv2");
     } else if (asset.strategyType === "daoStonks") {
-      vaultContract = store.getStore("happyHourContractDAOStonks")
+      vaultContract = store.getStore("happyHourContractDAOStonks");
+    } else if (asset.strategyType === "daoTA") {
+      vaultContract = store.getStore("happyHourContractDAOTA");
     }
 
     const web3 = new Web3(store.getStore("web3context").library.provider);
@@ -1389,6 +1392,7 @@ class Store {
     const FAANGAsset = assets.filter((el) => el.id === "daoSTO");
     const metaverseAsset = assets.filter((el) => el.id === "daoMVF");
     const daoStonksAsset = assets.filter((el) => el.id === "daoSTO2");
+    const daoTAAsset = assets.filter((el) => el.id === "daoTAS");
     
     if (happyHourWeb3) {
       // Initialize Contract
@@ -1417,12 +1421,18 @@ class Store {
         daoStonksAsset[0].vaultContractAddress
       );
 
+      const happyHourContractDAOTA = new happyHourWeb3.eth.Contract(
+        daoTAAsset[0].vaultContractABI,
+        daoTAAsset[0].vaultContractAddress
+      );
+
       store.setStore({
         happyHourContract: happyHourContract,
         happyHourContractFAANG: happyHourContractFAANG,
         happyHourContractMetaverse: happyHourContractMetaverse,
         happyHourContractCitadelv2: happyHourContractCitadelv2,
-        happyHourContractDAOStonks: happyHourContractDAOStonks
+        happyHourContractDAOStonks: happyHourContractDAOStonks,
+        happyHourContractDAOTA: happyHourContractDAOTA
       });
     }
 
@@ -1506,7 +1516,7 @@ class Store {
     const amountToSend = fromExponential(parseFloat(amount));
 
     let functionCall;
-    if(asset.strategyType === "citadelv2" || asset.strategyType === "daoStonks" || asset.strategyType === "daoDegen" || asset.strategyType === "daoSafu") {
+    if(asset.strategyType === "citadelv2" || asset.strategyType === "daoStonks" || asset.strategyType === "daoDegen" || asset.strategyType === "daoSafu" || asset.strategyType === "daoTA") {
       const tokenMinPrice = await this.getTokenPriceMin(token, asset.strategyType);
       functionCall = vaultContract.methods
         .withdraw(amountToSend, token, tokenMinPrice);
