@@ -17,6 +17,14 @@ const  mAMZNAddr = "0x0cae9e4d663793c2a2A0b211c1Cf4bBca2B9cAa7";
 const  mAAPLAddr = "0xd36932143F6eBDEDD872D5Fb0651f4B72Fd15a84";
 const  mNFLXAddr = "0xC8d674114bac90148d11D3C1d33C61835a0F9DCD";
 
+// DAO Degen
+const wBNBAddr = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
+const alpacaAddress = "0x8F0528cE5eF7B51152A59745bEfDD91D97091d2F";
+const xvsAddress = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
+const bUSDAddress = "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56";
+const beltAddress = "0xE0e514c71282b6f4e823703a39374Cf58dc3eA4f";
+const chessAddress = "0x20de22029ab63cf9A7Cf5fEB2b737Ca1eE4c82A6";
+const usdcAddress = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 // DAO Safu
 const wBNBBscAddr = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"
 const btcbBscAddress = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c"
@@ -46,6 +54,19 @@ const tokensMinInfo = {
             { amount: 1, decimal: 18, pairs:[mAMZNAddr, USTAddr]},
             { amount: 1, decimal: 18, pairs:[mAAPLAddr, USTAddr]},
             { amount: 1, decimal: 18, pairs:[mNFLXAddr, USTAddr]},
+        ]
+    },
+    daoDegen: {
+        routerAddress: "0x10ED43C718714eb63d5aA57B78B54704E256024E",
+        abi: config.uniswapV2RouterABI,
+        tokens: [
+            { amount: 1, decimal: 18, pairs:[wBNBAddr]},
+            { amount: 1, decimal: 18, pairs:[bUSDAddress, wBNBAddr]},
+            { amount: 1, decimal: 18, pairs:[usdcAddress, wBNBAddr]},
+            { amount: 1, decimal: 18, pairs:[alpacaAddress, wBNBAddr]},
+            { amount: 1, decimal: 18, pairs:[xvsAddress, wBNBAddr]},
+            { amount: 1, decimal: 18, pairs:[beltAddress, wBNBAddr]},
+            { amount: 1, decimal: 18, pairs:[chessAddress, wBNBAddr]},
         ]
     },
     daoSafu : {

@@ -849,11 +849,14 @@ class Store {
         pool = pool * 10 ** 12;
       }
       const totalSupply = await vaultContract.methods.totalSupply().call();
-      const pricePerFullShareInUSD = pool / totalSupply;
-
+      const pricePerFullShareInUSD = (parseFloat(pool) === 0 || parseFloat(totalSupply) === 0) 
+        ? 0
+        : pool / totalSupply;
+    
       const depositedShares = await vaultContract.methods
         .balanceOf(account.address)
         .call();
+
       const depositedSharesInUSD = (depositedShares / 10 ** asset.decimals) * pricePerFullShareInUSD;
      
       let pendingBalance = 0;
@@ -1503,7 +1506,7 @@ class Store {
     const amountToSend = fromExponential(parseFloat(amount));
 
     let functionCall;
-    if(asset.strategyType === "citadelv2" || asset.strategyType === "daoStonks" || asset.strategyType === "daoSafu") {
+    if(asset.strategyType === "citadelv2" || asset.strategyType === "daoStonks" || asset.strategyType === "daoDegen" || asset.strategyType === "daoSafu") {
       const tokenMinPrice = await this.getTokenPriceMin(token, asset.strategyType);
       functionCall = vaultContract.methods
         .withdraw(amountToSend, token, tokenMinPrice);
