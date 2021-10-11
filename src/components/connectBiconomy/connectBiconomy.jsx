@@ -111,7 +111,6 @@ class ConnectBiconomy extends Component {
 
     happyHourbiconomy
       .onEvent(happyHourbiconomy.READY, () => {
-        console.log('ready');
 
         // Initialize your dapp here like getting user accounts etc
         dispatcher.dispatch({

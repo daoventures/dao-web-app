@@ -17,6 +17,13 @@ const  mAMZNAddr = "0x0cae9e4d663793c2a2A0b211c1Cf4bBca2B9cAa7";
 const  mAAPLAddr = "0xd36932143F6eBDEDD872D5Fb0651f4B72Fd15a84";
 const  mNFLXAddr = "0xC8d674114bac90148d11D3C1d33C61835a0F9DCD";
 
+// DAO Safu
+const wBNBBscAddr = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"
+const btcbBscAddress = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c"
+const wethBscAddress = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8"
+const bUSDBscAddress = "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56"
+const cakeBscAddress = "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82"
+
 const tokensMinInfo = {
     citadelv2: {
         routerAddress: "0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F",
@@ -39,6 +46,17 @@ const tokensMinInfo = {
             { amount: 1, decimal: 18, pairs:[mAMZNAddr, USTAddr]},
             { amount: 1, decimal: 18, pairs:[mAAPLAddr, USTAddr]},
             { amount: 1, decimal: 18, pairs:[mNFLXAddr, USTAddr]},
+        ]
+    },
+    daoSafu : {
+        routerAddress: "0x10ED43C718714eb63d5aA57B78B54704E256024E",
+        abi: config.uniswapV2RouterABI,
+        tokens: [
+            { amount: 1, decimal: 18, pairs:[wBNBBscAddr]},
+            { amount: 1, decimal: 18, pairs:[btcbBscAddress, wBNBBscAddr]},
+            { amount: 1, decimal: 18, pairs:[wethBscAddress, wBNBBscAddr]},
+            { amount: 1, decimal: 18, pairs:[bUSDBscAddress, wBNBBscAddr]},
+            { amount: 1, decimal: 18, pairs:[cakeBscAddress, wBNBBscAddr]},
         ]
     }
 };
