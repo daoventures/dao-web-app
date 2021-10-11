@@ -9,6 +9,7 @@ import {
     ListItemIcon,
     ListItemText,
     Collapse,
+    Typography,
 } from "@material-ui/core";
 
 import Store from "../../stores/storev2";
@@ -19,28 +20,26 @@ import {
     CHANGE_NETWORK,
     CONNECTION_CONNECTED,
     GET_VAULT_INFO,
+    NETWORK,
+    CLAIM_DVD_HASH,
+    CLAIM_DVD_SUCCESS,
+    CLAIM_DVD_ERROR
 } from "../../constants/constants";
 import {
-    INVEST_PATH,
-    STAKE_PATH_DVD,
-    STAKE_PATH_DVG,
-    INVEST,
-    SWAP_PATH,
-    SWAP,
-    DAOMINE_PATH,
-    PORTFOLIO,
-    PORTFOLIO_PATH,
-    UPGPRADE,
-    UPGPRADE_PATH,
+    SIDE_MENU,
+    SOCIAL_MEDIAS,
+    SUB_MENU,
+    AUDITORS
 } from "../../constants/page-constant";
 import {drawerWidth} from "../../theme/theme";
-import ToggleTheme from "../toggleTheme";
 
 import copy from "copy-to-clipboard";
 import Snackbar from "../snackbar";
 
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
+
+import Airdrop from "../air-drop/airdrop";
 
 const emitter = Store.emitter;
 const dispatcher = Store.dispatcher;
@@ -145,7 +144,7 @@ const styles = (theme) => ({
         padding: "60px 20px 0px 20px",
     },
     paddingGitter: {
-        paddingLeft: "16px",
+        paddingLeft: "26px",
         paddingRight: "16px",
     },
     footerMenu: {
@@ -302,6 +301,24 @@ const styles = (theme) => ({
         justifyContent: "space-between",
         flexDirection: "column",
     },
+    flexCenter: {
+        display: "flex",
+        alignItems: "center"
+    },
+    purpleText: {
+        color: theme.themeColors.textP
+    },
+    justifyCenter: {
+        justifyContent:"center"
+    },
+    auditors: {
+        display: "flex",
+        justifyContent: "space-between",
+        margin: "5px 0px"
+    },
+    submenuLinks: {
+        fontSize: "12px"
+    }
 });
 
 class SideDrawer extends Component {
@@ -320,40 +337,13 @@ class SideDrawer extends Component {
             balance:
                 (store.getStore("account") && store.getStore("account").balance) || "",
             totalValue: "",
-            listItem: [
-                // {key: PORTFOLIO, name: "portfolio", path: PORTFOLIO_PATH, icon: "#iconmenu_porftfolio_nor_day"},
-                {
-                    key: INVEST,
-                    name: "invest",
-                    path: INVEST_PATH,
-                    icon: "#iconmenu_porftfolio_normal_nightbeifen1",
-                },
-                {
-                    key: "GROW",
-                    name: "stake",
-                    path: "",
-                    icon: "#iconmenu_stake_normal_night",
-                    open: false,
-                    childrens: [
-                        {key: "DAOmine", name: "daomine", path: DAOMINE_PATH},
-                        {key: "DAOvip (DVG)", name: "stake-dvg", path: STAKE_PATH_DVG},
-                        {key: "DAOvip (DVD)", name: "stake-dvd", path: STAKE_PATH_DVD},
-                    ],
-                },
-                // {
-                //     key: SWAP,
-                //     name: "swap",
-                //     path: SWAP_PATH,
-                //     icon: "#iconmenu_features_nor_night",
-                // },
-                {
-                    key: UPGPRADE,
-                    name: "upgrade",
-                    path: UPGPRADE_PATH,
-                    icon: "#iconmenu_revert",
-                },
-            ],
+            listItem: SIDE_MENU,
+            subMenus: SUB_MENU,
+            socialMedias: SOCIAL_MEDIAS,
             open: false,
+            showAirDrop: false,
+            airdropInfo: null,
+            airdropSupportedNetwork: [NETWORK.ETHEREUM, NETWORK.KOVAN]
         };
     }
 
@@ -362,6 +352,9 @@ class SideDrawer extends Component {
         emitter.on(DRAWER_RETURNED, this.toggleDrawer);
         this.resize();
         this.getTotalTVL();
+        emitter.on(CLAIM_DVD_HASH, this.handleClaim);
+        emitter.on(CLAIM_DVD_SUCCESS, this.handleSuccessClaim);
+        emitter.on(CLAIM_DVD_ERROR, this.handleErrorClaim);
     }
 
     componentWillMount() {
@@ -377,6 +370,40 @@ class SideDrawer extends Component {
         emitter.removeListener(CURRENT_THEME_RETURNED, this.currentThemeChanged);
         emitter.removeListener(CHANGE_NETWORK, this.networkChanged);
         emitter.removeListener(CONNECTION_CONNECTED, this.connectionConnected);
+        emitter.removeListener(CLAIM_DVD_HASH, this.handleClaim);
+        emitter.removeListener(CLAIM_DVD_SUCCESS, this.handleSuccessClaim);
+        emitter.removeListener(CLAIM_DVD_ERROR, this.handleErrorClaim);
+    }
+
+    handleClaim = (txnHash) => {
+        const snackbarObj = { snackbarMessage: null, snackbarType: null };
+        this.setState(snackbarObj);
+        const that = this;
+        setTimeout(() => {
+            const snackbarObj = { snackbarMessage: txnHash, snackbarType: "Hash" };
+            that.setState(snackbarObj);
+        });
+    }
+
+    handleSuccessClaim = (txnHash) => {
+        const snackbarObj = { snackbarMessage: null, snackbarType: null };
+        this.setState(snackbarObj);
+        const that = this;
+        setTimeout(() => {
+            const snackbarObj = { snackbarMessage: txnHash, snackbarType: "Transaction Success",};
+            that.setState(snackbarObj);
+        });
+    }
+
+    handleErrorClaim = (error) => {
+        const snackbarObj = { snackbarMessage: null, snackbarType: null };
+        this.setState(snackbarObj);
+        const errorMessage = typeof error === "string" ? error : error.message;
+        const that = this;
+        setTimeout(() => {
+            const snackbarObj = { snackbarMessage: errorMessage, snackbarType: "Error",};
+            that.setState(snackbarObj);
+        });
     }
 
     getTotalTVL = async () => {
@@ -384,6 +411,38 @@ class SideDrawer extends Component {
         this.setState({
             totalValue: (tvlResult.success) ? parseFloat(tvlResult.tvl).toFixed(2) : `0`
         });
+    }
+
+    getAirdropInfo = async(address) => {
+        const network = store.getStore("network");
+       
+        if(!this.state.airdropSupportedNetwork.includes(network)) {
+            this.setState({showAirDrop: false});
+            return;
+        }
+
+        const airdropInfoResponse = await store._getAirdropInfo(address);
+     
+        if(airdropInfoResponse && airdropInfoResponse.success) {
+            const airdropInfo = airdropInfoResponse.result.info;
+            const ongoingEvent = airdropInfoResponse.result.active;
+        
+            // No ongoing airdrop event, or user address not found
+            if(!ongoingEvent || (ongoingEvent && airdropInfo === null)) {
+                this.setState({showAirDrop: false});
+                return;
+            }
+
+            this.setState({
+                showAirDrop: true,
+                airdropInfo
+            });
+        } else {
+            this.setState({
+                showAirDrop: false,
+                airdropInfo: null
+            });
+        }
     }
 
     resize() {
@@ -394,8 +453,10 @@ class SideDrawer extends Component {
     }
 
     networkChanged = (obj) => {
+        const showAirDrop = this.state.airdropSupportedNetwork.includes(obj.network);
         this.setState({
             currentNetwork: obj.network,
+            showAirDrop: showAirDrop
         });
     };
 
@@ -414,6 +475,7 @@ class SideDrawer extends Component {
         this.setState({
             currentAddress: account.address,
         });
+        this.getAirdropInfo(this.state.currentAddress);
     };
 
     render() {
@@ -429,6 +491,7 @@ class SideDrawer extends Component {
     };
 
     nav = (url) => {
+        console.log(`in this.nav ${url}`);
         window.open(url, "_blank");
     };
 
@@ -624,7 +687,7 @@ class SideDrawer extends Component {
     };
 
     renderDrawer = () => {
-        const {snackbarMessage, listItem} = this.state;
+        const {snackbarMessage, listItem, airdropInfo} = this.state;
         const {classes, match: {path}} = this.props;
 
         const {hideNav} = this.state;
@@ -638,19 +701,12 @@ class SideDrawer extends Component {
                 <Drawer
                     className={classes.drawer}
                     variant="permanent"
-                    classes={{
-                        paper: classes.drawerPaper,
-                        // paperAnchorLeft: classes.drawerLeft,
-                    }}
+                    classes={{paper: classes.drawerPaper}}
                     key={path}
-                    style={{
-                        WebkitScrollbarTrack:
-                            "'background-color': 'red','-webkit-border-radius': '2em','-moz-border-radius': '2em','border-radius': '2em'",
-                    }}
+                    style={{WebkitScrollbarTrack:"'background-color': 'red','-webkit-border-radius': '2em','-moz-border-radius': '2em','border-radius': '2em'",}}
                 >
                     {/**  DAOventures Logo */}
-                    <div className={classes.logo} key={path}
-                    >
+                    <div className={classes.logo} key={path}>
                         <img
                             alt=""
                             src={
@@ -675,18 +731,68 @@ class SideDrawer extends Component {
                     <div className={classes.menuList}>
                         <List>
                             {listItem && listItem.length > 0
-                                ? listItem.map((item) => {
-                                    return item.childrens
-                                        ? this.renderChildrenListItem(item)
-                                        : this.renderNormalListItem(item);
-                                })
+                                ? listItem.map((item) => this.renderMenuListItem(item))
                                 : null}
                         </List>
                     </div>
+                    
+                    {/** Airdrop */}
+                    {
+                        (this.state.showAirDrop && this.state.airdropInfo) &&
+                        <div className={classes.accountInfoBlock}>
+                            <Airdrop info={airdropInfo}/>
+                        </div>
+                    }
 
+                    {/** SubMenu */}
+                    {this.renderSubmenu()}
+                   
                     {/** Footer */}
                     {this.renderFooterMenu(false)}
                     {snackbarMessage && this.renderSnackbar()}
+                </Drawer>
+            </Fragment>
+        );
+    };
+
+    renderSideDrawer = () => {
+        const {classes, match: {path}} = this.props;
+        const {listItem, airdropInfo} = this.state;
+    
+        return (
+            <Fragment key={path}>
+                <Drawer
+                    className={classes.drawer}
+                    classes={{
+                        paper: classes.drawerPaper,
+                    }}
+                    key={path}
+                    open={this.state.openDrawer}
+                    onClose={this.dispatchToggle}
+                >
+                    {/** Wallet information */}
+                    {this.renderWalletInfo()}
+    
+                    {/** Total Value Locked */}
+                    {this.renderTotalValueLocked()}
+    
+                    {/** Side Navigation Bar */}
+                    <List>
+                        {listItem && listItem.length > 0
+                            ? listItem.map((item) => this.renderMenuListItem(item))
+                            : null}
+                    </List>
+    
+    
+                    {/** Airdrop */}
+                    {(this.state.showAirDrop && this.state.airdropInfo) &&
+                        <Airdrop info={airdropInfo}/>
+                    }
+
+                    {this.renderSubmenu()}
+    
+                    {/* *Footer */}
+                    {this.renderFooterMenu(true)}
                 </Drawer>
             </Fragment>
         );
@@ -702,19 +808,23 @@ class SideDrawer extends Component {
         this.setState({listItem});
     };
 
-    renderChildrenListItem = (item) => {
+    renderMenuListItem = (item) => {
         const {classes} = this.props;
         return (
-            <React.Fragment    key={item.key}>
+            <React.Fragment key={item.key}>
                 <ListItem
                     button
                     key={item.key}
                     className={
                         this.linkSelected(item.path) ? classes.selected : classes.menuItem
                     }
-                    onClick={() => this.handleOpenMenu(item)}
+                    onClick={() => item.childrens 
+                        ? this.handleOpenMenu(item) 
+                        : (item.isExternalPath === true) 
+                            ? this.nav(item.path) 
+                            : this.navInApp(item.name)}
                 >
-                    <ListItemIcon>
+                    <ListItemIcon style={{minWidth:"40px"}}>
                         <svg
                             className={
                                 this.linkSelected(item.path)
@@ -726,12 +836,12 @@ class SideDrawer extends Component {
                             <use xlinkHref={item.icon}></use>
                         </svg>
                     </ListItemIcon>
-                    <ListItemText primary={item.key}/>
+                    <ListItemText primary={item.key} />
 
-                    {item.open ? <ExpandLess/> : <ExpandMore/>}
+                    {(item.childrens) ? item.open ? <ExpandLess /> : <ExpandMore /> : null}
                 </ListItem>
 
-                <Collapse in={item.open} timeout="auto" unmountOnExit>
+                {item.childrens && <Collapse in={item.open} timeout="auto" unmountOnExit>
                     <List component="div" disablePadding>
                         {item.childrens.map((c) => {
                             return (
@@ -744,180 +854,89 @@ class SideDrawer extends Component {
                                             : classes.menuItem
                                     }
                                     onClick={() => {
-                                        this.navInApp(c.name);
+                                        (c.isExternalPath === true) ? this.nav(c.path) : this.navInApp(c.name);
                                     }}
                                 >
-                                    <ListItemText primary={c.key}/>
+                                    <ListItemText primary={c.key} />
                                 </ListItem>
                             );
                         })}
                     </List>
-                </Collapse>
+                </Collapse>}
             </React.Fragment>
         );
     };
 
-    renderNormalListItem = (item) => {
+    renderSubmenu = () => {
         const {classes} = this.props;
-        return (
-            <ListItem
-                button
-                key={item.key}
-                className={
-                    this.linkSelected(item.path) ? classes.selected : classes.menuItem
-                }
-                onClick={() => {
-                    this.navInApp(item.name);
-                }}
-            >
-                <ListItemIcon>
-                    <svg
-                        className={
-                            this.linkSelected(item.path)
-                                ? classes.selectedSvg
-                                : classes.menuSvg
-                        }
-                        aria-hidden="true"
-                    >
-                        <use xlinkHref={item.icon}></use>
-                    </svg>
-                </ListItemIcon>
-                <ListItemText primary={item.key}/>
-                {item && item.childrens ? (
-                    item.open ? (
-                        <ExpandLess/>
-                    ) : (
-                        <ExpandMore/>
-                    )
-                ) : null}
-            </ListItem>
-        );
-    };
+        const {subMenus} = this.state;
 
-    renderSideDrawer = () => {
-        const {classes, match: {path}} = this.props;
+        return  <List className={classes.bottomLinkBox}>
+            {subMenus && subMenus.length > 0
+                ? subMenus.map((menu) => {
+                    return (
+                        <ListItem
+                            button
+                            key={menu.title}
+                            className={`${
+                                this.linkSelected(menu.link)
+                                    ? classes.selected
+                                    : classes.menuItem2
+                            } ${classes.bottomLink} ${classes.submenuLinks}`}
+                            onClick={() => {
+                                this.nav(menu.link);
+                            }}
+                        >
+                            <ListItemText primary={<Typography type={"h2"} style={{fontSize: "12px"}}>{menu.title}</Typography>}/>
+                        </ListItem>
+                    );
+                })
+                : null}
+        </List>
+    }
 
-        const {listItem} = this.state;
+    renderAuditor = () => {
+        const {classes} = this.props;
 
-        return (
-            <Fragment key={path}>
-                <Drawer
-                    className={classes.drawer}
-                    classes={{
-                        paper: classes.drawerPaper,
-                    }}
-                    key={path}
-                    open={this.state.openDrawer}
-                    onClose={this.dispatchToggle}
-                >
-                    {/** Wallet information */}
-                    {this.renderWalletInfo()}
+        const auditors = AUDITORS;
 
-                    {/** Total Value Locked */}
-                    {this.renderTotalValueLocked()}
-
-                    {/** Side Navigation Bar */}
-                    <List>
-                        {listItem && listItem.length > 0
-                            ? listItem.map((item) => {
-                                return item.childrens
-                                    ? this.renderChildrenListItem(item)
-                                    : this.renderNormalListItem(item);
-                            })
-                            : null}
-                    </List>
-
-                    {/* *Footer */}
-                    {this.renderFooterMenu(true)}
-                </Drawer>
-            </Fragment>
-        );
-    };
+        return <div className={classes.accountInfoBlock}>
+            <div className={`${classes.flexCenter} ${classes.purpleText} ${classes.justifyCenter}`}>
+                <Typography variant={"h5"}>Audited By</Typography>
+            </div>
+            { auditors.map(row => {
+                return <div className={classes.auditors}>
+                    {
+                        row.map(r => {
+                            const imgLink = require(`../../assets/img_new/sidebar/auditor-${r.name}.${r.format}`);
+                            return  <img
+                                alt={r.name}
+                                src={imgLink}
+                                style={{width: "84px", height: "18px", margin: "10px" }}
+                            />
+                        })
+                    }
+                </div>
+             })
+            }
+        </div>
+    }
 
     renderFooterMenu = (isMobile) => {
         const {classes} = this.props;
         const {hideNav} = this.state;
 
-        const subMenus = [
-            {
-                title: "Your Feedback",
-                path: "/user-feedback",
-                link: "http://feedback.daoventures.co/beta-product-v1",
-            },
-            {
-                title: "FAQ",
-                path: "/faq",
-                link: "https://daoventures.gitbook.io/daoventures/frequently-asked-question",
-            },
-            {
-                title: "About Us",
-                path: "/about-us",
-                link: "https://daoventures.co/about",
-            },
-        ];
-
-        const socialMedias = [
-            [
-                // {
-                //     icon: "#iconfacebook",
-                //     link: "https://www.facebook.com/DAOventuresCo/",
-                // },
-                {icon: "#icontwitter", link: "https://twitter.com/VenturesDao"},
-                // {
-                //     icon: "#iconlinked",
-                //     link: "https://www.linkedin.com/company/daoventuresco/",
-                // },
-                {icon: "#icondiscord", link: "https://discord.com/invite/UJaCPMkb6q"},
-                {icon: "#icontelegram", link: "https://t.me/DAOventures"},
-                // {icon: "#iconmedium", link: "https://daoventuresco.medium.com/"},
-            ],
-            [
-                // {icon: "#iconweixin1", link: ""},
-                // {icon: "#iconcoinMarketCap", link: "https://coinmarketcap.com/currencies/daoventures/"},
-                // {icon: "#iconcoingecko", link: "https://www.coingecko.com/en/coins/daoventures"},
-            ],
-            [
-                // {icon: "#iconreddit", link: "https://www.reddit.com/r/DAOVentures/"},
-
-                // {icon: "#iconemail", link: "mailto:support@daoventures.co"},
-                // {
-                //     icon: "#iconslack",
-                //     link: "https://join.slack.com/t/daoventures/shared_invite/zt-k4hmm44g-p5ME~5I~fm0pkfY2U8AUIw",
-                // },
-                // {icon: "#iconweibo", link: ""},
-            ],
-        ];
+        const socialMedias = SOCIAL_MEDIAS;
 
         return (
             <div className={isMobile ? classes.footerMenuH5 : classes.footerMenu}>
-                <List className={classes.bottomLinkBox}>
-                    {subMenus && subMenus.length > 0
-                        ? subMenus.map((menu) => {
-                            return (
-                                <ListItem
-                                    button
-                                    key={menu.title}
-                                    className={`${
-                                        this.linkSelected(menu.link)
-                                            ? classes.selected
-                                            : classes.menuItem2
-                                    } ${classes.bottomLink}`}
-                                    onClick={() => {
-                                        this.nav(menu.link);
-                                    }}
-                                >
-                                    <ListItemText primary={menu.title}/>
-                                </ListItem>
-                            );
-                        })
-                        : null}
-                </List>
-
                 {hideNav && (
                     <div style={{marginLeft: "20px", paddingBottom: "40px"}}>
                         {/*<ToggleTheme></ToggleTheme>*/}
                     </div>
                 )}
+
+                {<div style={{marginBottom: "10px"}}>{this.renderAuditor()}</div>}
 
                 {/** Social Medias */}
                 {socialMedias &&
