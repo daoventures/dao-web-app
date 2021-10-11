@@ -40,11 +40,16 @@ class TokenPriceMinHelper {
 
             const tokensPairs = tokensInfo.tokens;
 
+            const contractTypes = [
+                "citadelv2",
+                "metaverse"
+            ];
+
             for(let i = 0; i < tokensPairs.length; i ++) {
                 const tokenPair = tokensPairs[i];
                 let { amount, decimal, pairs } = tokenPair;
                 
-                if(i === 0 && contractType === "citadelv2") {
+                if(i === 0 && contractTypes.includes(contractType)) {
                     pairs.push(erc20Address);
                 }
 
@@ -53,7 +58,7 @@ class TokenPriceMinHelper {
                     web3.utils.toBN(amount * 10 ** decimal),
                     pairs
                 );
-               
+              
                 let priceMin = web3.utils.toBN(price[1]).muln(minPercentage).divn(100); 
                 if(priceMin === undefined) {
                     console.error(`Price Min is undefined for`, tokenPair.pairs);
