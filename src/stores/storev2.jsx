@@ -599,6 +599,30 @@ class Store {
             });
         }
 
+        // Happy Hour Test
+        const happyHourStrategy = [
+          "citadel",
+          "citadelv2",
+          "daoFaang",
+          "daoStonks",
+          "metaverse",
+          "daoTA"
+        ];
+  
+        if(happyHourStrategy.includes(asset.strategyType)) {
+          const happyHour = await this._eventVerifyAmount(amount); 
+  
+          if (happyHour === true) {
+            const happyHourWeb3 = store.getStore("happyHourWeb3");
+
+            erc20Contract =  new happyHourWeb3.eth.Contract(
+              erc20ABI,
+              asset.erc20address
+            );
+          }
+        }
+        // END OF Happy Hour Test
+
         await erc20Contract.methods
           .approve(contract, web3.utils.toWei("999999999999", "ether"))
           .send({
@@ -1214,11 +1238,14 @@ class Store {
     // } else if (asset.strategyType === "daoTA") {
     //   vaultContract = store.getStore("happyHourContractDAOTA");
     // }
+  
+    // Happy Hour Test
     const happyHourWeb3 = store.getStore("happyHourWeb3");
     vaultContract = new happyHourWeb3.eth.Contract(
       asset.vaultContractABI,
       asset.vaultContractAddress
     );
+    // END of Happy Hour Test
     
     const web3 = new Web3(store.getStore("web3context").library.provider);
 
