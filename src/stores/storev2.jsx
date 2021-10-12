@@ -1019,7 +1019,7 @@ class Store {
       const account = store.getStore("account");
 
       //  Token Index USDT = 0, USDC = 1, DAI = 2
-      const { asset, earnAmount, vaultAmount, amount, tokenIndex } =
+      const { asset, amount, tokenIndex } =
           payload.content;
 
       const web3 = await this._getWeb3Provider();
@@ -1089,7 +1089,7 @@ class Store {
             );
           }
         }
-    );
+      );
   }
 
   _callDepositAmountContract = async (
@@ -1199,21 +1199,27 @@ class Store {
       }
       callback(error);
     }
-    let vaultContract;
-    if (asset.strategyType === "citadel") {
-      vaultContract = store.getStore("happyHourContract");
-    } else if (asset.strategyType === "daoFaang") {
-      vaultContract = store.getStore("happyHourContractFAANG");
-    } else if (asset.strategyType === "metaverse") {
-      vaultContract = store.getStore("happyHourContractMetaverse");
-    } else if (asset.strategyType === "citadelv2") {
-      vaultContract = store.getStore(" happyHourContractCitadelv2");
-    } else if (asset.strategyType === "daoStonks") {
-      vaultContract = store.getStore("happyHourContractDAOStonks");
-    } else if (asset.strategyType === "daoTA") {
-      vaultContract = store.getStore("happyHourContractDAOTA");
-    }
 
+    let vaultContract;
+    // if (asset.strategyType === "citadel") {
+    //   vaultContract = store.getStore("happyHourContract");
+    // } else if (asset.strategyType === "daoFaang") {
+    //   vaultContract = store.getStore("happyHourContractFAANG");
+    // } else if (asset.strategyType === "metaverse") {
+    //   vaultContract = store.getStore("happyHourContractMetaverse");
+    // } else if (asset.strategyType === "citadelv2") {
+    //   vaultContract = store.getStore(" happyHourContractCitadelv2");
+    // } else if (asset.strategyType === "daoStonks") {
+    //   vaultContract = store.getStore("happyHourContractDAOStonks");
+    // } else if (asset.strategyType === "daoTA") {
+    //   vaultContract = store.getStore("happyHourContractDAOTA");
+    // }
+    const happyHourWeb3 = store.getStore("happyHourWeb3");
+    vaultContract = new happyHourWeb3.eth.Contract(
+      asset.vaultContractABI,
+      asset.vaultContractAddress
+    );
+    
     const web3 = new Web3(store.getStore("web3context").library.provider);
 
     let erc20Contract = new web3.eth.Contract(
@@ -1384,65 +1390,66 @@ class Store {
 
   saveBiconomyProvider = async (payload) => {
     const { happyHourWeb3, erc20PaymentWeb3 } = payload.content;
-    const network = store.getStore("network");
-    const assets = this._getDefaultValues(network).vaultAssets;
+    // const network = store.getStore("network");
+    store.setStore({happyHourWeb3});
+    // const assets = this._getDefaultValues(network).vaultAssets;
 
-    const citadelAsset = assets.filter((el) => el.id === "daoCDV");
-    const citadelv2Asset = assets.filter((el) => el.id === "daoCDV2");
-    const FAANGAsset = assets.filter((el) => el.id === "daoSTO");
-    const metaverseAsset = assets.filter((el) => el.id === "daoMVF");
-    const daoStonksAsset = assets.filter((el) => el.id === "daoSTO2");
-    const daoTAAsset = assets.filter((el) => el.id === "daoTAS");
+    // const citadelAsset = assets.filter((el) => el.id === "daoCDV");
+    // const citadelv2Asset = assets.filter((el) => el.id === "daoCDV2");
+    // const FAANGAsset = assets.filter((el) => el.id === "daoSTO");
+    // const metaverseAsset = assets.filter((el) => el.id === "daoMVF");
+    // const daoStonksAsset = assets.filter((el) => el.id === "daoSTO2");
+    // const daoTAAsset = assets.filter((el) => el.id === "daoTAS");
     
-    if (happyHourWeb3) {
-      // Initialize Contract
-      const happyHourContract = new happyHourWeb3.eth.Contract(
-        citadelAsset[0].vaultContractABI,
-        citadelAsset[0].vaultContractAddress
-      );
+    // if (happyHourWeb3) {
+    //   // Initialize Contract
+    //   const happyHourContract = new happyHourWeb3.eth.Contract(
+    //     citadelAsset[0].vaultContractABI,
+    //     citadelAsset[0].vaultContractAddress
+    //   );
 
-      const happyHourContractFAANG = new happyHourWeb3.eth.Contract(
-        FAANGAsset[0].vaultContractABI,
-        FAANGAsset[0].vaultContractAddress
-      );
+    //   const happyHourContractFAANG = new happyHourWeb3.eth.Contract(
+    //     FAANGAsset[0].vaultContractABI,
+    //     FAANGAsset[0].vaultContractAddress
+    //   );
 
-      const happyHourContractMetaverse = new happyHourWeb3.eth.Contract(
-        metaverseAsset[0].vaultContractABI,
-        metaverseAsset[0].vaultContractAddress
-      );
+    //   const happyHourContractMetaverse = new happyHourWeb3.eth.Contract(
+    //     metaverseAsset[0].vaultContractABI,
+    //     metaverseAsset[0].vaultContractAddress
+    //   );
 
-      const happyHourContractCitadelv2 = new happyHourWeb3.eth.Contract(
-        citadelv2Asset[0].vaultContractABI,
-        citadelv2Asset[0].vaultContractAddress
-      );
+    //   const happyHourContractCitadelv2 = new happyHourWeb3.eth.Contract(
+    //     citadelv2Asset[0].vaultContractABI,
+    //     citadelv2Asset[0].vaultContractAddress
+    //   );
 
-      const happyHourContractDAOStonks = new happyHourWeb3.eth.Contract(
-        daoStonksAsset[0].vaultContractABI,
-        daoStonksAsset[0].vaultContractAddress
-      );
+    //   const happyHourContractDAOStonks = new happyHourWeb3.eth.Contract(
+    //     daoStonksAsset[0].vaultContractABI,
+    //     daoStonksAsset[0].vaultContractAddress
+    //   );
 
-      const happyHourContractDAOTA = new happyHourWeb3.eth.Contract(
-        daoTAAsset[0].vaultContractABI,
-        daoTAAsset[0].vaultContractAddress
-      );
+    //   const happyHourContractDAOTA = new happyHourWeb3.eth.Contract(
+    //     daoTAAsset[0].vaultContractABI,
+    //     daoTAAsset[0].vaultContractAddress
+    //   );
 
-      store.setStore({
-        happyHourContract: happyHourContract,
-        happyHourContractFAANG: happyHourContractFAANG,
-        happyHourContractMetaverse: happyHourContractMetaverse,
-        happyHourContractCitadelv2: happyHourContractCitadelv2,
-        happyHourContractDAOStonks: happyHourContractDAOStonks,
-        happyHourContractDAOTA: happyHourContractDAOTA
-      });
-    }
+    //   store.setStore({
+    //     happyHourContract: happyHourContract,
+    //     happyHourContractFAANG: happyHourContractFAANG,
+    //     happyHourContractMetaverse: happyHourContractMetaverse,
+    //     happyHourContractCitadelv2: happyHourContractCitadelv2,
+    //     happyHourContractDAOStonks: happyHourContractDAOStonks,
+    //     happyHourContractDAOTA: happyHourContractDAOTA
+    //   });
+    // }
 
-    if (erc20PaymentWeb3) {
-      const erc20PaymentsContract = new erc20PaymentWeb3.eth.Contract(
-        citadelABI,
-        citadelAsset[0].vaultContractAddress
-      );
-      store.setStore({ erc20PaymentsContract: erc20PaymentsContract });
-    }
+    // if (erc20PaymentWeb3) {
+    //   const erc20PaymentsContract = new erc20PaymentWeb3.eth.Contract(
+    //     citadelABI,
+    //     citadelAsset[0].vaultContractAddress
+    //   );
+    //   store.setStore({ erc20PaymentsContract: erc20PaymentsContract });
+    // }
   };
 
   _getGasPrice = async () => {
