@@ -2632,7 +2632,7 @@ class Store {
     }
 
     await vipTokenContract.methods
-      .deposit(amount, autoCompound)
+      .deposit(amount)
       .send({
         from: account.address,
       })
