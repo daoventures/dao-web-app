@@ -50,7 +50,6 @@ const kovan = [
     isPopularItem: true,
     happyHourEnabled: true,
     performanceId: "daoCDV",
-    // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
   },
   {
     id: "daoCDV2",
@@ -98,7 +97,6 @@ const kovan = [
     isPopularItem: true,
     happyHourEnabled: true,
     performanceId: "daoCDV2",
-    // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
   },
   {
     id: "daoTAS",
@@ -146,7 +144,7 @@ const kovan = [
     isPopularItem: true,
     happyHourEnabled: true,
     performanceId: "daoTAS",
-    // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
+
   },
   {
     id: "daoMVF",
@@ -194,7 +192,6 @@ const kovan = [
     isPopularItem: true,
     happyHourEnabled: true,
     performanceId: "daoMVF",
-    // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
   },
   {
     id: "daoSTO",
@@ -334,7 +331,7 @@ const kovan = [
     tvlKey: "daoELO_tvl",
     infoLink: INFO_LINK.ELON,
     isPopularItem: false,
-    // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
+    happyHourEnabled: false,
   },
   {
     id: "daoCUB",
@@ -380,7 +377,7 @@ const kovan = [
     tvlKey: "daoCUB_tvl",
     infoLink: INFO_LINK.CUBAN,
     isPopularItem: false,
-    // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
+    happyHourEnabled: false,
   },
  /* {
     id: "USDT",

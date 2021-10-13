@@ -50,7 +50,6 @@ const ethereum = [
     isPopularItem: true, // use to render popular item icon
     happyHourEnabled: true,
     performanceId: "daoCDV",
-    // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
   },
   {
     id: "daoCDV2",
@@ -98,7 +97,6 @@ const ethereum = [
     isPopularItem: true,
     happyHourEnabled: true,
     performanceId: "daoCDV2",
-    // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
   },
   // {
   //   id: "daoTAS",
@@ -146,7 +144,6 @@ const ethereum = [
   //   isPopularItem: true,
   //   happyHourEnabled: true,
   //   performanceId: "daoTAS",
-  //   // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
   // },
   {
     id: "daoMVF",
@@ -194,7 +191,6 @@ const ethereum = [
     isPopularItem: true,
     happyHourEnabled: true,
     performanceId: "daoMVF",
-    // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
   },
   {
     id: "daoSTO",
@@ -334,7 +330,7 @@ const ethereum = [
     tvlKey: "daoELO_tvl",
     infoLink: INFO_LINK.ELON,
     isPopularItem: false,
-    // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
+    happyHourEnabled: false,
   },
   {
     id: "daoCUB",
@@ -380,7 +376,7 @@ const ethereum = [
     tvlKey: "daoCUB_tvl",
     infoLink: INFO_LINK.CUBAN,
     isPopularItem: false,
-    // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
+    happyHourEnabled: false,
   },
   /*{
     id: "USDT",
