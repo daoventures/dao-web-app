@@ -31,8 +31,8 @@ const bscMainnet = [
         measurement: 1e18,
         price_id: ["tether", "usd-coin", "dai"],
         priceInUSD: [0, 0, 0],
-        strategyName: "DAO Degen: USDT USDC DAI",
-        strategy: "DAO Degen",
+        strategyName: "DAO BSC Spaceship: USDT USDC DAI",
+        strategy: "DAO BSC Spaceship",
         strategyAddress: "0x7436297148face594f1b2f04a2901c3bb65eb771", // Update this
         strategyContractABI: config.vaultDAODegenStrategyContractABI,
         strategyInfo: "A stablecoin farming strategy to compound more stablecoins.",
@@ -77,8 +77,8 @@ const bscMainnet = [
         measurement: 1e18,
         price_id: ["tether", "usd-coin", "dai"],
         priceInUSD: [0, 0, 0],
-        strategyName: "DAO Safu: USDT USDC DAI",
-        strategy: "DAO Safu",
+        strategyName: "DAO BSC Citadel: USDT USDC DAI",
+        strategy: "DAO BSC Citadel",
         strategyAddress: "0x7436297148face594f1b2f04a2901c3bb65eb771", // Update this
         strategyContractABI: config.vaultDAOSAFUStrategyABI,
         strategyInfo: "A stablecoin farming strategy to compound more stablecoins.",

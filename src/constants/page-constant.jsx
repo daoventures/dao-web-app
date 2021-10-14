@@ -32,6 +32,6 @@ export const INFO_LINK = {
     YEARN: "https://daoventures.gitbook.io/daoventures/products/strategies/yearn-fighter",
     COMPOUND: "https://daoventures.gitbook.io/daoventures/products/strategies/compound-fighter",
     METAVERSE: "https://daoventures.gitbook.io/daoventures/products/strategies/dao-citadel-vault",
-    DAODEGEN: "https://daoventures.gitbook.io/daoventures/products/strategies/dao-citadel-vault"
+    DAODEGEN: "https://daoventures.gitbook.io/daoventures/products/strategies/dao-citadel-vault",
     DAOSAFU: "https://daoventures.gitbook.io/daoventures/products/strategies/dao-citadel-vault"
 }
