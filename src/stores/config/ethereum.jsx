@@ -230,7 +230,7 @@ const ethereum = [
     strategyInfo: "Popular US tech stocks with yield farming rewards and reduced volatility.",
     strategyDescription: "US tech stock names packaged into a bundle for one-click investment, with only half the volatility of the stock market. High chance of beating Wall Street with yield farming.",
     historicalPriceId: "daoSTO2_price",
-    logoFormat: "svg",
+    logoFormat: "png",
     risk: ADVANCE,
     strategyType: "daoStonks",
     cTokenAddress: "",
