@@ -132,8 +132,8 @@ const ethereum = [
   //   strategy: "DAO Tech Anlys", 
   //   strategyAddress: "0x8a3cbce40a8f92a1f27b250f0c9061ceeae328be", // Update this
   //   strategyContractABI: config.vaultDAOTASStrategyABI,
-  //   strategyInfo: "A balanced crypto portfolio enhanced with yield farming rewards.",
-  //   strategyDescription: "A market weight strategy that gives an investor a balanced exposure to crypto. Portfolio components are paired up to earn yield farming rewards to boost returns. ",
+  //   strategyInfo: "Technical analysis meets yield farming.",
+  //   strategyDescription: "This strategy switches between 2 modes depending on moving average technical indicators, to capture major market trends.",
   //   historicalPriceId: "daoTAS_price",
   //   logoFormat: "png",
   //   risk: EXPERT,
