@@ -599,6 +599,20 @@ class Store {
             });
         }
 
+        // Happy Hour Test
+        const isHappyHourStrategy = asset.happyHourEnabled;
+        let happyHour = false;
+
+        if(isHappyHourStrategy) {
+          happyHour = await this._eventVerifyAmount(amount); 
+        }
+
+        if(happyHour) {
+          const key = `${asset.symbols[tokenIndex]}HHContract`;
+          erc20Contract = store.getStore(key);
+        }
+        // END OF Happy Hour Test
+
         await erc20Contract.methods
           .approve(contract, web3.utils.toWei("999999999999", "ether"))
           .send({
@@ -840,12 +854,17 @@ class Store {
         "elon",
         "cuban"
       ];
+      const tempStrategies = [
+        "citadelv2",
+        "daoStonks"
+      ];
       const includeInStrategies = strategies.includes(asset.strategyType);
+      const includeTempStrategies = tempStrategies.includes(asset.strategyType);
 
       let pricePerFullShareInUSD = 0;
-      if(includeInStrategies) {
+      if(includeInStrategies || includeTempStrategies) {
         let pool = await vaultContract.methods.getAllPoolInUSD().call();
-        pool = pool * 10 ** 12;
+        pool = (includeTempStrategies) ? (pool - (asset.totalDepositedAmount * 10 ** 18)) : pool * 10 ** 12;
         const totalSupply = await vaultContract.methods.totalSupply().call();
         pricePerFullShareInUSD = (parseFloat(pool) === 0 || parseFloat(totalSupply) === 0) 
           ? 0
@@ -1021,7 +1040,7 @@ class Store {
       const account = store.getStore("account");
 
       //  Token Index USDT = 0, USDC = 1, DAI = 2
-      const { asset, earnAmount, vaultAmount, amount, tokenIndex } =
+      const { asset, amount, tokenIndex } =
           payload.content;
 
       const web3 = await this._getWeb3Provider();
@@ -1034,63 +1053,112 @@ class Store {
           asset.vaultContractAddress
       );
 
-      const happyHourStrategy = [
-        "citadel",
-        "citadelv2",
-        "daoFaang",
-        "daoStonks",
-        "metaverse"
-      ];
+      // Happy Hour Test
+      const isHappyHourStrategy = asset.happyHourEnabled;
+      let happyHour = false;
 
-      if(happyHourStrategy.includes(asset.strategyType)) {
-        const happyHour = await this._eventVerifyAmount(amount); 
-
-        if (happyHour === true) {
-          await this._callDepositAmountContractHappyHour(
-              asset,
-              account,
-              amount,
-              tokenIndex,
-              (err, txnHash, depositResult) => {
-                if (err) {
-                  emitter.emit(ERROR_DEPOSIT_WALLET, err);
-                  return emitter.emit(ERROR, err);
-                }
-                if (txnHash) {
-                  return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
-                }
-                if (depositResult) {
-                  return emitter.emit(
-                      DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED,
-                      depositResult.transactionHash
-                  );
-                }
-              }
-          );
-        }
+      if(isHappyHourStrategy) {
+        happyHour = await this._eventVerifyAmount(amount); 
       }
 
-      await this._callDepositAmountContract(
-        asset,
-        account,
-        amount,
-        tokenIndex,
-        (err, txnHash, depositResult) => {
-          if (err) {
-            emitter.emit(ERROR_DEPOSIT_WALLET, err);
-            return emitter.emit(ERROR, err);
+      if(happyHour) {
+        await this._callDepositAmountContractHappyHour(
+          asset,
+          account,
+          amount,
+          tokenIndex,
+          (err, txnHash, depositResult) => {
+            if (err) {
+              emitter.emit(ERROR_DEPOSIT_WALLET, err);
+              return emitter.emit(ERROR, err);
+            }
+            if (txnHash) {
+              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+            }
+            if (depositResult) {
+              return emitter.emit(
+                  DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED,
+                  depositResult.transactionHash
+              );
+            }
           }
-          if (txnHash) {
-            return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+        );
+      } else {
+        await this._callDepositAmountContract(
+          asset,
+          account,
+          amount,
+          tokenIndex,
+          (err, txnHash, depositResult) => {
+            if (err) {
+              emitter.emit(ERROR_DEPOSIT_WALLET, err);
+              return emitter.emit(ERROR, err);
+            }
+            if (txnHash) {
+              return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+            }
+            if (depositResult) {
+              return emitter.emit(
+                  DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+                  depositResult.transactionHash
+              );
+            }
           }
-          if (depositResult) {
-            return emitter.emit(
-                DEPOSIT_CONTRACT_RETURNED_COMPLETED,
-                depositResult.transactionHash
-            );
-          }
-        }
-    );
+        );
+      }
+      // END of happy hour test
+
+
+      // if(happyHourStrategy.includes(asset.strategyType)) {
+      //   const happyHour = await this._eventVerifyAmount(amount); 
+
+      //   if (happyHour === true) {
+      //     await this._callDepositAmountContractHappyHour(
+      //         asset,
+      //         account,
+      //         amount,
+      //         tokenIndex,
+      //         (err, txnHash, depositResult) => {
+      //           if (err) {
+      //             emitter.emit(ERROR_DEPOSIT_WALLET, err);
+      //             return emitter.emit(ERROR, err);
+      //           }
+      //           if (txnHash) {
+      //             return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+      //           }
+      //           if (depositResult) {
+      //             return emitter.emit(
+      //                 DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED,
+      //                 depositResult.transactionHash
+      //             );
+      //           }
+      //         }
+      //     );
+      //     return;
+      //   }
+      // }
+
+      // await this._callDepositAmountContract(
+      //   asset,
+      //   account,
+      //   amount,
+      //   tokenIndex,
+      //   (err, txnHash, depositResult) => {
+      //     if (err) {
+      //       emitter.emit(ERROR_DEPOSIT_WALLET, err);
+      //       return emitter.emit(ERROR, err);
+      //     }
+      //     if (txnHash) {
+      //       return emitter.emit(DEPOSIT_CONTRACT_RETURNED, txnHash);
+      //     }
+      //     if (depositResult) {
+      //       return emitter.emit(
+      //           DEPOSIT_CONTRACT_RETURNED_COMPLETED,
+      //           depositResult.transactionHash
+      //       );
+      //     }
+      //   }
+      // );
   }
 
   _callDepositAmountContract = async (
@@ -1200,19 +1268,27 @@ class Store {
       }
       callback(error);
     }
-    let vaultContract;
-    if (asset.strategyType === "citadel") {
-      vaultContract = store.getStore("happyHourContract");
-    } else if (asset.strategyType === "daoFaang") {
-      vaultContract = store.getStore("happyHourContractFAANG");
-    } else if (asset.strategyType === "metaverse") {
-      vaultContract = store.getStore("happyHourContractMetaverse");
-    } else if (asset.strategyType === "citadelv2") {
-      vaultContract = store.getStore(" happyHourContractCitadelv2");
-    } else if (asset.strategyType === "daoStonks") {
-      vaultContract = store.getStore("happyHourContractDAOStonks")
-    }
 
+    let vaultContract;
+    // if (asset.strategyType === "citadel") {
+    //   vaultContract = store.getStore("happyHourContract");
+    // } else if (asset.strategyType === "daoFaang") {
+    //   vaultContract = store.getStore("happyHourContractFAANG");
+    // } else if (asset.strategyType === "metaverse") {
+    //   vaultContract = store.getStore("happyHourContractMetaverse");
+    // } else if (asset.strategyType === "citadelv2") {
+    //   vaultContract = store.getStore(" happyHourContractCitadelv2");
+    // } else if (asset.strategyType === "daoStonks") {
+    //   vaultContract = store.getStore("happyHourContractDAOStonks");
+    // } else if (asset.strategyType === "daoTA") {
+    //   vaultContract = store.getStore("happyHourContractDAOTA");
+    // }
+  
+    // Happy Hour Test
+    const happyHourContractKey = `${asset.vaultSymbol}HHContract`;
+    vaultContract = store.getStore(happyHourContractKey);
+    // END of Happy Hour Test
+    
     const web3 = new Web3(store.getStore("web3context").library.provider);
 
     let erc20Contract = new web3.eth.Contract(
@@ -1382,59 +1458,94 @@ class Store {
   };
 
   saveBiconomyProvider = async (payload) => {
-    const { happyHourWeb3, erc20PaymentWeb3 } = payload.content;
+    const { happyHourWeb3 } = payload.content;
+    store.setStore({happyHourWeb3});
+
     const network = store.getStore("network");
-    const assets = this._getDefaultValues(network).vaultAssets;
+    let assets = this._getDefaultValues(network).vaultAssets;
+    assets = assets.filter(a => a.happyHourEnabled); // Find all happy hour contract
 
-    const citadelAsset = assets.filter((el) => el.id === "daoCDV");
-    const citadelv2Asset = assets.filter((el) => el.id === "daoCDV2");
-    const FAANGAsset = assets.filter((el) => el.id === "daoSTO");
-    const metaverseAsset = assets.filter((el) => el.id === "daoMVF");
-    const daoStonksAsset = assets.filter((el) => el.id === "daoSTO2");
-    
-    if (happyHourWeb3) {
-      // Initialize Contract
+    let contracts = {};
+
+    const erc20Addresses = assets[0].erc20addresses;
+    const erc20Symbols = assets[0].symbols;
+    erc20Addresses.forEach((e, index) => {
+      const key = `${erc20Symbols[index]}HHContract`;
       const happyHourContract = new happyHourWeb3.eth.Contract(
-        citadelAsset[0].vaultContractABI,
-        citadelAsset[0].vaultContractAddress
+        config.erc20ABI,
+        e
       );
+      contracts[key] = happyHourContract;
+    });
 
-      const happyHourContractFAANG = new happyHourWeb3.eth.Contract(
-        FAANGAsset[0].vaultContractABI,
-        FAANGAsset[0].vaultContractAddress
+    assets.forEach(a => {
+      const key = `${a.vaultSymbol}HHContract`;
+      const happyHourContract = new happyHourWeb3.eth.Contract(
+        a.vaultContractABI,
+        a.vaultContractAddress
       );
+      contracts[key] = happyHourContract;
+    });
 
-      const happyHourContractMetaverse = new happyHourWeb3.eth.Contract(
-        metaverseAsset[0].vaultContractABI,
-        metaverseAsset[0].vaultContractAddress
-      );
+    store.setStore(contracts);
+  
 
-      const happyHourContractCitadelv2 = new happyHourWeb3.eth.Contract(
-        citadelv2Asset[0].vaultContractABI,
-        citadelv2Asset[0].vaultContractAddress
-      );
+    // const citadelAsset = assets.filter((el) => el.id === "daoCDV");
+    // const citadelv2Asset = assets.filter((el) => el.id === "daoCDV2");
+    // const FAANGAsset = assets.filter((el) => el.id === "daoSTO");
+    // const metaverseAsset = assets.filter((el) => el.id === "daoMVF");
+    // const daoStonksAsset = assets.filter((el) => el.id === "daoSTO2");
+    // const daoTAAsset = assets.filter((el) => el.id === "daoTAS");
+    
+    // if (happyHourWeb3) {
+    //   // Initialize Contract
+    //   const happyHourContract = new happyHourWeb3.eth.Contract(
+    //     citadelAsset[0].vaultContractABI,
+    //     citadelAsset[0].vaultContractAddress
+    //   );
 
-      const happyHourContractDAOStonks = new happyHourWeb3.eth.Contract(
-        daoStonksAsset[0].vaultContractABI,
-        daoStonksAsset[0].vaultContractAddress
-      );
+    //   const happyHourContractFAANG = new happyHourWeb3.eth.Contract(
+    //     FAANGAsset[0].vaultContractABI,
+    //     FAANGAsset[0].vaultContractAddress
+    //   );
 
-      store.setStore({
-        happyHourContract: happyHourContract,
-        happyHourContractFAANG: happyHourContractFAANG,
-        happyHourContractMetaverse: happyHourContractMetaverse,
-        happyHourContractCitadelv2: happyHourContractCitadelv2,
-        happyHourContractDAOStonks: happyHourContractDAOStonks
-      });
-    }
+    //   const happyHourContractMetaverse = new happyHourWeb3.eth.Contract(
+    //     metaverseAsset[0].vaultContractABI,
+    //     metaverseAsset[0].vaultContractAddress
+    //   );
 
-    if (erc20PaymentWeb3) {
-      const erc20PaymentsContract = new erc20PaymentWeb3.eth.Contract(
-        citadelABI,
-        citadelAsset[0].vaultContractAddress
-      );
-      store.setStore({ erc20PaymentsContract: erc20PaymentsContract });
-    }
+    //   const happyHourContractCitadelv2 = new happyHourWeb3.eth.Contract(
+    //     citadelv2Asset[0].vaultContractABI,
+    //     citadelv2Asset[0].vaultContractAddress
+    //   );
+
+    //   const happyHourContractDAOStonks = new happyHourWeb3.eth.Contract(
+    //     daoStonksAsset[0].vaultContractABI,
+    //     daoStonksAsset[0].vaultContractAddress
+    //   );
+
+    //   const happyHourContractDAOTA = new happyHourWeb3.eth.Contract(
+    //     daoTAAsset[0].vaultContractABI,
+    //     daoTAAsset[0].vaultContractAddress
+    //   );
+
+    //   store.setStore({
+    //     happyHourContract: happyHourContract,
+    //     happyHourContractFAANG: happyHourContractFAANG,
+    //     happyHourContractMetaverse: happyHourContractMetaverse,
+    //     happyHourContractCitadelv2: happyHourContractCitadelv2,
+    //     happyHourContractDAOStonks: happyHourContractDAOStonks,
+    //     happyHourContractDAOTA: happyHourContractDAOTA
+    //   });
+    // }
+
+    // if (erc20PaymentWeb3) {
+    //   const erc20PaymentsContract = new erc20PaymentWeb3.eth.Contract(
+    //     citadelABI,
+    //     citadelAsset[0].vaultContractAddress
+    //   );
+    //   store.setStore({ erc20PaymentsContract: erc20PaymentsContract });
+    // }
   };
 
   _getGasPrice = async () => {
@@ -1508,7 +1619,7 @@ class Store {
     const amountToSend = fromExponential(parseFloat(amount));
 
     let functionCall;
-    if(asset.strategyType === "citadelv2" || asset.strategyType === "daoStonks" || asset.strategyType === "daoDegen" || asset.strategyType === "daoSafu") {
+    if(asset.strategyType === "citadelv2" || asset.strategyType === "daoStonks" || asset.strategyType === "daoDegen" || asset.strategyType === "daoSafu" || asset.strategyType === "daoTA") {
       const tokenMinPrice = await this.getTokenPriceMin(token, asset.strategyType);
       functionCall = vaultContract.methods
         .withdraw(amountToSend, token, tokenMinPrice);
@@ -1747,11 +1858,13 @@ class Store {
     let assetApiInfo = await this.getAllAssetInformation(networkObj[network]);
 
     assets.forEach(async (asset, i) => {
+      let assetApiData = assetApiInfo.data[asset.id] ? assetApiInfo.data[asset.id]: {};
+      // Temp solution
+      asset = { ...asset , ...{ totalDepositedAmount: assetApiData.totalDepositedAmount ? assetApiData.totalDepositedAmount : 0 }}
+     
       let _promises = [];
       _promises.push(this._getERC20Balances(web3, asset, account, () => {}, coinsInUSDPrice));
       _promises.push(this._getBalances(web3, asset, account, () => {}));
-
-      let assetApiData = assetApiInfo.data[asset.id] ? assetApiInfo.data[asset.id]: {};
     
       let data = await Promise.all(_promises);
 

@@ -47,7 +47,8 @@ class TokenPriceMinHelper {
             const contractTypes = [
                 "citadelv2",
                 "daoSafu",
-                "daoDegen"
+                "daoDegen",
+                "daoTA"
             ];
 
             for(let i = 0; i < tokensPairs.length; i ++) {
