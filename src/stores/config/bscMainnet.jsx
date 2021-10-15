@@ -16,7 +16,7 @@ const bscMainnet = [
             "0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3",
         ],
         erc20address: "0x55d398326f99059fF775485246999027B3197955", 
-        vaultContractAddress: "0x56f2005c3fec21dd3c21899fbceb1aae5b4bc5da", // Update this
+        vaultContractAddress: "0x5e5d75c2d1eec055e8c824c6c4763b59d5c7f065", 
         vaultContractABI: config.vaultDAODegenContractABI,
         balance: 0, // Stores balance of selectedERC20Address
         balances: [0, 0, 0],
@@ -27,13 +27,13 @@ const bscMainnet = [
         depositAll: true,
         withdraw: true,
         withdrawAll: true, 
-        lastMeasurement: 12751827, // Update this
+        lastMeasurement: 11796468, 
         measurement: 1e18,
         price_id: ["tether", "usd-coin", "dai"],
         priceInUSD: [0, 0, 0],
         strategyName: "DAO BSC Spaceship: USDT USDC DAI",
         strategy: "DAO BSC Spaceship",
-        strategyAddress: "0x7436297148face594f1b2f04a2901c3bb65eb771", // Update this
+        strategyAddress: "0xeaa8c430d17c894134acfa0561853f37363ce887", 
         strategyContractABI: config.vaultDAODegenStrategyContractABI,
         strategyInfo: "High risk BSC defi tokens with potential rocketship-like returns.",
         strategyDescription: "A range of high ROI potential but risky defi tokens that are native on the Binance Smart Chain (BSC) with added yield farming APRs.",
