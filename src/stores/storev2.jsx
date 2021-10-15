@@ -854,12 +854,17 @@ class Store {
         "elon",
         "cuban"
       ];
+      const tempStrategies = [
+        "citadelv2",
+        "daoStonks"
+      ];
       const includeInStrategies = strategies.includes(asset.strategyType);
+      const includeTempStrategies = tempStrategies.includes(asset.strategyType);
 
       let pricePerFullShareInUSD = 0;
-      if(includeInStrategies) {
+      if(includeInStrategies || includeTempStrategies) {
         let pool = await vaultContract.methods.getAllPoolInUSD().call();
-        pool = pool * 10 ** 12;
+        pool = (includeTempStrategies) ? (pool - (asset.totalDepositedAmount * 10 ** 18)) : pool * 10 ** 12;
         const totalSupply = await vaultContract.methods.totalSupply().call();
         pricePerFullShareInUSD = (parseFloat(pool) === 0 || parseFloat(totalSupply) === 0) 
           ? 0
@@ -1853,11 +1858,13 @@ class Store {
     let assetApiInfo = await this.getAllAssetInformation(networkObj[network]);
 
     assets.forEach(async (asset, i) => {
+      let assetApiData = assetApiInfo.data[asset.id] ? assetApiInfo.data[asset.id]: {};
+      // Temp solution
+      asset = { ...asset , ...{ totalDepositedAmount: assetApiData.totalDepositedAmount ? assetApiData.totalDepositedAmount : 0 }}
+     
       let _promises = [];
       _promises.push(this._getERC20Balances(web3, asset, account, () => {}, coinsInUSDPrice));
       _promises.push(this._getBalances(web3, asset, account, () => {}));
-
-      let assetApiData = assetApiInfo.data[asset.id] ? assetApiInfo.data[asset.id]: {};
     
       let data = await Promise.all(_promises);
 
