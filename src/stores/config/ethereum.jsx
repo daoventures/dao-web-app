@@ -275,7 +275,7 @@ const ethereum = [
     strategyInfo: "Diversified basket of US tech stocks with yield incentives.",
     strategyDescription: "A basket of diversified popular US tech stocks that leverages on yield farming incentives to provide superior returns.",
     historicalPriceId: "daoSTO2_price",
-    logoFormat: "svg",
+    logoFormat: "png",
     risk: ADVANCE,
     strategyType: "daoStonks",
     cTokenAddress: "",
