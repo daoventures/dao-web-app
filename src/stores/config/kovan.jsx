@@ -130,7 +130,7 @@ const kovan = [
     priceInUSD: [0, 0, 0],
     strategyName: "DAO Tech Anlys: USDT USDC DAI",
     strategy: "DAO Tech Anlys",
-    strategyAddress: "0x8a3cbce40a8f92a1f27b250f0c9061ceeae328be",
+    strategyAddress: "0xfd2f8db43bcd7817bc6cd83a3bbf18dbe8227e55",
     strategyContractABI: config.vaultDAOTASStrategyABI,
     strategyInfo: "Technical analysis meets yield farming.",
     strategyDescription: "This strategy switches between 2 modes depending on moving average technical indicators, to capture major market trends.",
