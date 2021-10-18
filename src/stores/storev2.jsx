@@ -425,7 +425,7 @@ class Store {
         },
         swapAddress: "0x61FfA596ABBbA47fE6014bDa91F894B2Dae6dE05",
         swapContractAbi: config.upgradeContractAbi,
-        airdropAddress: "",
+        airdropAddress: "0x9494C485Cd5Ea1BD5e0c4229fc8f80cBA814656C",
         airdropABI: config.airdropABI
       },
       42: {
