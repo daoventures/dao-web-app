@@ -1687,7 +1687,7 @@ class Asset extends Component {
     render() {
         const { classes, asset } = this.props;
         const { loading } = this.state;
-
+        
         const AssetInfo = getAssetData(asset.asset_distribution ? asset.asset_distribution : []);
 
         return (

@@ -741,6 +741,41 @@ class Store {
       }
     }
   };
+  
+  _getPricePerFullShare = async(asset, vaultContract) => {
+    let pricePerFullShareInUSD = 0;
+    try {
+      // Strategies with pool in 6 decimals
+      const strategies = [
+        "citadel",
+        "elon",
+        "cuban"
+      ];
+      const tempStrategies = [
+        "citadelv2",
+        "daoStonks"
+      ];
+      const includeInStrategies = strategies.includes(asset.strategyType);
+      const includeTempStrategies = tempStrategies.includes(asset.strategyType);
+
+      if(includeInStrategies || includeTempStrategies) {
+        let pool = await vaultContract.methods.getAllPoolInUSD().call();
+        pool = (includeTempStrategies) ? (pool - (asset.totalDepositedAmount * 10 ** 18)) : pool * 10 ** 12;
+        const totalSupply = await vaultContract.methods.totalSupply().call();
+        pricePerFullShareInUSD = (parseFloat(pool) === 0 || parseFloat(totalSupply) === 0) 
+          ? 0
+          : pool / totalSupply;
+      } else {
+        pricePerFullShareInUSD = await vaultContract.methods.getPricePerFullShare().call();
+        pricePerFullShareInUSD = pricePerFullShareInUSD / 10 ** 18;
+      }
+    } catch(err) {
+      console.error(`Error in getting price per full share`, err);
+    } finally {
+      return pricePerFullShareInUSD;
+    }
+   
+  }
 
   _getBalances = async (web3, asset, account, callback) => {
     if (asset.vaultContractAddress === null) {
@@ -859,21 +894,8 @@ class Store {
         "daoStonks"
       ];
       const includeInStrategies = strategies.includes(asset.strategyType);
-      const includeTempStrategies = tempStrategies.includes(asset.strategyType);
-
-      let pricePerFullShareInUSD = 0;
-      if(includeInStrategies || includeTempStrategies) {
-        let pool = await vaultContract.methods.getAllPoolInUSD().call();
-        pool = (includeTempStrategies) ? (pool - (asset.totalDepositedAmount * 10 ** 18)) : pool * 10 ** 12;
-        const totalSupply = await vaultContract.methods.totalSupply().call();
-        pricePerFullShareInUSD = (parseFloat(pool) === 0 || parseFloat(totalSupply) === 0) 
-          ? 0
-          : pool / totalSupply;
-      } else {
-        pricePerFullShareInUSD = await vaultContract.methods.getPricePerFullShare().call();
-        pricePerFullShareInUSD = pricePerFullShareInUSD / 10 ** 18;
-      }
-    
+      let pricePerFullShareInUSD = await this._getPricePerFullShare(asset, vaultContract);
+     
       const depositedShares = await vaultContract.methods
         .balanceOf(account.address)
         .call();
