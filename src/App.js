@@ -9,17 +9,16 @@ import { BrowserView, MobileView } from "react-device-detect";
 import "./i18n";
 import { getTheme } from "./theme";
 
-
 import Header from "./components/header";
 import VaultsInfo from "./components/vaultInfo";
 import SideDrawer from "./components/sideDrawer";
 import MainContainer from "./components/mainContainer";
 
-import StakeDvdVip from './components/stake/stakeDvdVip';
-import StakeDvgVip from './components/stake/stakeDvgVip';
-import Stake from './components/stake';
+import StakeDvdVip from "./components/stake/stakeDvdVip";
+import StakeDvgVip from "./components/stake/stakeDvgVip";
+import Stake from "./components/stake";
 
-import UpgradeToken from './components/upgradeToken/upgradeToken';
+import UpgradeToken from "./components/upgradeToken/upgradeToken";
 
 import {
   CONNECTION_CONNECTED,
@@ -28,6 +27,7 @@ import {
 } from "./constants";
 
 import Store from "./stores/storev2";
+
 const emitter = Store.emitter;
 const store = Store.store;
 const dispatcher = Store.dispatcher;
@@ -43,7 +43,6 @@ class App extends Component {
 
     if (window.ethereum) {
       window.ethereum.on("accountsChanged", function (accounts) {
-
         store.setStore({ account: { address: accounts[0] } });
 
         const web3context = store.getStore("web3context");
@@ -95,13 +94,14 @@ class App extends Component {
               alignItems: "center",
               // background: '#f9fafb',
               background: this.state.interestTheme.themeColors.back,
-            }}>
+            }}
+          >
             <Switch>
               <Route path="/invest">
                 <Header />
-                <SideDrawer keyName="invest"/>
+                <SideDrawer keyName="invest" />
                 <MainContainer />
-                <BrowserView style={{width: '100%'}}>
+                <BrowserView style={{ width: "100%" }}>
                   <VaultsInfo />
                 </BrowserView>
                 <MobileView>
@@ -112,28 +112,28 @@ class App extends Component {
 
               <Route path="/stake-dvd">
                 <Header />
-                <SideDrawer keyName="stake-dvd"/>
+                <SideDrawer keyName="stake-dvd" />
                 <MainContainer />
                 <StakeDvdVip />
               </Route>
 
               <Route path="/stake-dvg">
                 <Header />
-                <SideDrawer keyName="stake-dvg"/>
+                <SideDrawer keyName="stake-dvg" />
                 <MainContainer />
                 <StakeDvgVip />
               </Route>
 
               <Route path="/daomine">
                 <Header />
-                <SideDrawer keyName="daomine"/>
+                <SideDrawer keyName="daomine" />
                 <MainContainer />
                 <Stake />
               </Route>
 
               <Route path="/upgrade">
                 <Header />
-                <SideDrawer keyName="upgrade"/>
+                <SideDrawer keyName="upgrade" />
                 <MainContainer />
                 <UpgradeToken />
               </Route>
