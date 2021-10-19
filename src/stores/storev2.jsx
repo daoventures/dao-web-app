@@ -1647,13 +1647,14 @@ class Store {
     const amountToSend = fromExponential(parseFloat(amount));
 
     let functionCall;
-    if(asset.strategyType === "citadelv2" || asset.strategyType === "daoStonks" || asset.strategyType === "daoDegen" || asset.strategyType === "daoSafu" || asset.strategyType === "daoTA") {
+    const strategiesWithoutMinPriceParam = ["daoCDV", "daoSTO", "daoCUB", "daoELO", "daoMPT"];
+    if(strategiesWithoutMinPriceParam.includes(asset.vaultSymbol)) {
+      functionCall = vaultContract.methods
+      .withdraw(amountToSend, token);
+    } else {
       const tokenMinPrice = await this.getTokenPriceMin(token, asset.strategyType);
       functionCall = vaultContract.methods
         .withdraw(amountToSend, token, tokenMinPrice);
-    } else {
-      functionCall = vaultContract.methods
-      .withdraw(amountToSend, token);
     }
 
     await functionCall
@@ -1699,6 +1700,7 @@ class Store {
       const network = store.getStore("network");
       const supportedNetwork = [
         NETWORK.BSCMAINNET,
+        NETWORK.AVALANCHEMAIN,
         NETWORK.ETHEREUM
       ];
       if(!supportedNetwork.includes(network)) {
