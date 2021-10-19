@@ -1782,6 +1782,30 @@ class Store {
     }
   };
 
+  invest = async(asset) => {
+    const account = store.getStore("account");
+    const web3 = new Web3(store.getStore("web3context").library.provider);
+
+    let vaultContract = new web3.eth.Contract(
+      asset.vaultContractABI,
+      asset.vaultContractAddress
+    );
+
+    await vaultContract.methods.invest([]).send({
+      from: account.address,
+      gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+    }).on("transactionHash", function (txnHash) {
+      console.log(`invest  ${asset.vaultSymbol}  transaction hash`, txnHash);
+    })
+    .on("receipt", function (receipt) {
+      alert("Successfully invest");
+      console.log(`Successfully invest`);
+    })
+    .on("error", function (error) {
+      console.error(`Something wrong when calling invest`)
+    })
+  }
+
   /***************** WITHDRAWAL END *****************/
 
   _getVaultDAOmineAPY = (asset, pools, callback) => {

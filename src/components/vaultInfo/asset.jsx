@@ -1671,6 +1671,10 @@ class Asset extends Component {
         }
     };
 
+    invest = async(asset) => {
+        const result = await store.invest(asset);
+    }
+
     // Pending balance info modal renderring
     renderPendingInfo = () => {
         const { classes } = this.props;
@@ -1868,6 +1872,16 @@ class Asset extends Component {
                                             <span className={classes.actionButtonText}>Withdraw</span>
                                         </Button>
                                     )}
+
+                                    {/** INVEST Button remember to remove this */}
+                                    { ["daoAXA","daoAXS","daoASA","daoA2S"].includes(asset.vaultSymbol) && <Button
+                                            className={classes.withdrawButton}
+                                            onClick={() => this.invest(asset)}
+                                            fullWidth
+                                        >
+                                            <span className={classes.actionButtonText}>Invest</span>
+                                        </Button>
+                                    }
                                 </div>
                             </div>
                         </div>
