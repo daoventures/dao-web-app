@@ -87,6 +87,8 @@ import { injected } from "./connectors";
 import contractHelper from './helper/contractHelper';
 import tokenPriceMinHelper from './helper/tokenPriceMinHelper';
 import apiHelper from "./helper/apiHelper";
+import avalancheTesnet from "./config/avalancheTestnet";
+import avalancheMainnet from "./config/avalancheMainnet";
 
 const rp = require("request-promise");
 
@@ -104,6 +106,8 @@ const networkObj = {
   42: "ethereum",
   80001: "polygon",
   137: "polygon",
+  43113: "avalanche",
+  43114: "avalanche"
 }
 
 class Store {
@@ -414,7 +418,9 @@ class Store {
       80001: Mumbai,
       137: Matic,
       56: BscMainnet,
-      97: BscTestnet
+      97: BscTestnet,
+      43113: avalancheTesnet,
+      43114: avalancheMainnet
     };
 
     const upgradeTokenObj = {
