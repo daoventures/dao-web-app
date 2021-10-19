@@ -1874,7 +1874,7 @@ class Asset extends Component {
                                     )}
 
                                     {/** INVEST Button remember to remove this */}
-                                    { ["daoAXA","daoAXS","daoASA","daoA2S"].includes(asset.vaultSymbol) && <Button
+                                    {  (["daoAXA","daoAXS","daoASA","daoA2S"].includes(asset.vaultSymbol) && store.getStore("network") === 43113 ) && <Button
                                             className={classes.withdrawButton}
                                             onClick={() => this.invest(asset)}
                                             fullWidth
