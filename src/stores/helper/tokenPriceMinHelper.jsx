@@ -87,6 +87,9 @@ class TokenPriceMinHelper {
           } catch (err) {
             console.error(`Error in getTokenPriceMin(), `, err);
           } finally{
+            if(tokenPriceMin.length <= 0) {
+                tokenPriceMin = [0];
+            }
             return tokenPriceMin;
           }
     }

@@ -1695,7 +1695,7 @@ class Store {
   // For Citadel V2, DAO Stonks, DAO Safu
   getTokenPriceMin = async(erc20Address, contractType) => {
     try {
-      let tokenPriceMin = [];
+      let tokenPriceMin = [0];
 
       const network = store.getStore("network");
       const supportedNetwork = [
