@@ -5,7 +5,10 @@ import { withStyles } from "@material-ui/core/styles";
 import Store from "../../../stores/storev2";
 import {
     Typography
-} from "@material-ui/core"
+} from "@material-ui/core";
+import { 
+    ArrowDropDown
+} from "@material-ui/icons"
 import { 
     NETWORK_LABEL,
     CHANGE_NETWORK
@@ -60,6 +63,11 @@ const styles = (theme) => ({
     },
     titleNetworkLabel: {
         margin: "5px"
+    },
+    arrowDropDown: {
+        height: "15px",
+        width: "15px",
+        fill: theme.themeColors.textP,
     }
 });
 
@@ -165,9 +173,10 @@ class NetworkSelect extends Component {
         const networkIcon = getNetworkIcon(network); 
     
         return <React.Fragment>
-             <div className={classes.networkButton} onClick={() => this.setOpenModal(true)}>
+            <div className={classes.networkButton} onClick={() => this.setOpenModal(true)}>
                 <img src={networkIcon} alt={network}/>
                 <span className={classes.networkLabel}>{networkLabel}</span>
+                <ArrowDropDown className={classes.arrowDropDown}/>
             </div>
             {this.renderNetworkSelection()}
         </React.Fragment>
