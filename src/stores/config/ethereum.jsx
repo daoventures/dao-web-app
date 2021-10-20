@@ -50,7 +50,6 @@ const ethereum = [
     isPopularItem: true, // use to render popular item icon
     happyHourEnabled: true,
     performanceId: "daoCDV",
-    // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
   },
   {
     id: "daoCDV2",
@@ -98,8 +97,54 @@ const ethereum = [
     isPopularItem: true,
     happyHourEnabled: true,
     performanceId: "daoCDV2",
-    // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
   },
+  // {
+  //   id: "daoTAS",
+  //   name: "USDT/USDC/DAI",
+  //   symbol: "USDT",
+  //   symbols: ["USDT", "USDC", "DAI"],
+  //   description: "Stablecoins",
+  //   vaultSymbol: "daoTAS",
+  //   erc20addresses: [
+  //     "0xdac17f958d2ee523a2206206994597c13d831ec7",
+  //     "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+  //     "0x6b175474e89094c44da98b954eedeac495271d0f",
+  //   ],
+  //   erc20address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
+  //   vaultContractAddress: "	0xb72b89fa6d222973379cbd9c5c88768e3a050aed", // Update this
+  //   vaultContractABI: config.vaultDAOTASContractABI,
+  //   balance: 0, // Stores balance of selectedERC20Address
+  //   balances: [0, 0, 0],
+  //   vaultBalance: 0,
+  //   decimals: 18,
+  //   feeDecimals: 18,
+  //   deposit: true,
+  //   depositAll: true,
+  //   withdraw: true,
+  //   withdrawAll: true,
+  //   lastMeasurement: 27400992, // Update this
+  //   measurement: 1e18,
+  //   price_id: ["tether", "usd-coin", "dai"],
+  //   priceInUSD: [0, 0, 0],
+  //   strategyName: "DAO Tech Anlys: USDT USDC DAI",
+  //   strategy: "DAO Tech Anlys", 
+  //   strategyAddress: "0x8a3cbce40a8f92a1f27b250f0c9061ceeae328be", // Update this
+  //   strategyContractABI: config.vaultDAOTASStrategyABI,
+  //   strategyInfo: "A balanced crypto portfolio enhanced with yield farming rewards.",
+  //   strategyDescription: "A market weight strategy that gives an investor a balanced exposure to crypto. Portfolio components are paired up to earn yield farming rewards to boost returns. ",
+  //   historicalPriceId: "daoTAS_price",
+  //   logoFormat: "png",
+  //   risk: EXPERT,
+  //   strategyType: "daoTA",
+  //   cTokenAddress: "",
+  //   cAbi: "",
+  //   group: EXPERT,
+  //   tvlKey: "daoTAS_tvl",
+  //   infoLink: INFO_LINK.TA,
+  //   isPopularItem: true,
+  //   happyHourEnabled: true,
+  //   performanceId: "daoTAS",
+  // },
   {
     id: "daoMVF",
     name: "USDT/USDC/DAI",
@@ -146,7 +191,6 @@ const ethereum = [
     isPopularItem: true,
     happyHourEnabled: true,
     performanceId: "daoMVF",
-    // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
   },
   {
     id: "daoSTO",
@@ -230,7 +274,7 @@ const ethereum = [
     strategyInfo: "Diversified basket of US tech stocks with yield incentives.",
     strategyDescription: "A basket of diversified popular US tech stocks that leverages on yield farming incentives to provide superior returns.",
     historicalPriceId: "daoSTO2_price",
-    logoFormat: "svg",
+    logoFormat: "png",
     risk: ADVANCE,
     strategyType: "daoStonks",
     cTokenAddress: "",
@@ -286,7 +330,7 @@ const ethereum = [
     tvlKey: "daoELO_tvl",
     infoLink: INFO_LINK.ELON,
     isPopularItem: false,
-    // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
+    happyHourEnabled: false,
   },
   {
     id: "daoCUB",
@@ -332,7 +376,7 @@ const ethereum = [
     tvlKey: "daoCUB_tvl",
     infoLink: INFO_LINK.CUBAN,
     isPopularItem: false,
-    // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
+    happyHourEnabled: false,
   },
   /*{
     id: "USDT",

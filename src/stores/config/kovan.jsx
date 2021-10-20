@@ -50,7 +50,6 @@ const kovan = [
     isPopularItem: true,
     happyHourEnabled: true,
     performanceId: "daoCDV",
-    // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
   },
   {
     id: "daoCDV2",
@@ -98,7 +97,54 @@ const kovan = [
     isPopularItem: true,
     happyHourEnabled: true,
     performanceId: "daoCDV2",
-    // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
+  },
+  {
+    id: "daoTAS",
+    name: "USDT/USDC/DAI",
+    symbol: "USDT",
+    symbols: ["USDT", "USDC", "DAI"],
+    description: "Stablecoins",
+    vaultSymbol: "daoTAS",
+    erc20addresses: [
+      "0x07de306ff27a2b630b1141956844eb1552b956b5",
+      "0xb7a4f3e9097c08da09517b5ab877f7a917224ede",
+      "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
+    ],
+    erc20address: "0x07de306ff27a2b630b1141956844eb1552b956b5",
+    vaultContractAddress: "0xb72b89fa6d222973379cbd9c5c88768e3a050aed",
+    vaultContractABI: config.vaultDAOTASContractABI,
+    balance: 0, // Stores balance of selectedERC20Address
+    balances: [0, 0, 0],
+    vaultBalance: 0,
+    decimals: 18,
+    feeDecimals: 18,
+    deposit: true,
+    depositAll: true,
+    withdraw: true,
+    withdrawAll: true,
+    lastMeasurement: 27400992,
+    measurement: 1e18,
+    price_id: ["tether", "usd-coin", "dai"],
+    priceInUSD: [0, 0, 0],
+    strategyName: "DAO Tech Anlys: USDT USDC DAI",
+    strategy: "DAO Tech Anlys",
+    strategyAddress: "0x8a3cbce40a8f92a1f27b250f0c9061ceeae328be",
+    strategyContractABI: config.vaultDAOTASStrategyABI,
+    strategyInfo: "A balanced crypto portfolio enhanced with yield farming rewards.",
+    strategyDescription: "A market weight strategy that gives an investor a balanced exposure to crypto. Portfolio components are paired up to earn yield farming rewards to boost returns. ",
+    historicalPriceId: "daoTAS_price",
+    logoFormat: "png",
+    risk: EXPERT,
+    strategyType: "daoTA",
+    cTokenAddress: "",
+    cAbi: "",
+    group: EXPERT,
+    tvlKey: "daoTAS_tvl",
+    infoLink: INFO_LINK.TA,
+    isPopularItem: true,
+    happyHourEnabled: true,
+    performanceId: "daoTAS",
+
   },
   {
     id: "daoMVF",
@@ -146,7 +192,6 @@ const kovan = [
     isPopularItem: true,
     happyHourEnabled: true,
     performanceId: "daoMVF",
-    // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
   },
   {
     id: "daoSTO",
@@ -230,7 +275,7 @@ const kovan = [
     strategyInfo: "Diversified basket of US tech stocks with yield incentives.",
     strategyDescription: "A basket of diversified popular US tech stocks that leverages on yield farming incentives to provide superior returns.",
     historicalPriceId: "daoSTO2_price",
-    logoFormat: "svg",
+    logoFormat: "png",
     risk: ADVANCE,
     strategyType: "daoStonks",
     cTokenAddress: "",
@@ -286,7 +331,7 @@ const kovan = [
     tvlKey: "daoELO_tvl",
     infoLink: INFO_LINK.ELON,
     isPopularItem: false,
-    // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
+    happyHourEnabled: false,
   },
   {
     id: "daoCUB",
@@ -332,7 +377,7 @@ const kovan = [
     tvlKey: "daoCUB_tvl",
     infoLink: INFO_LINK.CUBAN,
     isPopularItem: false,
-    // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
+    happyHourEnabled: false,
   },
  /* {
     id: "USDT",

@@ -46,7 +46,9 @@ class TokenPriceMinHelper {
 
             const contractTypes = [
                 "citadelv2",
-                "daoSafu"
+                "daoSafu",
+                "daoDegen",
+                "daoTA"
             ];
 
             for(let i = 0; i < tokensPairs.length; i ++) {
@@ -57,11 +59,14 @@ class TokenPriceMinHelper {
                     pairs.push(erc20Address);
                 }
 
+                const magnifiedAmount =  web3.utils.toBN(amount * 10 ** decimal);
                 const price = await getAmountsOut(
                     routerContract,
-                    web3.utils.toBN(amount * 10 ** decimal),
+                    magnifiedAmount,
                     pairs
                 );
+                //console.log(`${magnifiedAmount}, price ${price[1]}, pairs`, pairs);
+               
 
                 let priceMin = web3.utils.toBN(price[1]).muln(minPercentage).divn(100); 
                 if(priceMin === undefined) {
