@@ -18,17 +18,17 @@ export const supportedNetworks = {
         rpcUrls: ['https://mainnet.infura.io/v3'],
         blockExplorerUrls: ['https://etherscan.com'] 
     },
-    [NETWORK.AVALANCHEMAIN]: {
-        chainId: '0xA86A',
-        chainName: 'Avalanche',
-        nativeCurrency: {
-        name: 'Avalanche Token',
-        symbol: 'AVAX',
-        decimals: 18,
-        },
-        rpcUrls: ['https://api.avax.network/ext/bc/C/rpc'],
-        blockExplorerUrls: ['https://cchain.explorer.avax.network'],
-    },
+    // [NETWORK.AVALANCHEMAIN]: {
+    //     chainId: '0xA86A',
+    //     chainName: 'Avalanche',
+    //     nativeCurrency: {
+    //     name: 'Avalanche Token',
+    //     symbol: 'AVAX',
+    //     decimals: 18,
+    //     },
+    //     rpcUrls: ['https://api.avax.network/ext/bc/C/rpc'],
+    //     blockExplorerUrls: ['https://cchain.explorer.avax.network'],
+    // },
     [NETWORK.MATIC]: {
         chainId: '0x89',
         chainName: 'Matic',
@@ -40,17 +40,17 @@ export const supportedNetworks = {
         rpcUrls: ['https://rpc-mainnet.maticvigil.com'], // ['https://matic-mainnet.chainstacklabs.com/'],
         blockExplorerUrls: ['https://explorer-mainnet.maticvigil.com'],
     },
-    [NETWORK.ARBITRUMMAIN]: {
-        chainId: '0xA4B1',
-        chainName: 'Arbitrum',
-        nativeCurrency: {
-          name: 'Ethereum',
-          symbol: 'ETH',
-          decimals: 18,
-        },
-        rpcUrls: ['https://arb1.arbitrum.io/rpc'],
-        blockExplorerUrls: ['https://mainnet-arb-explorer.netlify.app'],
-    },
+    // [NETWORK.ARBITRUMMAIN]: {
+    //     chainId: '0xA4B1',
+    //     chainName: 'Arbitrum',
+    //     nativeCurrency: {
+    //       name: 'Ethereum',
+    //       symbol: 'ETH',
+    //       decimals: 18,
+    //     },
+    //     rpcUrls: ['https://arb1.arbitrum.io/rpc'],
+    //     blockExplorerUrls: ['https://mainnet-arb-explorer.netlify.app'],
+    // },
     [NETWORK.BSCMAINNET]: {
         chainId: '0x38',
         chainName: 'Binance Smart Chain',
@@ -62,17 +62,17 @@ export const supportedNetworks = {
         rpcUrls: ['https://bsc-dataseed.binance.org'],
         blockExplorerUrls: ['https://bscscan.com'],
     },
-    [NETWORK.FANTOMMAINNET] : {
-        chainId: '0xfa',
-        chainName: 'Fantom',
-        nativeCurrency: {
-        name: 'Fantom',
-        symbol: 'FTM',
-        decimals: 18,
-        },
-        rpcUrls: ['https://rpcapi.fantom.network'],
-        blockExplorerUrls: ['https://ftmscan.com'],
-    }
+    // [NETWORK.FANTOMMAINNET] : {
+    //     chainId: '0xfa',
+    //     chainName: 'Fantom',
+    //     nativeCurrency: {
+    //     name: 'Fantom',
+    //     symbol: 'FTM',
+    //     decimals: 18,
+    //     },
+    //     rpcUrls: ['https://rpcapi.fantom.network'],
+    //     blockExplorerUrls: ['https://ftmscan.com'],
+    // }
 }
 
 export const getNetworkIcon = (network) => {
