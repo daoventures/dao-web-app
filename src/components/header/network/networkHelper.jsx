@@ -18,17 +18,17 @@ export const supportedNetworks = {
         rpcUrls: ['https://mainnet.infura.io/v3'],
         blockExplorerUrls: ['https://etherscan.com'] 
     },
-    // [NETWORK.AVALANCHEMAIN]: {
-    //     chainId: '0xA86A',
-    //     chainName: 'Avalanche',
-    //     nativeCurrency: {
-    //     name: 'Avalanche Token',
-    //     symbol: 'AVAX',
-    //     decimals: 18,
-    //     },
-    //     rpcUrls: ['https://api.avax.network/ext/bc/C/rpc'],
-    //     blockExplorerUrls: ['https://cchain.explorer.avax.network'],
-    // },
+    [NETWORK.AVALANCHEMAIN]: {
+        chainId: '0xA86A',
+        chainName: 'Avalanche',
+        nativeCurrency: {
+        name: 'Avalanche Token',
+        symbol: 'AVAX',
+        decimals: 18,
+        },
+        rpcUrls: ['https://api.avax.network/ext/bc/C/rpc'],
+        blockExplorerUrls: ['https://cchain.explorer.avax.network'],
+    },
     [NETWORK.MATIC]: {
         chainId: '0x89',
         chainName: 'Matic',
