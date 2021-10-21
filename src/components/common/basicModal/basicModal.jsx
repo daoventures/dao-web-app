@@ -59,7 +59,7 @@ class BasicModal extends Component {
     }
 
     render() {
-        const { classes, contentTemplate, title, subTitle, setOpenModal, openModal } = this.props;
+        const { classes, contentTemplate, title, subTitle, setOpenModal, openModal, titleTemplate } = this.props;
         const division = (<div></div>);
 
         return (
@@ -72,8 +72,9 @@ class BasicModal extends Component {
                 open={openModal}
             >
                 <MuiDialogTitle disableTypography className={classes.dialogTitle}>
-                    <Typography variant="h6" className={classes.title}>{title ? title : ""}</Typography>
-                    {subTitle && <Typography className={classes.subTitle} variant="h6">{subTitle}</Typography>}
+                    {titleTemplate !== undefined && titleTemplate}
+                    {(titleTemplate === undefined) && title && <Typography variant="h6" className={classes.title}>{title ? title : ""}</Typography>}
+                    {(titleTemplate === undefined) && subTitle && <Typography className={classes.subTitle} variant="h6">{subTitle}</Typography>}
                     <IconButton
                         aria-label="close"
                         className={classes.closeButton}

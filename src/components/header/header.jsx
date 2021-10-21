@@ -29,6 +29,8 @@ import { colors } from "../../theme";
 import { withRouter } from "react-router-dom";
 import { withStyles } from "@material-ui/core/styles";
 
+import NetworkSelect from "./network/network";
+
 const emitter = Store.emitter;
 const dispatcher = Store.dispatcher;
 const store = Store.store;
@@ -72,7 +74,7 @@ const styles = (theme) => ({
     display: "flex",
     padding: "15px 0px",
     alignItems: "center",
-    justifyContent: "center",
+    // justifyContent: "center",
     [theme.breakpoints.down("sm")]: {
       justifyContent: "space-between",
       padding: "15px",
@@ -161,7 +163,6 @@ const styles = (theme) => ({
   // 当前标题等
   currentMenu: {
     display: "flex",
-    flex: 1,
     alignItems: "center",
     fontSize: "26px",
     color: theme.themeColors.textT,
@@ -429,28 +430,7 @@ class Header extends Component {
               />
             </div>
           )}
-          {/* <div className={ classes.links }>
-            { this.renderLink('dashboard') }
-            { this.renderLink('vaults') }
-            { this.renderLink('portfolio') }
-            { this.renderLink('zap') }
-            { this.renderLink('cover') }
-            { this.renderLink('stats') }
-          </div> */}
-          {/* 钱包地址 (不放这里了)*/}
-          {/* <div className={ classes.account }>
-            { address &&
-              <div className={ classes.walletAddress }>
-                <img 
-                  alt="" 
-                  src={require('../../assets/profile.svg')} />
-                <Typography variant={ 'h4'} className={classes.addressAlias} style={{marginLeft: '10px'}} noWrap onClick={this.addressClicked} >
-                { addressAlias }
-              </Typography>
-              </div>
-            }
-          </div> */}
-
+      
           <div className={classes.currentMenu}>
             {/*** Page Header Title */}
             {!hideNav && (
@@ -460,80 +440,11 @@ class Header extends Component {
             )}
 
             {/*** Network Type */}
-            {this.state.currentNetwork === 1 ||
-            this.state.currentNetwork === 56 ||
-            this.state.currentNetwork === 42 ||
-            this.state.currentNetwork === NETWORK.BSCTEST ||
-            this.state.currentNetwork === NETWORK.BSCMAINNET || 
-            this.state.currentNetwork  === NETWORK.MUMBAI || 
-            this.state.currentNetwork  === NETWORK.MATIC ? (
-              <div className={classes.netWork}>
-                {this.state.currentNetwork === 1 ||
-                this.state.currentNetwork === 42 ? (
-                  <svg aria-hidden="true" className={classes.netWorkIcon}>
-                    <use xlinkHref="#iconETH"></use>
-                  </svg>
-                ) : null}
-                {this.state.currentNetwork === NETWORK.BSCMAINNET || this.state.currentNetwork === NETWORK.BSCTEST? (
-                  <img
-                    alt="bnb-icon"
-                    src={require("../../assets/img_new/bnb-icon.png")}
-                    className={classes.netWorkIcon}
-                  />
-                ) : null}
-                 {this.state.currentNetwork === NETWORK.MUMBAI ||
-                this.state.currentNetwork === NETWORK.MATIC ? (
-                  <img
-                    alt="matic-icon"
-                    src={require("../../assets/img_new/polygon-icon.svg")}
-                    className={classes.netWorkIcon}
-                  />
-                ) : null}
-                <span style={{marginLeft: "2px"}}>{networkObj[this.state.currentNetwork]}</span>
-
-                {/* <svg className={this.state.isShowNetWorkList ?classes.selectIconActive :classes.selectIcon} aria-hidden="true">
-                        <use xlinkHref="#iconicon_menu_dropDown__day"></use>
-                    </svg> */}
-
-                {this.state.isShowNetWorkList ? (
-                  <div className={classes.netWorkList}>
-                    <div
-                      className={classes.netWorkItem}
-                      onClick={(e) => {
-                        this.checkNetWork(1, e);
-                      }}
-                    >
-                      <img
-                        alt="eth-logo"
-                        src={require("../../assets/ETH-logo.png")}
-                        className={classes.netWorkIcon}
-                      />
-                      <span>Ethereum</span>
-                    </div>
-                    <div
-                      className={classes.netWorkItem}
-                      onClick={(e) => {
-                        this.checkNetWork(56, e);
-                      }}
-                    >
-                      <img
-                        alt="bnb-icon"
-                        src={require("../../assets/img_new/bnb-icon.png")}
-                        className={classes.netWorkIcon}
-                      />
-                      <span>Binance</span>
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-            ) : null}
-
-            <div>
-              {/* <svg aria-hidden="true" className={classes.netWorkIcon}>
-                <use xlinkHref="#iconETH"></use>
-              </svg> */}
+            <div style={{ marginLeft: "5px"}}>
+              <NetworkSelect />
             </div>
           </div>
+          
           {/*{!hideNav && <ToggleTheme></ToggleTheme>}*/}
           {this.renderHappyHourTimer()}
         </div>

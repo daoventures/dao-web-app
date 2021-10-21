@@ -1,5 +1,5 @@
 import config from "../../config";
-import { ADVANCE } from "../../constants/constants";
+import { ADVANCE, DEGEN } from "../../constants/constants";
 import { INFO_LINK } from "../../constants/page-constant";
 
 const bscTestnet = [
@@ -39,11 +39,11 @@ const bscTestnet = [
         strategyDescription: "A range of high ROI potential but risky defi tokens that are native on the Binance Smart Chain (BSC) with added yield farming APRs.",
         historicalPriceId: "daoDEGEN_price",
         logoFormat: "png",
-        risk: ADVANCE,
+        risk: DEGEN,
         strategyType: "daoDegen",
         cTokenAddress: "",
         cAbi: "",
-        group: ADVANCE,
+        group: DEGEN,
         tvlKey: "daoDEGEN_tvl",
         infoLink: INFO_LINK.DAODEGEN,
         isPopularItem: false,
