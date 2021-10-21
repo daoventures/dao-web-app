@@ -56,7 +56,7 @@ class TokenPriceMinHelper {
                 "daoSafu",
                 "daoDegen",
                 "daoTA",
-                "daoAVA",
+                "daoAXA",
             ];
 
             for(let i = 0; i < tokensPairs.length; i ++) {
