@@ -216,8 +216,38 @@ export const NETWORK = {
   MATIC: 137,
   MUMBAI: 80001,
   BSCTEST: 97,
-  BSCMAINNET: 56
-}
+  BSCMAINNET: 56,
+  FANTOMMAINNET: 250,
+  FANTOMTEST: 4002,
+  AVALANCHEMAIN: 43114,
+  AVALANCHETEST: 43113,
+  ARBITRUMMAIN: 42161,
+  ARBITRUMTEST: 421611
+};
+
+export const NETWORK_LABEL = {
+  1: "Ethereum",
+  42: "Kovan",
+  137: "Polygon(Matic)",
+  80001: "Polygon(Mumbai)",
+  97: "BSC(Testnet)",
+  56: "BSC(Mainnet)",
+  250: "Fantom Opera",
+  4002: "Fantom Testnet",
+  43114: "Avalanche Mainnet",
+  43113: "Avalanche Fuji Testnet",
+  42161: "Arbitrum Mainnet",
+  421611: "Arbitrum Testnet"
+};
+
+export const MAINNET_NETWORKS = [
+  { chainId: NETWORK.ETHEREUM, label: NETWORK_LABEL[1], networkId: "ethereum" },
+  { chainId: NETWORK.MATIC, label: NETWORK_LABEL[137] }, 
+  { chainId: NETWORK.BSCMAINNET, label: NETWORK_LABEL[56]},
+  { chainId: NETWORK.FANTOMMAINNET, label: NETWORK_LABEL[250]},
+  { chainId: NETWORK.AVALANCHEMAIN, label: NETWORK_LABEL[43114]},
+  { chainId: NETWORK.ARBITRUMMAIN, label: NETWORK_LABEL[42161]}
+];
 
 export const STRATEGIES_USE_TOKEN_INDEX = [
   "citadel",

@@ -867,13 +867,14 @@ class Vault extends Component {
 
     networkChanged = (obj) => {
         const account = store.getStore("account");
-       
-        let allowedNetworkIds = [1,42,80001,137,97,56];
         const networkId = obj.network;
         
-        if(!allowedNetworkIds.includes(networkId)) {
-            alert('Please switch your wallet Network to Ethereum , Polygon or Binance')
-        }
+        // let allowedNetworkIds = [1,42,80001,137,97,56];
+        // const networkId = obj.network;
+        
+        // if(!allowedNetworkIds.includes(networkId)) {
+        //     alert('Please switch your wallet Network to Ethereum , Polygon or Binance')
+        // }
 
         if (account && account.address) {
             dispatcher.dispatch({
