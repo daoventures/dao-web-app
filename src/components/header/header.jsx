@@ -440,7 +440,7 @@ class Header extends Component {
             )}
 
             {/*** Network Type */}
-            <div style={{ marginLeft: "8px"}}>
+            <div style={{ marginLeft: "24px"}}>
               <NetworkSelect />
             </div>
           </div>
