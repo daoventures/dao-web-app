@@ -144,7 +144,7 @@ const ethereum = [
     isPopularItem: true,
     happyHourEnabled: true,
     performanceId: "daoTAS",
-    // isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
+    isHappyHour: true, // use to render happy hour icon, note current logic uses a blanket HappyHour
   },
   {
     id: "daoMVF",

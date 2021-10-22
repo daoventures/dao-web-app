@@ -7,7 +7,11 @@ const bscMainnet = [
         id: "daoDEGEN",
         name: "USDT/USDC/DAI",
         symbol: "USDT",
-        symbols: ["USDT", "USDC", "DAI"],
+        symbols: [
+            "USDT", 
+            "USDC", 
+            // "DAI"
+        ],
         description: "Stablecoins",
         vaultSymbol: "daoDEGEN",
         erc20addresses: [
@@ -53,7 +57,11 @@ const bscMainnet = [
         id: "daoSAFU",
         name: "USDT/USDC/DAI",
         symbol: "USDT",
-        symbols: ["USDT", "USDC", "DAI"],
+        symbols: [
+            "USDT", 
+            "USDC", 
+            //"DAI"
+        ],
         description: "Stablecoins", 
         vaultSymbol: "daoSAFU",
         erc20addresses: [
