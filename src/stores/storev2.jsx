@@ -1641,7 +1641,7 @@ class Store {
     const amountToSend = fromExponential(parseFloat(amount));
 
     let functionCall;
-    if(asset.strategyType === "citadelv2" || asset.strategyType === "daoStonks" || asset.strategyType === "daoDegen" || asset.strategyType === "daoSafu" || asset.strategyType === "daoTA") {
+    if(asset.strategyType === "citadelv2" || asset.strategyType === "metaverse" || asset.strategyType === "daoStonks" || asset.strategyType === "daoDegen" || asset.strategyType === "daoSafu" || asset.strategyType === "daoTA") {
       const tokenMinPrice = await this.getTokenPriceMin(token, asset.strategyType);
       functionCall = vaultContract.methods
         .withdraw(amountToSend, token, tokenMinPrice);
