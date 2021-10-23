@@ -48,7 +48,8 @@ class TokenPriceMinHelper {
                 "citadelv2",
                 "daoSafu",
                 "daoDegen",
-                "daoTA"
+                "daoTA",
+                "metaverse"
             ];
 
             for(let i = 0; i < tokensPairs.length; i ++) {
@@ -65,9 +66,7 @@ class TokenPriceMinHelper {
                     magnifiedAmount,
                     pairs
                 );
-                //console.log(`${magnifiedAmount}, price ${price[1]}, pairs`, pairs);
-               
-
+              
                 let priceMin = web3.utils.toBN(price[1]).muln(minPercentage).divn(100); 
                 if(priceMin === undefined) {
                     console.error(`Price Min is undefined for`, tokenPair.pairs);

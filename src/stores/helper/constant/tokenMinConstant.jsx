@@ -33,8 +33,28 @@ const bUSDBscAddress = "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56"
 const cakeBscAddress = "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82"
 // DAO TA
 const USDCAddr = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
+// Metaverse
+const AXSAddr = "0xBB0E17EF65F82Ab018d8EDd776e8DD940327B28b";
+const SLPAddr = "0xCC8Fa225D80b9c7D42F96e9570156c65D6cAAa25";
+const ILVAddr = "0x767FE9EDC9E0dF98E07454847909b5E959D7ca0E";
+const GHSTAddr = "0x3F382DbD960E3a9bbCeaE22651E88158d2791550";
+const REVVAddr = "0x557B933a7C2c45672B610F8954A3deB39a51A8Ca";
+const MVIAddr = "0x72e364F2ABdC788b7E918bc238B21f109Cd634D7";
 
 const tokensMinInfo = {
+    metaverse: {
+        routerAddress: "0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F",
+        abi: config.uniswapV2RouterABI,
+        tokens: [
+            { amount: 1, decimal: 18, pairs:[WETHAddr]}, // ETH <-> Stablecoins for withdraw
+            { amount: 1, decimal: 18, pairs:[AXSAddr, WETHAddr]},
+            { amount: 1, decimal: 0, pairs:[SLPAddr, WETHAddr]},
+            { amount: 1, decimal: 18, pairs:[ILVAddr, WETHAddr]},
+            { amount: 1, decimal: 18, pairs:[GHSTAddr, WETHAddr]},
+            { amount: 1, decimal: 18, pairs:[REVVAddr, WETHAddr]},
+            { amount: 1, decimal: 18, pairs:[MVIAddr, WETHAddr]},
+        ]
+    },
     citadelv2: {
         routerAddress: "0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F",
         abi: config.uniswapV2RouterABI,
