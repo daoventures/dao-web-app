@@ -2106,16 +2106,16 @@ class Asset extends Component {
             InputValidation.validateAmountNotExist(amount)
         ) {
           this.setState({
-            redeemAmountError: true,
-            withdrawErrorMessage: `Invalid amount`,
+            amountError: true,
+            errorMessage: `Invalid amount`,
           });
           return;
         }
 
         if ( InputValidation.validateInputMoreThanBalance(amount, assetBalance)) {
             this.setState({
-                redeemAmountError: true,
-                withdrawErrorMessage: `Exceed available balance`,
+                amountError: true,
+                errorMessage: `Exceed available balance`,
             });
             return;
         }
