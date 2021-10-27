@@ -1280,7 +1280,7 @@ class Asset extends Component {
                                             : classes.depositScale
                                     }
                                     variant="text"
-                                    disabled={loading}
+                                    disabled={loading||!(isDeposit ? asset.isDepositEnabled : asset.isWithdrawEnabled)}
                                     onClick={() => {
                                         isDeposit
                                             ? this.setAmount(percentage)
