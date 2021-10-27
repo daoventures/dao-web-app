@@ -1941,7 +1941,9 @@ class Store {
         pnl: assetApiData.pnl || 0,
         asset_distribution: assetApiData.asset_distribution ? assetApiData.asset_distribution : [],
         isDepositEnabled: assetApiData.deposit,
-        isWithdrawEnabled: assetApiData.withdraw
+        isWithdrawEnabled: assetApiData.withdraw,
+        depositCurrencies: assetApiData.currencies ? assetApiData.currencies.filter(c => c.enabledDeposit === true) : [],
+        withdrawCurrencies: assetApiData.currencies? assetApiData.currencies.filter(c => c.enabledWithdraw === true) : []
       }
       asset = {
         ...asset,
@@ -1949,7 +1951,7 @@ class Store {
       }
       assets[i] = asset;
       store.setStore({ vaultAssets: assets });
-
+      
       emitter.emit(STRATEGY_BALANCES_FULL_RETURNED, assets);
       return asset;
     })
