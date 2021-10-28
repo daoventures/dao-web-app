@@ -1573,14 +1573,14 @@ class Asset extends Component {
                     alignItems="center"
                 >
                     {this.state.isWithdrawError && !this.state.isWithdrawCompleted && <Grid item sm={12} xs={12}>
-                        <span className={classes.erroredMessage}>Failed to withdraw {this.state.selectedCurrency}
+                        <span className={classes.erroredMessage}>Failed to withdraw {this.state.selectedWithdrawCurrency}
                             <br/> from {asset.strategy} Strategy. <br/>Please try again</span>
                     </Grid>}
                     {this.state.isWithdrawCompleted && <Grid item sm={8} xs={8} className={classes.withdrawMessageBlock}>
-                        <span className={classes.withDrawMessage}>Your {this.state.selectedCurrency} has been withdrawn <br/>from {asset.strategy} Strategy <br/>successfully.</span>
+                        <span className={classes.withDrawMessage}>Your {this.state.selectedWithdrawCurrency} has been withdrawn <br/>from {asset.strategy} Strategy <br/>successfully.</span>
                     </Grid>}
                     {this.state.isWithdrawing && <Grid item sm={8} xs={8} className={classes.withdrawMessageBlock}>
-                        <span className={classes.withDrawMessage}>Withdrawing your {this.state.selectedCurrency} <br/> in {asset.strategy} Strategy</span>
+                        <span className={classes.withDrawMessage}>Withdrawing your {this.state.selectedWithdrawCurrency} <br/> in {asset.strategy} Strategy</span>
                     </Grid>}
                     <Grid item xs={12}/>
                     <Grid item sm={6} xs={8}>
