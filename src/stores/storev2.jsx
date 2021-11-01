@@ -87,6 +87,8 @@ import { injected } from "./connectors";
 import contractHelper from './helper/contractHelper';
 import tokenPriceMinHelper from './helper/tokenPriceMinHelper';
 import apiHelper from "./helper/apiHelper";
+import avalancheTesnet from "./config/avalancheTestnet";
+import avalancheMainnet from "./config/avalancheMainnet";
 
 const rp = require("request-promise");
 
@@ -104,6 +106,8 @@ const networkObj = {
   42: "ethereum",
   80001: "polygon",
   137: "polygon",
+  43113: "avalanche",
+  43114: "avalanche"
 }
 
 class Store {
@@ -414,7 +418,9 @@ class Store {
       80001: Mumbai,
       137: Matic,
       56: BscMainnet,
-      97: BscTestnet
+      97: BscTestnet,
+      43113: avalancheTesnet,
+      43114: avalancheMainnet
     };
 
     const upgradeTokenObj = {
@@ -1641,13 +1647,14 @@ class Store {
     const amountToSend = fromExponential(parseFloat(amount));
 
     let functionCall;
-    if(asset.strategyType === "citadelv2" || asset.strategyType === "metaverse" || asset.strategyType === "daoStonks" || asset.strategyType === "daoDegen" || asset.strategyType === "daoSafu" || asset.strategyType === "daoTA") {
+    const strategiesWithoutMinPriceParam = ["daoCDV", "daoSTO", "daoCUB", "daoELO", "daoMPT"];
+    if(strategiesWithoutMinPriceParam.includes(asset.vaultSymbol)) {
+      functionCall = vaultContract.methods
+      .withdraw(amountToSend, token);
+    } else {
       const tokenMinPrice = await this.getTokenPriceMin(token, asset.strategyType);
       functionCall = vaultContract.methods
         .withdraw(amountToSend, token, tokenMinPrice);
-    } else {
-      functionCall = vaultContract.methods
-      .withdraw(amountToSend, token);
     }
 
     await functionCall
@@ -1688,11 +1695,12 @@ class Store {
   // For Citadel V2, DAO Stonks, DAO Safu
   getTokenPriceMin = async(erc20Address, contractType) => {
     try {
-      let tokenPriceMin = [];
+      let tokenPriceMin = [0];
 
       const network = store.getStore("network");
       const supportedNetwork = [
         NETWORK.BSCMAINNET,
+        NETWORK.AVALANCHEMAIN,
         NETWORK.ETHEREUM
       ];
       if(!supportedNetwork.includes(network)) {
@@ -1773,6 +1781,30 @@ class Store {
       );
     }
   };
+
+  invest = async(asset) => {
+    const account = store.getStore("account");
+    const web3 = new Web3(store.getStore("web3context").library.provider);
+
+    let vaultContract = new web3.eth.Contract(
+      asset.vaultContractABI,
+      asset.vaultContractAddress
+    );
+
+    await vaultContract.methods.invest([]).send({
+      from: account.address,
+      gasPrice: web3.utils.toWei(await this._getGasPrice(), "gwei"),
+    }).on("transactionHash", function (txnHash) {
+      console.log(`invest  ${asset.vaultSymbol}  transaction hash`, txnHash);
+    })
+    .on("receipt", function (receipt) {
+      alert("Successfully invest");
+      console.log(`Successfully invest`);
+    })
+    .on("error", function (error) {
+      console.error(`Something wrong when calling invest`)
+    })
+  }
 
   /***************** WITHDRAWAL END *****************/
 
@@ -1909,7 +1941,9 @@ class Store {
         pnl: assetApiData.pnl || 0,
         asset_distribution: assetApiData.asset_distribution ? assetApiData.asset_distribution : [],
         isDepositEnabled: assetApiData.deposit,
-        isWithdrawEnabled: assetApiData.withdraw
+        isWithdrawEnabled: assetApiData.withdraw,
+        depositCurrencies: assetApiData.currencies ? assetApiData.currencies.filter(c => c.enabledDeposit === true) : [],
+        withdrawCurrencies: assetApiData.currencies? assetApiData.currencies.filter(c => c.enabledWithdraw === true) : []
       }
       asset = {
         ...asset,
@@ -1917,7 +1951,7 @@ class Store {
       }
       assets[i] = asset;
       store.setStore({ vaultAssets: assets });
-
+      
       emitter.emit(STRATEGY_BALANCES_FULL_RETURNED, assets);
       return asset;
     })

@@ -15,6 +15,8 @@ class ContractHelper {
       return config.polygonERC20Abi;
     } else if (network === NETWORK.BSCTEST || network === NETWORK.BSCMAINNET) {
       return config.bscERC20Abi;
+    } else if (network === NETWORK.AVALANCHEMAIN || network === NETWORK.AVALANCHETEST) {
+      return config.bscERC20Abi;
     }
   }
 

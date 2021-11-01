@@ -20,7 +20,8 @@ class TokenPriceMinHelper {
         try {
             const supportedNetwork = [
                 NETWORK.ETHEREUM,
-                NETWORK.BSCMAINNET
+                NETWORK.BSCMAINNET,
+                NETWORK.AVALANCHEMAIN
             ]
             if(!supportedNetwork.includes(network)) {
                 throw new Error(`Not in mainnet network`);
@@ -36,12 +37,18 @@ class TokenPriceMinHelper {
             if(!tokensInfo || tokensInfo === undefined) {
                 throw new Error(`Tokens Info undefined`);
             }
-      
-            const routerContract = new web3.eth.Contract(
-              tokensInfo.abi,
-              tokensInfo.routerAddress
-            );
 
+            const routerContracts = [];
+            const routerAddresses = tokensInfo.routerAddresses;
+
+            for(let i = 0; i < routerAddresses.length; i++) {
+                const routerContract = new web3.eth.Contract(
+                    tokensInfo.abi,
+                    routerAddresses[i]
+                );
+                routerContracts.push(routerContract);
+            }
+      
             const tokensPairs = tokensInfo.tokens;
 
             const contractTypes = [
@@ -49,12 +56,13 @@ class TokenPriceMinHelper {
                 "daoSafu",
                 "daoDegen",
                 "daoTA",
-                "metaverse"
+                "metaverse",
+                "daoAXA",
             ];
 
             for(let i = 0; i < tokensPairs.length; i ++) {
                 const tokenPair = tokensPairs[i];
-                let { amount, decimal, pairs } = tokenPair;
+                let { amount, decimal, pairs, routerIndex } = tokenPair;
                 
                 if(i === 0 && contractTypes.includes(contractType)) {
                     pairs.push(erc20Address);
@@ -62,11 +70,12 @@ class TokenPriceMinHelper {
 
                 const magnifiedAmount =  web3.utils.toBN(amount * 10 ** decimal);
                 const price = await getAmountsOut(
-                    routerContract,
+                    routerContracts[routerIndex],
                     magnifiedAmount,
                     pairs
                 );
-              
+                // console.log(`${magnifiedAmount}, price ${price[1]}, pairs`, pairs);
+               
                 let priceMin = web3.utils.toBN(price[1]).muln(minPercentage).divn(100); 
                 if(priceMin === undefined) {
                     console.error(`Price Min is undefined for`, tokenPair.pairs);
@@ -79,6 +88,9 @@ class TokenPriceMinHelper {
           } catch (err) {
             console.error(`Error in getTokenPriceMin(), `, err);
           } finally{
+            if(tokenPriceMin.length <= 0) {
+                tokenPriceMin = [0];
+            }
             return tokenPriceMin;
           }
     }

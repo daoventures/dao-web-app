@@ -10,7 +10,7 @@ const bscMainnet = [
         symbols: [
             "USDT", 
             "USDC", 
-            // "DAI"
+            "DAI"
         ],
         description: "Stablecoins",
         vaultSymbol: "daoDEGEN",

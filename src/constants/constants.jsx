@@ -142,7 +142,9 @@ export const BLOCK_EXPLORERS = {
   56: "https://bscscan.com/tx/",
   97: "https://testnet.bscscan.com/tx/",
   80001: "https://mumbai.polygonscan.com/tx/",
-  137: "https://polygonscan.com/tx/"
+  137: "https://polygonscan.com/tx/",
+  43114: "https://avascan.info/blockchain/c/tx/",
+  43113: "https://cchain.explorer.avax-test.network/tx/"
 };
 
 // Pools
