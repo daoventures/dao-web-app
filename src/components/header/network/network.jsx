@@ -31,7 +31,7 @@ const styles = (theme) => ({
         display: "flex",
         border: `1px solid ${theme.themeColors.border}`,
         color: theme.themeColors.textT,
-        padding: "5px",
+        padding: "8px",
         alignItems: "center"
     },
     networkLabel: {
