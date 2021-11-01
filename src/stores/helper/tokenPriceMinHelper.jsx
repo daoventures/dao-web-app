@@ -1,5 +1,8 @@
 import { NETWORK } from "../../constants/constants";
 import TokenMinsInfo from "./constant/tokenMinConstant";
+import AvalancheMainnet from "../config/avalancheMainnet";
+import AvalancheTestnet from "../config/avalancheTestnet";
+import ContractHelper from "../helper/contractHelper";
 
 const minPercentage = 95;
 
@@ -13,6 +16,95 @@ const getAmountsOut = async(contract, amount, pairs) => {
         return result;
     }
 } 
+
+const getPricePerFullShare = async(contract)=> {
+    let pricePerFullShare = 0;
+    try { 
+        pricePerFullShare = await contract.getPricePerFullShare().call();
+        pricePerFullShare = pricePerFullShare / 10 ** 18;
+    } catch (err) {
+        console.error(`Error in getPricePerFullShare of tokenPriceMinHelper`, err);
+    } finally {
+        return pricePerFullShare;
+    }
+}
+
+
+const getAmountsOutMinDexStable = async(web3, network, shareToWithdraw, stableCoinToWithdraw, contractType) => {
+    const strategies = network === NETWORK.AVALANCHEMAIN ? AvalancheMainnet : AvalancheTestnet;
+    const strategy = strategies.find(s => s.vaultSymbol === contractType);
+
+    const vaultContract = new web3.eth.Contract(
+        strategy.vaultContractABI,
+        strategy.vaultContractAddress
+    );
+
+    const strategyContract = new web3.eth.Contract(
+        strategy.strategyAddress,
+        strategy.strategyContractABI
+    );
+
+    // Get total ERC20 amount in vault
+    const erc20Contracts = [];
+    const fees = await vaultContract.fees();
+    const erc20ABI = ContractHelper.getERC20AbiByNetwork(network);
+    let totalERC20AmountInVault = 0;
+    for(let i = 0; i < strategy.erc20addresses; i++) {
+        const erc20Contract = new web3.eth.Contract(
+            erc20ABI,
+            strategy.erc20addresses[i]
+        );
+        const currencyType = strategy.symbols[i];
+
+        let balanceInVault = erc20Contract.balanceOf(strategy.vaultContractAddress);
+        if(["usdt", "usdc"].includes(currencyType.toLowerCase())) {
+            balanceInVault = balanceInVault * 10 ** 12;
+        }
+
+        totalERC20AmountInVault = totalERC20AmountInVault + balanceInVault;
+        
+        const result = {
+            currencyType,
+            erc20Contract, 
+            balanceInVault,
+            address: strategy.erc20addresses[i]
+        };
+
+        erc20Contracts.push(result);
+    }
+    totalERC20AmountInVault = totalERC20AmountInVault - fees;
+
+    // Get amount withdraw in USD
+    const pricePerFullShare = await getPricePerFullShare();
+    const totalAmountWithdrawInUSD = pricePerFullShare * shareToWithdraw;
+
+    // Do nothing when total amount to withdraw in USD is less than total stablecoin balance in vault.
+    if(totalAmountWithdrawInUSD <= totalERC20AmountInVault) {
+        return [0];
+    }
+
+    // set stablecoin amount in vault
+    const erc20BalanceInVault = erc20Contracts.find(e => e.erc20Contract === stableCoinToWithdraw);
+    const amountToWithdrawFromStrategy = totalAmountWithdrawInUSD - erc20BalanceInVault;
+    const strategyAllPoolInUSD = await strategyContract.getAllPoolInUSD();
+    const sharePerc = (amountToWithdrawFromStrategy * 10 ** 18).div(strategyAllPoolInUSD);
+
+    // Check strategy's WAVAX balance before withdraw
+    const tokensInfo = TokenMinsInfo[contractType];
+    const WAVAXAddress = tokensInfo.WAXAXAddress;
+    const WAVAXContract = new web3.eth.Contact(erc20ABI, WAVAXAddress);
+    const WAVAXAmountBefore = await WAVAXContract.balanceOf(strategy.strategyAddress);
+    let totalWithdrawAVAX = WAVAXAmountBefore;
+
+    for(let i = 0 ; i < tokensInfo.length; i++) {
+        const tokenInfo = tokensInfo[i];
+    
+        const pairVaultContract = new web3.eth(tokenInfo.vaultAddress, )
+    }
+
+
+
+}
 
 class TokenPriceMinHelper {
     static getTokenPriceMin = async(web3, network, contractType, erc20Address) => {

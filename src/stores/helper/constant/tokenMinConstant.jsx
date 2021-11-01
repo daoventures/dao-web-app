@@ -107,9 +107,10 @@ const tokensMinInfo = {
             "0xA52aBE4676dbfd04Df42eF7755F01A3c41f28D27", // lyd router
         ], 
         abi: config.uniswapV2RouterABI,
+        WAVAXAddr,
         tokens: [
             { amount: 1, decimal: 18, routerIndex: 0, pairs:[WAVAXAddr]}, // AVAX <-> Stablecoins for withdraw
-            { amount: 1, decimal: 18, routerIndex: 0, pairs:[joeAddr, WAVAXAddr]},
+            { amount: 1, decimal: 18, routerIndex: 0, pairs:[joeAddr, WAVAXAddr] , vaultAddress: "0xFe67a4BAe72963BE1181B211180d8e617B5a8dee"},
             { amount: 1, decimal: 18, routerIndex: 1, pairs:[pngAddr, WAVAXAddr]},
             { amount: 1, decimal: 18, routerIndex: 2, pairs:[lydAddr, WAVAXAddr]},
         ]
@@ -120,6 +121,7 @@ const tokensMinInfo = {
             "0xE54Ca86531e17Ef3616d22Ca28b0D458b6C89106", // png router
             "0xA52aBE4676dbfd04Df42eF7755F01A3c41f28D27", // lyd router
         ], 
+        WAVAXAddr,
         abi: config.uniswapV2RouterABI,
         tokens: [
             { amount: 1, decimal: 18, routerIndex: 0, pairs:[joeAddr, usdtAvaxAddr]}, // AVAX <-> Stablecoins for withdraw
@@ -133,6 +135,7 @@ const tokensMinInfo = {
             "0xE54Ca86531e17Ef3616d22Ca28b0D458b6C89106", // png router
             "0xA52aBE4676dbfd04Df42eF7755F01A3c41f28D27", // lyd router
         ], 
+        WAVAXAddr,
         abi: config.uniswapV2RouterABI,
         tokens: [
             { amount: 1, decimal: 18, routerIndex: 2, pairs:[WAVAXAddr, usdtAvaxAddr]}, // AVAX <-> Stablecoins for withdraw
@@ -146,6 +149,7 @@ const tokensMinInfo = {
             "0xE54Ca86531e17Ef3616d22Ca28b0D458b6C89106", // png router
             "0xA52aBE4676dbfd04Df42eF7755F01A3c41f28D27", // lyd router
         ], 
+        WAVAXAddr,
         abi: config.uniswapV2RouterABI,
         tokens: []
     }
