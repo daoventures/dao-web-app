@@ -74,12 +74,8 @@ class TokenPriceMinHelper {
                     magnifiedAmount,
                     pairs
                 );
-<<<<<<< HEAD
-              
-=======
                 // console.log(`${magnifiedAmount}, price ${price[1]}, pairs`, pairs);
                
->>>>>>> develop
                 let priceMin = web3.utils.toBN(price[1]).muln(minPercentage).divn(100); 
                 if(priceMin === undefined) {
                     console.error(`Price Min is undefined for`, tokenPair.pairs);
