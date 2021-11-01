@@ -46,6 +46,7 @@ import {withRouter} from "react-router-dom";
 import {withStyles} from "@material-ui/core/styles";
 import PieChart from '../common/pieChart';
 import LineChart from '../common/chart/lineChart/lineChart';
+import CurrencySelect from "../common/currencySelect/currencySelect";
 
 import {
     getAssetData} from './vaultUtils';
@@ -803,7 +804,7 @@ const StyledTableRow = withStyles(() => ({
 }))(TableRow);
 
 class Asset extends Component {
-    constructor() {
+    constructor(props) {
         super();
 
         this.state = {
@@ -829,7 +830,9 @@ class Asset extends Component {
             openVaultInfo: false,
             interestTheme: {}, // 当前主题数据,
             selectedCurrency: "USDT",
-            tokenIndex: 0,
+            selectedWithdrawCurrency: "USDT",
+            tokenIndex: null,
+            withdrawTokenIndex: null,
             errorMessage: "",
             amountAboveThreshold: false,
             scales: [0, 25, 50, 75, 100],
@@ -872,6 +875,7 @@ class Asset extends Component {
             feeAmount: 0,
             finalAmount: 0,
             feePercentage: 0,
+            refreshToken: false,
         };
     }
 
@@ -899,6 +903,10 @@ class Asset extends Component {
     componentDidUpdate(prevProps){
         if(prevProps.expanded !== this.props.expanded && this.props.expanded === this.props.asset.id) {
             this.selectRangeLabel(this.props.asset, '7d');
+        }
+
+        if(prevProps.asset !== this.props.asset) {
+            this.setTokenIndex();
         }
     }
 
@@ -947,6 +955,23 @@ class Asset extends Component {
         if (apyResponseData.success) {
             this.setState({vaultAssetHistoricalData: {chartData: apyResponseData.data.chartData , pnl: apyResponseData.data.performanceHistory}});
         }
+    }
+
+    setTokenIndex = () => {
+        const { asset } = this.props;
+        const tokenIndex = asset.depositCurrencies ?  asset.depositCurrencies[0].tokenIndex : 0;
+        const selectedCurrency = asset.depositCurrencies ? asset.depositCurrencies[0].label: "USDT";
+
+        const withdrawTokenIndex = asset.withdrawCurrencies ? asset.withdrawCurrencies[0].tokenIndex: 0;
+        const selectedWithdrawCurrency = asset.withdrawCurrencies ? asset.withdrawCurrencies[0].label: "USDC";
+
+        // asset.symbol = asset.symbols[tokenIndex];
+        asset.balance = asset.balances[tokenIndex];
+        asset.erc20address = asset.erc20addresses[tokenIndex];
+
+        const refreshToken = !this.state.refreshToken;
+
+        this.setState({tokenIndex, selectedCurrency, refreshToken, withdrawTokenIndex,selectedWithdrawCurrency});
     }
 
     checkTheWalletApprovedStatus = async () => {
@@ -1042,7 +1067,7 @@ class Asset extends Component {
         const tokenMap = {USDT: "0", USDC: "1", DAI: "2"};
         const tokenIndex = tokenMap[currencyType];
 
-        asset.symbol = asset.symbols[tokenIndex];
+        //asset.symbol = asset.symbols[tokenIndex];
         asset.balance = asset.balances[tokenIndex];
         asset.erc20address = asset.erc20addresses[tokenIndex];
 
@@ -1056,6 +1081,40 @@ class Asset extends Component {
 
         this.handleModalDisplay(false);
     };
+
+    handleSelectedDepositCurrency = (selectedCurrency) => {
+        const { label: currencyType, tokenIndex } = selectedCurrency;
+        const {asset} = this.props;
+
+        // asset.symbol = asset.symbols[tokenIndex];
+        asset.balance = asset.balances[tokenIndex];
+        asset.erc20address = asset.erc20addresses[tokenIndex];
+        
+        this.setState({
+            selectedCurrency: currencyType,
+            tokenIndex: tokenIndex,
+            amount: "",
+            percent: 0,
+            errorMessage: "",
+        });
+    }
+
+    handleSelectedWithdrawCurrency = (selectedCurrency) => {
+        const { label: currencyType, tokenIndex } = selectedCurrency;
+        const {asset} = this.props;
+
+        // asset.symbol = asset.symbols[tokenIndex];
+        // asset.balance = asset.balances[tokenIndex];
+        // asset.erc20address = asset.erc20addresses[tokenIndex];
+        
+        this.setState({
+            selectedWithdrawCurrency: currencyType,
+            withdrawTokenIndex: tokenIndex,
+            amount: "",
+            percent: 0,
+            errorMessage: "",
+        });
+    }
 
     depositReturned = () => {
         this.setState({
@@ -1237,31 +1296,10 @@ class Asset extends Component {
                     />
                     <div className={classes.depositScaleContainer}>
                         <div className={classes.accountInfoBlock}>
-                            <div
-                                className={classes.accountInfo}
-                                onClick={() => {
-                                    this.handleModalDisplay(true);
-                                }}
-                            >
-                                <img
-                                    alt=""
-                                    src={require("../../assets/" +
-                                        this.state.selectedCurrency +
-                                        "-logo.png")}
-                                    className={classes.assetIconImg}
-                                    style={
-                                        asset.disabled
-                                            ? { filter: "grayscale(100%)" }
-                                            : {}
-                                    }
-                                />
-                                <span className={classes.addressSpan}>
-                                    {this.state.selectedCurrency}
-                                </span>
-                                <ArrowDropDownCircleIcon
-                                    className={classes.arrowDropdownIcon}
-                                />
-                            </div>
+                            <CurrencySelect currencies={isDeposit? asset.depositCurrencies : asset.withdrawCurrencies} 
+                                refresh={this.state.refreshToken} 
+                                selectedCurrency={isDeposit ? this.handleSelectedDepositCurrency : this.handleSelectedWithdrawCurrency} 
+                            />
                         </div>
                         {this.renderCurrencyModal(asset.symbols)}
                     </div>
@@ -1400,7 +1438,7 @@ class Asset extends Component {
                                                 ? {filter: "grayscale(100%)"}
                                                 : {}
                                         }
-                                    /> {asset.symbol}</StyledTableCellDepositHead>
+                                    /> {this.state.selectedCurrency}</StyledTableCellDepositHead>
                                     <StyledTableCellDepositHead
                                         align="right">{this.state.amount}</StyledTableCellDepositHead>
                                 </TableRow>
@@ -1412,16 +1450,16 @@ class Asset extends Component {
                                 </StyledTableRow>
                                 <StyledTableRow key={"approveDepositValue"}>
                                     <StyledTableCellDeposit align="left">Deposit</StyledTableCellDeposit>
-                                    <StyledTableCellDeposit align="right"> {this.state.finalAmount} {asset.symbol}</StyledTableCellDeposit>
+                                    <StyledTableCellDeposit align="right"> {this.state.finalAmount} {this.state.selectedCurrency}</StyledTableCellDeposit>
                                 </StyledTableRow>
                                 <StyledTableRow key={"approveDepositFee"}>
                                     <StyledTableCellDeposit align="left">Fee({this.state.feePercentage}%)</StyledTableCellDeposit>
-                                    <StyledTableCellDeposit align="right">-{this.state.feeAmount} {asset.symbol}</StyledTableCellDeposit>
+                                    <StyledTableCellDeposit align="right">-{this.state.feeAmount} {this.state.selectedCurrency}</StyledTableCellDeposit>
                                 </StyledTableRow>
                                 <StyledTableRow key={"approveDepositTotal"}>
                                     <StyledTableCellDeposit align="left">TOTAL</StyledTableCellDeposit>
                                     <StyledTableCellDeposit
-                                        align="right">{this.state.amount} {asset.symbol}</StyledTableCellDeposit>
+                                        align="right">{this.state.amount} {this.state.selectedCurrency}</StyledTableCellDeposit>
                                 </StyledTableRow>
                             </TableBody>}
                         </Table>
@@ -1431,7 +1469,7 @@ class Asset extends Component {
             {this.state.needVaultApproval && <div className={classes.depositWarningDiv}>
                 <Grid container>
                     {!this.state.isApprovalErrored && <Grid item sm={8} xs={8}>
-                        Allow your {asset.symbol} to be deposited in {asset.strategy}
+                        Allow your {this.state.selectedCurrency} to be deposited in {asset.strategy}
                     </Grid>}
                     {this.state.isApprovalErrored && <Grid item sm={8} xs={8}>
                         <span className={classes.erroredMessage}>Transaction denied. Please try again</span>
@@ -1508,7 +1546,7 @@ class Asset extends Component {
                                     <StyledTableCellDepositHead align="left"> <img
                                         alt=""
                                         src={require("../../assets/" +
-                                            this.state.selectedCurrency +
+                                            this.state.selectedWithdrawCurrency +
                                             "-logo.png")}
                                         className={classes.assetIconImgModal}
                                         style={
@@ -1516,7 +1554,7 @@ class Asset extends Component {
                                                 ? {filter: "grayscale(100%)"}
                                                 : {}
                                         }
-                                    /> <span className={classes.withdrawTextStandard}>{asset.symbol}</span></StyledTableCellDepositHead>
+                                    /> <span className={classes.withdrawTextStandard}>{this.state.selectedWithdrawCurrency}</span></StyledTableCellDepositHead>
                                     <StyledTableCellDepositHead
                                         align="right"><span className={classes.withdrawTextStandard}>{this.state.redeemAmountInUsd}</span></StyledTableCellDepositHead>
                                 </TableRow>
@@ -1535,14 +1573,14 @@ class Asset extends Component {
                     alignItems="center"
                 >
                     {this.state.isWithdrawError && !this.state.isWithdrawCompleted && <Grid item sm={12} xs={12}>
-                        <span className={classes.erroredMessage}>Failed to withdraw {this.state.selectedCurrency}
+                        <span className={classes.erroredMessage}>Failed to withdraw {this.state.selectedWithdrawCurrency}
                             <br/> from {asset.strategy} Strategy. <br/>Please try again</span>
                     </Grid>}
                     {this.state.isWithdrawCompleted && <Grid item sm={8} xs={8} className={classes.withdrawMessageBlock}>
-                        <span className={classes.withDrawMessage}>Your {this.state.selectedCurrency} has been withdrawn <br/>from {asset.strategy} Strategy <br/>successfully.</span>
+                        <span className={classes.withDrawMessage}>Your {this.state.selectedWithdrawCurrency} has been withdrawn <br/>from {asset.strategy} Strategy <br/>successfully.</span>
                     </Grid>}
                     {this.state.isWithdrawing && <Grid item sm={8} xs={8} className={classes.withdrawMessageBlock}>
-                        <span className={classes.withDrawMessage}>Withdrawing your {this.state.selectedCurrency} <br/> in {asset.strategy} Strategy</span>
+                        <span className={classes.withDrawMessage}>Withdrawing your {this.state.selectedWithdrawCurrency} <br/> in {asset.strategy} Strategy</span>
                     </Grid>}
                     <Grid item xs={12}/>
                     <Grid item sm={6} xs={8}>
@@ -1639,7 +1677,7 @@ class Asset extends Component {
 
     // Dispatch withdraw action
     onWithdraw = () => {
-        let {redeemEarnAmount, redeemAmount, tokenIndex} = this.state;
+        let {redeemAmount, withdrawTokenIndex} = this.state;
 
         const {asset, startLoading} = this.props;
 
@@ -1665,11 +1703,15 @@ class Asset extends Component {
                     vaultAmount: "0",
                     amount: shares,
                     asset: asset,
-                    tokenIndex: tokenIndex,
+                    tokenIndex: withdrawTokenIndex,
                 },
             });
         }
     };
+
+    invest = async(asset) => {
+        const result = await store.invest(asset);
+    }
 
     // Pending balance info modal renderring
     renderPendingInfo = () => {
@@ -1685,7 +1727,7 @@ class Asset extends Component {
     }
 
     render() {
-        const { classes, asset } = this.props;
+        const { classes, asset, } = this.props;
         const { loading } = this.state;
         
         const AssetInfo = getAssetData(asset.asset_distribution ? asset.asset_distribution : []);
@@ -1836,10 +1878,10 @@ class Asset extends Component {
                                                             {asset.depositedSharesInUSD
                                                                 ? (
                                                                     asset.depositedSharesInUSD /
-                                                                    asset.priceInUSD[this.state.tokenIndex]
+                                                                    asset.priceInUSD[this.state.withdrawTokenIndex]
                                                                 ).toFixed(4)
                                                                 : "0.0000"}{" "}
-                                                            {asset.symbols[this.state.tokenIndex]}
+                                                            {this.state.selectedWithdrawCurrency}
                                                         </span>
                                                     )}
                                                 </Typography>
@@ -1868,6 +1910,16 @@ class Asset extends Component {
                                             <span className={classes.actionButtonText}>Withdraw</span>
                                         </Button>
                                     )}
+
+                                    {/** INVEST Button remember to remove this */}
+                                    {  (["daoAXA","daoAXS","daoASA","daoA2S"].includes(asset.vaultSymbol) && store.getStore("network") === 43113 ) && <Button
+                                            className={classes.withdrawButton}
+                                            onClick={() => this.invest(asset)}
+                                            fullWidth
+                                        >
+                                            <span className={classes.actionButtonText}>Invest</span>
+                                        </Button>
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -1977,7 +2029,8 @@ class Asset extends Component {
 
         const pricePerFullShareInUSD = asset.depositedSharesInUSD / balance;
 
-        let assetTokenAmount = (inputAmount * asset.priceInUSD[this.state.tokenIndex]) / pricePerFullShareInUSD;
+        let assetTokenAmount = (inputAmount * asset.priceInUSD[this.state.withdrawTokenIndex]) / pricePerFullShareInUSD;
+         
         assetTokenAmount = (
             Math.floor(assetTokenAmount * 10 ** 8) /
             10 ** 8
@@ -2014,7 +2067,7 @@ class Asset extends Component {
         ).toFixed(8);
 
         const displayBalance = (asset.depositedSharesInUSD)
-            ? (asset.depositedSharesInUSD / asset.priceInUSD[this.state.tokenIndex]).toFixed(4)
+            ? (asset.depositedSharesInUSD / asset.priceInUSD[this.state.withdrawTokenIndex]).toFixed(4)
             : 0;
 
         if( !InputValidation.validateDigit(shareAmount) || 
@@ -2053,16 +2106,16 @@ class Asset extends Component {
             InputValidation.validateAmountNotExist(amount)
         ) {
           this.setState({
-            redeemAmountError: true,
-            withdrawErrorMessage: `Invalid amount`,
+            amountError: true,
+            errorMessage: `Invalid amount`,
           });
           return;
         }
 
         if ( InputValidation.validateInputMoreThanBalance(amount, assetBalance)) {
             this.setState({
-                redeemAmountError: true,
-                withdrawErrorMessage: `Exceed available balance`,
+                amountError: true,
+                errorMessage: `Exceed available balance`,
             });
             return;
         }
@@ -2128,22 +2181,6 @@ class Asset extends Component {
             withdrawErrorMessage: "",
         });
     };
-
-    // Handle selected currency
-    setCurrency = (tokenIndex) => {
-        if (this.state.loading) {
-            return;
-        }
-
-        const {asset} = this.props;
-
-        asset.symbol = asset.symbols[tokenIndex];
-        asset.balance = asset.balances[tokenIndex];
-        asset.erc20address = asset.erc20addresses[tokenIndex];
-
-        this.setState({tokenIndex: tokenIndex});
-    };
-
 }
 
 export default withRouter(withStyles(styles, {withTheme: true})(Asset));
