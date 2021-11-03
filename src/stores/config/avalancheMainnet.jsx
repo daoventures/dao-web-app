@@ -38,7 +38,7 @@ const avalancheMainnet = [
     //     strategyInfo: "Yield farm with top Avalanche decentralised exchange tokens.",
     //     strategyDescription: "Invest in the top three Avalanche DEXs (Trader Joe, Pangolin Exchange and Lydia Finance) which will be paired with AVAX for additional yield farming.",
     //     historicalPriceId: "daoAXA_price",
-    //     logoFormat: "svg",
+    //     logoFormat: "png",
     //     risk: ADVANCE,
     //     strategyType: "daoAXA",
     //     cTokenAddress: "",
