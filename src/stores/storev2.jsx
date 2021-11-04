@@ -1652,7 +1652,7 @@ class Store {
       functionCall = vaultContract.methods
       .withdraw(amountToSend, token);
     } else {
-      const tokenMinPrice = await this.getTokenPriceMin(token, asset.strategyType);
+      const tokenMinPrice = await this.getTokenPriceMin(token, asset.strategyType, amountToSend);
       functionCall = vaultContract.methods
         .withdraw(amountToSend, token, tokenMinPrice);
     }
@@ -1693,7 +1693,7 @@ class Store {
   };
 
   // For Citadel V2, DAO Stonks, DAO Safu
-  getTokenPriceMin = async(erc20Address, contractType) => {
+  getTokenPriceMin = async(erc20Address, contractType, shareToWithdraw) => {
     try {
       let tokenPriceMin = [0];
 
@@ -1711,7 +1711,7 @@ class Store {
         throw new Error(`Missing web3`);
       }
 
-      return await tokenPriceMinHelper.getTokenPriceMin(web3, network, contractType, erc20Address);
+      return await tokenPriceMinHelper.getTokenPriceMin(web3, network, contractType, erc20Address, shareToWithdraw);
     } catch (err) {
       console.error(`Error in getTokenPriceMin(), `, err);
     }
