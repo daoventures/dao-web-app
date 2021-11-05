@@ -16,7 +16,7 @@ const avalancheMainnet = [
             "0xd586e7f844cea2f87f50152665bcbc2c279d8d70",
         ],
         erc20address: "0xde3a24028580884448a5397872046a019649b084",  
-        vaultContractAddress: "0x0b0e5b52e14152308f9f952ff19c67ebeb7560bb",   
+        vaultContractAddress: "0xa4dcbe792f51e13fc0e6961bbec436a881e73194",   
         vaultContractABI: config.avaxVaultContractABI,
         balance: 0, // Stores balance of selectedERC20Address
         balances: [0, 0, 0],
