@@ -1839,8 +1839,14 @@ class Store {
       let percentageRange2 = await vaultContract.methods.networkFeePerc(1).call();
       let percentageRange3 = await vaultContract.methods.networkFeePerc(2).call();
 
-      let amountRange1 = await vaultContract.methods.networkFeeTier2(0).call();
-      let amountRange2 = await vaultContract.methods.networkFeeTier2(1).call();
+      let amountRange1, amountRange2 = 0;
+      if(["daoAXA", "daoAXS", "daoA2S", "daoASA"].includes(asset.strategyType)) {
+        amountRange1 = await vaultContract.methods.networkFeeTier(0).call();
+        amountRange2 = await vaultContract.methods.networkFeeTier(1).call();
+      } else {
+        amountRange1 = await vaultContract.methods.networkFeeTier2(0).call();
+        amountRange2 = await vaultContract.methods.networkFeeTier2(1).call();
+      }
 
       const strategies = [
         "metaverse",
@@ -1848,7 +1854,7 @@ class Store {
         "daoStonks",
         "daoSafu",
         "daoTA",
-        "daoDegen"
+        "daoDegen",
       ];
 
       if(strategies.includes(asset.strategyType)) {
@@ -1889,7 +1895,7 @@ class Store {
         }
       }
     } catch (Err) {
-
+      console.log(`get fee info`, Err);
     }
   }
 
@@ -1951,7 +1957,7 @@ class Store {
       }
       assets[i] = asset;
       store.setStore({ vaultAssets: assets });
-      
+   
       emitter.emit(STRATEGY_BALANCES_FULL_RETURNED, assets);
       return asset;
     })

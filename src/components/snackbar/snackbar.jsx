@@ -246,6 +246,24 @@ class MySnackbar extends Component {
           </IconButton>,
         ];
         break;
+      case "Approval Hash":
+        progressBar = <ProgressBar />;
+        icon = <SuccessIcon color={colors.blue} />;
+        color = colors.blue;
+        messageType = t("Approval in Progress");
+        autoHideDuration = 15000;
+        actions = [
+          <Button
+            variant="text"
+            size="small"
+            onClick={() => window.open(messageLink, "_blank")}>
+            View
+          </Button>,
+          <IconButton key="close" aria-label="Close" onClick={this.handleClose}>
+            <CloseIcon />
+          </IconButton>,
+        ];
+        break;
       default:
         icon = <SuccessIcon color={colors.blue} />;
         color = colors.blue;
