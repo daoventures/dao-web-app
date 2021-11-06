@@ -682,6 +682,7 @@ class Store {
 
       try {
         let balance = await erc20Contract.methods
+          .balanceOf(account.address)
           .call({ from: account.address });
         let decimals = await erc20Contract.methods
           .decimals()
@@ -1954,7 +1955,7 @@ class Store {
       }
       assets[i] = asset;
       store.setStore({ vaultAssets: assets });
-
+   
       emitter.emit(STRATEGY_BALANCES_FULL_RETURNED, assets);
       return asset;
     })
