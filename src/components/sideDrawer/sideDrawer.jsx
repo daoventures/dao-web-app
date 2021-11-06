@@ -904,12 +904,13 @@ class SideDrawer extends Component {
             <div className={`${classes.flexCenter} ${classes.purpleText} ${classes.justifyCenter}`}>
                 <Typography variant={"h5"}>Audited By</Typography>
             </div>
-            { auditors.map(row => {
-                return <div className={classes.auditors}>
+            { auditors.map((row, _rowId) => {
+                return <div className={classes.auditors} key={_rowId}>
                     {
-                        row.map(r => {
+                        row.map((r, _rId) => {
                             const imgLink = require(`../../assets/img_new/sidebar/auditor-${r.name}.${r.format}`);
                             return  <img
+                                key={_rId}
                                 alt={r.name}
                                 src={imgLink}
                                 style={{width: "84px", height: "18px", margin: "10px" }}
