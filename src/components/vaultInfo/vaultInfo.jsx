@@ -1039,8 +1039,8 @@ class Vault extends Component {
         const that = this;
         setTimeout(() => {
             const snackbarObj = {
-                snackbarMessage: "Approving...",
-                snackbarType: "Hash",
+                snackbarMessage: txHash,
+                snackbarType: "Approval Hash",
             };
             that.setState(snackbarObj);
         });

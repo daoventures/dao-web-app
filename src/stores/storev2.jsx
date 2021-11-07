@@ -1652,7 +1652,7 @@ class Store {
       functionCall = vaultContract.methods
       .withdraw(amountToSend, token);
     } else {
-      const tokenMinPrice = await this.getTokenPriceMin(token, asset.strategyType);
+      const tokenMinPrice = await this.getTokenPriceMin(token, asset.strategyType, amountToSend);
       functionCall = vaultContract.methods
         .withdraw(amountToSend, token, tokenMinPrice);
     }
@@ -1693,7 +1693,7 @@ class Store {
   };
 
   // For Citadel V2, DAO Stonks, DAO Safu
-  getTokenPriceMin = async(erc20Address, contractType) => {
+  getTokenPriceMin = async(erc20Address, contractType, shareToWithdraw) => {
     try {
       let tokenPriceMin = [0];
 
@@ -1711,7 +1711,7 @@ class Store {
         throw new Error(`Missing web3`);
       }
 
-      return await tokenPriceMinHelper.getTokenPriceMin(web3, network, contractType, erc20Address);
+      return await tokenPriceMinHelper.getTokenPriceMin(web3, network, contractType, erc20Address, shareToWithdraw);
     } catch (err) {
       console.error(`Error in getTokenPriceMin(), `, err);
     }
@@ -1839,8 +1839,14 @@ class Store {
       let percentageRange2 = await vaultContract.methods.networkFeePerc(1).call();
       let percentageRange3 = await vaultContract.methods.networkFeePerc(2).call();
 
-      let amountRange1 = await vaultContract.methods.networkFeeTier2(0).call();
-      let amountRange2 = await vaultContract.methods.networkFeeTier2(1).call();
+      let amountRange1, amountRange2 = 0;
+      if(["daoAXA", "daoAXS", "daoA2S", "daoASA"].includes(asset.strategyType)) {
+        amountRange1 = await vaultContract.methods.networkFeeTier(0).call();
+        amountRange2 = await vaultContract.methods.networkFeeTier(1).call();
+      } else {
+        amountRange1 = await vaultContract.methods.networkFeeTier2(0).call();
+        amountRange2 = await vaultContract.methods.networkFeeTier2(1).call();
+      }
 
       const strategies = [
         "metaverse",
@@ -1848,7 +1854,7 @@ class Store {
         "daoStonks",
         "daoSafu",
         "daoTA",
-        "daoDegen"
+        "daoDegen",
       ];
 
       if(strategies.includes(asset.strategyType)) {
@@ -1889,7 +1895,7 @@ class Store {
         }
       }
     } catch (Err) {
-
+      console.log(`get fee info`, Err);
     }
   }
 
@@ -1951,7 +1957,7 @@ class Store {
       }
       assets[i] = asset;
       store.setStore({ vaultAssets: assets });
-      
+   
       emitter.emit(STRATEGY_BALANCES_FULL_RETURNED, assets);
       return asset;
     })
