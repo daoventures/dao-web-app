@@ -6,7 +6,8 @@ import {
   GET_HAPPY_HOUR_STATUS,
   HAPPY_HOUR_RETURN,
   TOGGLE_DRAWER,
-  NETWORK
+  NETWORK,
+  ENS_ADDRESS_RESOLVED
 } from "../../constants";
 import {
   HEADER_TITLE_DAOMINE,
@@ -20,7 +21,6 @@ import {
 import { IconButton, Typography } from "@material-ui/core";
 import React, { Component } from "react";
 
-import ENS from "ethjs-ens";
 import HappyHourTimer from "../happyHourTimer";
 import Store from "../../stores/storev2";
 import ToggleTheme from "../toggleTheme";
@@ -296,6 +296,7 @@ class Header extends Component {
     emitter.on(CURRENT_THEME_RETURNED, this.currentThemeChanged);
     emitter.on(CHANGE_NETWORK, this.networkChanged);
     emitter.on(HAPPY_HOUR_RETURN, this.handleHappyHour);
+    emitter.on(ENS_ADDRESS_RESOLVED, this.setAddressEnsName);
   }
 
   componentDidMount() {
@@ -320,6 +321,7 @@ class Header extends Component {
     emitter.removeListener(CURRENT_THEME_RETURNED, this.currentThemeChanged);
     emitter.removeListener(CHANGE_NETWORK, this.networkChanged);
     emitter.removeListener(HAPPY_HOUR_RETURN, this.handleHappyHour);
+    emitter.removeListener(ENS_ADDRESS_RESOLVED, this.setAddressEnsName);
   }
 
   handleHappyHour = (payload) => {
@@ -335,7 +337,6 @@ class Header extends Component {
 
   connectionConnected = () => {
     this.setState({ account: store.getStore("account") });
-    this.setAddressEnsName();
   };
 
   connectionDisconnected = () => {
@@ -350,18 +351,7 @@ class Header extends Component {
   };
 
   setAddressEnsName = async () => {
-    const context = store.getStore("web3context");
-    if (context && context.library && context.library.provider) {
-      const provider = context.library.provider;
-      const account = store.getStore("account");
-      const { address } = account;
-      const network = provider.networkVersion;
-      const ens = new ENS({ provider, network });
-      const addressEnsName = await ens.reverse(address).catch(() => {});
-      if (addressEnsName) {
-        this.setState({ addressEnsName });
-      }
-    }
+    this.setState({ addressEnsName: store.getStore("account").ensName });
   };
 
   showNetWorkList() {

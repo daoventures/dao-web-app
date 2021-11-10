@@ -203,7 +203,9 @@ class ConnectWallet extends Component {
     const onboard = initOnboard({
       address: (address) => {
         store.setStore({account: {address: address}});
-        emitter.emit(CONNECTION_CONNECTED);
+        if (store.getStore('network')) {
+          emitter.emit(CONNECTION_CONNECTED);
+        }
       },
       network: (network) => {
         const oldNetwork = store.getStore("network");
@@ -220,6 +222,11 @@ class ConnectWallet extends Component {
 
         store.setStore({network: network});
         emitter.emit('CHANGE_NETWORK', {network: network});
+
+        const account = store.getStore('account')
+        if (account && account.address) {
+          emitter.emit(CONNECTION_CONNECTED);
+        }
       },
       balance: (balance) => {
         let account = store.getStore('account');
@@ -230,6 +237,14 @@ class ConnectWallet extends Component {
           web3context: {library: {provider: wallet.provider}},
         })
         window.localStorage.setItem('selectedWallet', wallet.name);
+      },
+      ens: (ens) => {
+        if (ens && ens.name) {
+          console.log('ENS name is available for the account. ', ens.name)
+          let account = store.getStore('account');
+          store.setStore({account: {...account, ensName: ens.name}})
+          emitter.emit('ENS_ADDRESS_RESOLVED');
+        }
       }
     });
     this.setState({
