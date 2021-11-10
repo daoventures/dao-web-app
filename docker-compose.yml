@@ -5,8 +5,7 @@ services:
     restart: always
     env_file:
       - .env
-    build: 
-      context: .
+    image: daoventures/frontend-develop:latest
     ports: 
       - 80:80
       - 443:443
