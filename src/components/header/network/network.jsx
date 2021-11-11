@@ -140,7 +140,7 @@ class NetworkSelect extends Component {
                 if(remainder === 0) {
                     const secondNetwork = supportedNetworkKeys[index + 1];
                     return (
-                        <div className={`${classes.networkSelectionRow}`}>
+                        <div className={`${classes.networkSelectionRow}`} key={index}>
                             <div id={index} className={`${classes.networkSelectionBox} ${classes.networkButton} ${(this.isSelectedNetwork(network) === true) ? classes.selectedNetworkSelectionBox: ""}`} onClick={() => this.changeNetwork(network)}>
                                 <img src={ getNetworkIcon(network)} alt={network}/>
                                 <Typography variant={"body1"} className={classes.networkSelectionLabel}>{supportedNetworks[network]["chainName"]}</Typography>
