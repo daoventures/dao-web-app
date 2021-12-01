@@ -48,6 +48,9 @@ const emitter = Store.emitter;
 const dispatcher = Store.dispatcher;
 const store = Store.store;
 
+const windowHeight = window.screen.availHeight;
+const windowWidth = window.screen.availWidth;
+
 const styles = (theme) => ({
   value: {
     cursor: "pointer",

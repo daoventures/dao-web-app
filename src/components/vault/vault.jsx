@@ -965,8 +965,8 @@ class Vault extends Component {
     return asset.strategyType === "citadel" ||
       asset.strategyType === "elon" ||
       asset.strategyType === "cuban" ||
-      asset.strategyType === "daoFaang" || 
-      asset.strategyType === "moneyPrinter" || 
+      asset.strategyType === "daoFaang" ||
+      asset.strategyType === "moneyPrinter" ||
       asset.strategyType === "metaverse"
       ? true
       : false;
@@ -1023,13 +1023,11 @@ class Vault extends Component {
     return showMobile ? (
       <React.Fragment>
         <Typography variant={"h5"} className={classes.assetLabel2}>
-          {
-            (asset.strategyType === "citadel" || asset.strategyType === "daoFaang")
-              ? "7d PnL"
-              : (this.isLogoVault(asset) && asset.strategyType !== "moneyPrinter")
-                ? "YTD Performance"
-                : "Yearly Growth"
-          }
+          {asset.strategyType === "citadel" || asset.strategyType === "daoFaang"
+            ? "7d PnL"
+            : this.isLogoVault(asset) && asset.strategyType !== "moneyPrinter"
+            ? "YTD Performance"
+            : "Yearly Growth"}
         </Typography>
         <Typography variant={"h3"} noWrap className={classes.assetLabel1}>
           {/* {this.isUsdVault(asset) && (
@@ -1103,13 +1101,13 @@ class Vault extends Component {
             </Typography> */}
 
             <Typography variant={"h5"} className={classes.assetLabel2}>
-              {
-                (asset.strategyType === "citadel" || asset.strategyType === "daoFaang")
-                  ? "7d PnL"
-                  : (this.isLogoVault(asset) && asset.strategyType !== "moneyPrinter")
-                    ? "YTD Performance"
-                    : "Yearly Growth"
-              }
+              {asset.strategyType === "citadel" ||
+              asset.strategyType === "daoFaang"
+                ? "7d PnL"
+                : this.isLogoVault(asset) &&
+                  asset.strategyType !== "moneyPrinter"
+                ? "YTD Performance"
+                : "Yearly Growth"}
             </Typography>
           </div>
         </div>
