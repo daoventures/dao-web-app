@@ -28,6 +28,7 @@ import {
 } from "./constants";
 
 import Store from "./stores/storev2";
+import PTokenRedeem from "./components/pTokenRedeem/pTokenRedeem";
 const emitter = Store.emitter;
 const store = Store.store;
 const dispatcher = Store.dispatcher;
@@ -129,6 +130,13 @@ class App extends Component {
                 <SideDrawer keyName="daomine"/>
                 <MainContainer />
                 <Stake />
+              </Route>
+
+              <Route path="/redeem">
+                <Header />
+                <SideDrawer keyName="redeem"/>
+                <MainContainer />
+                <PTokenRedeem />
               </Route>
 
               <Route path="/upgrade">

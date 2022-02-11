@@ -67,7 +67,8 @@ import {
   APPROVE_DEPOSIT_SUCCESS,
   ERROR_WALLET_APPROVAL,
   ERROR_DEPOSIT_WALLET,
-  CLAIM_DVD_ERROR
+  CLAIM_DVD_ERROR,
+  GET_REDEEM_INFO
 } from "../constants/constants";
 
 import Ethereum from "./config/ethereum";
@@ -388,6 +389,9 @@ class Store {
           case CONFIRM_CLAIM_DVD:
             this.claimTokens();
             break;
+          case GET_REDEEM_INFO: 
+            this.getUserPD33DInfo();
+            break;
           default: {
           }
         }
@@ -489,6 +493,22 @@ class Store {
       dvgObj.xDVG = config.xdvgTestContract;
       dvgObj.dvg = config.dvgTokenTestContract;
       dvgObj.dvd = config.dvdTokenTestContract;
+    } 
+
+    // Redeem PD33D Token 
+    let redeemPD33D = { xDvd: "", dvd: "", pD33dRedeemer: ""};
+    if(network === 1) {
+      redeemPD33D = {
+        xDvd: config.xdvdMainnetContract,
+        dvd: config.dvdTokenMainnetContract,
+        pD33dRedeemer: config.pD33dRedeemerMainnetContract,
+      }
+    } else if (network === 4) {
+      redeemPD33D = {
+        xDvd: config.xdvdRinkedbyContract,
+        dvd: config.dvdRinkedbyContract,
+        pD33dRedeemer: config.pD33dRedeemerTestContract,
+      }
     }
 
     return {
@@ -532,7 +552,8 @@ class Store {
         },
       ],
       upgradeToken,
-      airdrop
+      airdrop,
+      redeemPD33D
     };
   };
 
@@ -741,6 +762,7 @@ class Store {
           .call({ from: account.address });
         balance = parseFloat(balance) / 10 ** asset.decimals;
         callback(null, parseFloat(balance));
+        return parseFloat(balance);
       } catch (ex) {
         console.error("Error in getting ERC 20 Balance for asset: ", ex);
         // return callback(ex);
@@ -3365,6 +3387,75 @@ class Store {
     .on("error", function(error) {
       return emitter.emit(CLAIM_DVD_ERROR, error.message);
     })
+  }
+
+  getBalance = async(asset, account) => {
+    const web3 = await this._getWeb3Provider();
+    if(!web3) {
+      console.error(`No web3 in getDvgBalance()`);
+      return null;
+    }
+
+    const { address } = asset;
+
+    try {
+      const network = store.getStore("network");
+      const abi = contractHelper.getERC20AbiByNetwork(network);
+
+      const contract = new web3.eth.Contract(
+        abi,
+        address
+      );
+
+      const balance = await contract.methods.balanceOf(account.address).call();
+
+      return parseFloat(balance);
+    } catch (err) {
+      console.error(`Error in getBalance() : `, err);
+    }
+  }
+
+  /** PD33D Redeemer */
+  getUserPD33DInfo = async() => {
+    const network = store.getStore("network");
+    const account = store.getStore("account");
+    if(!account || account === undefined) {
+      return false;
+    }
+
+    let assets = this._getDefaultValues(network).redeemPD33D;
+  
+    let _promises = [];
+    _promises.push(this.getBalance(assets.dvd, account));
+    _promises.push(this.getBalance(assets.xDvd, account));
+
+    let [ dvdBalance, xDvdBalance ] = await Promise.all(_promises);
+
+    console.log(dvdBalance);
+  }
+
+  calculateForPD33D = async(payload) => {
+    const { amount, isVipToken } = payload;
+
+    if(!amount || amount === undefined) {
+      return false;
+    }
+
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      return null;
+    }
+
+
+    const methodName = isVipToken
+      ? "calcForVipDVD"
+      : "calcpD33d";
+
+    try {
+
+    } catch(err) {
+
+    }
   }
 }
 

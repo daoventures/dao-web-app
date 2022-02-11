@@ -264,3 +264,9 @@ export const CONFIRM_CLAIM_DVD = "Confirm Claim DVD";
 export const CLAIM_DVD_HASH = "Claim DVD Success";
 export const CLAIM_DVD_SUCCESS = "Claim DVD Success Returned";
 export const CLAIM_DVD_ERROR = "Claim DVD Error";
+
+// Redeem PD33D 
+export const GET_REDEEM_INFO = "Get Redeem Info";
+export const REDEEM_PTOKEN_HASH = "Redeem pToken Success";
+export const REDEEM_PTOKEN_SUCCESS = "Redeem pToken Success Returned";
+export const REDEEM_PTOKEN_ERROR = "Redeem pToken Error";
