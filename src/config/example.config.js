@@ -27767,15 +27767,22 @@ const config = {
   // DVD Token
   dvdTokenTestContract: daotokenConfig.dvdKovanAddress,
   dvdTokenMainnetContract: daotokenConfig.dvdMainnetAddress,
+  dvdRinkedbyContract: daotokenConfig.dvdRinkedbyAddress,
   dvdTokenContractABI: daotokenConfig.dvdABI,
   // xDVD Token
   xdvdTestContract: daotokenConfig.xdvdKovanAddress,
   xdvdMainnetContract: daotokenConfig.xdvdMainnetAddress,
+  xdvdRinkedbyContract: daotokenConfig.xdvdRinkedbyAddress,
   xDvdAbi:daotokenConfig.xdvdABI,
   // xDVG Token
   xdvgTestContract: daotokenConfig.xdvgKovanAddress,
   xdvgMainnetContract: daotokenConfig.xdvgMainnetAddress,
   xdvgAbi: daotokenConfig.xdvgABI,
+  // PD33D Redeemer
+  pD33dRedeemerTestContract: daotokenConfig.pD33dRedeemerRinkedbyAddress,
+  pD33dRedeemerMainnetContract: daotokenConfig.pD33dRedeemerMainnetAddress,
+  pD33dRedeemerAbi: daotokenConfig.pD33dRedeemerABI,
+
   DvgAbi: [{
     "inputs": [{
       "internalType": "address",
