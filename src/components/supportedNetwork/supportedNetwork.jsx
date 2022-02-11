@@ -7,6 +7,9 @@ import { Box, Typography, Button } from "@material-ui/core";
 import Warning from "../../assets/warning.png";
 import BasicModal from "../common/basicModal/basicModal";
 import { CHANGE_NETWORK, CONNECTION_CONNECTED, CONNECTION_DISCONNECTED } from "../../constants/constants";
+import {
+    switchNetwork
+} from "../header/network/networkHelper";
 
 const emitter = Store.emitter;
 const dispatcher = Store.dispatcher;
@@ -115,6 +118,10 @@ class SupportedNetwork extends Component {
         return account !== undefined && !supportedNetwork.includes(network);
     }
 
+    changeNetwork = async() => {
+        const result = await switchNetwork(1);
+        this.setState({open: false});
+    }
 
     render() {
         const { classes, pageName } = this.props;
@@ -126,7 +133,7 @@ class SupportedNetwork extends Component {
                     {pageName} page only works on Ethereum Mainnet
                 </Typography>
 
-                <Button className={`${classes.switchNetworkButton}`}>Switch to Ethereum Network</Button>
+                <Button className={`${classes.switchNetworkButton}`} onClick={() => this.changeNetwork()}>Switch to Ethereum Network</Button>
             </Box>
         </>
 
