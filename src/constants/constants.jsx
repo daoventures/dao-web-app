@@ -233,6 +233,7 @@ export const NETWORK = {
 export const NETWORK_LABEL = {
   1: "Ethereum",
   42: "Kovan",
+  4: "Rinkeby",
   137: "Polygon(Matic)",
   80001: "Polygon(Mumbai)",
   97: "BSC(Testnet)",

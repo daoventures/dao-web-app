@@ -80,6 +80,7 @@ export const getNetworkIcon = (network) => {
     switch(network) {
         case NETWORK.ETHEREUM:
         case NETWORK.KOVAN: 
+        case NETWORK.RINKEDBY:
             return ETHEREUM;
         case NETWORK.MATIC:
         case NETWORK.MUMBAI: 
