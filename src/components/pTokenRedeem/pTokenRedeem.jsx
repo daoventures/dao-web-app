@@ -75,14 +75,28 @@ const styles = (theme) => ({
     }
 });
 
+const supportedNetwork = [1, 4];
 class PTokenRedeem extends Component { 
     constructor(props) {
         super(props);
+
+        const account = store.getStore("account");
+
         this.state = {
             networkId: store.getStore("networkId"),
             account: store.getStore("account"),
-            supportedNetwork: [1, 4], // Only supported on Rinkeby and Ethereum Network
-            disableTransact : false
+            supportedNetwork: supportedNetwork, // Only supported on Rinkeby and Ethereum Network
+            disableTransact : this.checkSupportedNetwork(supportedNetwork)
+        }
+
+        // Check network after reload the page
+        if (performance.getEntriesByType("navigation")[0].type === "reload") {
+            
+            this.state.disableTransact = this.checkSupportedNetwork(supportedNetwork);
+
+            if(account && account.address) {
+                this.checkRedeemerInfo();
+            }
         }
     }
 
@@ -109,14 +123,17 @@ class PTokenRedeem extends Component {
         this.setState({
           networkId: networkId,
         });
-        this.checkSupportedNetwork();
+        this.checkSupportedNetwork(supportedNetwork);
     };
 
     walletConnected = () => {
-        console.log(`connected from p token redeem`);
         this.setState({
             account: store.getStore("account")
         });
+
+        // Get user PToken Info
+        this.checkRedeemerInfo();
+
     }
 
     walletDisconnected = () => {
@@ -127,16 +144,28 @@ class PTokenRedeem extends Component {
         });
     };
 
-
-    checkSupportedNetwork = () => {
+    checkSupportedNetwork = (supportedNetwork) => {
         const account = store.getStore("account").address;
         const network = store.getStore("network");
 
-        const isNetworkSupported = account !== undefined && this.state.supportedNetwork.includes(network);
+        if(supportedNetwork !== undefined && account !== undefined) {
+            const isNetworkSupported = account !== undefined && supportedNetwork.includes(network);
+            
+            this.setState({ 
+                disableTransact: !isNetworkSupported
+            })
 
-        this.setState({ 
-            disableTransact: !isNetworkSupported
-        })
+            if(!isNetworkSupported) {
+                return;
+            }
+
+            this.checkRedeemerInfo();
+        }
+    }
+
+    checkRedeemerInfo = async() => {
+        const redeemerInfo = await store.getUserPD33DInfo();
+        console.log(`redeemer info`, redeemerInfo);
     }
 
 

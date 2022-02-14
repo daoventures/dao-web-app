@@ -217,6 +217,7 @@ export const DVD_AIRDROP = "DVD_AIRDROP";
 export const NETWORK = {
   ETHEREUM: 1,
   KOVAN: 42,
+  RINKEDBY: 4,
   MATIC: 137,
   MUMBAI: 80001,
   BSCTEST: 97,
@@ -226,7 +227,7 @@ export const NETWORK = {
   AVALANCHEMAIN: 43114,
   AVALANCHETEST: 43113,
   ARBITRUMMAIN: 42161,
-  ARBITRUMTEST: 421611
+  ARBITRUMTEST: 421611,
 };
 
 export const NETWORK_LABEL = {
@@ -270,3 +271,8 @@ export const GET_REDEEM_INFO = "Get Redeem Info";
 export const REDEEM_PTOKEN_HASH = "Redeem pToken Success";
 export const REDEEM_PTOKEN_SUCCESS = "Redeem pToken Success Returned";
 export const REDEEM_PTOKEN_ERROR = "Redeem pToken Error";
+
+
+export const PARSE_UNITS = {
+  18: "ether",
+}

@@ -68,7 +68,8 @@ import {
   ERROR_WALLET_APPROVAL,
   ERROR_DEPOSIT_WALLET,
   CLAIM_DVD_ERROR,
-  GET_REDEEM_INFO
+  GET_REDEEM_INFO,
+  PARSE_UNITS
 } from "../constants/constants";
 
 import Ethereum from "./config/ethereum";
@@ -3389,27 +3390,30 @@ class Store {
     })
   }
 
-  getBalance = async(asset, account) => {
+  getBalance = async(tokenAddress, account) => {
     const web3 = await this._getWeb3Provider();
     if(!web3) {
       console.error(`No web3 in getDvgBalance()`);
       return null;
     }
-
-    const { address } = asset;
-
+   
     try {
       const network = store.getStore("network");
       const abi = contractHelper.getERC20AbiByNetwork(network);
 
       const contract = new web3.eth.Contract(
         abi,
-        address
+        tokenAddress
       );
 
-      const balance = await contract.methods.balanceOf(account.address).call();
+      const balanceRaw = await contract.methods.balanceOf(account.address).call();
 
-      return parseFloat(balance);
+      const decimals = await contract.methods.decimals().call();
+
+      const balance = web3.utils.fromWei(balanceRaw, PARSE_UNITS[decimals]);
+
+      return { balanceRaw, decimals, balance, tokenAddress };
+
     } catch (err) {
       console.error(`Error in getBalance() : `, err);
     }
@@ -3431,7 +3435,11 @@ class Store {
 
     let [ dvdBalance, xDvdBalance ] = await Promise.all(_promises);
 
-    console.log(dvdBalance);
+    return {
+      token: dvdBalance, 
+      vipToken: xDvdBalance,
+      pToken: undefined
+    }
   }
 
   calculateForPD33D = async(payload) => {

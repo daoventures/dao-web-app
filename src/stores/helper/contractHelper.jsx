@@ -9,7 +9,7 @@ import config from "../../config/config";
 class ContractHelper {
 
   static getERC20AbiByNetwork = (network) => {
-    if(network === NETWORK.ETHEREUM || network === NETWORK.KOVAN) {
+    if(network === NETWORK.ETHEREUM || network === NETWORK.KOVAN || network === NETWORK.RINKEDBY) {
       return config.erc20ABI;
     } else if (network === NETWORK.MATIC || network === NETWORK.MUMBAI) {
       return config.polygonERC20Abi;

@@ -66,12 +66,13 @@ class SupportedNetwork extends Component {
     constructor(props) {
         super(props);
 
+        // 
         this.state = {
             open: this.checkSupportedNetwork()
         }
 
+        // Check network after reload the page
         if (performance.getEntriesByType("navigation")[0].type === "reload") {
-            console.log(`reload`);
             this.state.open = this.checkSupportedNetwork();
         }
     }
