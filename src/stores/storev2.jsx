@@ -69,7 +69,10 @@ import {
   ERROR_DEPOSIT_WALLET,
   CLAIM_DVD_ERROR,
   GET_REDEEM_INFO,
-  PARSE_UNITS
+  PARSE_UNITS,
+  REDEEM_PTOKEN_HASH,
+  REDEEM_PTOKEN_SUCCESS,
+  REDEEM_PTOKEN_ERROR
 } from "../constants/constants";
 
 import Ethereum from "./config/ethereum";
@@ -503,12 +506,14 @@ class Store {
         xDvd: config.xdvdMainnetContract,
         dvd: config.dvdTokenMainnetContract,
         pD33dRedeemer: config.pD33dRedeemerMainnetContract,
+        pD33dRedeemerAbi: config.pD33dRedeemerAbi
       }
     } else if (network === 4) {
       redeemPD33D = {
         xDvd: config.xdvdRinkedbyContract,
         dvd: config.dvdRinkedbyContract,
         pD33dRedeemer: config.pD33dRedeemerTestContract,
+        pD33dRedeemerAbi: config.pD33dRedeemerAbi
       }
     }
 
@@ -3435,36 +3440,129 @@ class Store {
 
     let [ dvdBalance, xDvdBalance ] = await Promise.all(_promises);
 
+    _promises = [];
+    _promises.push(this.calculateForPD33D({ amount: dvdBalance.balanceRaw, isVipToken: false }));
+    _promises.push(this.calculateForPD33D({ amount: xDvdBalance.balanceRaw, isVipToken: true }));
+
+    let [ maxPtokenForToken , maxPtokenForVipToken ] = await Promise.all(_promises);
+
+    let pToken = {
+      token: maxPtokenForToken,
+      vipToken: maxPtokenForVipToken
+    };
+    
     return {
       token: dvdBalance, 
       vipToken: xDvdBalance,
-      pToken: undefined
+      pToken: pToken
     }
+  }
+
+  getRedeemerContract = async () => {
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      console.error(`No web3 found`);
+      return;
+    }
+
+    const network = store.getStore("network");
+
+    // Create Redeemer contract
+    let assets = this._getDefaultValues(network).redeemPD33D;
+    const { pD33dRedeemerAbi: abi, pD33dRedeemer: address } = assets;
+
+    const redeemerContract = new web3.eth.Contract(
+      abi,
+      address
+    );
+
+    return redeemerContract;
   }
 
   calculateForPD33D = async(payload) => {
     const { amount, isVipToken } = payload;
-
-    if(!amount || amount === undefined) {
-      return false;
-    }
-
+    
     const web3 = await this._getWeb3Provider();
     if (!web3) {
-      return null;
+      console.error(`No web3 found`);
+      return;
     }
 
+    if(!amount || amount === undefined) {
+      console.error(`Amount is missing for calculate PD33D.`);
+      return ;
+    }
+
+    // Create redeemer contract
+    const redeemerContract = await this.getRedeemerContract();
 
     const methodName = isVipToken
       ? "calcForVipDVD"
       : "calcpD33d";
 
     try {
+      const expectedPTokenAmountRaw = await redeemerContract.methods[methodName](amount).call();
+      
+      const expectedPTokenAmount = web3.utils.fromWei(expectedPTokenAmountRaw, PARSE_UNITS[18]);
 
+      return { pTokenAmountRaw: expectedPTokenAmountRaw, pTokenAmount: expectedPTokenAmount };
+  
     } catch(err) {
-
+      console.error(err);
     }
   }
+
+  redeemPToken = async(payload) => {
+    const { amount, isVipToken } = payload;
+
+    if(!amount || amount === undefined) {
+      console.error(`Amount is missing for redeem PD33D.`);
+      return ;
+    }
+
+    const web3 = await this._getWeb3Provider();
+    if (!web3) {
+      console.error(`No web3 found`);
+      return;
+    }
+
+    const account = store.getStore("account");
+    if (!account) {
+      console.error(`No account found`);
+      return;
+    }
+
+    const finalAmount = web3.utils.toWei(web3.utils.toBN(amount), PARSE_UNITS(18));
+
+    // Create redeemer contract
+    const redeemerContract = await this.getRedeemerContract();
+
+    const methodName = isVipToken
+      ? "redeemVipDVD"
+      : "redeemDVD";
+
+    try {
+        await redeemerContract.methods[methodName](finalAmount)
+          .send({
+            from: account.address
+          })
+          .on("transactionHash", function (txnHash) {
+            console.log(`Transaction hash generated `, txnHash);
+            return emitter.emit(REDEEM_PTOKEN_HASH, txnHash);
+          })
+          .on("receipt", function (receipt) {
+            console.log(receipt);
+            return emitter.emit(REDEEM_PTOKEN_SUCCESS, receipt);
+          })
+          .on("error", function (error) {
+            console.error(error);
+            return emitter.emit(REDEEM_PTOKEN_ERROR, error);
+          });
+    } catch(err) {
+        console.error(err);
+    }
+  }
+
 }
 
 var store = new Store();
