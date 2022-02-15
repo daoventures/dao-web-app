@@ -72,7 +72,11 @@ import {
   PARSE_UNITS,
   REDEEM_PTOKEN_HASH,
   REDEEM_PTOKEN_SUCCESS,
-  REDEEM_PTOKEN_ERROR
+  REDEEM_PTOKEN_ERROR,
+  APPROVE_PTOKEN_HASH,
+  APPROVE_PTOKEN_SUCCESS,
+  APPROVE_PTOKEN_ERROR,
+  REDEEM_SUPPORTED_NETWORK
 } from "../constants/constants";
 
 import Ethereum from "./config/ethereum";
@@ -3395,6 +3399,8 @@ class Store {
     })
   }
 
+  /** PD33D Redeemer */
+
   getBalance = async(tokenAddress, account) => {
     const web3 = await this._getWeb3Provider();
     if(!web3) {
@@ -3424,12 +3430,55 @@ class Store {
     }
   }
 
-  /** PD33D Redeemer */
+  getAllowance = async(tokenAddress) => {
+    const web3 = await this._getWeb3Provider();
+    if(!web3) {
+      console.error(`No web3 in getDvgBalance()`);
+      return null;
+    }
+   
+    try {
+      const network = store.getStore("network");
+
+      const abi = contractHelper.getERC20AbiByNetwork(network);
+
+      const contract = new web3.eth.Contract(
+        abi,
+        tokenAddress
+      );
+
+      const asset = this._getDefaultValues(network).redeemPD33D;
+      const redeemer = asset.pD33dRedeemer;
+
+      const allowanceRaw = await contract.methods.allowance(redeemer).call();
+
+      const decimals = await contract.methods.decimals().call();
+
+      const allowance = web3.utils.fromWei(allowanceRaw, PARSE_UNITS[decimals]);
+
+      return { allowanceRaw, allowance };
+
+    } catch (err) {
+      console.error(`Error in getAllowance() : `, err);
+    }
+  }
+  
   getUserPD33DInfo = async() => {
     const network = store.getStore("network");
     const account = store.getStore("account");
     if(!account || account === undefined) {
       return false;
+    }
+
+    // Returned 0 for wrong network
+    const supportedNetwork = REDEEM_SUPPORTED_NETWORK;
+    if(!supportedNetwork.includes(network)) {
+      const balance = {balanceRaw : 0, decimals: 0, balance: 0, tokenAddress: "" };
+
+      return {
+        token: balance,
+        vipToken: balance,
+      }
     }
 
     let assets = this._getDefaultValues(network).redeemPD33D;
@@ -3439,22 +3488,10 @@ class Store {
     _promises.push(this.getBalance(assets.xDvd, account));
 
     let [ dvdBalance, xDvdBalance ] = await Promise.all(_promises);
-
-    _promises = [];
-    _promises.push(this.calculateForPD33D({ amount: dvdBalance.balanceRaw, isVipToken: false }));
-    _promises.push(this.calculateForPD33D({ amount: xDvdBalance.balanceRaw, isVipToken: true }));
-
-    let [ maxPtokenForToken , maxPtokenForVipToken ] = await Promise.all(_promises);
-
-    let pToken = {
-      token: maxPtokenForToken,
-      vipToken: maxPtokenForVipToken
-    };
     
     return {
       token: dvdBalance, 
       vipToken: xDvdBalance,
-      pToken: pToken
     }
   }
 
@@ -3562,6 +3599,55 @@ class Store {
         console.error(err);
     }
   }
+
+
+  getApproval = async(tokenAddress) => {
+    const web3 = await this._getWeb3Provider();
+    if(!web3) {
+      console.error(`No web3 in getApproval()`);
+      return null;
+    }
+
+    const account = await store.getStore("account");
+    if(!account) {
+      console.error(`No web3 in getApproval()`);
+      return null;
+    }
+   
+    try {
+      const network = store.getStore("network");
+
+      const abi = contractHelper.getERC20AbiByNetwork(network);
+
+      const tokenContract = new web3.eth.Contract(
+        abi,
+        tokenAddress
+      );
+
+      const approveAmount = web3.utils.toWei("999999999999", PARSE_UNITS[18]);
+
+      await tokenContract.methods.approve(approveAmount)
+        .send({
+          from: account.address
+        })
+        .on("transactionHash", function (txnHash) {
+          console.log(`Transaction hash generated `, txnHash);
+          return emitter.emit(APPROVE_PTOKEN_HASH, txnHash);
+        })
+        .on("receipt", function (receipt) {
+          console.log(receipt);
+          return emitter.emit(APPROVE_PTOKEN_SUCCESS, receipt);
+        })
+        .on("error", function (error) {
+          console.error(error);
+          return emitter.emit(APPROVE_PTOKEN_ERROR, error);
+        });
+
+    } catch (err) {
+      console.error(`Error in getApproval() : `, err);
+    }
+  }
+
 
 }
 

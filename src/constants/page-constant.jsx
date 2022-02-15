@@ -20,8 +20,8 @@ export const SWAP_PATH = '/swap';
 export const SWAP = 'SWAP';
 export const UPGPRADE_PATH = '/upgrade';
 export const UPGPRADE = 'UPGRADE';
-export const REDEEM_PATH = "/redeem";
-export const REDEEM = "REDEEM";
+export const REDEEM_PATH = "/swap";
+export const REDEEM = "SWAP";
 export const PREDICTION_GAME = "PREDICTION GAME";
 export const PREDICTION_GAME_PATH = "https://prediction.daoventures.co";
 
@@ -72,7 +72,7 @@ export const SIDE_MENU = [
     },
     {
         key: REDEEM,
-        name: "redeem",
+        name: "swap",
         path: REDEEM_PATH,
         isExternalPath: false,
         icon: "#iconmenu_revert",

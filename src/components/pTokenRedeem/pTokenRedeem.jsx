@@ -1,12 +1,14 @@
 import React, { Component } from "react";
 import { withNamespaces } from "react-i18next";
-import { Button } from "@material-ui/core";
+import { Typography, Button } from "@material-ui/core";
 import { withRouter } from "react-router";
 import { withStyles } from "@material-ui/core/styles";
 import { CHANGE_NETWORK, REDEEM_PTOKEN_ERROR, REDEEM_PTOKEN_HASH, REDEEM_PTOKEN_SUCCESS, CONNECTION_CONNECTED, CONNECTION_DISCONNECTED } from "../../constants/constants";
 import Store from "../../stores/storev2"; // Update this
 import SuportedNetwork from "../supportedNetwork/supportedNetwork";
 import ConnectWallet from "../common/connectWallet/connectWallet";
+import RedeemInput from "./redeemInput";
+import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 
 const emitter = Store.emitter;
 const dispatcher = Store.dispatcher;
@@ -14,16 +16,11 @@ const store = Store.store;
 
 const styles = (theme) => ({
     root: {
-        flex: 1,
-        display: "flex",
-        flexDirection: "column",
         width: "100%",
-        justifyContent: "center",
-        alignItems: "flex-end",
         paddingLeft: "320px",
         paddingRight: "80px",
         paddingTop: "32px",
-        minHeight: "800px",
+        color: theme.themeColors.textT,
         [theme.breakpoints.down("sm")]: {
             paddingLeft: "0px",
             paddingRight: "0px",
@@ -31,23 +28,13 @@ const styles = (theme) => ({
         },
     },
     contentContainer: {
-        minWidth: "100%",
         display: "flex",
-        flex: 1,
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        position: "relative",
-        width: "82vw",
-        [theme.breakpoints.up('md')] : {
-            width: "75vw",
-        },
-        [theme.breakpoints.up('sm')] : {
-             width: "65vw",
-        }
-        // [theme.breakpoints.up('md')]: {
-        //   minWidth: 'calc(100% - '+ drawerWidth + 'px)',
-        // }
+        flexDirection: "row",
+    },
+    redeemContainer: {
+        width: "100%", 
+        background: "#292750"
+        // border: "1px solid "+ theme.themeColors.border,
     },
     switchNetworkButton: {
         height: "42px",
@@ -72,7 +59,69 @@ const styles = (theme) => ({
         "&:first-child": {
             marginLeft: "0px",
         },
-    }
+    }, 
+    titleContainer: {
+        display: "flex",
+        height: "48px",
+        padding: "0px 19px",
+        alignItems: "center",
+        flexDirection: "row",
+        background: theme.themeColors.menuSel,
+        color: theme.themeColors.textT
+    }, 
+    title: {
+        fontSize: "18px", 
+        fontWeight: 400
+    },
+    flexRow: {
+        display: "flex",
+        flexDirection: "row",
+    }, 
+    justifyCenter: {
+        justifyContent: "center",
+    },
+    alignCenter: {
+        alignItems: "center"
+    }, 
+    swapContainer: {
+        padding: "16px 72px 48px 72px", 
+        display: "flex",
+        flexDirection: "column"
+    }, 
+    inputContainer: {
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-between", 
+        alignItems: "center",
+        padding: "16px 0px"
+    },
+    buttonContainer: {
+        marginTop: "8px"
+    },
+    depositActionButton: {
+        height: "42px",
+        background: "#7B25D266",
+        borderColor: theme.themeColors.border,
+        color: theme.themeColors.textT,
+        width: '100%',
+        borderRadius: "0px",
+        cursor: "pointer",
+        flex: "1",
+        "&:hover": {
+            background: theme.themeColors.btnBack,
+        },
+        "&.Mui-disabled": {
+            borderColor: theme.themeColors.btnDisabled,
+            cursor: "not-allowed",
+            color: theme.themeColors.textD,
+        },
+        "&:first-child": {
+            marginLeft: "0px",
+        },
+        '& img': {
+            height: "30px"
+        }
+    },
 });
 
 const supportedNetwork = [1, 4];
@@ -86,7 +135,9 @@ class PTokenRedeem extends Component {
             networkId: store.getStore("networkId"),
             account: store.getStore("account"),
             supportedNetwork: supportedNetwork, // Only supported on Rinkeby and Ethereum Network
-            disableTransact : this.checkSupportedNetwork(supportedNetwork)
+            disableTransact : this.checkSupportedNetwork(supportedNetwork),
+            token: "DVD", 
+            redeemerInfo: null
         }
 
         // Check network after reload the page
@@ -165,7 +216,12 @@ class PTokenRedeem extends Component {
 
     checkRedeemerInfo = async() => {
         const redeemerInfo = await store.getUserPD33DInfo();
-        console.log(`redeemer info`, redeemerInfo);
+       
+        const that = this;
+        that.setState({
+            redeemerInfo
+        })
+
     }
 
 
@@ -181,9 +237,19 @@ class PTokenRedeem extends Component {
 
     }
 
+    handleInput = (event) => {
+
+    }
+
+    handleTokenSelected = (event) => {
+       if(event!==undefined && event!==null) {
+            this.setState({token : event.label})
+       }
+    }
+
     render() {
         const { classes } = this.props;
-        const { account } = this.state;
+        const { account, token, redeemerInfo } = this.state;
 
         if (!account || !account.address) {
             return <ConnectWallet></ConnectWallet>;
@@ -192,8 +258,36 @@ class PTokenRedeem extends Component {
         return <>
             <div className={classes.root}>
                 <div className={classes.contentContainer}>
-                    <div style={{ height: "240px", width: "240px", background: "#7367b7" }}>
-                        <Button disabled={this.state.disableTransact} onClick={() => console.log(`Hello`)}>Hello</Button>
+                    <div className={classes.redeemContainer}>
+                        {/** Title Container */}
+                        <div className={classes.titleContainer}>
+                            <Typography className={classes.title}>Swap ({token} - PD33D)</Typography>
+                        </div>
+
+                        {/** Action Container */}
+                        <div style={{padding: "0px 19px", marginTop: "24px"}}>
+                            <Typography variant="body" style={{ marginTop: "16px" }}>Convert your {token} token into PD33D</Typography>
+
+                            {/** Swap */}
+                            <div className={classes.swapContainer}>
+                                <div className={classes.inputContainer}>
+                                    <RedeemInput redeemerInfo={redeemerInfo} handleInput={this.handleInput} handleTokenSelected={this.handleTokenSelected} />
+                                    
+                                    <div style={{margin: "0px 16px"}}>
+                                        <ArrowForwardIcon/>
+                                    </div>
+                                   
+                                    <RedeemInput redeemerInfo={redeemerInfo} handleInput={this.handleInput} handleTokenSelected={this.handleTokenSelected} />
+
+                                </div>
+
+                                <div className={classes.buttonContainer}>
+                                    <Button className={classes.depositActionButton}>Swap</Button>
+                                </div>
+
+                            </div>
+                            
+                        </div>
                     </div>
                 </div>
             </div>

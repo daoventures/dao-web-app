@@ -273,6 +273,16 @@ export const REDEEM_PTOKEN_HASH = "Redeem pToken Success";
 export const REDEEM_PTOKEN_SUCCESS = "Redeem pToken Success Returned";
 export const REDEEM_PTOKEN_ERROR = "Redeem pToken Error";
 
+export const APPROVE_PTOKEN_HASH = "Approve pToken Success";
+export const APPROVE_PTOKEN_SUCCESS = "Approve pToken Success Returned";
+export const APPROVE_PTOKEN_ERROR = "Approve pToken Error";
+
+export const REDEEM_SUPPORTED_NETWORK = [1, 4];
+
+export const TOKEN_TYPE = [
+  { label: "DVD", type: "token"},
+  { label: "vipDVD", type: "vipToken"}
+];
 
 export const PARSE_UNITS = {
   18: "ether",
