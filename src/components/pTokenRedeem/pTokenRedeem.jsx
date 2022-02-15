@@ -9,6 +9,9 @@ import SuportedNetwork from "../supportedNetwork/supportedNetwork";
 import ConnectWallet from "../common/connectWallet/connectWallet";
 import RedeemInput from "./redeemInput";
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
+import { formattingNumber } from "./utils";
+import BasicModal from "../common/basicModal/basicModal";
+import ConfirmRedeem from "./confirmRedeem";
 
 const emitter = Store.emitter;
 const dispatcher = Store.dispatcher;
@@ -137,7 +140,11 @@ class PTokenRedeem extends Component {
             supportedNetwork: supportedNetwork, // Only supported on Rinkeby and Ethereum Network
             disableTransact : this.checkSupportedNetwork(supportedNetwork),
             token: "DVD", 
-            redeemerInfo: null
+            tokenType: "token",
+            redeemerInfo: null, 
+            pTokenAmount: 0, 
+            amountToConvert: 0, 
+            open: false
         }
 
         // Check network after reload the page
@@ -173,6 +180,7 @@ class PTokenRedeem extends Component {
         const networkId = obj.network;
         this.setState({
           networkId: networkId,
+          pTokenAmount: 0
         });
         this.checkSupportedNetwork(supportedNetwork);
     };
@@ -237,23 +245,68 @@ class PTokenRedeem extends Component {
 
     }
 
-    handleInput = (event) => {
+    handleInput = async(event) => {
+        if(event !== undefined && event !== null) {
+            if(!event.error) {
+                const inputAmount = event.amount;
+              
+                const isVipToken = event.tokenType === "vipToken";
+                const amountToConvert = inputAmount * 10 ** 18;
 
+                const pTokenGet = await store.calculateForPD33D({ amount: amountToConvert, isVipToken});
+
+                if(pTokenGet !== undefined) {
+                    this.setState({ 
+                        pTokenAmount: pTokenGet.pTokenAmount,
+                        amountToConvert: inputAmount
+                    })
+                }
+            } else {
+                this.setState({ pTokenAmount : 0 })
+            }   
+        } 
     }
 
     handleTokenSelected = (event) => {
        if(event!==undefined && event!==null) {
-            this.setState({token : event.label})
+            this.setState({token : event.label, pTokenAmount: 0, tokenType: event.tokenType})
        }
+    }
+
+    handleModalOpen = (open) => {
+        this.setState({open})
     }
 
     render() {
         const { classes } = this.props;
-        const { account, token, redeemerInfo } = this.state;
+        const { account, token, disableTransact, pTokenAmount } = this.state;
 
         if (!account || !account.address) {
             return <ConnectWallet></ConnectWallet>;
         }
+
+        const redeemerInputProps = {
+            redeemerInfo: this.state.redeemerInfo,
+            handleInput: this.handleInput,
+            handleTokenSelected: this.handleTokenSelected, 
+            isForDisplay: false
+        }
+
+        const pTokenProps = {
+            isForDisplay: true,
+            info: {
+                label: "PD33D", 
+                amount: formattingNumber(this.state.pTokenAmount),
+            }
+        }
+
+        const confirmRedeemProps = {
+            inputAmount: this.state.amountToConvert,
+            inputLabel: this.state.token,
+            isVipToken: this.state.tokenType === "vipToken",
+            outputAmount: this.state.pTokenAmount,
+            outputLabel: "pD33D"
+        };
 
         return <>
             <div className={classes.root}>
@@ -271,18 +324,22 @@ class PTokenRedeem extends Component {
                             {/** Swap */}
                             <div className={classes.swapContainer}>
                                 <div className={classes.inputContainer}>
-                                    <RedeemInput redeemerInfo={redeemerInfo} handleInput={this.handleInput} handleTokenSelected={this.handleTokenSelected} />
+                                    <RedeemInput {...redeemerInputProps} />
                                     
                                     <div style={{margin: "0px 16px"}}>
                                         <ArrowForwardIcon/>
                                     </div>
                                    
-                                    <RedeemInput redeemerInfo={redeemerInfo} handleInput={this.handleInput} handleTokenSelected={this.handleTokenSelected} />
+                                    <RedeemInput {...pTokenProps}/>
 
                                 </div>
 
                                 <div className={classes.buttonContainer}>
-                                    <Button className={classes.depositActionButton}>Swap</Button>
+                                    <Button className={classes.depositActionButton} 
+                                        disabled={disableTransact || pTokenAmount <= 0}
+                                        onClick={() => {this.handleModalOpen(true)}}>
+                                        Swap
+                                    </Button>
                                 </div>
 
                             </div>
@@ -293,6 +350,15 @@ class PTokenRedeem extends Component {
             </div>
           
             <SuportedNetwork pageName="Redeem" supportedNetwork={this.state.supportedNetwork}/>
+       
+            <BasicModal 
+                contentTemplate={
+                    <ConfirmRedeem { ...confirmRedeemProps }/>
+                }
+                title={"Confirm Swap"}
+                openModal={this.state.open}
+                setOpenModal={this.handleModalOpen}
+            />
         </>
     }
 }

@@ -3517,8 +3517,8 @@ class Store {
   }
 
   calculateForPD33D = async(payload) => {
-    const { amount, isVipToken } = payload;
-    
+    let { amount, isVipToken } = payload;
+   
     const web3 = await this._getWeb3Provider();
     if (!web3) {
       console.error(`No web3 found`);
@@ -3536,6 +3536,8 @@ class Store {
     const methodName = isVipToken
       ? "calcForVipDVD"
       : "calcpD33d";
+
+    amount = fromExponential(amount);
 
     try {
       const expectedPTokenAmountRaw = await redeemerContract.methods[methodName](amount).call();

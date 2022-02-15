@@ -6,13 +6,19 @@ import { withStyles } from "@material-ui/core/styles";
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp';
 import InputValidation from "../../utils/inputValidation";
-import { TOKEN_TYPE as tokenType } from "../../constants/constants";
+import { TOKEN_TYPE as tokenTypes } from "../../constants/constants";
+import { formattingNumber } from "./utils";
+import { CHANGE_NETWORK } from "../../constants/constants";
+import Store from "../../stores/storev2";
+
+const emitter = Store.emitter;
 
 const styles = (theme) => ({
     flexColumm: {
         display: "flex",
         flexDirection: "column",
-        width: "100%"
+        width: "100%", 
+        minHeight: "120px"
     },
     actionContainer: {
         width: "100%",
@@ -53,7 +59,7 @@ const styles = (theme) => ({
     selectionContainer: {
         position: "absolute",
         right: "15px",
-        background:  "#000000",
+        background:  "rgba(21,2,59,0.7)",
         border: "1px solid " + theme.themeColors.border,
         zIndex: 5, 
         display: "flex",
@@ -66,7 +72,7 @@ const styles = (theme) => ({
         flexDirection: "row",
         alignItems: "center",
         cursor: "pointer",
-        padding: "0px 14px",
+        padding: "8px 14px",
         color: theme.themeColors.textT,
         "&:hover": {
             background: "#7357b7"
@@ -103,8 +109,17 @@ class RedeemInput extends Component {
         };
     }
 
-    // props
-    // isPToken, amount
+    componentWillMount() {
+        emitter.on(CHANGE_NETWORK, this.networkChanged)
+    }
+
+    componentWillUnmount() {
+        emitter.removeListener(CHANGE_NETWORK, this.networkChanged);
+    }
+
+    networkChanged = () => {
+        this.setState({ inputAmount: "0"})
+    }
 
     validateInput(amount) {
         const { redeemerInfo } = this.props;
@@ -114,11 +129,12 @@ class RedeemInput extends Component {
         if( !InputValidation.validateDigit(amount) || 
             InputValidation.validateAmountNotExist(amount)
         ) {
+        
           this.setState({
             error: true,
             errorMessage: `Invalid amount`,
           });
-          return;
+          return { error: true };
         }
 
         if ( InputValidation.validateInputMoreThanBalance(amount, balance)) {
@@ -126,10 +142,11 @@ class RedeemInput extends Component {
                 error: true,
                 errorMessage: `Exceed available balance`,
             });
-            return;
+            return { error: true };;
         }
 
         this.setState({error: false, errorMessage: ""});
+        return { error: false };
     }
 
     closeExpanded = () => {
@@ -142,12 +159,17 @@ class RedeemInput extends Component {
         let val = [];
         val[event.target.id] = event.target.value;
 
-        this.validateInput(val[event.target.id]);
+        const {error} = this.validateInput(val[event.target.id]);
 
         this.setState({
             inputAmount: val[event.target.id]
         })
 
+        this.props.handleInput({ 
+            error, 
+            amount: val[event.target.id],
+            tokenType: this.state.selectedToken,
+        });
         
     }
 
@@ -165,11 +187,11 @@ class RedeemInput extends Component {
     }
  
     render() {
-        let { classes, amount, isPToken, loading, redeemerInfo } = this.props;
+        let { classes , isForDisplay, loading, redeemerInfo, info } = this.props;
         const { inputAmount, error, expanded, errorMessage, tokenLabel } = this.state;
 
-        if (isPToken === undefined) {
-            isPToken = false;
+        if (isForDisplay === undefined) {
+            isForDisplay = false;
         }
 
         if (loading === undefined) {
@@ -180,38 +202,38 @@ class RedeemInput extends Component {
             <div className={classes.messageContainer}>
                 {/** Token Label */}
                 <div className={classes.topLabel}>
-                    <Typography variant={"h5"}>{tokenLabel}</Typography>
+                    <Typography variant={"h5"}>{isForDisplay ? info.label: tokenLabel}</Typography>
                 </div>
 
                 {/** Balance */}
-                <div className={classes.topLabel} style={{ marginRight: "15px"}}>
+                {!isForDisplay&&<div className={classes.topLabel} style={{ marginRight: "15px"}}>
                     <span>Balance: {
-                        redeemerInfo !== null
-                            ? redeemerInfo[this.state.selectedToken].balance
+                        redeemerInfo !== null && redeemerInfo !== undefined
+                            ? formattingNumber(redeemerInfo[this.state.selectedToken].balance)
                             : 0
                     } {tokenLabel}</span>
-                </div>
+                </div>}
             </div>
            
             <div className={classes.depositContainer}>
                 <TextField
                     className={classes.actionInput}
-                    value={isPToken ? amount : inputAmount}
+                    value={isForDisplay ? info.amount : inputAmount}
                     error={error}
                     id="input"
-                    disabled={loading || isPToken}
+                    disabled={loading || isForDisplay}
                     variant="outlined"
                     onChange={this.onChange}
                 />
 
-                <div className={classes.currencyContainer} onClick={() => this.closeExpanded()}>
+                {!isForDisplay&&<div className={classes.currencyContainer} onClick={() => this.closeExpanded()}>
                     <img alt="icon" className={classes.currency} src={require(`../../assets/img_new/swap/${this.state.tokenLabel.toLowerCase()}.png`)}/>
                     <span>{tokenLabel}</span>
                     {expanded ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
-                </div>
+                </div>}
 
                 {expanded && <div className={classes.selectionContainer}>
-                    {tokenType.map(d => {
+                    {tokenTypes.map(d => {
                         return <div className={classes.selection} onClick={() => this.handleTokenSelected(d)}>
                             <img alt="icon" className={classes.currency} src={require(`../../assets/img_new/swap/${this.state.tokenLabel.toLowerCase()}.png`)}/>
                             <span>{d.label}</span>

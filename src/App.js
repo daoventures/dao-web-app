@@ -132,9 +132,9 @@ class App extends Component {
                 <Stake />
               </Route>
 
-              <Route path="/redeem">
+              <Route path="/swap">
                 <Header />
-                <SideDrawer keyName="redeem"/>
+                <SideDrawer keyName="swap"/>
                 <MainContainer />
                 <PTokenRedeem />
               </Route>
