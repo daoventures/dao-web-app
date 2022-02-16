@@ -129,7 +129,7 @@ class RedeemInput extends Component {
     }
 
     handleRedeemReturned = (event) => {
-        if(event.success && event.receipt) {
+        if(event.success && event.receipt && event.action === "redeem") {
             this.setState({
                 inputAmount: "0"
             })

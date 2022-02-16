@@ -94,7 +94,7 @@ class ConfirmRedeem extends Component {
 
     handleRedeemStatus = (event) => {
 
-        if(event.success && event.receipt) {
+        if(event.success && event.receipt && event.action === "redeem") {
             const network = store.getStore("network");
             const receipt = event.receipt;
             const transactionHash = receipt.transactionHash;
@@ -108,6 +108,10 @@ class ConfirmRedeem extends Component {
                 redeemError: "",
                 transactionUrl
             })
+
+            setTimeout(() => {
+                this.resetAllVariable();
+            }, 5000)
         }
 
         if(!event.success && event.error) {
@@ -118,14 +122,14 @@ class ConfirmRedeem extends Component {
         }
     }
 
-
     handlePTokenStatus = (event) => {
 
-        if(event.success && event.receipt) {
+        if(event.success && event.receipt && event.action === "approve") {
             this.setState({
                 approvalSuccess: true,
                 approvalLoading: false, 
-                approvalError: ""
+                approvalError: "", 
+                requireApprove: false
             })
         }
 
@@ -136,6 +140,21 @@ class ConfirmRedeem extends Component {
                 approvalError: event.error.message
             })
         }
+    }
+
+    resetAllVariable() {
+        this.setState({
+            requireApprove: false, 
+            allowance: 0,
+            enableSwap: false, 
+            approvalLoading: false, 
+            approvalSuccess: false,
+            approvalError: "", 
+            redeemLoading: false,
+            redeemSuccess: false,
+            redeemError: "",
+            transactionUrl: "",
+        })
     }
 
 

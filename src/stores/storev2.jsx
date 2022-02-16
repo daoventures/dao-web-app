@@ -3594,15 +3594,15 @@ class Store {
           })
           .on("transactionHash", function (txnHash) {
             console.log(`Transaction hash generated `, txnHash);
-            return emitter.emit(REDEEM_PTOKEN, { txnHash, success: false});
+            return emitter.emit(REDEEM_PTOKEN, {  action: "redeem", txnHash, success: false});
           })
           .on("receipt", function (receipt) {
             console.log(receipt);
-            return emitter.emit(REDEEM_PTOKEN,  { receipt, success: true });
+            return emitter.emit(REDEEM_PTOKEN,  { action: "redeem", receipt, success: true });
           })
           .on("error", function (error) {
             console.error(error);
-            return emitter.emit(REDEEM_PTOKEN, { error , success: false });
+            return emitter.emit(REDEEM_PTOKEN, { action: "redeem", error , success: false });
           });
     } catch(err) {
         console.error(err);
@@ -3652,15 +3652,15 @@ class Store {
         })
         .on("transactionHash", function (txnHash) {
           console.log(`Transaction hash generated `, txnHash);
-          return emitter.emit(APPROVE_PTOKEN,  { txnHash, success: false });
+          return emitter.emit(APPROVE_PTOKEN,  { action: "approve", txnHash, success: false });
         })
         .on("receipt", function (receipt) {
           console.log(receipt);
-          return emitter.emit(APPROVE_PTOKEN, { receipt, success: true });
+          return emitter.emit(APPROVE_PTOKEN, {  action: "approve", receipt, success: true });
         })
         .on("error", function (error) {
           console.error(error);
-          return emitter.emit(APPROVE_PTOKEN,  { error, success: false });
+          return emitter.emit(APPROVE_PTOKEN,  { action: "approve",  error, success: false });
         });
 
     } catch (err) {
