@@ -236,13 +236,16 @@ class PTokenRedeem extends Component {
     handleRedeemEvent = (event) => {
         if(event.success && event.receipt && event.action === "redeem") {
             this.setState({
-                pTokenAmount: 0, 
                 disableTransact: false
             })
             this.checkRedeemerInfo();
 
             setTimeout(() => {
-                this.setState({open: false})
+                this.setState({
+                    open: false,
+                    pTokenAmount: 0, 
+                });
+                
             }, 5000)
         }
 

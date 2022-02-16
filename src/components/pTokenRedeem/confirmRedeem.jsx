@@ -134,7 +134,6 @@ class ConfirmRedeem extends Component {
         }
 
         if(!event.success && event.error) {
-            console.log(event);
             this.setState({
                 approvalLoading: false, 
                 approvalError: event.error.message
