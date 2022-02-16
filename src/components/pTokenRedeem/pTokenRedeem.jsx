@@ -3,7 +3,7 @@ import { withNamespaces } from "react-i18next";
 import { Typography, Button } from "@material-ui/core";
 import { withRouter } from "react-router";
 import { withStyles } from "@material-ui/core/styles";
-import { CHANGE_NETWORK, CONNECTION_CONNECTED, CONNECTION_DISCONNECTED } from "../../constants/constants";
+import { CHANGE_NETWORK, CONNECTION_CONNECTED, CONNECTION_DISCONNECTED, APRROVE_TOKEN, REDEEM_PTOKEN, REDEEM, APPROVE_PTOKEN } from "../../constants/constants";
 import Store from "../../stores/storev2"; // Update this
 import SuportedNetwork from "../supportedNetwork/supportedNetwork";
 import ConnectWallet from "../common/connectWallet/connectWallet";
@@ -145,7 +145,9 @@ class PTokenRedeem extends Component {
             redeemerInfo: null, 
             pTokenAmount: 0, 
             amountToConvert: 0, 
-            open: false
+            open: false,
+            snackbarMessage: "",
+            snackbarType: "",
         }
 
         // Check network after reload the page
@@ -163,12 +165,16 @@ class PTokenRedeem extends Component {
         emitter.on(CHANGE_NETWORK, this.networkChanged)
         emitter.on(CONNECTION_CONNECTED, this.walletConnected);
         emitter.on(CONNECTION_DISCONNECTED, this.walletDisconnected);
+        emitter.on(REDEEM_PTOKEN, this.handleRedeemEvent);
+        emitter.on(APPROVE_PTOKEN, this.handleApproveEvent);
     }
 
     componentWillUnmount() {
         emitter.removeListener(CHANGE_NETWORK, this.networkChanged);
         emitter.removeListener(CONNECTION_CONNECTED, this.walletConnected);
         emitter.removeListener(CONNECTION_DISCONNECTED, this.walletDisconnected);
+        emitter.removeListener(REDEEM_PTOKEN, this.handleRedeemEvent);
+        emitter.removeListener(APPROVE_PTOKEN, this.handleApproveEvent);
     }
 
     networkChanged = (obj) => {
@@ -227,17 +233,34 @@ class PTokenRedeem extends Component {
 
     }
 
+    handleRedeemEvent = (event) => {
+        if(event.success && event.receipt) {
+            this.setState({
+                pTokenAmount: 0, 
+                disableTransact: false
+            })
+            this.checkRedeemerInfo();
+        }
 
-    handleSuccessfulRedeem = () => {
-
+        if(!event.success && event.error) {
+            this.setState({
+                disableTransact: false
+            });
+        }
     }
 
-    handleRedeemHashGenerated = () => {
+    handleApproveEvent = (event) => {
+        if(event.success && event.receipt) {
+            this.setState({
+                disableTransact: false
+            })
+        }
 
-    }
-
-    handleRedeemError = () => {
-
+        if(!event.success && event.error) {
+            this.setState({
+                disableTransact: false
+            });
+        }
     }
 
     handleInput = async(event) => {
@@ -272,6 +295,12 @@ class PTokenRedeem extends Component {
         this.setState({open})
     }
 
+    handleTransaction = () => {
+        this.setState({
+            disableTransact: true
+        })
+    }
+
     render() {
         const { classes } = this.props;
         const { account, token, disableTransact, pTokenAmount } = this.state;
@@ -302,10 +331,9 @@ class PTokenRedeem extends Component {
             isVipToken: this.state.tokenType === "vipToken",
             redeemerInfo: this.state.redeemerInfo !== null ? this.state.redeemerInfo[this.state.tokenType] : null,
             outputAmount: this.state.pTokenAmount,
-            outputLabel: "pD33D"
+            outputLabel: "pD33D", 
+            handleTransaction: this.handleTransaction
         };
-
-        
 
         return <>
             <div className={classes.root}>

@@ -168,6 +168,7 @@ class ConfirmRedeem extends Component {
             approvalLoading: true,
             approvalError: ""
         })
+        this.props.handleTransaction();
         const tokenAddress = this.props.redeemerInfo.tokenAddress;
         await store.getApproval(tokenAddress);
     }
@@ -178,6 +179,7 @@ class ConfirmRedeem extends Component {
             redeemLoading: true,
             redeemError: ""
         })
+        this.props.handleTransaction();
         const params = { amount: this.props.inputAmount, isVipToken: this.props.isVipToken};
         await store.redeemPToken(params);
     }

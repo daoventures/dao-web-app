@@ -6,7 +6,7 @@ import { withStyles } from "@material-ui/core/styles";
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp';
 import InputValidation from "../../utils/inputValidation";
-import { TOKEN_TYPE as tokenTypes } from "../../constants/constants";
+import { REDEEM_PTOKEN, TOKEN_TYPE as tokenTypes } from "../../constants/constants";
 import { formattingNumber } from "./utils";
 import { CHANGE_NETWORK } from "../../constants/constants";
 import Store from "../../stores/storev2";
@@ -112,10 +112,12 @@ class RedeemInput extends Component {
 
     componentWillMount() {
         emitter.on(CHANGE_NETWORK, this.networkChanged)
+        emitter.on(REDEEM_PTOKEN, this.handleRedeemReturned)
     }
 
     componentWillUnmount() {
         emitter.removeListener(CHANGE_NETWORK, this.networkChanged);
+        emitter.removeListener(REDEEM_PTOKEN, this.handleRedeemReturned);
     }
 
     networkChanged = () => {
@@ -124,6 +126,14 @@ class RedeemInput extends Component {
             error: false,
             errorMessage: ""
         })
+    }
+
+    handleRedeemReturned = (event) => {
+        if(event.success && event.receipt) {
+            this.setState({
+                inputAmount: "0"
+            })
+        }
     }
 
     validateInput(amount) {
