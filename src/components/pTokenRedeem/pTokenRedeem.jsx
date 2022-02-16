@@ -3,7 +3,7 @@ import { withNamespaces } from "react-i18next";
 import { Typography, Button } from "@material-ui/core";
 import { withRouter } from "react-router";
 import { withStyles } from "@material-ui/core/styles";
-import { CHANGE_NETWORK, REDEEM_PTOKEN_ERROR, REDEEM_PTOKEN_HASH, REDEEM_PTOKEN_SUCCESS, CONNECTION_CONNECTED, CONNECTION_DISCONNECTED } from "../../constants/constants";
+import { CHANGE_NETWORK, CONNECTION_CONNECTED, CONNECTION_DISCONNECTED } from "../../constants/constants";
 import Store from "../../stores/storev2"; // Update this
 import SuportedNetwork from "../supportedNetwork/supportedNetwork";
 import ConnectWallet from "../common/connectWallet/connectWallet";
@@ -163,18 +163,12 @@ class PTokenRedeem extends Component {
         emitter.on(CHANGE_NETWORK, this.networkChanged)
         emitter.on(CONNECTION_CONNECTED, this.walletConnected);
         emitter.on(CONNECTION_DISCONNECTED, this.walletDisconnected);
-        emitter.on(REDEEM_PTOKEN_SUCCESS, this.handleSuccessfulRedeem);
-        emitter.on(REDEEM_PTOKEN_HASH, this.handleRedeemHashGenerated);
-        emitter.on(REDEEM_PTOKEN_ERROR, this.handleRedeemError);
     }
 
     componentWillUnmount() {
         emitter.removeListener(CHANGE_NETWORK, this.networkChanged);
         emitter.removeListener(CONNECTION_CONNECTED, this.walletConnected);
         emitter.removeListener(CONNECTION_DISCONNECTED, this.walletDisconnected);
-        emitter.removeListener(REDEEM_PTOKEN_SUCCESS, this.handleSuccessfulRedeem);
-        emitter.removeListener(REDEEM_PTOKEN_HASH, this.handleRedeemHashGenerated);
-        emitter.removeListener(REDEEM_PTOKEN_ERROR, this.handleRedeemError);
     }
 
     networkChanged = (obj) => {
