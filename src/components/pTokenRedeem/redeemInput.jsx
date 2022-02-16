@@ -18,7 +18,7 @@ const styles = (theme) => ({
         display: "flex",
         flexDirection: "column",
         width: "100%", 
-        minHeight: "120px"
+        minHeight: "120px",
     },
     actionContainer: {
         width: "100%",
@@ -92,7 +92,8 @@ const styles = (theme) => ({
         display: "flex",
         flexDirection: "row",
         justifyContent: "space-between", 
-        alignItems: "center"
+        alignItems: "center", 
+        minHeight: "50px"
     }
 })
 
@@ -118,7 +119,11 @@ class RedeemInput extends Component {
     }
 
     networkChanged = () => {
-        this.setState({ inputAmount: "0"})
+        this.setState({ 
+            inputAmount: "0",
+            error: false,
+            errorMessage: ""
+        })
     }
 
     validateInput(amount) {

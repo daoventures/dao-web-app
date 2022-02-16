@@ -70,12 +70,8 @@ import {
   CLAIM_DVD_ERROR,
   GET_REDEEM_INFO,
   PARSE_UNITS,
-  REDEEM_PTOKEN_HASH,
-  REDEEM_PTOKEN_SUCCESS,
-  REDEEM_PTOKEN_ERROR,
-  APPROVE_PTOKEN_HASH,
-  APPROVE_PTOKEN_SUCCESS,
-  APPROVE_PTOKEN_ERROR,
+  APPROVE_PTOKEN,
+  REDEEM_PTOKEN,
   REDEEM_SUPPORTED_NETWORK
 } from "../constants/constants";
 
@@ -510,14 +506,24 @@ class Store {
         xDvd: config.xdvdMainnetContract,
         dvd: config.dvdTokenMainnetContract,
         pD33dRedeemer: config.pD33dRedeemerMainnetContract,
-        pD33dRedeemerAbi: config.pD33dRedeemerAbi
+        pD33dRedeemerAbi: config.pD33dRedeemerAbi, 
+        pD33D: {
+          symbol: "PD33D",
+          decimals: "18", 
+          address: config.pD33dMainnetContract
+        }
       }
     } else if (network === 4) {
       redeemPD33D = {
         xDvd: config.xdvdRinkedbyContract,
         dvd: config.dvdRinkedbyContract,
         pD33dRedeemer: config.pD33dRedeemerTestContract,
-        pD33dRedeemerAbi: config.pD33dRedeemerAbi
+        pD33dRedeemerAbi: config.pD33dRedeemerAbi,
+        pD33D: {
+          symbol: "PD33D",
+          decimals: "18", 
+          address: config.pD33dTestContract
+        }
       }
     }
 
@@ -3439,6 +3445,7 @@ class Store {
    
     try {
       const network = store.getStore("network");
+      const account = store.getStore("account").address;
 
       const abi = contractHelper.getERC20AbiByNetwork(network);
 
@@ -3450,7 +3457,7 @@ class Store {
       const asset = this._getDefaultValues(network).redeemPD33D;
       const redeemer = asset.pD33dRedeemer;
 
-      const allowanceRaw = await contract.methods.allowance(redeemer).call();
+      const allowanceRaw = await contract.methods.allowance(account, redeemer).call();
 
       const decimals = await contract.methods.decimals().call();
 
@@ -3552,7 +3559,7 @@ class Store {
   }
 
   redeemPToken = async(payload) => {
-    const { amount, isVipToken } = payload;
+    let { amount, isVipToken } = payload;
 
     if(!amount || amount === undefined) {
       console.error(`Amount is missing for redeem PD33D.`);
@@ -3571,8 +3578,8 @@ class Store {
       return;
     }
 
-    const finalAmount = web3.utils.toWei(web3.utils.toBN(amount), PARSE_UNITS(18));
-
+    let finalAmount = web3.utils.toWei( web3.utils.toBN(amount), PARSE_UNITS[18]);
+   
     // Create redeemer contract
     const redeemerContract = await this.getRedeemerContract();
 
@@ -3581,21 +3588,21 @@ class Store {
       : "redeemDVD";
 
     try {
-        await redeemerContract.methods[methodName](finalAmount)
+      await redeemerContract.methods[methodName](finalAmount)
           .send({
             from: account.address
           })
           .on("transactionHash", function (txnHash) {
             console.log(`Transaction hash generated `, txnHash);
-            return emitter.emit(REDEEM_PTOKEN_HASH, txnHash);
+            return emitter.emit(REDEEM_PTOKEN, { txnHash, success: false});
           })
           .on("receipt", function (receipt) {
             console.log(receipt);
-            return emitter.emit(REDEEM_PTOKEN_SUCCESS, receipt);
+            return emitter.emit(REDEEM_PTOKEN,  { receipt, success: true });
           })
           .on("error", function (error) {
             console.error(error);
-            return emitter.emit(REDEEM_PTOKEN_ERROR, error);
+            return emitter.emit(REDEEM_PTOKEN, { error , success: false });
           });
     } catch(err) {
         console.error(err);
@@ -3628,21 +3635,32 @@ class Store {
 
       const approveAmount = web3.utils.toWei("999999999999", PARSE_UNITS[18]);
 
-      await tokenContract.methods.approve(approveAmount)
+      const assets = this._getDefaultValues(network).redeemPD33D;
+      const { pD33dRedeemer: address } = assets;
+
+      // setTimeout(() => {
+      //   emitter.emit(APPROVE_PTOKEN,  { txnHash: "0xaf1003bfe518f19957a3c78d9a64f0139c002e0ab3e6b5ecb7a374a872c2c643", success: false })
+      // }, 3000);
+
+      // setTimeout(() => {
+      //   emitter.emit(APPROVE_PTOKEN,  { receipt: "0xaf1003bfe518f19957a3c78d9a64f0139c002e0ab3e6b5ecb7a374a872c2c643", success: true })
+      // }, 5000);
+
+      await tokenContract.methods.approve(address, approveAmount)
         .send({
           from: account.address
         })
         .on("transactionHash", function (txnHash) {
           console.log(`Transaction hash generated `, txnHash);
-          return emitter.emit(APPROVE_PTOKEN_HASH, txnHash);
+          return emitter.emit(APPROVE_PTOKEN,  { txnHash, success: false });
         })
         .on("receipt", function (receipt) {
           console.log(receipt);
-          return emitter.emit(APPROVE_PTOKEN_SUCCESS, receipt);
+          return emitter.emit(APPROVE_PTOKEN, { receipt, success: true });
         })
         .on("error", function (error) {
           console.error(error);
-          return emitter.emit(APPROVE_PTOKEN_ERROR, error);
+          return emitter.emit(APPROVE_PTOKEN,  { error, success: false });
         });
 
     } catch (err) {

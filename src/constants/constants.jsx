@@ -141,6 +141,7 @@ export const DEPOSIT_CONTRACT_HAPPY_HOUR_RETURNED_COMPLETED =
 export const BLOCK_EXPLORERS = {
   1: "https://etherscan.io/tx/",
   42: "https://kovan.etherscan.io/tx/",
+  4: "https://rinkeby.etherscan.io/tx/",
   56: "https://bscscan.com/tx/",
   97: "https://testnet.bscscan.com/tx/",
   80001: "https://mumbai.polygonscan.com/tx/",
@@ -269,13 +270,8 @@ export const CLAIM_DVD_ERROR = "Claim DVD Error";
 
 // Redeem PD33D 
 export const GET_REDEEM_INFO = "Get Redeem Info";
-export const REDEEM_PTOKEN_HASH = "Redeem pToken Success";
-export const REDEEM_PTOKEN_SUCCESS = "Redeem pToken Success Returned";
-export const REDEEM_PTOKEN_ERROR = "Redeem pToken Error";
-
-export const APPROVE_PTOKEN_HASH = "Approve pToken Success";
-export const APPROVE_PTOKEN_SUCCESS = "Approve pToken Success Returned";
-export const APPROVE_PTOKEN_ERROR = "Approve pToken Error";
+export const REDEEM_PTOKEN = "Approve pToken";
+export const APPROVE_PTOKEN = "Approve pToken";
 
 export const REDEEM_SUPPORTED_NETWORK = [1, 4];
 

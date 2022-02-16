@@ -33,6 +33,7 @@ const styles = (theme) => ({
     contentContainer: {
         display: "flex",
         flexDirection: "row",
+        padding: "0px 72px"
     },
     redeemContainer: {
         width: "100%", 
@@ -269,7 +270,7 @@ class PTokenRedeem extends Component {
 
     handleTokenSelected = (event) => {
        if(event!==undefined && event!==null) {
-            this.setState({token : event.label, pTokenAmount: 0, tokenType: event.tokenType})
+            this.setState({token : event.label, pTokenAmount: 0, tokenType: event.type})
        }
     }
 
@@ -302,11 +303,15 @@ class PTokenRedeem extends Component {
 
         const confirmRedeemProps = {
             inputAmount: this.state.amountToConvert,
+            inputAmountRaw: this.state.amountToConvert * 10 ** 18,
             inputLabel: this.state.token,
             isVipToken: this.state.tokenType === "vipToken",
+            redeemerInfo: this.state.redeemerInfo !== null ? this.state.redeemerInfo[this.state.tokenType] : null,
             outputAmount: this.state.pTokenAmount,
             outputLabel: "pD33D"
         };
+
+        
 
         return <>
             <div className={classes.root}>
@@ -326,9 +331,7 @@ class PTokenRedeem extends Component {
                                 <div className={classes.inputContainer}>
                                     <RedeemInput {...redeemerInputProps} />
                                     
-                                    <div style={{margin: "0px 16px"}}>
-                                        <ArrowForwardIcon/>
-                                    </div>
+                                    <ArrowForwardIcon style={{margin: "0px 16px"}}/>
                                    
                                     <RedeemInput {...pTokenProps}/>
 

@@ -27782,6 +27782,8 @@ const config = {
   pD33dRedeemerTestContract: daotokenConfig.pD33dRedeemerRinkedbyAddress,
   pD33dRedeemerMainnetContract: daotokenConfig.pD33dRedeemerMainnetAddress,
   pD33dRedeemerAbi: daotokenConfig.pD33dRedeemerABI,
+  pD33dTestContract: daotokenConfig.pD33dRinkedbyAddress,
+  pD33dMainnetContract: daotokenConfig.pD33dMainnetAddress,
 
   DvgAbi: [{
     "inputs": [{
